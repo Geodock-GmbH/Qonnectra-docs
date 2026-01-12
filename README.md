@@ -8,15 +8,17 @@ This is the documentation site for Qonnectra - Network documentation for municip
 
 ### Prerequisites
 
-- Node.js 18 or higher
-- npm or yarn
+- Node.js 24 (specified in `package.json`)
+- pnpm 10 (specified in `package.json`)
+
+> **Note:** This project includes a `.devcontainer` configuration for GitHub Codespaces. When opening this repository in Codespaces, dependencies will be installed and the dev server will start automatically.
 
 ### Installation
 
 1. Install dependencies:
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### Development
@@ -24,7 +26,7 @@ npm install
 Start the development server:
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 The documentation site will be available at `http://localhost:5173`
@@ -34,13 +36,13 @@ The documentation site will be available at `http://localhost:5173`
 Build the documentation site for production:
 
 ```bash
-npm run build
+pnpm build
 ```
 
 Preview the production build:
 
 ```bash
-npm run preview
+pnpm preview
 ```
 
 ## Project Structure
