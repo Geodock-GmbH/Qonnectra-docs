@@ -1,12 +1,28 @@
 import { defineConfig } from 'vitepress'
+import { generateSidebar } from 'vitepress-sidebar'
+import { VitePressSidebarOptions } from 'vitepress-sidebar/types'
+
+function generateSidebarConfig(path: string, override: Partial<VitePressSidebarOptions> = {}) {
+  return {
+    scanStartPath: path,
+    resolvePath: `/${path}/`,
+    useTitleFromFileHeading: true,
+    useTitleFromFrontmatter: true,
+    useFolderTitleFromIndexFile: true,
+    includeRootIndexFile: true,
+    includeFolderIndexFile: true,
+    collapsed: false,
+    ...override,
+  }
+}
 
 export default defineConfig({
   title: 'Qonnectra Documentation',
   description: 'Network documentation for municipal infrastructures - Manual and best practices',
-  
+
   // Base URL for GitHub Pages deployment
   base: '/qonnectra/',
-  
+
   // Markdown configuration
   markdown: {
     lineNumbers: true,
@@ -15,7 +31,7 @@ export default defineConfig({
       dark: 'github-dark'
     }
   },
-  
+
   // Internationalization configuration
   locales: {
     root: {
@@ -31,47 +47,33 @@ export default defineConfig({
           { text: 'Best Practices', link: '/best-practices/' },
           { text: 'Website', link: 'https://qonnectra.de', target: '_blank' }
         ],
-        
-        // Sidebar navigation
-        sidebar: {
-          '/manual/': [
-            {
-              text: 'Manual',
-              items: [
-                { text: 'Introduction', link: '/manual/' }
-              ]
-            }
-          ],
-          '/best-practices/': [
-            {
-              text: 'Best Practices',
-              items: [
-                { text: 'Overview', link: '/best-practices/' }
-              ]
-            }
-          ]
-        },
-        
+
+        // Sidebar navigation - auto-generated from file structure
+        sidebar: generateSidebar([
+          generateSidebarConfig('manual'),
+          generateSidebarConfig('best-practices')
+        ]),
+
         // Footer
         footer: {
           message: 'Open source software for municipal network documentation. Licensed under AGPL-3.0.',
           copyright: 'Copyright © 2025 Geodock GmbH'
         },
-        
+
         // Edit link
         editLink: {
           pattern: 'https://github.com/Geodock-GmbH/Qonnectra/edit/main/docs/:path',
           text: 'Edit this page on GitHub'
         },
-        
+
         // Social links
         socialLinks: [
           { icon: 'github', link: 'https://github.com/Geodock-GmbH/Qonnectra' }
         ],
-        
+
         // External link icon
         externalLinkIcon: true,
-        
+
         // Search configuration with Algolia DocSearch
         search: {
           provider: 'algolia',
@@ -143,47 +145,33 @@ export default defineConfig({
           { text: 'Best Practices', link: '/de/best-practices/' },
           { text: 'Website', link: 'https://qonnectra.de', target: '_blank' }
         ],
-        
-        // Sidebar navigation
-        sidebar: {
-          '/de/manual/': [
-            {
-              text: 'Handbuch',
-              items: [
-                { text: 'Einführung', link: '/de/manual/' }
-              ]
-            }
-          ],
-          '/de/best-practices/': [
-            {
-              text: 'Best Practices',
-              items: [
-                { text: 'Übersicht', link: '/de/best-practices/' }
-              ]
-            }
-          ]
-        },
-        
+
+        // Sidebar navigation - auto-generated from file structure
+        sidebar: generateSidebar([
+          generateSidebarConfig('de/manual'),
+          generateSidebarConfig('de/best-practices'),
+        ]),
+
         // Footer
         footer: {
           message: 'Open-Source-Software für kommunale Netzdokumentation. Lizenziert unter AGPL-3.0.',
           copyright: 'Copyright © 2025 Geodock GmbH'
         },
-        
+
         // Edit link
         editLink: {
           pattern: 'https://github.com/Geodock-GmbH/Qonnectra/edit/main/docs/:path',
           text: 'Diese Seite auf GitHub bearbeiten'
         },
-        
+
         // Social links
         socialLinks: [
           { icon: 'github', link: 'https://github.com/Geodock-GmbH/Qonnectra' }
         ],
-        
+
         // External link icon
         externalLinkIcon: true,
-        
+
         // Search configuration with Algolia DocSearch
         search: {
           provider: 'algolia',
