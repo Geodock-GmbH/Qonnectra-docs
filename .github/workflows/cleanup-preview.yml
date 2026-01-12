@@ -10,6 +10,7 @@ permissions:
 jobs:
   cleanup-preview:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.head.ref != 'gh-pages-preview'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -31,7 +32,7 @@ jobs:
           PR_DIR="pr-${{ github.event.pull_request.number }}"
           if [ -d "$PR_DIR" ]; then
             git rm -r "$PR_DIR"
-            git commit -m "Remove preview for PR #${{ github.event.pull_request.number }}"
+            git commit -m "Remove preview for PR #${{ github.event.pull_request.number }} [skip ci]"
             git push origin gh-pages-preview
           else
             echo "Preview directory $PR_DIR does not exist, nothing to clean up"

@@ -22,6 +22,7 @@ concurrency:
 jobs:
   build-preview:
     runs-on: ubuntu-latest
+    if: github.event.pull_request.head.ref != 'gh-pages-preview'
     steps:
       - name: Checkout PR branch
         uses: actions/checkout@v6
