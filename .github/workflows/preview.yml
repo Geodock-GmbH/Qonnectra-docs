@@ -76,8 +76,14 @@ jobs:
           rm -rf "$PR_DIR"
           # Copy stored built files to PR-specific directory
           cp -r /tmp/preview-dist "$PR_DIR"
+          # Create .nojekyll file at root to disable Jekyll processing (if it doesn't exist)
+          # This ensures GitHub Pages serves the static files correctly
+          if [ ! -f .nojekyll ]; then
+            touch .nojekyll
+          fi
           # Stage changes
           git add "$PR_DIR"
+          git add -f .nojekyll 2>/dev/null || git add .nojekyll
           # Commit if there are changes
           if git diff --staged --quiet; then
             echo "No changes to commit"
