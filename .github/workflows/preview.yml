@@ -43,23 +43,8 @@ jobs:
           BASE_PATH: /Qonnectra-docs/pr-${{ github.event.pull_request.number }}/
       
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: preview-build-pr-${{ github.event.pull_request.number }}
           path: .vitepress/dist
-          retention-days: 7
-      
-      - name: Comment PR with instructions
-        uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
-        with:
-          script: |
-            const prNumber = context.payload.pull_request.number;
-            const branchName = context.payload.pull_request.head.ref;
-            github.rest.issues.createComment({
-              issue_number: prNumber,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: `✅ **Preview build completed!**\n\n📦 Build artifact is available for download from the Actions tab (artifact name: \`preview-build-pr-${prNumber}\`).\n\n🌐 **To enable GitHub Pages preview for this branch:**\n\n1. Download the build artifact from the Actions tab\n2. Extract the \`.vitepress/dist\` folder contents\n3. Commit and push the \`dist\` folder to your branch (or create a \`gh-pages\` branch with the dist contents)\n4. Go to Repository Settings → Pages\n5. Under "Source", select "Deploy from a branch"\n6. Select your branch or the \`gh-pages\` branch\n7. Select folder: \`/dist\` (or root if you put dist at root)\n8. Click Save\n\n⚠️ **Important Notes:**\n- The build uses base path \`/Qonnectra-docs/pr-${prNumber}/\`\n- GitHub Pages can only serve from one branch at a time\n- Enabling Pages for a PR branch will temporarily replace the main site\n- Remember to switch back to \`main\` branch after reviewing\n\nOnce enabled, your preview will be available at:\n\`https://geodock-gmbh.github.io/Qonnectra-docs/pr-${prNumber}/\``
-            });
 
