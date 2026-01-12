@@ -69,6 +69,11 @@ export default defineConfig({
     // External link icon
     externalLinkIcon: true,
 
+    // Outline configuration
+    outline: {
+      label: 'Auf dieser Seite'
+    },
+
     // Search configuration with Algolia DocSearch
     search: {
       provider: 'algolia',
