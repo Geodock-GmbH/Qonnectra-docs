@@ -1,0 +1,82 @@
+name: Deploy PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '**.md'
+      - '.vitepress/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/preview.yml'
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+  pull-requests: write
+
+# Allow concurrent PR preview deployments
+concurrency:
+  group: preview-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Build with VitePress
+        run: pnpm run build
+        env:
+          # Set base path for PR preview: /Qonnectra-docs/pr-{PR_NUMBER}/
+          BASE_PATH: /Qonnectra-docs/pr-${{ github.event.pull_request.number }}/
+      
+      - name: Deploy to Preview Branch
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.event_name == 'pull_request'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: .vitepress/dist
+          # Deploy to a PR-specific directory in gh-pages branch
+          # This allows multiple PR previews to coexist
+          destination_dir: pr-${{ github.event.pull_request.number }}
+          # Keep existing files (other PR previews and main site)
+          keep_files: true
+          # Use gh-pages branch for previews (separate from main Pages deployment)
+          publish_branch: gh-pages-preview
+      
+      - name: Comment PR with Preview URL
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            // Note: You'll need to configure GitHub Pages to serve from gh-pages-preview branch
+            // Or use a custom domain/subdomain for previews
+            const previewUrl = `https://geodock-gmbh.github.io/Qonnectra-docs/pr-${context.payload.pull_request.number}/`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 **Preview deployed!**\n\n📖 Documentation preview: ${previewUrl}\n\n⚠️ **Note**: To enable PR previews, you need to configure GitHub Pages to serve from the \`gh-pages-preview\` branch, or set up a custom domain for previews.\n\nThis preview will be updated automatically when you push new commits.`
+            });
+

@@ -22,7 +22,8 @@ export default defineConfig({
   lang: 'de',
 
   // Base URL for GitHub Pages deployment
-  base: '/qonnectra/',
+  // Can be overridden via BASE_PATH environment variable (useful for PR previews)
+  base: (typeof process !== 'undefined' && process.env?.BASE_PATH) || '/Qonnectra-docs/',
 
   // Markdown configuration
   markdown: {
@@ -57,13 +58,13 @@ export default defineConfig({
 
     // Edit link
     editLink: {
-      pattern: 'https://github.com/Geodock-GmbH/Qonnectra/edit/main/docs/:path',
+      pattern: 'https://github.com/Geodock-GmbH/Qonnectra-docs/edit/main/:path',
       text: 'Diese Seite auf GitHub bearbeiten'
     },
 
     // Social links
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/Geodock-GmbH/Qonnectra' }
+      { icon: 'github', link: 'https://github.com/Geodock-GmbH/Qonnectra-docs' }
     ],
 
     // External link icon
