@@ -22,8 +22,9 @@ export default defineConfig({
   lang: 'de',
 
   // Base URL for GitHub Pages deployment
-  // Can be overridden via BASE_PATH environment variable (useful for PR previews)
-  base: (typeof process !== 'undefined' && process.env?.BASE_PATH) || '/Qonnectra-docs/',
+  // Defaults to "/" for local development, can be overridden via BASE_PATH environment variable
+  // Production builds set BASE_PATH="/Qonnectra-docs/" in GitHub Actions workflows
+  base: (typeof process !== 'undefined' && process.env?.BASE_PATH) || '/',
 
   // Markdown configuration
   markdown: {
