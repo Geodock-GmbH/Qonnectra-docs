@@ -3,64 +3,64 @@ layout: home
 
 hero:
   name: "Qonnectra"
-  text: "Documentation"
-  tagline: Modern network documentation for municipal infrastructures
+  text: "Dokumentation"
+  tagline: Moderne Netzdokumentation für kommunale Infrastrukturen
   actions:
     - theme: brand
-      text: Get Started
+      text: Loslegen
       link: /manual/
     - theme: alt
       text: Best Practices
       link: /best-practices/
     - theme: alt
-      text: Visit Website
+      text: Website besuchen
       link: https://qonnectra.de
       target: _blank
 
 features:
   - title: Open Source
-    details: Open source software, freely available, developed by the community
+    details: Quelloffene Software, frei verfügbar, entwickelt von der Community
     icon: 🚀
-  - title: Data Sovereignty
-    details: Data remains in the ownership of the municipality, hosting on your own systems, independent from software vendors
+  - title: Datensouveränität
+    details: Daten bleiben im Besitz der Kommune, Hosting auf eigenen Systemen, unabhängig von Softwareanbietern
     icon: 🔒
-  - title: Free of Charge
-    details: No license fees, open standards, exclusively using open-source components (QGIS, Django, PostgreSQL, QGIS Server, Docker)
+  - title: Kostenfrei
+    details: Keine Lizenzgebühren, offene Standards, ausschließlich Verwendung von Open-Source-Komponenten (QGIS, Django, PostgreSQL, QGIS Server, Docker)
     icon: 💰
-  - title: Browser-based Map View
-    details: Instant and uncomplicated network inquiries and evaluations for network operators and administrations
+  - title: Browserbasierte Kartenansicht
+    details: Sofortige und unkomplizierte Netzauskünfte sowie Auswertungen für Netzbetreiber und Verwaltungen
     icon: 🗺️
-  - title: Complete Network Documentation
-    details: From main distributor to house connection and from pipe association to individual fiber optic cable
+  - title: Vollständige Netzdokumentation
+    details: Vom Hauptverteiler bis zum Hausanschluss und vom Rohrverband bis zur einzelnen Glasfaser
     icon: 📊
-  - title: Integrated Data
-    details: Integration of technical and geodata including warranty periods, drilling protocols, occupancy plans, acceptances, and measured routes
+  - title: Integrierte Daten
+    details: Integration von Sach- und Geodaten einschließlich Gewährleistungsfristen, Bohrprotokolle, Belegungspläne, Abnahmen und eingemessene Trassen
     icon: 🔗
 ---
 
-## About Qonnectra
+## Über Qonnectra
 
-Qonnectra is a modern documentation system for municipal network infrastructures. It enables network operators and administrations to efficiently document, manage, and analyze their network infrastructure.
+Qonnectra ist ein modernes Dokumentationssystem für kommunale Netzinfrastrukturen. Es ermöglicht Netzbetreibern und Verwaltungen, ihre Netzinfrastruktur effizient zu dokumentieren, zu verwalten und zu analysieren.
 
-### Key Features
+### Hauptfunktionen
 
-- **Browser-based Map View**: Simple determination of data for network monitoring
-- **Documentation of All Network Levels**: From main distributor to house connection
-- **Integration of Technical and Geodata**: Comprehensive overview of all network infrastructures
-- **Open Source**: Developed with open-source components and freely available
+- **Browserbasierte Kartenansicht**: Einfache Ermittlung von Daten für das Netzmonitoring
+- **Dokumentation aller Netzebenen**: Vom Hauptverteiler bis zum Hausanschluss
+- **Integration von Sach- und Geodaten**: Übersichtliche Abbildungen aller Netzinfrastrukturen
+- **Open Source**: Entwickelt mit Open-Source-Komponenten und frei verfügbar
 
-### Technology Stack
+### Technologie-Stack
 
-Qonnectra is built using modern open-source technologies:
+Qonnectra wird mit modernen Open-Source-Technologien entwickelt:
 
-- **QGIS**: Geographic information system for spatial data management
-- **Django**: Web framework for the backend
-- **PostgreSQL**: Database for data storage
-- **QGIS Server**: Map server for web-based map services
-- **Docker**: Containerization for easy deployment
+- **QGIS**: Geoinformationssystem für die Verwaltung räumlicher Daten
+- **Django**: Web-Framework für das Backend
+- **PostgreSQL**: Datenbank für die Datenspeicherung
+- **QGIS Server**: Map-Server für webbasierte Kartendienste
+- **Docker**: Containerisierung für einfache Bereitstellung
 
 ### Community
 
-Our goal is to build a vibrant user and developer community that supports each other, shares knowledge, and develops new features together.
+Unser Ziel ist der Aufbau einer lebendigen User- und Entwicklercommunity, die sich gegenseitig unterstützt, Wissen teilt und gemeinsam neue Funktionen entwickelt.
 
-Even extensive extensions or new features can be jointly conceived, implemented, and financed.
+Auch umfangreiche Erweiterungen oder neue Features können gemeinschaftlich konzipiert, umgesetzt und finanziert werden.

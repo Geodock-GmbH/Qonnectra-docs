@@ -1,80 +1,80 @@
-# Qonnectra Manual
+# Qonnectra Handbuch
 
-Welcome to the Qonnectra manual. This section contains comprehensive guides and instructions for using Qonnectra to document and manage municipal network infrastructures.
+Willkommen im Qonnectra-Handbuch. Dieser Abschnitt enthält umfassende Anleitungen und Anweisungen zur Verwendung von Qonnectra zur Dokumentation und Verwaltung kommunaler Netzinfrastrukturen.
 
-## Introduction
+## Einführung
 
-Qonnectra is a modern documentation system designed specifically for municipal network infrastructures. It enables network operators and administrations to efficiently document, manage, and analyze their network infrastructure through a browser-based interface.
+Qonnectra ist ein modernes Dokumentationssystem, das speziell für kommunale Netzinfrastrukturen entwickelt wurde. Es ermöglicht Netzbetreibern und Verwaltungen, ihre Netzinfrastruktur effizient über eine browserbasierte Oberfläche zu dokumentieren, zu verwalten und zu analysieren.
 
-## Getting Started
+## Erste Schritte
 
-### System Requirements
+### Systemanforderungen
 
-Before installing Qonnectra, ensure your system meets the following requirements:
+Vor der Installation von Qonnectra sollten Sie sicherstellen, dass Ihr System die folgenden Anforderungen erfüllt:
 
-- **Operating System**: Linux (recommended), macOS, or Windows
-- **Docker**: Version 20.10 or higher
-- **Docker Compose**: Version 2.0 or higher
-- **Web Browser**: Modern browser with JavaScript enabled (Chrome, Firefox, Safari, Edge)
+- **Betriebssystem**: Linux (empfohlen), macOS oder Windows
+- **Docker**: Version 20.10 oder höher
+- **Docker Compose**: Version 2.0 oder höher
+- **Web-Browser**: Moderner Browser mit aktiviertem JavaScript (Chrome, Firefox, Safari, Edge)
 
 ### Installation
 
-Qonnectra can be installed using Docker, which simplifies the setup process:
+Qonnectra kann mit Docker installiert werden, was den Einrichtungsprozess vereinfacht:
 
 ```bash
-# Clone the repository
+# Repository klonen
 git clone https://github.com/Geodock-GmbH/Qonnectra.git
 cd Qonnectra
 
-# Start the application using Docker Compose
+# Anwendung mit Docker Compose starten
 docker-compose up -d
 ```
 
-The application will be available at `http://localhost:8000` after startup.
+Die Anwendung ist nach dem Start unter `http://localhost:8000` verfügbar.
 
-### Initial Configuration
+### Erste Konfiguration
 
-1. **Access the Admin Panel**: Navigate to `http://localhost:8000/admin`
-2. **Create Superuser**: Run `python manage.py createsuperuser` in the container
-3. **Configure Database**: The PostgreSQL database is automatically set up via Docker
-4. **Import Base Data**: Use the admin interface to import initial network data
+1. **Zugriff auf das Admin-Panel**: Navigieren Sie zu `http://localhost:8000/admin`
+2. **Superuser erstellen**: Führen Sie `python manage.py createsuperuser` im Container aus
+3. **Datenbank konfigurieren**: Die PostgreSQL-Datenbank wird automatisch über Docker eingerichtet
+4. **Basisdaten importieren**: Verwenden Sie die Admin-Oberfläche, um erste Netzwerkdaten zu importieren
 
-## Core Features
+## Kernfunktionen
 
-### Browser-based Map View
+### Browserbasierte Kartenansicht
 
-The map view is the central component of Qonnectra. It provides:
+Die Kartenansicht ist die zentrale Komponente von Qonnectra. Sie bietet:
 
-- **Interactive Map**: Navigate and zoom to different areas of your network
-- **Layer Management**: Show/hide different network layers
-- **Network Inquiries**: Query network data directly from the map
-- **Measurements**: Measure distances and areas on the map
+- **Interaktive Karte**: Navigieren und Zoomen in verschiedene Bereiche Ihres Netzwerks
+- **Ebenenverwaltung**: Ein- und Ausblenden verschiedener Netzwerkebenen
+- **Netzabfragen**: Abfragen von Netzwerkdaten direkt von der Karte
+- **Messungen**: Messen von Entfernungen und Flächen auf der Karte
 
-### Network Documentation
+### Netzdokumentation
 
-Document all levels of your network infrastructure:
+Dokumentieren Sie alle Ebenen Ihrer Netzinfrastruktur:
 
-- **Main Distributors**: Document central distribution points
-- **Secondary Networks**: Track intermediate network levels
-- **House Connections**: Manage individual connections
-- **Fiber Optic Cables**: Document fiber infrastructure
-- **Pipe Associations**: Track pipe networks
+- **Hauptverteiler**: Dokumentieren Sie zentrale Verteilungspunkte
+- **Sekundärnetze**: Verfolgen Sie Zwischennetzebenen
+- **Hausanschlüsse**: Verwalten Sie einzelne Anschlüsse
+- **Glasfaserkabel**: Dokumentieren Sie die Glasfaserinfrastruktur
+- **Rohrverbände**: Verfolgen Sie Rohrnetze
 
-### Data Integration
+### Datenintegration
 
-Qonnectra integrates various types of data:
+Qonnectra integriert verschiedene Datentypen:
 
-- **Geodata**: Spatial information about network components
-- **Technical Data**: Specifications, capacities, and technical parameters
-- **Administrative Data**: Warranty periods, maintenance schedules, acceptances
-- **Documents**: Drilling protocols, occupancy plans, and other documentation
+- **Geodaten**: Räumliche Informationen über Netzwerkkomponenten
+- **Technische Daten**: Spezifikationen, Kapazitäten und technische Parameter
+- **Verwaltungsdaten**: Gewährleistungsfristen, Wartungspläne, Abnahmen
+- **Dokumente**: Bohrprotokolle, Belegungspläne und andere Dokumentationen
 
-## Usage Examples
+## Verwendungsbeispiele
 
-### Adding a Network Component
+### Hinzufügen einer Netzwerkkomponente
 
 ```python
-# Example: Adding a new network node via API
+# Beispiel: Hinzufügen eines neuen Netzwerkknotens über die API
 import requests
 
 url = "http://localhost:8000/api/network/nodes/"
@@ -96,15 +96,15 @@ response = requests.post(url, json=data, headers={
 })
 ```
 
-### Querying Network Data
+### Abfragen von Netzwerkdaten
 
 ```python
-# Example: Query network components in a specific area
+# Beispiel: Abfragen von Netzwerkkomponenten in einem bestimmten Bereich
 import requests
 
 url = "http://localhost:8000/api/network/nodes/"
 params = {
-    "bbox": "10.0,54.0,10.2,54.2",  # Bounding box
+    "bbox": "10.0,54.0,10.2,54.2",  # Begrenzungsrahmen
     "type": "distributor",
     "status": "active"
 }
@@ -113,14 +113,14 @@ response = requests.get(url, params=params)
 nodes = response.json()
 ```
 
-## Next Steps
+## Nächste Schritte
 
-- Read the [Best Practices](/best-practices/) guide for recommended workflows
-- Explore the [API Documentation](/manual/api/) for programmatic access
-- Check out [Deployment Guide](/manual/deployment/) for production setup
+- Lesen Sie den [Best Practices](/best-practices/)-Leitfaden für empfohlene Workflows
+- Erkunden Sie die [API-Dokumentation](/manual/api/) für programmatischen Zugriff
+- Schauen Sie sich den [Bereitstellungsleitfaden](/manual/deployment/) für die Produktionseinrichtung an
 
-## Additional Resources
+## Weitere Ressourcen
 
-- [Official Website](https://qonnectra.de)
-- [GitHub Repository](https://github.com/Geodock-GmbH/Qonnectra)
-- [Community Forum](https://github.com/Geodock-GmbH/Qonnectra/discussions)
+- [Offizielle Website](https://qonnectra.de)
+- [GitHub-Repository](https://github.com/Geodock-GmbH/Qonnectra)
+- [Community-Forum](https://github.com/Geodock-GmbH/Qonnectra/discussions)
