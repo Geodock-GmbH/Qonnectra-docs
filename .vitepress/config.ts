@@ -82,49 +82,45 @@ export default defineConfig({
         apiKey: 'YOUR_SEARCH_API_KEY',
         indexName: 'YOUR_INDEX_NAME',
         searchParameters: {},
-        locales: {
-          de: {
-            placeholder: 'Dokumentation durchsuchen',
-            translations: {
-              button: {
-                buttonText: 'Suchen',
-                buttonAriaLabel: 'Dokumentation durchsuchen'
-              },
-              modal: {
-                searchBox: {
-                  resetButtonTitle: 'Abfrage löschen',
-                  resetButtonAriaLabel: 'Abfrage löschen',
-                  cancelButtonText: 'Abbrechen',
-                  cancelButtonAriaLabel: 'Abbrechen'
-                },
-                startScreen: {
-                  recentSearchesTitle: 'Kürzlich',
-                  noRecentSearchesText: 'Keine kürzlichen Suchen',
-                  saveRecentSearchButtonTitle: 'Zu kürzlichen Suchen speichern',
-                  removeRecentSearchButtonTitle: 'Aus kürzlichen Suchen entfernen',
-                  favoriteSearchesTitle: 'Favoriten',
-                  removeFavoriteSearchButtonTitle: 'Aus Favoriten entfernen'
-                },
-                errorScreen: {
-                  titleText: 'Ergebnisse konnten nicht abgerufen werden',
-                  helpText: 'Möglicherweise sollten Sie Ihre Netzwerkverbindung überprüfen.'
-                },
-                footer: {
-                  selectText: 'zum Auswählen',
-                  selectKeyAriaLabel: 'Eingabetaste',
-                  navigateText: 'zum Navigieren',
-                  navigateUpKeyAriaLabel: 'Pfeil nach oben',
-                  navigateDownKeyAriaLabel: 'Pfeil nach unten',
-                  closeText: 'zum Schließen',
-                  closeKeyAriaLabel: 'Escape-Taste'
-                },
-                noResultsScreen: {
-                  noResultsText: 'Keine Ergebnisse für',
-                  suggestedQueryText: 'Versuchen Sie zu suchen nach',
-                  reportMissingResultsText: 'Glauben Sie, dass diese Abfrage Ergebnisse zurückgeben sollte?',
-                  reportMissingResultsLinkText: 'Lassen Sie es uns wissen.'
-                }
-              }
+        placeholder: 'Dokumentation durchsuchen',
+        translations: {
+          button: {
+            buttonText: 'Suchen',
+            buttonAriaLabel: 'Dokumentation durchsuchen'
+          },
+          modal: {
+            searchBox: {
+              resetButtonTitle: 'Abfrage löschen',
+              resetButtonAriaLabel: 'Abfrage löschen',
+              cancelButtonText: 'Abbrechen',
+              cancelButtonAriaLabel: 'Abbrechen'
+            },
+            startScreen: {
+              recentSearchesTitle: 'Kürzlich',
+              noRecentSearchesText: 'Keine kürzlichen Suchen',
+              saveRecentSearchButtonTitle: 'Zu kürzlichen Suchen speichern',
+              removeRecentSearchButtonTitle: 'Aus kürzlichen Suchen entfernen',
+              favoriteSearchesTitle: 'Favoriten',
+              removeFavoriteSearchButtonTitle: 'Aus Favoriten entfernen'
+            },
+            errorScreen: {
+              titleText: 'Ergebnisse konnten nicht abgerufen werden',
+              helpText: 'Möglicherweise sollten Sie Ihre Netzwerkverbindung überprüfen.'
+            },
+            footer: {
+              selectText: 'zum Auswählen',
+              selectKeyAriaLabel: 'Eingabetaste',
+              navigateText: 'zum Navigieren',
+              navigateUpKeyAriaLabel: 'Pfeil nach oben',
+              navigateDownKeyAriaLabel: 'Pfeil nach unten',
+              closeText: 'zum Schließen',
+              closeKeyAriaLabel: 'Escape-Taste'
+            },
+            noResultsScreen: {
+              noResultsText: 'Keine Ergebnisse für',
+              suggestedQueryText: 'Versuchen Sie zu suchen nach',
+              reportMissingResultsText: 'Glauben Sie, dass diese Abfrage Ergebnisse zurückgeben sollte?',
+              reportMissingResultsLinkText: 'Lassen Sie es uns wissen.'
             }
           }
         }
