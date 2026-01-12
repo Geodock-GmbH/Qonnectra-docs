@@ -212,6 +212,4 @@ Befolgen Sie RESTful API Best Practices:
 ## Weitere Ressourcen
 
 - [Handbuch](/manual/) - Detaillierte Anweisungen zur Verwendung
-- [API-Dokumentation](/manual/api/) - API-Referenz
-- [Bereitstellungsleitfaden](/manual/deployment/) - Produktionsbereitstellung
 - [Startseite](/) - Zurück zur Startseite

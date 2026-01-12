@@ -116,8 +116,6 @@ nodes = response.json()
 ## Nächste Schritte
 
 - Lesen Sie den [Best Practices](/best-practices/)-Leitfaden für empfohlene Workflows
-- Erkunden Sie die [API-Dokumentation](/manual/api/) für programmatischen Zugriff
-- Schauen Sie sich den [Bereitstellungsleitfaden](/manual/deployment/) für die Produktionseinrichtung an
 
 ## Weitere Ressourcen
 
