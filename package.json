@@ -1,6 +1,7 @@
 {
   "name": "qonnectra-docs",
-  "version": "1.0.0",
+  "private": true,
+  "version": "0.0.0",
   "description": "Documentation for Qonnectra - Network documentation for municipal infrastructures",
   "type": "module",
   "packageManager": "pnpm@10.28.0",
