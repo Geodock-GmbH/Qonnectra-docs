@@ -71,7 +71,8 @@ jobs:
       - name: Deploy to Preview Branch
         if: github.event_name == 'pull_request'
         run: |
-          PR_DIR="pr-${{ github.event.pull_request.number }}"
+          # PR_DIR="pr-${{ github.event.pull_request.number }}"
+          PR_DIR="./"
           # Remove existing PR directory if it exists
           rm -rf "$PR_DIR"
           # Copy stored built files to PR-specific directory
