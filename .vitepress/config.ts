@@ -8,10 +8,11 @@ function generateSidebarConfig(path: string, override: Partial<VitePressSidebarO
     resolvePath: `/${path}/`,
     useTitleFromFileHeading: true,
     useTitleFromFrontmatter: true,
-    useFolderTitleFromIndexFile: true,
+    useFolderTitleFromIndexFile: false,
     includeRootIndexFile: true,
     includeFolderIndexFile: true,
     collapsed: false,
+    sortFolderTo: 'bottom',
     ...override,
   }
 }
