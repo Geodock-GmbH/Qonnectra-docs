@@ -56,3 +56,16 @@
   box-shadow: 0 4px 12px var(--vp-c-brand-soft);
 }
 
+/* Custom components */
+
+/* Make non-H1 headings look like H1 */
+.h1-like {
+  letter-spacing: -0.02em;
+  line-height: 40px;
+  font-size: 32px;
+  position: relative;
+  font-weight: 600;
+  outline: none;
+  overflow-wrap: break-word;
+}
+

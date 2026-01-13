@@ -1,124 +1,94 @@
-# Qonnectra Handbuch
+# 1. Einführung und Einordnung
 
-Willkommen im Qonnectra-Handbuch. Dieser Abschnitt enthält umfassende Anleitungen und Anweisungen zur Verwendung von Qonnectra zur Dokumentation und Verwaltung kommunaler Netzinfrastrukturen.
+## 1.1 Ziel des Handbuchs
 
-## Einführung
+Dieses Handbuch beschreibt die Nutzung, den Betrieb und die technische Grundlage von **Qonnectra**. Es richtet sich an alle Personen, die mit dem System arbeiten oder für dessen Betrieb, Pflege oder Weiterentwicklung verantwortlich sind.
 
-Qonnectra ist ein modernes Dokumentationssystem, das speziell für kommunale Netzinfrastrukturen entwickelt wurde. Es ermöglicht Netzbetreibern und Verwaltungen, ihre Netzinfrastruktur effizient über eine browserbasierte Oberfläche zu dokumentieren, zu verwalten und zu analysieren.
+Ziel des Handbuchs ist es,
 
-## Erste Schritte
+- Anwender*Innen einen sicheren und verständlichen Einstieg in die Arbeit mit Qonnectra zu ermöglichen,
+- den täglichen Umgang mit der Anwendung zu unterstützen,
+- Zuständigkeiten und Rollen klar zu machen,
+- sowie technische Hintergründe für Betrieb und Entwicklung nachvollziehbar zu dokumentieren.
 
-### Systemanforderungen
+Das Handbuch ist bewusst praxisorientiert aufgebaut. Es folgt der Struktur der Anwendung und den typischen Arbeitsabläufen in Verwaltung, Betrieb und Fachplanung.
 
-Vor der Installation von Qonnectra sollten Sie sicherstellen, dass Ihr System die folgenden Anforderungen erfüllt:
 
-- **Betriebssystem**: Linux (empfohlen), macOS oder Windows
-- **Docker**: Version 20.10 oder höher
-- **Docker Compose**: Version 2.0 oder höher
-- **Web-Browser**: Moderner Browser mit aktiviertem JavaScript (Chrome, Firefox, Safari, Edge)
+## 1.2 Zielgruppen und Aufbau des Handbuchs
 
-### Installation
+Qonnectra wird von Nutzer*Innen mit sehr unterschiedlichen fachlichen Hintergründen verwendet. Entsprechend ist auch dieses Handbuch in mehrere Teile gegliedert, die sich an verschiedene Zielgruppen richten.
 
-Qonnectra kann mit Docker installiert werden, was den Einrichtungsprozess vereinfacht:
+Das Handbuch besteht aus drei Hauptteilen:
 
-```bash
-# Repository klonen
-git clone https://github.com/Geodock-GmbH/Qonnectra.git
-cd Qonnectra
+- **Teil A – Anwenderhandbuch**  
+  Dieser Teil richtet sich an Verwaltungsmitarbeitende, Sachbearbeitung, Entscheidungsträger sowie weitere Nutzende ohne vertiefte GIS-Kenntnisse. Er beschreibt die Arbeit mit der Webanwendung (Dashboard, Karte, Fachmodule) und ist für den täglichen Betrieb ausreichend.
 
-# Anwendung mit Docker Compose starten
-docker-compose up -d
-```
+- **Teil B – Betrieb, Administration und QGIS-Nutzung**  
+  Dieser Teil richtet sich an Personen mit administrativen und fachlichen Aufgaben, z. B. für Benutzerverwaltung, Stammdatenpflege, Qualitätssicherung sowie die Nutzung von QGIS für geometrische Arbeiten und spezielle GIS-Aufgaben. Er beschreibt den sicheren Betrieb von Qonnectra sowie die verantwortungsvolle Nutzung von QGIS im Zusammenspiel mit der Webanwendung.
 
-Die Anwendung ist nach dem Start unter `http://localhost:8000` verfügbar.
+- **Teil C – Entwickler- und Systemdokumentation**  
+  Dieser Teil richtet sich ausschließlich an technische Rollen wie Entwickler, DevOps, GIS-Administratoren und die Open-Source-Community. Er beschreibt Setup, Architektur, Schnittstellen, Datenmodelle und Erweiterungsmöglichkeiten von Qonnectra.
 
-### Erste Konfiguration
+Für den normalen Betrieb von Qonnectra ist **nicht erforderlich**, alle Teile des Handbuchs zu lesen. Jedes Kapitel ist so aufgebaut, dass klar erkennbar ist, für welche Zielgruppe es relevant ist.
 
-1. **Zugriff auf das Admin-Panel**: Navigieren Sie zu `http://localhost:8000/admin`
-2. **Superuser erstellen**: Führen Sie `python manage.py createsuperuser` im Container aus
-3. **Datenbank konfigurieren**: Die PostgreSQL-Datenbank wird automatisch über Docker eingerichtet
-4. **Basisdaten importieren**: Verwenden Sie die Admin-Oberfläche, um erste Netzwerkdaten zu importieren
 
-## Kernfunktionen
+## 1.3 Was ist Qonnectra?
 
-### Browserbasierte Kartenansicht
+Qonnectra ist eine **Open-Source-Webanwendung zur nachhaltigen Dokumentation passiver Netzinfrastruktur**.  
+Der Schwerpunkt liegt auf Glasfasernetzen, perspektivisch auch auf weiteren Netzinfrastrukturen.
 
-Die Kartenansicht ist die zentrale Komponente von Qonnectra. Sie bietet:
+Qonnectra bildet den **tatsächlichen Bestand (IST-Zustand)** eines Netzes ab und fungiert als digitaler Zwilling. Dokumentiert werden unter anderem:
 
-- **Interaktive Karte**: Navigieren und Zoomen in verschiedene Bereiche Ihres Netzwerks
-- **Ebenenverwaltung**: Ein- und Ausblenden verschiedener Netzwerkebenen
-- **Netzabfragen**: Abfragen von Netzwerkdaten direkt von der Karte
-- **Messungen**: Messen von Entfernungen und Flächen auf der Karte
+- Trassen und Trassensegmente
+- Rohre und Mikrorohre
+- Netzknoten, Verteiler und Hausanschlüsse
+- Kabel, Spleiße und zugehörige Sachdaten
+- Fotos, Protokolle und weitere Dokumente
 
-### Netzdokumentation
+Ein zentrales Ziel von Qonnectra ist es, **Verwaltungen und Netzeigentümer in die Lage zu versetzen**, ihre Netzinfrastruktur selbstständig, langfristig und datensouverän zu dokumentieren und zu betreiben – ohne Abhängigkeit von proprietärer Software oder spezialisierten Einzellösungen.
 
-Dokumentieren Sie alle Ebenen Ihrer Netzinfrastruktur:
 
-- **Hauptverteiler**: Dokumentieren Sie zentrale Verteilungspunkte
-- **Sekundärnetze**: Verfolgen Sie Zwischennetzebenen
-- **Hausanschlüsse**: Verwalten Sie einzelne Anschlüsse
-- **Glasfaserkabel**: Dokumentieren Sie die Glasfaserinfrastruktur
-- **Rohrverbände**: Verfolgen Sie Rohrnetze
+## 1.4 Grundprinzip: Einfachheit und klare Trennung der Aufgaben
 
-### Datenintegration
+Qonnectra folgt einem klaren Prinzip:
 
-Qonnectra integriert verschiedene Datentypen:
+- Die **Webanwendung** ist das führende Werkzeug für Übersicht, Auswertung und Dokumentation.
+- **QGIS** wird ausschließlich als **Expertenwerkzeug** für Geometriearbeiten und spezielle GIS-Aufgaben eingesetzt.
 
-- **Geodaten**: Räumliche Informationen über Netzwerkkomponenten
-- **Technische Daten**: Spezifikationen, Kapazitäten und technische Parameter
-- **Verwaltungsdaten**: Gewährleistungsfristen, Wartungspläne, Abnahmen
-- **Dokumente**: Bohrprotokolle, Belegungspläne und andere Dokumentationen
+Die Webanwendung wurde bewusst als Alternative zu einem QGIS-Plugin entwickelt. Dadurch können Arbeitsabläufe gezielt geführt werden, und Nutzer ohne GIS-Kenntnisse benötigen lediglich einen Webbrowser, um Informationen einzusehen und zu pflegen.
 
-## Verwendungsbeispiele
+Für geschulte Nutzer können Webanwendung und QGIS parallel eingesetzt werden:
 
-### Hinzufügen einer Netzwerkkomponente
+- QGIS für geometrische Änderungen und GIS-spezifische Arbeiten
+- Qonnectra für Dokumentation, Auswertung und strukturierte Informationsanzeige
 
-```python
-# Beispiel: Hinzufügen eines neuen Netzwerkknotens über die API
-import requests
+Alle Nutzer arbeiten dabei auf derselben Datenbasis.
 
-url = "http://localhost:8000/api/network/nodes/"
-data = {
-    "name": "Node-001",
-    "type": "distributor",
-    "coordinates": {
-        "latitude": 54.3233,
-        "longitude": 10.1394
-    },
-    "properties": {
-        "capacity": 1000,
-        "status": "active"
-    }
-}
 
-response = requests.post(url, json=data, headers={
-    "Authorization": "Token YOUR_API_TOKEN"
-})
-```
+## 1.5 Was ist Qonnectra nicht?
 
-### Abfragen von Netzwerkdaten
+Für das Verständnis des Systems ist ebenso wichtig, klar zu benennen, **was Qonnectra bewusst nicht ist**:
 
-```python
-# Beispiel: Abfragen von Netzwerkkomponenten in einem bestimmten Bereich
-import requests
+- Qonnectra ist **kein Planungswerkzeug** für neue Netze.  
+  Es dokumentiert ausschließlich den bestehenden, passiven Netzbestand.
 
-url = "http://localhost:8000/api/network/nodes/"
-params = {
-    "bbox": "10.0,54.0,10.2,54.2",  # Begrenzungsrahmen
-    "type": "distributor",
-    "status": "active"
-}
+- Qonnectra ist **keine Netzbetriebssoftware für aktive Technik**.  
+  Aktive Komponenten wie Ports, Bandbreiten oder aktive Schaltungen werden nicht verwaltet.
 
-response = requests.get(url, params=params)
-nodes = response.json()
-```
+- Qonnectra ist **kein Prognose- oder Szenariotool**.  
+  Zukunftsplanungen oder hypothetische Ausbauzustände stehen nicht im Fokus.
 
-## Nächste Schritte
+Diese bewusste Abgrenzung trägt dazu bei, das System übersichtlich, wartbar und langfristig nutzbar zu halten.
 
 - Lesen Sie den [Best Practices](/best-practices/)-Leitfaden für empfohlene Workflows
 
-## Weitere Ressourcen
+## 1.6 Dokumentation als langfristige Aufgabe
 
-- [Offizielle Website](https://qonnectra.de)
-- [GitHub-Repository](https://github.com/Geodock-GmbH/Qonnectra)
-- [Community-Forum](https://github.com/Geodock-GmbH/Qonnectra/discussions)
+Qonnectra versteht Dokumentation nicht als einmalige Aufgabe, sondern als **kontinuierlichen Prozess**.  
+Das System ist darauf ausgelegt,
+
+- Daten langfristig verfügbar zu halten,
+- offene Standards und Formate zu verwenden,
+- und die Weitergabe von Informationen an Dritte (z. B. für Leitungsauskunft, Genehmigungen oder Berichte) zu erleichtern.
+
+Die klare Trennung von Alltagstätigkeiten, administrativen Aufgaben und Experteneingriffen ist ein zentrales Element dieses Konzepts und zieht sich durch das gesamte Handbuch.
