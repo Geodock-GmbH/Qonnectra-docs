@@ -1,6 +1,10 @@
 {
   "name": "Qonnectra Docs",
-  "image": "mcr.microsoft.com/devcontainers/javascript-node:1-24",
+  
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
   
   // Features to add to the dev container
   "features": {},
