@@ -1,0 +1,40 @@
+{
+  "name": "Qonnectra Docs",
+  
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
+  
+  // Features to add to the dev container
+  "features": {},
+  
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [5173],
+  
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // Use CI=true to avoid corepack confirmation for downloading pnpm
+  "postCreateCommand": "corepack enable && CI=true pnpm install",
+  
+  // Use 'postAttachCommand' to run commands in a normal terminal after VS Code attaches.
+  // This runs in a regular terminal where Ctrl+C works properly.
+  // Note: This runs every time VS Code attaches, so you may want to add a check to avoid duplicates.
+  "postAttachCommand": "pnpm dev",
+
+  // Configure tool-specific properties.
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  
+  // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
+  "remoteUser": "node"
+}
+

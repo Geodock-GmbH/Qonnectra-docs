@@ -1,0 +1,133 @@
+name: Deploy PR Preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - '**.md'
+      - '.vitepress/**'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/preview.yml'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# Allow concurrent PR preview deployments
+concurrency:
+  group: preview-pr-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.ref != 'gh-pages-preview'
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+      
+      - name: Build with VitePress
+        run: pnpm run build
+        env:
+          # Set base path for PR preview: /Qonnectra-docs/pr-{PR_NUMBER}/
+          BASE_PATH: /Qonnectra-docs/pr-${{ github.event.pull_request.number }}/
+      
+      - name: Store built files
+        run: |
+          # Store built files outside of git working directory
+          cp -r .vitepress/dist /tmp/preview-dist
+      
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+      
+      - name: Checkout preview branch
+        run: |
+          # Fetch the preview branch if it exists
+          git fetch origin gh-pages-preview:gh-pages-preview 2>/dev/null || true
+          # Switch to preview branch or create it
+          if git show-ref --verify --quiet refs/heads/gh-pages-preview; then
+            git checkout gh-pages-preview
+          else
+            git checkout --orphan gh-pages-preview
+            git rm -rf . 2>/dev/null || true
+          fi
+      
+      - name: Deploy to Preview Branch
+        if: github.event_name == 'pull_request'
+        run: |
+          PR_DIR="pr-${{ github.event.pull_request.number }}"
+          # Remove existing PR directory if it exists
+          rm -rf "$PR_DIR"
+          # Copy stored built files to PR-specific directory
+          cp -r /tmp/preview-dist "$PR_DIR"
+          # Create .nojekyll file at root to disable Jekyll processing (if it doesn't exist)
+          # This ensures GitHub Pages serves the static files correctly
+          if [ ! -f .nojekyll ]; then
+            touch .nojekyll
+          fi
+          # Stage changes
+          git add "$PR_DIR"
+          git add -f .nojekyll 2>/dev/null || git add .nojekyll
+          # Commit if there are changes
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Deploy preview for PR #${{ github.event.pull_request.number }} [skip ci]"
+            git push origin gh-pages-preview
+          fi
+      
+      - name: Comment PR with Preview URL
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            const previewUrl = `https://geodock-gmbh.github.io/Qonnectra-docs/pr-${prNumber}/`;
+            const commentBody = `🚀 **Preview deployed!**\n\n📖 Documentation preview: ${previewUrl}\n\n⚠️ **Note**: To enable PR previews, you need to configure GitHub Pages to serve from the \`gh-pages-preview\` branch in Repository Settings → Pages.\n\nThis preview will be updated automatically when you push new commits.`;
+            
+            // Find existing preview comment
+            const comments = await github.rest.issues.listComments({
+              issue_number: prNumber,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            
+            const existingComment = comments.data.find(comment => 
+              (comment.user.type === 'Bot' || comment.user.login === 'github-actions[bot]') && 
+              comment.body.includes('Preview deployed!')
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+            } else {
+              // Create new comment if none exists
+              await github.rest.issues.createComment({
+                issue_number: prNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+            }
+
