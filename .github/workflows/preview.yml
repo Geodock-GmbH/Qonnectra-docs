@@ -99,10 +99,35 @@ jobs:
           script: |
             const prNumber = context.payload.pull_request.number;
             const previewUrl = `https://geodock-gmbh.github.io/Qonnectra-docs/pr-${prNumber}/`;
-            github.rest.issues.createComment({
+            const commentBody = `🚀 **Preview deployed!**\n\n📖 Documentation preview: ${previewUrl}\n\n⚠️ **Note**: To enable PR previews, you need to configure GitHub Pages to serve from the \`gh-pages-preview\` branch in Repository Settings → Pages.\n\nThis preview will be updated automatically when you push new commits.`;
+            
+            // Find existing preview comment
+            const comments = await github.rest.issues.listComments({
               issue_number: prNumber,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🚀 **Preview deployed!**\n\n📖 Documentation preview: ${previewUrl}\n\n⚠️ **Note**: To enable PR previews, you need to configure GitHub Pages to serve from the \`gh-pages-preview\` branch in Repository Settings → Pages.\n\nThis preview will be updated automatically when you push new commits.`
             });
+            
+            const existingComment = comments.data.find(comment => 
+              (comment.user.type === 'Bot' || comment.user.login === 'github-actions[bot]') && 
+              comment.body.includes('Preview deployed!')
+            );
+            
+            if (existingComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                comment_id: existingComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+            } else {
+              // Create new comment if none exists
+              await github.rest.issues.createComment({
+                issue_number: prNumber,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: commentBody
+              });
+            }
 
