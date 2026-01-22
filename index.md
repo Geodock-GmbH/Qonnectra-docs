@@ -10,9 +10,6 @@ hero:
       text: Loslegen
       link: /manual/
     - theme: alt
-      text: Best Practices
-      link: /best-practices/
-    - theme: alt
       text: Website besuchen
       link: https://qonnectra.de
       target: _blank
@@ -38,7 +35,7 @@ features:
     icon: 🔗
 ---
 
-## Über Qonnectra (Test)
+## Über Qonnectra
 
 Qonnectra ist ein modernes Dokumentationssystem für kommunale Netzinfrastrukturen. Es ermöglicht Netzbetreibern und Verwaltungen, ihre Netzinfrastruktur effizient zu dokumentieren, zu verwalten und zu analysieren.
 

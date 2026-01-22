@@ -73,8 +73,6 @@ docs/
 │       └── deploy.yml     # GitHub Pages deployment
 ├── manual/
 │   └── index.md           # Manual section
-├── best-practices/
-│   └── index.md           # Best practices section
 ├── index.md               # Homepage
 └── package.json           # Dependencies and scripts
 ```

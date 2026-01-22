@@ -80,8 +80,6 @@ Für das Verständnis des Systems ist ebenso wichtig, klar zu benennen, **was Qo
 
 Diese bewusste Abgrenzung trägt dazu bei, das System übersichtlich, wartbar und langfristig nutzbar zu halten.
 
-- Lesen Sie den [Best Practices](/best-practices/)-Leitfaden für empfohlene Workflows
-
 ## 1.6 Dokumentation als langfristige Aufgabe
 
 Qonnectra versteht Dokumentation nicht als einmalige Aufgabe, sondern als **kontinuierlichen Prozess**.  

@@ -19,7 +19,7 @@ function generateSidebarConfig(path: string, override: Partial<VitePressSidebarO
 
 export default defineConfig({
   title: 'Qonnectra Dokumentation',
-  description: 'Netzdokumentation für kommunale Infrastrukturen - Handbuch und Best Practices',
+  description: 'Netzdokumentation für kommunale Infrastrukturen - Handbuch',
   lang: 'de',
 
   // Base URL for GitHub Pages deployment
@@ -42,14 +42,12 @@ export default defineConfig({
     nav: [
       { text: 'Startseite', link: '/' },
       { text: 'Handbuch', link: '/manual/' },
-      { text: 'Best Practices', link: '/best-practices/' },
       { text: 'Website', link: 'https://qonnectra.de', target: '_blank' }
     ],
 
     // Sidebar navigation - auto-generated from file structure
     sidebar: generateSidebar([
-      generateSidebarConfig('manual'),
-      generateSidebarConfig('best-practices')
+      generateSidebarConfig('manual')
     ]),
 
     // Footer
@@ -66,7 +64,7 @@ export default defineConfig({
 
     // Social links
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/Geodock-GmbH/Qonnectra-docs' }
+      { icon: 'github', link: 'https://github.com/Geodock-GmbH/Qonnectra' }
     ],
 
     // External link icon
