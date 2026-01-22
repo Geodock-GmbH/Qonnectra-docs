@@ -6,6 +6,21 @@ This is the documentation site for Qonnectra - Network documentation for municip
 
 ## Getting Started
 
+### 🚀 Quick Start with GitHub Codespaces
+
+The easiest way to get started with this documentation project is using **GitHub Codespaces**. Simply click the green "Code" button in the repository and select "Codespaces" → "Create codespace on main". 
+
+**Benefits:**
+- ✅ No local setup required - everything is pre-configured
+- ✅ Dependencies are automatically installed
+- ✅ Development server starts automatically
+- ✅ Works in your browser - no need to install Node.js or pnpm locally
+- ✅ Consistent development environment for all contributors
+
+The project includes a `.devcontainer` configuration that sets up Node.js 24, pnpm 10, and automatically runs `pnpm install` and `pnpm dev` when the codespace starts. Your documentation site will be available at `http://localhost:5173` and automatically forwarded to your browser.
+
+> **Tip:** If you prefer local development, continue reading the Prerequisites section below.
+
 ### Prerequisites
 
 - Node.js 24 (specified in `package.json`)
