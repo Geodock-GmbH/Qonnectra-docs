@@ -13,7 +13,8 @@
   "forwardPorts": [5173],
   
   // Use 'postCreateCommand' to run commands after the container is created.
-  "postCreateCommand": "pnpm install",
+  // Use CI=true to avoid corepack confirmation for downloading pnpm
+  "postCreateCommand": "corepack enable && CI=true pnpm install",
   
   // Use 'postStartCommand' to run commands after the container starts.
   // This runs every time you start the codespace
