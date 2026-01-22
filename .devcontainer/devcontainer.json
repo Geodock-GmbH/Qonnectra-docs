@@ -18,7 +18,7 @@
   
   // Use 'postStartCommand' to run commands after the container starts.
   // This runs every time you start the codespace
-  "postStartCommand": "pnpm dev",
+  "postStartCommand": "echo \"Open a new terminal and run 'pnpm dev' in there\"",
   
   // Configure tool-specific properties.
   "customizations": {
