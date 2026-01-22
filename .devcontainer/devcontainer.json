@@ -16,15 +16,11 @@
   // Use CI=true to avoid corepack confirmation for downloading pnpm
   "postCreateCommand": "corepack enable && CI=true pnpm install",
   
-  // Use 'postStartCommand' to run commands after the container starts.
-  // This runs every time you start the codespace
-  "postStartCommand": "echo -e \"\\033[1m\\033[36m╔════════════════════════════════════════════════╗\\033[0m\\n\\033[1m\\033[36m║\\033[0m \\033[1m\\033[32mNext Step:\\033[0m Open a new terminal and run \\033[1m\\033[33m'pnpm dev'\\033[0m \\033[1m\\033[36m║\\033[0m\\n\\033[1m\\033[36m╚════════════════════════════════════════════════╝\\033[0m\"",
-  
   // Use 'postAttachCommand' to run commands in a normal terminal after VS Code attaches.
   // This runs in a regular terminal where Ctrl+C works properly.
   // Note: This runs every time VS Code attaches, so you may want to add a check to avoid duplicates.
   "postAttachCommand": "pnpm dev",
-  
+
   // Configure tool-specific properties.
   "customizations": {
     "vscode": {
