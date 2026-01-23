@@ -58,30 +58,52 @@ features:
   - title: Integration von Sach- und Geodaten
     details: Gewährleistungsfristen, Bohrprotokolle, Belegungspläne, Abnahmen, eingemessene Trassen, Verteiler oder Hausanschlüsse.
 ---
+<div align="center">
 
-## Über Qonnectra
+## Einfache Ermittlung von Daten für das Netzmonitoring 
 
-Qonnectra ist ein modernes Dokumentationssystem für kommunale Netzinfrastrukturen. Es ermöglicht Netzbetreibern und Verwaltungen, ihre Netzinfrastruktur effizient zu dokumentieren, zu verwalten und zu analysieren.
+![Screenshot Dashboard](/images/view_dashboard.png)
 
-### Hauptfunktionen
+## Übersichtliche Abbildungen aller Netzinfrastrukturen
 
-- **Browserbasierte Kartenansicht**: Einfache Ermittlung von Daten für das Netzmonitoring
-- **Dokumentation aller Netzebenen**: Vom Hauptverteiler bis zum Hausanschluss
-- **Integration von Sach- und Geodaten**: Übersichtliche Abbildungen aller Netzinfrastrukturen
-- **Open Source**: Entwickelt mit Open-Source-Komponenten und frei verfügbar
+![Screenshot Kartenansicht Infrastruktur](/images/view_map.png)
 
-### Technologie-Stack
+</div>
 
-Qonnectra wird mit modernen Open-Source-Technologien entwickelt:
+## Das Projekt
 
-- **QGIS**: Geoinformationssystem für die Verwaltung räumlicher Daten
-- **Django**: Web-Framework für das Backend
-- **PostgreSQL**: Datenbank für die Datenspeicherung
-- **QGIS Server**: Map-Server für webbasierte Kartendienste
-- **Docker**: Containerisierung für einfache Bereitstellung
+Im Rahmen des Breitbandausbaus hat sich der Breitbandzweckverband der Schleswig-Holsteinischen Ämter Dänischenhagen, Dänischer Wohld und Hüttener Berge zusammen mit dem Planungsbüro plan[neo] GmbH aus Kiel das Ziel gesetzt eine digitale Dokumentation des Breitbandnetzes zu erfassen. So entstand die Idee eine open source basierte Software zu entwickeln, die weitreichend von Kommunen in Deutschland genutzt werden kann.
 
-### Community
+Gemeinsam mit dem Geo-Software-spezialisten Geodock GmbH aus Hamburg wurde Qonnectra entwickelt. Für die Entwicklung erhielt die Projektgemeinschaft Fördermittel aus dem Landesprogramm Offene Innovation der Staatskanzlei Schleswig-Holstein finanziert – betreut und begleitet durch den DigitalHub.SH.
 
-Unser Ziel ist der Aufbau einer lebendigen User- und Entwicklercommunity, die sich gegenseitig unterstützt, Wissen teilt und gemeinsam neue Funktionen entwickelt.
+Ziel ist es, dass öffentliche Verwaltungen und gemeinnützige Organisationen gemeinsam mit der regionalen Digitalwirtschaft digitale Lösungen entwickeln, die Verwaltungsprozesse effizienter
+machen und zugleich die digitale Souveränität stärken. 
+
+Heute kann Qonnectra bereits die Netzinfrastruktur von Glasfasernetzen umfangreich dokumentieren. Langfristig soll die Software auf die gesamte kommunale unterirdische Netzstruktur ausgeweitet werden, sodass auch Gas-, Wasser- und Stromnetze digital erfasst werden können. 
+
+<img
+  src="/images/echtdigital_logo.jpg"
+  alt="Logo echtdigital Dachmarke des Landes Schleswig-Holstein"
+  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
+/>
+
+## Open-Source Community
+
+Unser Ziel ist der Aufbau einer lebendigen User- und Entwicklercommunity, die sich gegenseitig unterstützt, Wissen teilt und gemeinsam neue Funktionen entwickelt. 
+
+In der Open Source Community wollen wir gemeinsam
+- Qonnectra weiterentwickeln
+- uns gegenseitig unterstützten
+- Wissen teilen
 
 Auch umfangreiche Erweiterungen oder neue Features können gemeinschaftlich konzipiert, umgesetzt und finanziert werden.
+
+Du willst Teil unserer Community werden?
+
+Dann melde dich bei uns unter community@qonnectra.de
+
+<img
+  src="/images/view_community.jpg"
+  alt="Bild mit Spielfiguren auf einem Netzplan verteilt"
+  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
+/>
