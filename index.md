@@ -18,24 +18,45 @@ hero:
       target: _blank
 
 features:
+
   - title: Open Source
-    details: Quelloffene Software, frei verfügbar, entwickelt von der Community
-    icon: 🚀
+    details: |
+      <ul>
+        <li>Quelloffene Software</li>
+        <li>Lizenzfrei verfügbar</li>
+        <li>Weiterentwicklung durch die Community</li>
+      </ul>
+    icon: 
+      src: '/icons/MaterialSymbolsLockOpenOutline.svg'
+
   - title: Datensouveränität
-    details: Daten bleiben im Besitz der Kommune, Hosting auf eigenen Systemen, unabhängig von Softwareanbietern
-    icon: 🔒
+    details: |
+      <ul>
+        <li>Daten bleiben im Besitz der Kommune</li>
+        <li>Hosting auf eigenen Systemen</li>
+        <li>Unabhängig von Softwareanbietern oder Lizenzmodellen</li>
+      </ul>
+    icon:
+      src: '/icons/MdiShieldCheckOutline.svg'
+
   - title: Kostenfrei
-    details: Keine Lizenzgebühren, offene Standards, ausschließlich Verwendung von Open-Source-Komponenten (QGIS, Django, PostgreSQL, QGIS Server, Docker)
-    icon: 💰
+    details: |
+      <ul>
+        <li>Keine Lizenzgebühren</li>
+        <li>Offene Standards</li>
+        <li>Ausschließlich Verwendung von Open-Source-Komponenten (QGIS, Django, PostgreSQL, QGIS Server, Docker)</li>
+      </ul>
+    icon: 
+      src: '/icons/MaterialSymbolsEuro.svg'
+
   - title: Browserbasierte Kartenansicht
-    details: Sofortige und unkomplizierte Netzauskünfte sowie Auswertungen für Netzbetreiber und Verwaltungen
-    icon: 🗺️
-  - title: Vollständige Netzdokumentation
-    details: Vom Hauptverteiler bis zum Hausanschluss und vom Rohrverband bis zur einzelnen Glasfaser
-    icon: 📊
-  - title: Integrierte Daten
-    details: Integration von Sach- und Geodaten einschließlich Gewährleistungsfristen, Bohrprotokolle, Belegungspläne, Abnahmen und eingemessene Trassen
-    icon: 🔗
+    details: Sofortige und unkomplizierte Netzauskünfte sowie Auswertungen für Netzbetreiber und Verwaltungen.
+
+  - title: Dokumentation Aller Netzebenen
+    details: Vom Hauptverteiler bis zum Hausanschluss und vom Rohrverband bis zur einzelnen Glasfaser.
+
+  - title: Integration von Sach- und Geodaten
+    details: Gewährleistungsfristen, Bohrprotokolle, Belegungspläne, Abnahmen, eingemessene Trassen, Verteiler oder Hausanschlüsse.
 ---
 
 ## Über Qonnectra
