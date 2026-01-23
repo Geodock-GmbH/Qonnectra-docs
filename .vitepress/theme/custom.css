@@ -19,13 +19,13 @@
   --vp-home-hero-name-color: transparent;
   --vp-home-hero-name-background: linear-gradient(
     120deg,
-    #11ba81 30%,
-    #2dd4a3
+    var(--vp-c-brand-1) 30%,
+    var(--vp-c-accent-1)
   );
 
   --vp-home-hero-image-background-image: radial-gradient(
     circle at center,
-    #11ba81,
+    var(--vp-c-brand-1),
     transparent 65%
   );
   --vp-home-hero-image-filter: blur(56px);
