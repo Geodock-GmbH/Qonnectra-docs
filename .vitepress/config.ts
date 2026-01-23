@@ -18,7 +18,7 @@ function generateSidebarConfig(path: string, override: Partial<VitePressSidebarO
 }
 
 export default defineConfig({
-  title: 'Qonnectra Dokumentation',
+  title: 'Qonnectra Netzdokumentation',
   description: 'Netzdokumentation für kommunale Infrastrukturen - Handbuch',
   lang: 'de',
 
@@ -42,7 +42,7 @@ export default defineConfig({
     nav: [
       { text: 'Startseite', link: '/' },
       { text: 'Handbuch', link: '/manual/' },
-      { text: 'Website', link: 'https://qonnectra.de', target: '_blank' }
+      { text: 'Kontakt', link: '/contact' }
     ],
 
     // Sidebar navigation - auto-generated from file structure
@@ -53,7 +53,7 @@ export default defineConfig({
     // Footer
     footer: {
       message: 'Open-Source-Software für kommunale Netzdokumentation. Lizenziert unter AGPL-3.0.',
-      copyright: 'Copyright © 2025 Geodock GmbH'
+      copyright: 'Copyright © 2025 Geodock GmbH & plan[neo] GmbH'
     },
 
     // Edit link

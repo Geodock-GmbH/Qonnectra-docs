@@ -3,7 +3,7 @@ layout: home
 
 hero:
   name: "Qonnectra"
-  text: "Dokumentation"
+  text: "Netzdokumentation"
   tagline: Moderne Netzdokumentation für kommunale Infrastrukturen
   actions:
     - theme: brand
