@@ -60,12 +60,6 @@ export default defineConfig({
       copyright: 'Copyright © 2025 Geodock GmbH & plan[neo] GmbH'
     },
 
-    // Edit link
-    editLink: {
-      pattern: 'https://github.com/Geodock-GmbH/Qonnectra-docs/edit/main/:path',
-      text: 'Diese Seite auf GitHub bearbeiten'
-    },
-
     // Social links
     socialLinks: [
       { icon: 'github', link: 'https://github.com/Geodock-GmbH/Qonnectra' }
