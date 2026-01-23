@@ -34,7 +34,7 @@ Tel: 0151 68458877
 <br>E-Mai: mail@geodock.de
 
 <img
-  src="/images/Geodock_logo.png"
+  src="/images/geodock_logo.png"
   alt="Logo der planneo GmbH"
   style="max-width: 300px; width: 100%;"
 />
