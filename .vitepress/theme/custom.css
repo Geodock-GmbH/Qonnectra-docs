@@ -119,3 +119,7 @@
   overflow-wrap: break-word;
 }
 
+/* Global image styling */
+img {
+  border-radius: 12px;
+}
