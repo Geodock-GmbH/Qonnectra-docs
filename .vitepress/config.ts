@@ -18,9 +18,12 @@ function generateSidebarConfig(path: string, override: Partial<VitePressSidebarO
 }
 
 export default defineConfig({
-  title: 'Qonnectra Netzdokumentation',
+  title: 'Qonnectra',
   description: 'Netzdokumentation für kommunale Infrastrukturen - Handbuch',
   lang: 'de',
+  head: [
+    ['link', { rel: 'icon', href: '/favicon.ico' }]
+  ],
 
   // Base URL for GitHub Pages deployment
   // Defaults to "/" for local development, can be overridden via BASE_PATH environment variable
@@ -38,6 +41,7 @@ export default defineConfig({
 
   // Theme configuration
   themeConfig: {
+    logo: '/images/qonnectra_logo.png',
     // Site navigation
     nav: [
       { text: 'Startseite', link: '/' },
