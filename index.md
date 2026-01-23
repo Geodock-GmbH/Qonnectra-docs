@@ -5,13 +5,16 @@ hero:
   name: "Qonnectra"
   text: "Netzdokumentation"
   tagline: Moderne Netzdokumentation für kommunale Infrastrukturen
+  image:
+    src: /images/qonnectra_logo.png
+    alt: Qonnectra Logo
   actions:
     - theme: brand
-      text: Loslegen
+      text: Handbuch
       link: /manual/
     - theme: alt
-      text: Website besuchen
-      link: https://qonnectra.de
+      text: Github
+      link: https://github.com/Geodock-GmbH/Qonnectra
       target: _blank
 
 features:
