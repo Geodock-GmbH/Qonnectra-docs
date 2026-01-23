@@ -56,7 +56,11 @@ export default defineConfig({
 
     // Footer
     footer: {
-      message: 'Open-Source-Software für kommunale Netzdokumentation. Lizenziert unter AGPL-3.0.',
+      message: [
+        '<a href="/imprint">Impressum</a> · <a href="/privacy">Datenschutz</a> · <a href="/contact">Kontakt</a>',
+        '', // leere Zeile
+        'Open-Source-Software für kommunale Netzdokumentation. Lizenziert unter AGPL-3.0.'
+      ].join('<br>'),
       copyright: 'Copyright © 2025 Geodock GmbH & plan[neo] GmbH'
     },
 
