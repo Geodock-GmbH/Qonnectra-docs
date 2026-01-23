@@ -18,7 +18,7 @@ Tel: 0431 720041-80
 <br>E-Mail: willkommen@­planneo.de
 
 <img
-  src="/images/planneo_logo_rgb_frei-1024x307.png"
+  src="/images/planneo_logo.png"
   alt="Logo der planneo GmbH"
   style="max-width: 300px; width: 100%;"
 />
@@ -34,7 +34,7 @@ Tel: 0151 68458877
 <br>E-Mai: mail@geodock.de
 
 <img
-  src="/images/Geodock_2560_1440_transparent_Outlook-1024x615.png"
+  src="/images/Geodock_logo.png"
   alt="Logo der planneo GmbH"
   style="max-width: 300px; width: 100%;"
 />
