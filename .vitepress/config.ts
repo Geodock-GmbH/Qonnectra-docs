@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 import { generateSidebar } from 'vitepress-sidebar'
 import { VitePressSidebarOptions } from 'vitepress-sidebar/types'
 
-function generateSidebarConfig(path: string, override: Partial<VitePressSidebarOptions> = {}) {
+function generateSidebarConfig(path: string, override: Partial<VitePressSidebarOptions> = {}): VitePressSidebarOptions {
   return {
     scanStartPath: path,
     resolvePath: `/${path}/`,
@@ -17,6 +17,13 @@ function generateSidebarConfig(path: string, override: Partial<VitePressSidebarO
   }
 }
 
+// Base URL for GitHub Pages deployment
+// Defaults to "/" for local development, can be overridden via BASE_PATH environment variable
+// Production builds set BASE_PATH="/Qonnectra-docs/" in GitHub Actions workflows
+const base = (typeof process !== 'undefined' && process.env?.BASE_PATH) || '/';
+
+const withBase = (path: string) => `${base.endsWith('/') ? base : `${base}/`}${path.replace(/^\/+/, '')}`
+
 export default defineConfig({
   title: 'Qonnectra',
   description: 'Netzdokumentation für kommunale Infrastrukturen - Handbuch',
@@ -25,10 +32,7 @@ export default defineConfig({
     ['link', { rel: 'icon', href: '/favicon.ico' }]
   ],
 
-  // Base URL for GitHub Pages deployment
-  // Defaults to "/" for local development, can be overridden via BASE_PATH environment variable
-  // Production builds set BASE_PATH="/Qonnectra-docs/" in GitHub Actions workflows
-  base: (typeof process !== 'undefined' && process.env?.BASE_PATH) || '/',
+  base,
 
   // Markdown configuration
   markdown: {
@@ -63,7 +67,7 @@ export default defineConfig({
     // Footer
     footer: {
       message: [
-        '<a href="/imprint">Impressum</a> · <a href="/privacy">Datenschutz</a> · <a href="/contact">Kontakt</a>',
+        `<a href="${withBase('imprint')}">Impressum</a> · <a href="${withBase('privacy')}">Datenschutz</a> · <a href="${withBase('contact')}">Kontakt</a>`,
         '', // leere Zeile
         'Open-Source-Software für kommunale Netzdokumentation. Lizenziert unter AGPL-3.0.'
       ].join('<br>'),
