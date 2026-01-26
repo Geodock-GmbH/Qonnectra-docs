@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 import { generateSidebar } from 'vitepress-sidebar'
 import { VitePressSidebarOptions } from 'vitepress-sidebar/types'
 
-function generateSidebarConfig(path: string, override: Partial<VitePressSidebarOptions> = {}) {
+function generateSidebarConfig(path: string, override: Partial<VitePressSidebarOptions> = {}): VitePressSidebarOptions {
   return {
     scanStartPath: path,
     resolvePath: `/${path}/`,
