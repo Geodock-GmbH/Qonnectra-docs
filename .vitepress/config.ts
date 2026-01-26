@@ -61,7 +61,7 @@ export default defineConfig({
     // Footer
     footer: {
       message: [
-        `<a href="${withBase('imprint')}">Impressum</a> · <a href="${withBase('privacy')}">Datenschutz</a> · <a href="${withBase('contact')}">Kontakt</a>'`,
+        `<a href="${withBase('imprint')}">Impressum</a> · <a href="${withBase('privacy')}">Datenschutz</a> · <a href="${withBase('contact')}">Kontakt</a>`,
         '', // leere Zeile
         'Open-Source-Software für kommunale Netzdokumentation. Lizenziert unter AGPL-3.0.'
       ].join('<br>'),
