@@ -54,6 +54,12 @@ export default defineConfig({
       generateSidebarConfig('manual')
     ]),
 
+    // German translation in doc footer
+    docFooter: {
+      prev: 'Vorherige Seite',
+      next: 'Nächste Seite'
+    },
+
     // Footer
     footer: {
       message: [
