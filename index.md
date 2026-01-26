@@ -20,32 +20,17 @@ hero:
 features:
 
   - title: Open Source
-    details: |
-      <ul>
-        <li>Quelloffene Software</li>
-        <li>Lizenzfrei verfügbar</li>
-        <li>Weiterentwicklung durch die Community</li>
-      </ul>
+    details: Quelloffene Software, lizenzfrei verfügbar, Weiterentwicklung durch die Community
     icon: 
       src: '/icons/MaterialSymbolsLockOpenOutline.svg'
 
   - title: Datensouveränität
-    details: |
-      <ul>
-        <li>Daten bleiben im Besitz der Kommune</li>
-        <li>Hosting auf eigenen Systemen</li>
-        <li>Unabhängig von Softwareanbietern oder Lizenzmodellen</li>
-      </ul>
+    details: Daten bleiben im Besitz der Kommune, Hosting auf eigenen Systemen, unabhängig von Softwareanbietern oder Lizenzmodellen
     icon:
       src: '/icons/MdiShieldCheckOutline.svg'
 
   - title: Kostenfrei
-    details: |
-      <ul>
-        <li>Keine Lizenzgebühren</li>
-        <li>Offene Standards</li>
-        <li>Ausschließlich Verwendung von Open-Source-Komponenten (QGIS, Django, PostgreSQL, QGIS Server, Docker)</li>
-      </ul>
+    details: Keine Lizenzgebühren, offene Standards, ausschließlich Verwendung von Open-Source-Komponenten (QGIS, Django, PostgreSQL, QGIS Server, Docker)
     icon: 
       src: '/icons/MaterialSymbolsEuro.svg'
 
