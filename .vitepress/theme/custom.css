@@ -50,6 +50,7 @@
   position: relative;
   overflow: hidden;
   background: transparent;
+  min-height: clamp(200px, 30vh, 384px);
   margin-bottom: 3rem;
 }
 
@@ -58,6 +59,7 @@
   position: absolute;
   inset: 0;
   background-image: url('/images/hero-bg.png');
+
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

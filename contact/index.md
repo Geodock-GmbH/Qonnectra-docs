@@ -1,4 +1,12 @@
-# Kontakt
+---
+layout: home
+
+hero:
+  name: false
+  text: "Kontakt"
+  tagline: false
+
+---
 
 **Sie interessieren sich für Qonnectra?**
 <br>Dann schreiben Sie uns an info@qonnectra.de
