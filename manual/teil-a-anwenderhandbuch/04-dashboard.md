@@ -5,7 +5,7 @@ Das **Dashboard** ist die zentrale Einstiegs- und Übersichtsseite in der Qonnec
 Die Inhalte des Dashboards beziehen sich immer auf das aktuell ausgewählte Projekt.
 
 <img
-  src="/manualA/dashboard.jpg"
+  src="/images/manual/teil-a/dashboard.jpg"
   alt="Screenshot Dashboard"
   style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
 />
@@ -19,7 +19,7 @@ Bevor detaillierte Daten sichtbar sind, muss ein Projekt ausgewählt werden:
 - Nach Auswahl werden alle Inhalte im Dashboard automatisch entsprechend des gewählten Projekts aktualisiert.
 
 <img
-  src="/manualA/dashboard_project.jpg"
+  src="/images/manual/teil-a/dashboard_project.jpg"
   alt="Screenshot Dashboard mit Hervorhebung Projektauswahl oben links"
   style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
 />
@@ -36,7 +36,7 @@ Direkt unter der Projekt-Auswahl befinden sich drei Reiter (Tabs):
 Sie können durch Klick auf die jeweilige Beschriftung zwischen diesen Ansichten wechseln. Der aktive Tab ist visuell hervorgehoben.
 
 <img
-  src="/manualA/dashboard_tabs.jpg"
+  src="/images/manual/teil-a/dashboard_tabs.jpg"
   alt="Screenshot Dashboard mit Hervorhebung der Reiter (Tabs) oben links"
   style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
 />
@@ -46,7 +46,7 @@ Sie können durch Klick auf die jeweilige Beschriftung zwischen diesen Ansichten
 Im Reiter „Übersicht“ sehen Sie drei Abschnitte.
 
 <img
-  src="/manualA/dashboard_overview.jpg"
+  src="/images/manual/teil-a/dashboard_overview.jpg"
   alt="Screenshot Dashboard mit Hervorhebung der Inhalte im Reiter Überblick mittig"
   style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
 />
@@ -74,7 +74,7 @@ Hinweis: Wenn es viele Einträge gibt, kann innerhalb der Listendarstellung vert
 Im Reiter „Trasse“ finden Sie auswertbare Diagramme zu verschiedenen Aspekten des Netzes. Diese sind visuell aufbereitet und gruppiert. Die Diagramme sind nur zur Ansicht vorgesehen – eine direkte Bearbeitung oder Exportfunktion besteht nicht. Allerdings besteht eine Hover-Funktion. 
 
 <img
-  src="/manualA/dashboard_trasse.jpg"
+  src="/images/manual/teil-a/dashboard_trasse.jpg"
   alt="Screenshot Dashboard mit Hervorhebung der Inhalte im Reiter Trasse mittig"
   style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
 />
@@ -82,7 +82,7 @@ Im Reiter „Trasse“ finden Sie auswertbare Diagramme zu verschiedenen Aspekte
 Hover-Funktion: Um Details zu einzelnen Einträgen in einem Diagramm zu sehen, bewegen Sie den Mauszeiger über den jeweiligen Balken oder Datensatz. Es erscheint dann ein Hinweis mit dem genauen Wert.
 
 <img
-  src="/manualA/dashboard_trasse_hover.jpg"
+  src="/images/manual/teil-a/dashboard_trasse_hover.jpg"
   alt="Screenshot Detailansicht Gesamtlänge pro Oberfläche mit Hovereffekt auf einen Eintrag und daraus entstehenden Detaileinblendungen"
   style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
 />
