@@ -29,6 +29,13 @@ Das Handbuch besteht aus drei Hauptteilen:
 - **Teil C – Entwickler- und Systemdokumentation**  
   Dieser Teil richtet sich ausschließlich an technische Rollen wie Entwickler, DevOps, GIS-Administratoren und die Open-Source-Community. Er beschreibt Setup, Architektur, Schnittstellen, Datenmodelle und Erweiterungsmöglichkeiten von Qonnectra.
 
+
+| Ebene | Zielgruppe | Werkzeuge/Technologien | Handbuch |
+|-------|------------|------------------------|---------------|
+| **1. Anwendungsebene** | Verwaltungsmitarbeitende, Sachbearbeitung | Webbrowser (Qonnectra Webanwendung)| **Teil A** |
+| **2. Betrieb und Fachanwendung** | Administrator*Innen, GIS-Fachkräfte | Qonnectra Webanwendung + QGIS | **Teil B** |
+| **3. System- und Entwicklungsebene** | Entwickler*Innen, DevOps, Systemadministration | Qonnectra Backend, Datenbank, API, Git usw. | **Teil C** |
+
 Für den normalen Betrieb von Qonnectra ist **nicht erforderlich**, alle Teile des Handbuchs zu lesen. Jedes Kapitel ist so aufgebaut, dass klar erkennbar ist, für welche Zielgruppe es relevant ist.
 
 
