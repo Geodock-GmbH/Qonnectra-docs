@@ -107,10 +107,31 @@
   color: var(--vp-c-neutral-inverse);
 }
 
+/* Global responsive image row with two images*/
+.img-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  align-items: center;
+}
 
-/* Custom components */
+.img-row img {
+  width: 100%;
+  max-width: clamp(260px, 40vw, 360px);
+  aspect-ratio: 16  / 10;
+  object-fit: contain;
+
+}
+
+/* When images stack, let them fill the available width */
+.img-row img:only-child,
+.img-row img:nth-child(n + 1):nth-last-child(1),
+.img-row img:nth-child(n + 1):nth-last-child(2) {
+  max-width: 100%;
+}
 
 /* Global image styling */
-img {
-  border-radius: 12px;
+.vp-doc img {
+  border-radius: 8px;
+  border: 1px solid var(--vp-c-brand-1);
 }
