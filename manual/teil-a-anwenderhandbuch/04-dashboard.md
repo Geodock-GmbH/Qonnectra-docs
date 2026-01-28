@@ -73,21 +73,22 @@ Hinweis: Wenn es viele Einträge gibt, kann innerhalb der Listendarstellung vert
 
 Im Reiter „Trasse“ finden Sie auswertbare Diagramme zu verschiedenen Aspekten des Netzes. Diese sind visuell aufbereitet und gruppiert. Die Diagramme sind nur zur Ansicht vorgesehen – eine direkte Bearbeitung oder Exportfunktion besteht nicht. Allerdings besteht eine Hover-Funktion. 
 
-<img
-  src="/images/manual/teil-a/dashboard_trasse.jpg"
-  alt="Screenshot Dashboard mit Hervorhebung der Inhalte im Reiter Trasse mittig"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+<div class="img-row">
+  <img src="/images/manual/teil-a/dashboard_trasse.jpg" alt="Screenshot Dashboard mit Hervorhebung der Inhalte im Reiter Trasse mittig" />
+  <img src="/images/manual/teil-a/dashboard_trasse_hover.jpg" alt="Screenshot Detailansicht Gesamtlänge pro Oberfläche mit Hovereffekt auf einen Eintrag und daraus entstehenden Detaileinblendungen" />
+</div>
 
 Hover-Funktion: Um Details zu einzelnen Einträgen in einem Diagramm zu sehen, bewegen Sie den Mauszeiger über den jeweiligen Balken oder Datensatz. Es erscheint dann ein Hinweis mit dem genauen Wert.
 
-<img
-  src="/images/manual/teil-a/dashboard_trasse_hover.jpg"
-  alt="Screenshot Detailansicht Gesamtlänge pro Oberfläche mit Hovereffekt auf einen Eintrag und daraus entstehenden Detaileinblendungen"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+
 
 ### Projekte
 
 Im Reiter „Projekte“ sehen Sie eine tabellarische Übersicht aller projektierten oder aktiven Projekte. Spalten zeigen den Projektnamen, eine optionale Beschreibung und ob das Projekt aktuell aktiv ist. In dieser Übersicht lässt sich die Projektauswahl nicht wechseln. Dies geschieht über das Dropdown-Menü (siehe weiter oben "Projekte auswählen").
+
+<img
+  src="/images/manual/teil-a/dashboard_projects.jpg"
+  alt="Screenshot Dashboard mit Hervorhebung der Projektliste im Reiter Projekte mittig"
+  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
+/>
 
