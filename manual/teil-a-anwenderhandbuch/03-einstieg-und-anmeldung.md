@@ -20,7 +20,7 @@ Falls Sie noch keine Zugangsdaten erhalten haben, wenden Sie sich bitte an Ihr
 
 ### Passwort vergessen?
 
-Derzeit gibt es keine „Passwort vergessen“-Funktion im System. Wenn Sie Ihr Passwort nicht mehr wissen, hilft Ihnen Ihr*e Projektverantwortliche*r oder Administrator*in weiter. Dort kann das Passwort zurückgesetzt oder ein neues vergeben werden.
+Derzeit gibt es keine „Passwort vergessen“-Funktion im System. Wenn Sie Ihr Passwort nicht mehr wissen, hilft Ihnen Ihre Projektleitung oder Administrator*in weiter. Dort kann das Passwort zurückgesetzt oder ein neues vergeben werden.
 
 ## 3.2 Navigation in der Anwendung
 
