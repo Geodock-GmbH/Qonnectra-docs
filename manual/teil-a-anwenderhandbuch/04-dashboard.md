@@ -41,7 +41,7 @@ Sie können durch Klick auf die jeweilige Beschriftung zwischen diesen Ansichten
   style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
 />
 
-### Übersicht
+### 4.2.1 Übersicht
 
 Im Reiter „Übersicht“ sehen Sie drei Abschnitte.
 
@@ -69,7 +69,7 @@ Im Reiter „Übersicht“ sehen Sie drei Abschnitte.
 
 Hinweis: Wenn es viele Einträge gibt, kann innerhalb der Listendarstellung vertikal gescrollt werden. Nicht alle Einträge sind auf den ersten Blick sichtbar. Nutzen Sie das Scrollrad Ihrer Maus oder ein Touchpad.
 
-### Trasse
+### 4.2.2 Trasse
 
 Im Reiter „Trasse“ finden Sie auswertbare Diagramme zu verschiedenen Aspekten des Netzes. Diese sind visuell aufbereitet und gruppiert. Die Diagramme sind nur zur Ansicht vorgesehen – eine direkte Bearbeitung oder Exportfunktion besteht nicht. Allerdings besteht eine Hover-Funktion. 
 
@@ -81,8 +81,7 @@ Im Reiter „Trasse“ finden Sie auswertbare Diagramme zu verschiedenen Aspekte
 Hover-Funktion: Um Details zu einzelnen Einträgen in einem Diagramm zu sehen, bewegen Sie den Mauszeiger über den jeweiligen Balken oder Datensatz. Es erscheint dann ein Hinweis mit dem genauen Wert.
 
 
-
-### Projekte
+### 4.2.3 Projekte
 
 Im Reiter „Projekte“ sehen Sie eine tabellarische Übersicht aller projektierten oder aktiven Projekte. Spalten zeigen den Projektnamen, eine optionale Beschreibung und ob das Projekt aktuell aktiv ist. In dieser Übersicht lässt sich die Projektauswahl nicht wechseln. Dies geschieht über das Dropdown-Menü (siehe weiter oben "Projekte auswählen").
 

@@ -86,7 +86,8 @@ export default defineConfig({
 
     // Outline configuration
     outline: {
-      label: 'Auf dieser Seite'
+      label: 'Auf dieser Seite',
+      level: [2, 3]
     },
 
     // Search configuration with Algolia DocSearch

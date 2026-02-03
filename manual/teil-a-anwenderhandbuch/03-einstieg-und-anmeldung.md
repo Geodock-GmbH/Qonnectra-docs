@@ -14,11 +14,11 @@ Mit einem Klick auf „Login“ gelangen Sie zur Startseite der Anwendung.
     <img src="/images/manual/teil-a/login_start_detail.jpg" alt="Screenshot Login-Seite leer" />
 </div>
 
-### Noch keine Zugangsdaten?
+### 3.1.1 Noch keine Zugangsdaten?
 
 Falls Sie noch keine Zugangsdaten erhalten haben, wenden Sie sich bitte an Ihre Projektleitung oder Ihre Administrator*Innen. Ein Benutzerkonto kann dort für Sie angelegt werden.
 
-### Passwort vergessen?
+### 3.1.2 Passwort vergessen?
 
 Derzeit gibt es keine „Passwort vergessen“-Funktion im System. Wenn Sie Ihr Passwort nicht mehr wissen, hilft Ihnen Ihre Projektleitung oder Administrator*in weiter. Dort kann das Passwort zurückgesetzt oder ein neues vergeben werden.
 
@@ -32,7 +32,7 @@ Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Benutzeroberfläche 
   style="display: block; max-width: 800px; width: 100%; margin: 0 auto; border: 0;"
 />
 
-### Navigation
+### 3.2.1 Navigation
 
 Auf der linken Seite befindet sich die Navigationsleiste, mit der Sie zu allen verfügbaren Ansichten wechseln können:
 
@@ -46,7 +46,7 @@ Auf der linken Seite befindet sich die Navigationsleiste, mit der Sie zu allen v
 
 Die Navigation bleibt beim Arbeiten in der Anwendung immer sichtbar, womit Sie schnellen Zugriff auf alle Funktionen haben.
 
-### Kopfzeile / Header
+### 3.2.2 Kopfzeile / Header
 
 Oben links in der Anwendung befindet sich das Projektauswahl-Menü. Hier wählen Sie das Projekt aus, mit dem Sie aktuell arbeiten möchten. Bei einem Wechsel des Projekts aktualisieren sich automatisch alle angezeigten Inhalte.
 
@@ -57,12 +57,12 @@ Oben rechts in der Kopfzeile befinden sich folgende Optionen:
 - Aktuelle Softwareversion: Diese kann man angeben, sollten Fehler auftreten, die Sie bei Ihrem Systemadministrator melden möchten.
 - Abmelden (Logout): Um sich sicher abzumelden, klicken Sie oben rechts auf das Tür-mit-Pfeil-Symbol. Danach werden Sie automatisch zur Anmeldeseite zurückgeleitet.
 
-### Inhalt
+### 3.2.3 Inhalt
 
 In der zentralen Inhaltsfläche werden alle projektbezogenen Informationen angezeigt: Statistiken, Listen, Karten usw. Welche Inhalte sichtbar sind, hängt vom gewählten Projekt (oben links in der Kopfzeile), dem gewählten Navigationspunkt (linke Navigationsleiste) und ggf. von dem gewählten Reiter (meist unterhalb der Kopfzeile) ab.
 
 Karten, Grafiken und Listen sind meist interaktiv: Beispielsweise können Sie in einem Diagramm mit der Maus über einen Datenpunkt fahren („hovern“), um Details anzuzeigen.
 
-### Einstellungen
+### 3.2.4 Einstellungen
 
 Ganz unten links finden Sie den Menüpunkt „Einstellungen“. Hier können individuelle Einstellungen vorgenommen werden, z. B. zu Ihrem Benutzerkonto oder zu Anzeigeoptionen.
