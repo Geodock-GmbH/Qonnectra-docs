@@ -2,7 +2,7 @@ import { defineConfig } from 'vitepress'
 import { generateSidebar } from 'vitepress-sidebar'
 import { VitePressSidebarOptions } from 'vitepress-sidebar/types'
 
-function generateSidebarConfig(path: string, override: Partial<VitePressSidebarOptions> = {}) {
+function generateSidebarConfig(path: string, override: Partial<VitePressSidebarOptions> = {}): VitePressSidebarOptions {
   return {
     scanStartPath: path,
     resolvePath: `/${path}/`,
@@ -17,15 +17,22 @@ function generateSidebarConfig(path: string, override: Partial<VitePressSidebarO
   }
 }
 
+// Base URL for GitHub Pages deployment
+// Defaults to "/" for local development, can be overridden via BASE_PATH environment variable
+// Production builds set BASE_PATH="/Qonnectra-docs/" in GitHub Actions workflows
+const base = (typeof process !== 'undefined' && process.env?.BASE_PATH) || '/';
+
+const withBase = (path: string) => `${base.endsWith('/') ? base : `${base}/`}${path.replace(/^\/+/, '')}`
+
 export default defineConfig({
-  title: 'Qonnectra Dokumentation',
+  title: 'Qonnectra',
   description: 'Netzdokumentation für kommunale Infrastrukturen - Handbuch',
   lang: 'de',
+  head: [
+    ['link', { rel: 'icon', href: '/favicon.ico' }]
+  ],
 
-  // Base URL for GitHub Pages deployment
-  // Defaults to "/" for local development, can be overridden via BASE_PATH environment variable
-  // Production builds set BASE_PATH="/Qonnectra-docs/" in GitHub Actions workflows
-  base: (typeof process !== 'undefined' && process.env?.BASE_PATH) || '/',
+  base,
 
   // Markdown configuration
   markdown: {
@@ -38,11 +45,12 @@ export default defineConfig({
 
   // Theme configuration
   themeConfig: {
+    logo: '/images/qonnectra_logo.png',
     // Site navigation
     nav: [
       { text: 'Startseite', link: '/' },
       { text: 'Handbuch', link: '/manual/' },
-      { text: 'Website', link: 'https://qonnectra.de', target: '_blank' }
+      { text: 'Kontakt', link: '/contact' }
     ],
 
     // Sidebar navigation - auto-generated from file structure
@@ -50,16 +58,20 @@ export default defineConfig({
       generateSidebarConfig('manual')
     ]),
 
-    // Footer
-    footer: {
-      message: 'Open-Source-Software für kommunale Netzdokumentation. Lizenziert unter AGPL-3.0.',
-      copyright: 'Copyright © 2025 Geodock GmbH'
+    // German translation in doc footer
+    docFooter: {
+      prev: 'Vorherige Seite',
+      next: 'Nächste Seite'
     },
 
-    // Edit link
-    editLink: {
-      pattern: 'https://github.com/Geodock-GmbH/Qonnectra-docs/edit/main/:path',
-      text: 'Diese Seite auf GitHub bearbeiten'
+    // Footer
+    footer: {
+      message: [
+        `<a href="${withBase('imprint')}">Impressum</a> · <a href="${withBase('privacy')}">Datenschutz</a> · <a href="${withBase('contact')}">Kontakt</a>`,
+        '', // leere Zeile
+        'Open-Source-Software für kommunale Netzdokumentation. Lizenziert unter AGPL-3.0.'
+      ].join('<br>'),
+      copyright: 'Copyright © 2025 Geodock GmbH & plan[neo] GmbH'
     },
 
     // Social links

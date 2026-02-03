@@ -4,36 +4,37 @@
  */
 
 :root {
-  /* Qonnectra brand colors - professional blue/green theme */
-  --vp-c-brand-1: #0066cc;
-  --vp-c-brand-2: #0052a3;
-  --vp-c-brand-3: #003d7a;
-  --vp-c-brand-soft: rgba(0, 102, 204, 0.14);
-  
-  /* Accent colors */
-  --vp-c-accent-1: #00a86b;
-  --vp-c-accent-2: #00885a;
-  --vp-c-accent-3: #006644;
-  
-  /* Custom properties for better theming */
+  /* Brand – Primary (Logo-Grün) */
+  --vp-c-brand-1: #11ba81;
+  --vp-c-brand-2: #0fa873;
+  --vp-c-brand-3: #0d8f63;
+  --vp-c-brand-soft: rgba(17, 186, 129, 0.16);
+
+  /* Accent – leicht heller / frischer */
+  --vp-c-accent-1: #2dd4a3;
+  --vp-c-accent-2: #22c59a;
+  --vp-c-accent-3: #16a97f;
+
+  /* Hero */
   --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: linear-gradient(120deg, #0066cc 30%, #00a86b);
-  
-  --vp-home-hero-image-background-image: linear-gradient(-45deg, #0066cc 50%, #00a86b 50%);
-  --vp-home-hero-image-filter: blur(44px);
+  --vp-home-hero-name-background: linear-gradient(
+    120deg,
+    var(--vp-c-brand-1) 30%,
+    var(--vp-c-accent-1)
+  );
+
+  --vp-home-hero-image-background-image: radial-gradient(
+    circle at center,
+    var(--vp-c-brand-1),
+    transparent 65%
+  );
+  --vp-home-hero-image-filter: blur(56px);
 }
 
-.dark {
-  --vp-c-brand-1: #4da6ff;
-  --vp-c-brand-2: #66b3ff;
-  --vp-c-brand-3: #80c0ff;
-  --vp-c-brand-soft: rgba(77, 166, 255, 0.16);
-  
-  --vp-c-accent-1: #00d98b;
-  --vp-c-accent-2: #00c77a;
-  --vp-c-accent-3: #00b569;
-  
-  --vp-home-hero-name-background: linear-gradient(120deg, #4da6ff 30%, #00d98b);
+/* Navbar on home page when scrolled to top:
+   force solid background so hero image does not bleed through */
+.VPNavBar.home.top {
+  background-color: var(--vp-nav-bg-color);
 }
 
 /* Hero section styling */
@@ -43,6 +44,30 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+/* Full-width Hero Background Image */
+.VPHero {
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  margin-bottom: 3rem;
+}
+
+.VPHero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/images/hero-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  /* image styling */
+  opacity: 0.5;
+
+  z-index: -2;
+}
+
 
 /* Feature cards */
 .VPFeature {
@@ -55,6 +80,31 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px var(--vp-c-brand-soft);
 }
+
+/* Enable bullets inside Feature details */
+.VPFeature ul {
+  list-style: disc;
+  padding-left: 1.25rem;
+}
+
+.VPFeature li {
+  margin: 0.25rem 0;
+}
+/* icons styling inside Feature section*/
+.VPHomeFeatures .VPFeature .icon,
+.VPHomeFeatures .VPImage {
+  background-color: var(--vp-c-brand-1);
+  border-radius: 100%;
+  border: 8px solid var(--vp-c-brand-1);
+}
+
+/* Home features – alternate background for second row */
+.VPHomeFeatures .item:nth-child(n + 4) .VPFeature,
+.VPHomeFeatures .item:nth-child(n + 4) .VPFeature .details {
+  background-color: var(--vp-c-brand-1);
+  color: var(--vp-c-neutral-inverse);
+}
+
 
 /* Custom components */
 
@@ -69,3 +119,7 @@
   overflow-wrap: break-word;
 }
 
+/* Global image styling */
+img {
+  border-radius: 12px;
+}
