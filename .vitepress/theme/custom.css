@@ -59,7 +59,6 @@
   position: absolute;
   inset: 0;
   background-image: url('/images/hero-bg.png');
-
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -88,6 +87,27 @@
   list-style: disc;
   padding-left: 1.25rem;
 }
+
+.VPFeature li {
+  margin: 0.25rem 0;
+}
+/* icons styling inside Feature section*/
+.VPHomeFeatures .VPFeature .icon,
+.VPHomeFeatures .VPImage {
+  background-color: var(--vp-c-brand-1);
+  border-radius: 100%;
+  border: 8px solid var(--vp-c-brand-1);
+}
+
+/* Home features – alternate background for second row */
+.VPHomeFeatures .item:nth-child(n + 4) .VPFeature,
+.VPHomeFeatures .item:nth-child(n + 4) .VPFeature .details {
+  background-color: var(--vp-c-brand-1);
+  color: var(--vp-c-neutral-inverse);
+}
+
+
+/* Custom components */
 
 .VPFeature li {
   margin: 0.25rem 0;
