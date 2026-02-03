@@ -28,7 +28,7 @@ Tel: 0431 720041-80
 <img
   src="/images/planneo_logo.png"
   alt="Logo der planneo GmbH"
-  style="max-width: 300px; width: 100%;"
+  style="max-width: 300px; width: 100%; border: 0;"
 />
 
 ## Entwicklung
@@ -44,5 +44,5 @@ Tel: 0151 68458877
 <img
   src="/images/geodock_logo.png"
   alt="Logo der planneo GmbH"
-  style="max-width: 300px; width: 100%;"
+  style="max-width: 300px; width: 100%; border: 0;"
 />
