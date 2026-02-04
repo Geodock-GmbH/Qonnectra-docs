@@ -52,7 +52,7 @@ Diese Info-Box enthält mehrere Reiter, je nachdem, welches Element sie ausgewä
 
 Sobald Sie ein anderes Objekt auswählen, ändern sich die Einträge in der Info-Box entsprechend dem selektierten Element.
 
-Sie können die Auswahl aufheben und somit die Info-Box schließen, indem Sie in einen Bereich in der Karte klicken, der kein Element enthält. Sollten Sie große Elemente ausgewählt haben (z. B, Gebiete), zoomen Sie zum abwählen aus der Karte und klicken Sie in einen Bereich, außerhalb des Elements.
+Sie können die Auswahl aufheben und somit die Info-Box schließen, indem Sie in einen Bereich in der Karte klicken, der kein Element enthält. Sollten Sie große Elemente ausgewählt haben (z. B, Gebiete), zoomen Sie zum Abwählen aus der Karte und klicken Sie in einen Bereich, außerhalb des Elements.
 
 <img
   src="/images/manual/teil-a/map_selected_object.jpg"
@@ -60,19 +60,19 @@ Sie können die Auswahl aufheben und somit die Info-Box schließen, indem Sie in
   style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
 />
 
-# 5.3.1 Anhänge von Kartenobjekten
+### 5.3.1 Anhänge von Kartenobjekten
 
-Bei einigen Objekten wird Ihnen in der Info-Box der Reiter "Anhänge" angezeigt. Hier können Sie Anhänge (Dateien) hinzufügen, einsehen (herunterladen), umbenennen oder löschen. Gehen Sie dazu in den entsprechenden Reiter und klicken Sie entweder auf Dateien auswählen (zum Hinzufügen einer neuen Datei) oder auf Dokumente (zum Einsehen der vorhandenen Dateien). Wenn Sie über ein vorhandenes Dokument hovern, erscheinen die Optionen "Downloaden", "Umbenennen" und "Löschen" rechts neben dem Dateinamen. Sollte dies nicht sichtbar sein, ist eventuell Ihr Fenster zu klein. Sie können in der Info-Box nach links und rechts scrolen, oder durch Klicken, Halten und Nach-links-ziehen auf den linken Rand der Info-Box diese vergrößern.
+Bei einigen Objekten wird Ihnen in der Info-Box der Reiter "Anhänge" angezeigt. Hier können Sie Anhänge (Dateien) hinzufügen, einsehen (herunterladen), umbenennen oder löschen. Gehen Sie dazu in den entsprechenden Reiter und klicken Sie entweder auf Dateien auswählen (zum Hinzufügen einer neuen Datei) oder auf Dokumente (zum Einsehen der vorhandenen Dateien). Wenn Sie über ein vorhandenes Dokument hovern, erscheinen die Optionen "Downloaden", "Umbenennen" und "Löschen" rechts neben dem Dateinamen. 
+
+Sollte dies nicht sichtbar sein, ist eventuell Ihr Fenster zu klein. Sie können in der Info-Box nach links und rechts scrollen, oder durch klicken, halten und nach-links-ziehen auf den linken Rand der Info-Box diese vergrößern.
 
 <video
   controls
   playsinline
   preload="metadata"
   style="max-width: 100%; border-radius: 12px;"
->
-  <source src="/videos/map_attachment.webm" type="video/webm" />
-  Dein Browser unterstützt kein HTML5-Video.
-</video>
+  src="/videos/map_attachment.webm"
+/>
 
 ## 5.4 Suche
 
