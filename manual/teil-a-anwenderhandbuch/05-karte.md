@@ -9,7 +9,7 @@ Die Karte ist eines der zentralen Werkzeuge in Qonnectra. Sie dient der visuelle
 />
 
 
-## 5.1 Bewegung in der Karten.
+## 5.1 Bewegung in der Karte
 
 Sie können in der Karte auf verschiedene Arten navigieren. 
 Mit dem Mausrad oder Touchpad hinein- und herauszoomen. Mit der gedrückten linken Maustaste den Kartenausschnitt verschieben.
