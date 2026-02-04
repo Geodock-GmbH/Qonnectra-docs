@@ -1,6 +1,6 @@
 # 4. Dashboard
 
-Das **Dashboard** ist die zentrale Einstiegs- und Übersichtsseite in der Qonnectra-WebApp. Es bietet den Nutzer*Innen eine kompakte, visuell aufbereitete Zusammenfassung aller wesentlichen Informationen zu einem ausgewählten Projekt. Ziel ist es, den aktuellen Zustand des passiven Glasfasernetzes schnell und intuitiv erfassen zu können – ohne sich durch komplexe Datenstrukturen oder Planungsdetails arbeiten zu müssen. Es ist unterteilt in drei Hauptbereiche: Übersicht, Trasse, Projekte.
+Das **Dashboard** ist die zentrale Einstiegs- und Übersichtsseite in der Qonnectra-WebApp. Es bietet den Nutzenden eine kompakte, visuell aufbereitete Zusammenfassung aller wesentlichen Informationen zu einem ausgewählten Projekt. Ziel ist es, den aktuellen Zustand des passiven Glasfasernetzes schnell und intuitiv erfassen zu können – ohne sich durch komplexe Datenstrukturen oder Planungsdetails arbeiten zu müssen. Es ist unterteilt in drei Hauptbereiche: Übersicht, Trasse, Projekte.
 
 Die Inhalte des Dashboards beziehen sich immer auf das aktuell ausgewählte Projekt.
 

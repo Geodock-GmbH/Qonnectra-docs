@@ -7,7 +7,7 @@ Die **Webanwendung** dient der strukturierten Einsicht, Dokumentation und Auswer
 Der Fokus liegt immer auf folgenden Zielen:
 
 - **Transparenz schaffen** über den dokumentierten Ausbauzustand,
-- **Wissen sichern**, etwa für Rückfragen von Ämtern, Dienstleistern oder Förderungsträgern,
+- **Wissen sichern**, etwa für Rückfragen von Ämtern, beteiligte Organisationen oder Förderinstitutionen,
 - **Komplexität reduzieren**, durch eine klare, nicht überladene Benutzeroberfläche.
 
 Dabei ist Qonnectra flexibel genug, um sich unterschiedlichen Arbeitsweisen und Projektstrukturen anzupassen, ohne sich dabei zu einer aktiven Betriebssoftware zu entwickeln .

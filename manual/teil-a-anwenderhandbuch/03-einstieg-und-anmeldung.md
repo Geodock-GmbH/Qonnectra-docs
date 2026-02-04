@@ -4,7 +4,7 @@
 
 Qonnectra wird über einen Webbrowser bedient. Die Adresse zur Anmeldung erhalten Sie von Ihrer Organisation oder zuständigen Verwaltung. Dort geben Sie Ihre Zugangsdaten ein:
 
-- Benutzername
+- Anmeldename
 - Passwort
 
 Mit einem Klick auf „Login“ gelangen Sie zur Startseite der Anwendung.
@@ -16,15 +16,15 @@ Mit einem Klick auf „Login“ gelangen Sie zur Startseite der Anwendung.
 
 ### 3.1.1 Noch keine Zugangsdaten?
 
-Falls Sie noch keine Zugangsdaten erhalten haben, wenden Sie sich bitte an Ihre Projektleitung oder Ihre Administrator*Innen. Ein Benutzerkonto kann dort für Sie angelegt werden.
+Falls Sie noch keine Zugangsdaten erhalten haben, wenden Sie sich bitte an Ihre Projektleitung oder Ihre Administration. Ein Benutzerkonto kann dort für Sie angelegt werden.
 
 ### 3.1.2 Passwort vergessen?
 
-Derzeit gibt es keine „Passwort vergessen“-Funktion im System. Wenn Sie Ihr Passwort nicht mehr wissen, hilft Ihnen Ihre Projektleitung oder Administrator*in weiter. Dort kann das Passwort zurückgesetzt oder ein neues vergeben werden.
+Derzeit gibt es keine „Passwort vergessen“-Funktion im System. Wenn Sie Ihr Passwort nicht mehr wissen, hilft Ihnen Ihre Projektleitung oder Administration weiter. Dort kann das Passwort zurückgesetzt oder ein neues vergeben werden.
 
 ## 3.2 Navigation in der Anwendung
 
-Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Benutzeroberfläche ist übersichtlich aufgebaut und besteht aus mehreren Bereichen, die unterschiedliche Funktionen erfüllen. Dieser Abschnitt erläutert die Oberfläche und hilft beim schnellen Einstieg.
+Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Bedienoberfläche ist übersichtlich aufgebaut und besteht aus mehreren Bereichen, die unterschiedliche Funktionen erfüllen. Dieser Abschnitt erläutert die Oberfläche und hilft beim schnellen Einstieg.
 
 <img
   src="/images/manual/teil-a/login_navigation.jpg"

@@ -16,25 +16,25 @@ Das Handbuch ist bewusst praxisorientiert aufgebaut. Es folgt der Struktur der A
 
 ## 1.2 Zielgruppen und Aufbau des Handbuchs
 
-Qonnectra wird von Nutzer*Innen mit sehr unterschiedlichen fachlichen Hintergründen verwendet. Entsprechend ist auch dieses Handbuch in mehrere Teile gegliedert, die sich an verschiedene Zielgruppen richten.
+Qonnectra wird von Nutzenden (Usern) mit sehr unterschiedlichen fachlichen Hintergründen verwendet. Entsprechend ist auch dieses Handbuch in mehrere Teile gegliedert, die sich an verschiedene Zielgruppen richten.
 
 Das Handbuch besteht aus drei Hauptteilen:
 
 - **Teil A – Anwenderhandbuch**  
-  Dieser Teil richtet sich an Verwaltungsmitarbeitende, Sachbearbeitung, Entscheidungsträger sowie weitere Nutzende ohne vertiefte GIS-Kenntnisse. Er beschreibt die Arbeit mit der Webanwendung (Dashboard, Karte, Fachmodule) und ist für den täglichen Betrieb ausreichend.
+  Dieser Teil richtet sich an Verwaltungsmitarbeitende, Sachbearbeitung, Personen mit Entscheidungsbefugnis sowie weitere Nutzende ohne vertiefte GIS-Kenntnisse. Er beschreibt die Arbeit mit der Webanwendung (Dashboard, Karte, Fachmodule) und ist für den täglichen Betrieb ausreichend.
 
 - **Teil B – Betrieb, Administration und QGIS-Nutzung**  
   Dieser Teil richtet sich an Personen mit administrativen und fachlichen Aufgaben, z. B. für Benutzerverwaltung, Stammdatenpflege, Qualitätssicherung sowie die Nutzung von QGIS für geometrische Arbeiten und spezielle GIS-Aufgaben. Er beschreibt den sicheren Betrieb von Qonnectra sowie die verantwortungsvolle Nutzung von QGIS im Zusammenspiel mit der Webanwendung.
 
 - **Teil C – Entwickler- und Systemdokumentation**  
-  Dieser Teil richtet sich ausschließlich an technische Rollen wie Entwickler, DevOps, GIS-Administratoren und die Open-Source-Community. Er beschreibt Setup, Architektur, Schnittstellen, Datenmodelle und Erweiterungsmöglichkeiten von Qonnectra.
+  Dieser Teil richtet sich ausschließlich an fachlich-technische Rollen, darunter Personen in der Softwareentwicklung, im DevOps, in der GIS-Administration sowie in der Open-Source-Community.. Er beschreibt Setup, Architektur, Schnittstellen, Datenmodelle und Erweiterungsmöglichkeiten von Qonnectra.
 
 
 | Ebene | Zielgruppe | Werkzeuge/Technologien | Handbuch |
 |-------|------------|------------------------|---------------|
 | **1. Anwendungsebene** | Verwaltungsmitarbeitende, Sachbearbeitung | Webbrowser (Qonnectra Webanwendung)| **Teil A** |
-| **2. Betrieb und Fachanwendung** | Administrator*Innen, GIS-Fachkräfte | Qonnectra Webanwendung + QGIS | **Teil B** |
-| **3. System- und Entwicklungsebene** | Entwickler*Innen, DevOps, Systemadministration | Qonnectra Backend, Datenbank, API, Git usw. | **Teil C** |
+| **2. Betrieb und Fachanwendung** | Administration, GIS-Fachkräfte | Qonnectra Webanwendung + QGIS | **Teil B** |
+| **3. System- und Entwicklungsebene** | Entwicklung, DevOps, Systemadministration | Qonnectra Backend, Datenbank, API, Git usw. | **Teil C** |
 
 Für den normalen Betrieb von Qonnectra ist **nicht erforderlich**, alle Teile des Handbuchs zu lesen. Jedes Kapitel ist so aufgebaut, dass klar erkennbar ist, für welche Zielgruppe es relevant ist.
 
@@ -52,7 +52,7 @@ Qonnectra bildet den **tatsächlichen Bestand (IST-Zustand)** eines Netzes ab un
 - Kabel, Spleiße und zugehörige Sachdaten
 - Fotos, Protokolle und weitere Dokumente
 
-Ein zentrales Ziel von Qonnectra ist es, **Verwaltungen und Netzeigentümer in die Lage zu versetzen**, ihre Netzinfrastruktur selbstständig, langfristig und datensouverän zu dokumentieren und zu betreiben – ohne Abhängigkeit von proprietärer Software oder spezialisierten Einzellösungen.
+Ein zentrales Ziel von Qonnectra ist es, **Verwaltungen und verantwortliche Stellen für Netzinfrastruktur in die Lage zu versetzen**, ihre Netzinfrastruktur selbstständig, langfristig und datensouverän zu dokumentieren und zu betreiben – ohne Abhängigkeit von proprietärer Software oder spezialisierten Einzellösungen.
 
 
 ## 1.4 Grundprinzip: Einfachheit und klare Trennung der Aufgaben
@@ -60,16 +60,16 @@ Ein zentrales Ziel von Qonnectra ist es, **Verwaltungen und Netzeigentümer in d
 Qonnectra folgt einem klaren Prinzip:
 
 - Die **Webanwendung** ist das führende Werkzeug für Übersicht, Auswertung und Dokumentation.
-- **QGIS** wird ausschließlich als **Expertenwerkzeug** für Geometriearbeiten und spezielle GIS-Aufgaben eingesetzt.
+- **QGIS** wird ausschließlich als **spezialisiertes Fachwerkzeug** für Geometriearbeiten und spezielle GIS-Aufgaben eingesetzt.
 
-Die Webanwendung wurde bewusst als Alternative zu einem QGIS-Plugin entwickelt. Dadurch können Arbeitsabläufe gezielt geführt werden, und Nutzer ohne GIS-Kenntnisse benötigen lediglich einen Webbrowser, um Informationen einzusehen und zu pflegen.
+Die Webanwendung wurde bewusst als Alternative zu einem QGIS-Plugin entwickelt. Dadurch können Arbeitsabläufe gezielt geführt werden, und Nutzende ohne GIS-Kenntnisse benötigen lediglich einen Webbrowser, um Informationen einzusehen und zu pflegen.
 
-Für geschulte Nutzer können Webanwendung und QGIS parallel eingesetzt werden:
+Für geschulte Nutzende können Webanwendung und QGIS parallel eingesetzt werden:
 
 - QGIS für geometrische Änderungen und GIS-spezifische Arbeiten
 - Qonnectra für Dokumentation, Auswertung und strukturierte Informationsanzeige
 
-Alle Nutzer arbeiten dabei auf derselben Datenbasis.
+Alle Nutzenden arbeiten dabei auf derselben Datenbasis.
 
 
 ## 1.5 Was ist Qonnectra nicht?
@@ -96,4 +96,4 @@ Das System ist darauf ausgelegt,
 - offene Standards und Formate zu verwenden,
 - und die Weitergabe von Informationen an Dritte (z. B. für Leitungsauskunft, Genehmigungen oder Berichte) zu erleichtern.
 
-Die klare Trennung von Alltagstätigkeiten, administrativen Aufgaben und Experteneingriffen ist ein zentrales Element dieses Konzepts und zieht sich durch das gesamte Handbuch.
+Die klare Trennung von Alltagstätigkeiten, administrativen Aufgaben und technischen Anpassungen ist ein zentrales Element dieses Konzepts und zieht sich durch das gesamte Handbuch.
