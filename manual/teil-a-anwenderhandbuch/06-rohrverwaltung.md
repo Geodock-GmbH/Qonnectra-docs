@@ -64,9 +64,9 @@ Hinweis: Wenn der Button nicht sichtbar ist, scrollen Sie im Feld nach unten. Au
   style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
 />
 
-Wichtiger Hinweis: Wenn Sie Eigenschaften ändern, klicken Sie auf „Speichern“, bevor Sie ein anderes Rohr auswählen aus der Liste auswählen. Andernfalls gehen die Änderungen ohne Warnung verloren.
+Wichtiger Hinweis: Wenn Sie Eigenschaften ändern, klicken Sie auf „Speichern“, bevor Sie ein anderes Rohr aus der Liste auswählen. Andernfalls gehen die Änderungen ohne Warnung verloren.
 
-## 6.3.2 Reiter „Anhänge“
+### 6.3.2 Reiter „Anhänge“
 
 Hier können Sie Anhänge (Dateien) hinzufügen, einsehen (herunterladen), umbenennen oder löschen. Gehen Sie dazu in den entsprechenden Reiter und klicken Sie entweder auf Dateien auswählen (zum Hinzufügen einer neuen Datei) oder auf Dokumente (zum Einsehen der vorhandenen Dateien). Wenn Sie über ein vorhandenes Dokument hovern, erscheinen die Optionen "Downloaden", "Umbenennen" und "Löschen" rechts neben dem Dateinamen. 
 
