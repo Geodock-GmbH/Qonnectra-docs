@@ -50,6 +50,7 @@
   position: relative;
   overflow: hidden;
   background: transparent;
+  min-height: clamp(200px, 30vh, 384px);
   margin-bottom: 3rem;
 }
 
@@ -108,18 +109,49 @@
 
 /* Custom components */
 
-/* Make non-H1 headings look like H1 */
-.h1-like {
-  letter-spacing: -0.02em;
-  line-height: 40px;
-  font-size: 32px;
-  position: relative;
-  font-weight: 600;
-  outline: none;
-  overflow-wrap: break-word;
+.VPFeature li {
+  margin: 0.25rem 0;
+}
+/* icons styling inside Feature section*/
+.VPHomeFeatures .VPFeature .icon,
+.VPHomeFeatures .VPImage {
+  background-color: var(--vp-c-brand-1);
+  border-radius: 100%;
+  border: 8px solid var(--vp-c-brand-1);
+}
+
+/* Home features – alternate background for second row */
+.VPHomeFeatures .item:nth-child(n + 4) .VPFeature,
+.VPHomeFeatures .item:nth-child(n + 4) .VPFeature .details {
+  background-color: var(--vp-c-brand-1);
+  color: var(--vp-c-neutral-inverse);
+}
+
+/* Global responsive image row with two images*/
+.img-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  align-items: center;
+}
+
+.img-row img {
+  width: 100%;
+  max-width: clamp(260px, 40vw, 360px);
+  aspect-ratio: 16  / 10;
+  object-fit: contain;
+
+}
+
+/* When images stack, let them fill the available width */
+.img-row img:only-child,
+.img-row img:nth-child(n + 1):nth-last-child(1),
+.img-row img:nth-child(n + 1):nth-last-child(2) {
+  max-width: 100%;
 }
 
 /* Global image styling */
-img {
-  border-radius: 12px;
+.vp-doc img {
+  border-radius: 8px;
+  border: 1px solid var(--vp-c-brand-1);
 }
