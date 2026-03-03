@@ -14,7 +14,7 @@ env:
 
 # Allow concurrent preview deployments
 concurrency:
-  group: preview-${{ env.PREVIEW_ID }}
+  group: preview-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('branch-{0}', github.ref_name) }}
   cancel-in-progress: true
 
 jobs:
