@@ -2,33 +2,30 @@ name: Deploy PR Preview
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
-    paths:
-      - '**.md'
-      - '.vitepress/**'
-      - 'package.json'
-      - 'pnpm-lock.yaml'
-      - '.github/workflows/preview.yml'
+  push:
+    branches: [main]
 
 permissions:
   contents: write
   pull-requests: write
 
-# Allow concurrent PR preview deployments
+env:
+  PREVIEW_ID: ${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('branch-{0}', github.ref_name) }}
+
+# Allow concurrent preview deployments
 concurrency:
-  group: preview-pr-${{ github.event.pull_request.number }}
+  group: preview-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('branch-{0}', github.ref_name) }}
   cancel-in-progress: true
 
 jobs:
   build-preview:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.ref != 'gh-pages-preview'
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.head.ref != 'gh-pages-preview') ||
+      github.event_name == 'push'
     steps:
-      - name: Checkout PR branch
+      - name: Checkout
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-          fetch-depth: 0
       
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -43,13 +40,13 @@ jobs:
       - name: Build with VitePress
         run: pnpm run build
         env:
-          # Set base path for PR preview: /Qonnectra-docs/pr-{PR_NUMBER}/
-          BASE_PATH: /Qonnectra-docs/pr-${{ github.event.pull_request.number }}/
+          BASE_PATH: /Qonnectra-docs/${{ env.PREVIEW_ID }}/
       
       - name: Store built files
         run: |
-          # Store built files outside of git working directory
+          # Store built files and scripts outside of git working directory
           cp -r .vitepress/dist /tmp/preview-dist
+          cp .github/scripts/generate-preview-index.sh /tmp/
       
       - name: Configure Git
         run: |
@@ -69,26 +66,32 @@ jobs:
           fi
       
       - name: Deploy to Preview Branch
-        if: github.event_name == 'pull_request'
         run: |
-          PR_DIR="pr-${{ github.event.pull_request.number }}"
-          # Remove existing PR directory if it exists
-          rm -rf "$PR_DIR"
-          # Copy stored built files to PR-specific directory
-          cp -r /tmp/preview-dist "$PR_DIR"
+          OUTPUT_DIR="${{ env.PREVIEW_ID }}"
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            COMMIT_MSG="Deploy preview for PR #${{ github.event.pull_request.number }} [skip ci]"
+          else
+            COMMIT_MSG="Deploy preview for branch ${{ github.ref_name }} [skip ci]"
+          fi
+          # Remove existing directory if it exists
+          rm -rf "$OUTPUT_DIR"
+          # Copy stored built files to output directory
+          cp -r /tmp/preview-dist "$OUTPUT_DIR"
           # Create .nojekyll file at root to disable Jekyll processing (if it doesn't exist)
-          # This ensures GitHub Pages serves the static files correctly
           if [ ! -f .nojekyll ]; then
             touch .nojekyll
           fi
+          # Generate index.html listing all previews
+          bash /tmp/generate-preview-index.sh
           # Stage changes
-          git add "$PR_DIR"
+          git add "$OUTPUT_DIR"
+          git add index.html
           git add -f .nojekyll 2>/dev/null || git add .nojekyll
           # Commit if there are changes
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Deploy preview for PR #${{ github.event.pull_request.number }} [skip ci]"
+            git commit -m "$COMMIT_MSG"
             git push origin gh-pages-preview
           fi
       
@@ -97,8 +100,9 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           script: |
+            const previewId = process.env.PREVIEW_ID;
             const prNumber = context.payload.pull_request.number;
-            const previewUrl = `https://geodock-gmbh.github.io/Qonnectra-docs/pr-${prNumber}/`;
+            const previewUrl = `https://geodock-gmbh.github.io/Qonnectra-docs/${previewId}/`;
             const commentBody = `🚀 **Preview deployed!**\n\n📖 Documentation preview: ${previewUrl}\n\n⚠️ **Note**: To enable PR previews, you need to configure GitHub Pages to serve from the \`gh-pages-preview\` branch in Repository Settings → Pages.\n\nThis preview will be updated automatically when you push new commits.`;
             
             // Find existing preview comment
