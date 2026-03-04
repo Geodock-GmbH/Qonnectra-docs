@@ -49,7 +49,6 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           path: .vitepress/dist
-          retention-days: 1
 
   build-github-pages:
     runs-on: ubuntu-latest
