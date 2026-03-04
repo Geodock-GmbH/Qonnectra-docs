@@ -4,7 +4,7 @@
 
 set -e
 
-PREVIEW_DIRS=$(find . -maxdepth 1 -type d ! -name '.' ! -name '.git' | sed 's|^\./||' | sort)
+PREVIEW_DIRS=$(find . -maxdepth 1 -type d \( -name 'branch-*' -o -name 'pr-*' \) | sed 's|^\./||' | sort)
 
 {
   echo '<!DOCTYPE html>'
