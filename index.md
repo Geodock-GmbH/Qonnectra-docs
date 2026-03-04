@@ -47,11 +47,19 @@ features:
 
 ## Einfache Ermittlung von Daten für das Netzmonitoring 
 
-![Screenshot Dashboard](/images/view_dashboard.png)
+<img
+  src="/images/view_dashboard.png"
+  alt="Screenshot Dashboard"
+  style="display: block; max-width: 512px; width: 100%; margin: 0 auto; border: 0;"
+/>
 
 ## Übersichtliche Abbildungen aller Netzinfrastrukturen
 
-![Screenshot Kartenansicht Infrastruktur](/images/view_map.png)
+<img
+  src="/images/view_map.png"
+  alt="Screenshot Kartenansicht"
+  style="display: block; max-width: 512px; width: 100%; margin: 0 auto; border: 0;"
+/>
 
 </div>
 
@@ -69,7 +77,7 @@ Heute kann Qonnectra bereits die Netzinfrastruktur von Glasfasernetzen umfangrei
 <img
   src="/images/echtdigital_logo.jpg"
   alt="Logo echtdigital Dachmarke des Landes Schleswig-Holstein"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
+  style="display: block; max-width: 512px; width: 100%; margin: 0 auto; border: 0;"
 />
 
 ## Open-Source Community
@@ -90,5 +98,5 @@ Dann melde dich bei uns unter community@qonnectra.de
 <img
   src="/images/view_community.jpg"
   alt="Bild mit Spielfiguren auf einem Netzplan verteilt"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
+  style="display: block; max-width: 512px; width: 100%; margin: 0 auto; border: 0;"
 />
