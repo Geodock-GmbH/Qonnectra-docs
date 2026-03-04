@@ -32,7 +32,7 @@ PREVIEW_DIRS=$(find . -maxdepth 1 -type d \( -name 'branch-*' -o -name 'pr-*' \)
   echo '    li { margin: 0.5rem 0; }'
   echo '    a { display: block; padding: 0.75rem 1rem; border-radius: 8px; color: #0969da; text-decoration: none; font-weight: 500; transition: background 0.15s; }'
   echo '    a:hover { background: #eaeef2; text-decoration: none; }'
-  echo '    .branch a, .pr a { border-left: 3px solid #0969da; }'
+  echo '    .branch a, .pr a { border-left: 3px solid #11ba81; }'
   echo '    .header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }'
   echo '    .header img { height: 40px; width: auto; }'
   echo '  </style>'
