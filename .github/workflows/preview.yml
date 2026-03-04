@@ -81,11 +81,12 @@ jobs:
           if [ ! -f .nojekyll ]; then
             touch .nojekyll
           fi
-          # Generate index.html listing all previews
+          # Generate index.html listing all previews (also copies logo to root)
           bash /tmp/generate-preview-index.sh
           # Stage changes
           git add "$OUTPUT_DIR"
           git add index.html
+          git add images/ 2>/dev/null || true
           git add -f .nojekyll 2>/dev/null || git add .nojekyll
           # Commit if there are changes
           if git diff --staged --quiet; then
