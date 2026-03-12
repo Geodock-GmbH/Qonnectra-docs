@@ -40,13 +40,7 @@ Beim Umschalter "Trassenverbindungen anzeigen" haben Sie die Möglichkeit bei ei
 
 - Trassenverbindungen **eingeschaltet** (Regler rechts und farbig): Beim Auswählen eines Rohrs werden alle zugehörigen Trassenabschnitte in der Karte farblich hervorgehoben.
 
-<video
-  controls
-  playsinline
-  preload="metadata"
-  src="/videos/conduit_connection_showTrench.webm"
-/>
-
+![](/videos/conduit_connection_showTrench.webm)
 
 ## 7.3 Zuordnung von Rohren zu Trassensegmenten
 
@@ -72,12 +66,7 @@ Die Rohre werden den Trassensegmenten anhand der Auswahl in der Karte hinzugefü
 
 Wenn die Zuordnung erfolgreich war, erscheint am unteren Bildschirmrand eine kurze Bestätigungsnachricht. Gleichzeitig wird das Trassensegment in der Liste unterhalb des ausgewählten Rohrs angezeigt.
 
-<video
-  controls
-  playsinline
-  preload="metadata"
-  src="/videos/conduit_connection_mapSelection.webm"
-/>
+![](/videos/conduit_connection_mapSelection.webm)
 
 Sollte "Trassenverbindungen anzeigen" (weiter oben) aktiviert sein, wird das hinzugefügte Trassensegment dauerhaft farblich hervorgehoben.
 
@@ -85,13 +74,7 @@ Sollte "Trassenverbindungen anzeigen" (weiter oben) aktiviert sein, wird das hin
 
 Wenn Sie in der Liste auf eine Trassen-ID klicken, wird die Karte zu diesem Segment gezoomt und dieses kurz blinkend hervorgehoben. Bitte beachten Sie, dass die Liste aus mehreren Seiten bestehen kann. Am unteren Ende der Liste finden Sie eine Möglichkeit zum Umblättern. 
 
-<video
-  controls
-  playsinline
-  preload="metadata"
-  src="/videos/conduit_connection_mapFind.webm"
-/>
-
+![](/videos/conduit_connection_mapFind.webm)
 
 ### 7.3.4 Löschen einer Zuordnung
 

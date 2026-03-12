@@ -51,12 +51,7 @@ Bei einigen Objekten wird Ihnen in der Info-Box der Reiter "Anhänge" angezeigt.
 
 Sollte dies nicht sichtbar sein, ist eventuell Ihr Fenster zu klein. Sie können in der Info-Box nach links und rechts scrollen, oder durch klicken, halten und nach-links-ziehen auf den linken Rand der Info-Box diese vergrößern.
 
-<video
-  controls
-  playsinline
-  preload="metadata"
-  src="/videos/map_attachment.webm"
-/>
+![](/videos/map_attachment.webm)
 
 ## 5.4 Suche
 

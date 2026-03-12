@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@types/node": "^24.10.7",
+    "markdown-it-html5-media": "^0.8.0",
     "vitepress": "^1.0.0",
     "vitepress-sidebar": "^1.33.1"
   }
