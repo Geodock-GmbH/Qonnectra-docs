@@ -171,3 +171,9 @@
 .vp-doc img.no-border {
   border: 0;
 }
+
+/* Global video styling */
+.vp-doc video {
+  max-width: 100%;
+  border-radius: 12px;
+}

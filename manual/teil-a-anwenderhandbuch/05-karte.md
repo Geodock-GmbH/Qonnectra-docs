@@ -55,7 +55,6 @@ Sollte dies nicht sichtbar sein, ist eventuell Ihr Fenster zu klein. Sie können
   controls
   playsinline
   preload="metadata"
-  style="max-width: 100%; border-radius: 12px;"
   src="/videos/map_attachment.webm"
 />
 

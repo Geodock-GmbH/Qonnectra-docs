@@ -44,7 +44,6 @@ Beim Umschalter "Trassenverbindungen anzeigen" haben Sie die Möglichkeit bei ei
   controls
   playsinline
   preload="metadata"
-  style="max-width: 100%; border-radius: 12px;"
   src="/videos/conduit_connection_showTrench.webm"
 />
 
@@ -77,7 +76,6 @@ Wenn die Zuordnung erfolgreich war, erscheint am unteren Bildschirmrand eine kur
   controls
   playsinline
   preload="metadata"
-  style="max-width: 100%; border-radius: 12px;"
   src="/videos/conduit_connection_mapSelection.webm"
 />
 
@@ -91,7 +89,6 @@ Wenn Sie in der Liste auf eine Trassen-ID klicken, wird die Karte zu diesem Segm
   controls
   playsinline
   preload="metadata"
-  style="max-width: 100%; border-radius: 12px;"
   src="/videos/conduit_connection_mapFind.webm"
 />
 
