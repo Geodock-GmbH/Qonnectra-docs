@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitepress'
 import { generateSidebar } from 'vitepress-sidebar'
 import { VitePressSidebarOptions } from 'vitepress-sidebar/types'
+import { html5Media } from 'markdown-it-html5-media'
 
 function generateSidebarConfig(path: string, override: Partial<VitePressSidebarOptions> = {}): VitePressSidebarOptions {
   return {
@@ -8,11 +9,13 @@ function generateSidebarConfig(path: string, override: Partial<VitePressSidebarO
     resolvePath: `/${path}/`,
     useTitleFromFileHeading: true,
     useTitleFromFrontmatter: true,
-    useFolderTitleFromIndexFile: false,
+    useFolderTitleFromIndexFile: true,
     includeRootIndexFile: true,
-    includeFolderIndexFile: true,
+    includeFolderIndexFile: false,
     collapsed: false,
     sortFolderTo: 'bottom',
+    folderLinkNotIncludesFileName: true,
+    useFolderLinkFromIndexFile: true,
     ...override,
   }
 }
@@ -40,6 +43,19 @@ export default defineConfig({
     theme: {
       light: 'github-light',
       dark: 'github-dark'
+    },
+    config: (md) => {
+      md.use(html5Media, {
+        messages: {
+          en: {
+            'html5 video not supported': 'Ihr Browser unterstützt das Abspielen von HTML5-Videos nicht.',
+            'html5 audio not supported': 'Ihr Browser unterstützt das Abspielen von HTML5-Audio nicht.',
+            'html5 media fallback link': 'Sie können die Datei <a href="%s" download>herunterladen</a> anstelle des Videos.',
+            'html5 media description': 'Hier ist eine Beschreibung des Inhalts: %s'
+          }
+        },
+        videoAttrs: 'controls playsinline preload="metadata"'
+      })
     }
   },
 
@@ -84,7 +100,8 @@ export default defineConfig({
 
     // Outline configuration
     outline: {
-      label: 'Auf dieser Seite'
+      label: 'Auf dieser Seite',
+      level: [2, 3]
     },
 
     // Search configuration with Algolia DocSearch

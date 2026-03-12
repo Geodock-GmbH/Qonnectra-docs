@@ -1,4 +1,12 @@
-# Kontakt
+---
+layout: home
+
+hero:
+  name: false
+  text: "Kontakt"
+  tagline: false
+
+---
 
 **Sie interessieren sich für Qonnectra?**
 <br>Dann schreiben Sie uns an info@qonnectra.de
@@ -17,11 +25,7 @@ Schauenburgerstr. 116
 Tel: 0431 720041-80
 <br>E-Mail: willkommen@­planneo.de
 
-<img
-  src="/images/planneo_logo.png"
-  alt="Logo der planneo GmbH"
-  style="max-width: 300px; width: 100%;"
-/>
+![Logo der planneo GmbH](/images/planneo_logo.png){.small}{.no-border}
 
 ## Entwicklung
 
@@ -33,8 +37,4 @@ Händelhof 2
 Tel: 0151 68458877
 <br>E-Mai: mail@geodock.de
 
-<img
-  src="/images/geodock_logo.png"
-  alt="Logo der planneo GmbH"
-  style="max-width: 300px; width: 100%;"
-/>
+![Logo der Geodock GmbH](/images/geodock_logo.png){.small}{.no-border}
