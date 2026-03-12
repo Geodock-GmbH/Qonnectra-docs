@@ -152,6 +152,22 @@
 
 /* Global image styling */
 .vp-doc img {
+  display: block; 
+  max-width: 512px; 
+  width: 100%; 
+  margin: 0 auto; 
   border-radius: 8px;
   border: 1px solid var(--vp-c-brand-1);
+}
+
+.vp-doc img.big {
+  max-width: 800px;
+}
+
+.vp-doc img.small {
+  max-width: 300px;
+}
+
+.vp-doc img.no-border {
+  border: 0;
 }

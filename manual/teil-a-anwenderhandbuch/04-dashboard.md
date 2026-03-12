@@ -4,11 +4,7 @@ Das **Dashboard** ist die zentrale Einstiegs- und Übersichtsseite in der Qonnec
 
 Die Inhalte des Dashboards beziehen sich immer auf das aktuell ausgewählte Projekt.
 
-<img
-  src="/images/manual/teil-a/dashboard.jpg"
-  alt="Screenshot Dashboard"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Dashboard](/images/manual/teil-a/dashboard.jpg)
 
 ## 4.1 Projekt auswählen
 
@@ -18,12 +14,7 @@ Bevor detaillierte Daten sichtbar sind, muss ein Projekt ausgewählt werden:
 - Klicken Sie auf das Auswahlfeld und wählen Sie das gewünschte Projekt aus der Liste aus.
 - Nach Auswahl werden alle Inhalte im Dashboard automatisch entsprechend des gewählten Projekts aktualisiert.
 
-<img
-  src="/images/manual/teil-a/dashboard_project.jpg"
-  alt="Screenshot Dashboard mit Hervorhebung Projektauswahl oben links"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
-
+![Screenshot Dashboard mit Hervorhebung Projektauswahl oben links](/images/manual/teil-a/dashboard_project.jpg)
 
 ## 4.2 Reiter im Dashboard
 
@@ -35,21 +26,13 @@ Direkt unter der Projekt-Auswahl befinden sich drei Reiter (Tabs):
 
 Sie können durch Klick auf die jeweilige Beschriftung zwischen diesen Ansichten wechseln. Der aktive Tab ist visuell hervorgehoben.
 
-<img
-  src="/images/manual/teil-a/dashboard_tabs.jpg"
-  alt="Screenshot Dashboard mit Hervorhebung der Reiter (Tabs) oben links"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Dashboard mit Hervorhebung der Reiter (Tabs) oben links](/images/manual/teil-a/dashboard_tabs.jpg)
 
 ### 4.2.1 Übersicht
 
 Im Reiter „Übersicht“ sehen Sie drei Abschnitte.
 
-<img
-  src="/images/manual/teil-a/dashboard_overview.jpg"
-  alt="Screenshot Dashboard mit Hervorhebung der Inhalte im Reiter Überblick mittig"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Dashboard mit Hervorhebung der Inhalte im Reiter Überblick mittig](/images/manual/teil-a/dashboard_overview.jpg)
 
 #### Trassenstatistik
 
@@ -73,10 +56,9 @@ Hinweis: Wenn es viele Einträge gibt, kann innerhalb der Listendarstellung vert
 
 Im Reiter „Trasse“ finden Sie auswertbare Diagramme zu verschiedenen Aspekten des Netzes. Diese sind visuell aufbereitet und gruppiert. Die Diagramme sind nur zur Ansicht vorgesehen – eine direkte Bearbeitung oder Exportfunktion besteht nicht. Allerdings besteht eine Hover-Funktion. 
 
-<div class="img-row">
-  <img src="/images/manual/teil-a/dashboard_trasse.jpg" alt="Screenshot Dashboard mit Hervorhebung der Inhalte im Reiter Trasse mittig" />
-  <img src="/images/manual/teil-a/dashboard_trasse_hover.jpg" alt="Screenshot Detailansicht Gesamtlänge pro Oberfläche mit Hovereffekt auf einen Eintrag und daraus entstehenden Detaileinblendungen" />
-</div>
+![Screenshot Dashboard mit Hervorhebung der Inhalte im Reiter Trasse mittig](/images/manual/teil-a/dashboard_trasse.jpg)
+![Screenshot Detailansicht Gesamtlänge pro Oberfläche mit Hovereffekt auf einen Eintrag und daraus entstehenden Detaileinblendungen](/images/manual/teil-a/dashboard_trasse_hover.jpg)
+{.img-row}
 
 Hover-Funktion: Um Details zu einzelnen Einträgen in einem Diagramm zu sehen, bewegen Sie den Mauszeiger über den jeweiligen Balken oder Datensatz. Es erscheint dann ein Hinweis mit dem genauen Wert.
 
@@ -85,9 +67,4 @@ Hover-Funktion: Um Details zu einzelnen Einträgen in einem Diagramm zu sehen, b
 
 Im Reiter „Projekte“ sehen Sie eine tabellarische Übersicht aller projektierten oder aktiven Projekte. Spalten zeigen den Projektnamen, eine optionale Beschreibung und ob das Projekt aktuell aktiv ist. In dieser Übersicht lässt sich die Projektauswahl nicht wechseln. Dies geschieht über das Dropdown-Menü (siehe weiter oben "Projekte auswählen").
 
-<img
-  src="/images/manual/teil-a/dashboard_projects.jpg"
-  alt="Screenshot Dashboard mit Hervorhebung der Projektliste im Reiter Projekte mittig"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
-
+![Screenshot Dashboard mit Hervorhebung der Projektliste im Reiter Projekte mittig](/images/manual/teil-a/dashboard_projects.jpg)

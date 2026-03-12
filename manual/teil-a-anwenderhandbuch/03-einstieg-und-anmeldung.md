@@ -9,10 +9,9 @@ Qonnectra wird über einen Webbrowser bedient. Die Adresse zur Anmeldung erhalte
 
 Mit einem Klick auf „Login“ gelangen Sie zur Startseite der Anwendung.
 
-<div class="img-row">
-    <img src="/images/manual/teil-a/login_start.jpg" alt="Screenshot Login-Seite leer" />
-    <img src="/images/manual/teil-a/login_start_detail.jpg" alt="Screenshot Login-Seite leer" />
-</div>
+![Screenshot Login-Seite leer](/images/manual/teil-a/login_start.jpg)
+![Screenshot Login-Seite leer](/images/manual/teil-a/login_start_detail.jpg)
+{.img-row}
 
 ### 3.1.1 Noch keine Zugangsdaten?
 
@@ -26,11 +25,7 @@ Derzeit gibt es keine „Passwort vergessen“-Funktion im System. Wenn Sie Ihr 
 
 Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Bedienoberfläche ist übersichtlich aufgebaut und besteht aus mehreren Bereichen, die unterschiedliche Funktionen erfüllen. Dieser Abschnitt erläutert die Oberfläche und hilft beim schnellen Einstieg.
 
-<img
-  src="/images/manual/teil-a/login_navigation.jpg"
-  alt="Screenshot Startbildschirm mit Hervorhebung der einzelnen Bestandteile der App"
-  style="display: block; max-width: 800px; width: 100%; margin: 0 auto; border: 0;"
-/>
+![Screenshot Startbildschirm mit Hervorhebung der einzelnen Bestandteile der App](/images/manual/teil-a/login_navigation.jpg){.big}{.no-border}
 
 ### 3.2.1 Navigation
 

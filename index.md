@@ -47,19 +47,11 @@ features:
 
 ## Einfache Ermittlung von Daten für das Netzmonitoring 
 
-<img
-  src="/images/view_dashboard.png"
-  alt="Screenshot Dashboard"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto; border: 0;"
-/>
+![Screenshot Dashboard](/images/view_dashboard.png){.no-border}
 
 ## Übersichtliche Abbildungen aller Netzinfrastrukturen
 
-<img
-  src="/images/view_map.png"
-  alt="Screenshot Kartenansicht"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto; border: 0;"
-/>
+![Screenshot Kartenansicht](/images/view_map.png){.no-border}
 
 </div>
 
@@ -74,11 +66,7 @@ machen und zugleich die digitale Souveränität stärken.
 
 Heute kann Qonnectra bereits die Netzinfrastruktur von Glasfasernetzen umfangreich dokumentieren. Langfristig soll die Software auf die gesamte kommunale unterirdische Netzstruktur ausgeweitet werden, sodass auch Gas-, Wasser- und Stromnetze digital erfasst werden können. 
 
-<img
-  src="/images/echtdigital_logo.jpg"
-  alt="Logo echtdigital Dachmarke des Landes Schleswig-Holstein"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto; border: 0;"
-/>
+![Logo echtdigital Dachmarke des Landes Schleswig-Holstein](/images/echtdigital_logo.jpg){.no-border}
 
 ## Open-Source Community
 
@@ -95,8 +83,4 @@ Du willst Teil unserer Community werden?
 
 Dann melde dich bei uns unter community@qonnectra.de
 
-<img
-  src="/images/view_community.jpg"
-  alt="Bild mit Spielfiguren auf einem Netzplan verteilt"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto; border: 0;"
-/>
+![Bild mit Spielfiguren auf einem Netzplan verteilt](/images/view_community.jpg){.no-border}

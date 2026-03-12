@@ -2,12 +2,7 @@
 
 Die Karte ist eines der zentralen Werkzeuge in Qonnectra. Sie dient der visuellen Darstellung des Netzbestands, der Orientierung im Raum und dem schnellen Aufruf von Informationen zu einzelnen Netzobjekten. Um zur Karte zu gelangen, klicken Sie in der linken Navigation auf den Menüpunkt „Karte“.
 
-<img
-  src="/images/manual/teil-a/map.jpg"
-  alt="Screenshot Karte"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
-
+![Screenshot Karte](/images/manual/teil-a/map.jpg)
 
 ## 5.1 Bewegung in der Karte
 
@@ -16,20 +11,15 @@ Mit dem Mausrad oder Touchpad hinein- und herauszoomen. Mit der gedrückten link
 
 Sollten Sie während der Kartenansicht ein anderes Projekt auswählen, springt die Karte nicht automatisch zu dem Gebiet. Um dorthin zu gelangen, können Sie beispielsweise in der Legende oben rechts in der Karte beim Eintrag "Adresse" auf das Lupensymbol klicken. Damit navigiert die Ansicht in den Bereich, in dem für dieses Projekt Daten vorhanden sind.
 
-<div class="img-row">
-  <img src="/images/manual/teil-a/map_adress_detail.jpg" alt="Screenshot Karte mit Hervorhebung des Layers Adresse in der Legende rechts oben" />
-  <img src="/images/manual/teil-a/map_adress_detail_select.jpg" alt="Screenshot Karte mit Zoom zu Layer Adresse in der Legende" />
-</div>
+![Screenshot Karte mit Hervorhebung des Layers Adresse in der Legende rechts oben](/images/manual/teil-a/map_adress_detail.jpg)
+![Screenshot Karte mit Zoom zu Layer Adresse in der Legende](/images/manual/teil-a/map_adress_detail_select.jpg)
+{.img-row}
 
 ## 5.2 Anpassung der Darstellung
 
 Links unten in der Kartenansicht finden Sie einen Regler, mit dem Sie die **Transparenz** der Hintergrundkarte anpassen können. Dies ist hilfreich, um Netzdaten besser sichtbar zu machen.
 
-<img
-  src="/images/manual/teil-a/map_opacity.jpg"
-  alt="Screenshot Karte mit Hervorhebung des Schiebereglers für die Transparenz der Karte"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Karte mit Hervorhebung des Schiebereglers für die Transparenz der Karte](/images/manual/teil-a/map_opacity.jpg)
 
 Auf der rechten Seite befindet sich die **interaktive Legende** („Layer“-Menü). Hier können Sie:
 
@@ -39,10 +29,9 @@ Auf der rechten Seite befindet sich die **interaktive Legende** („Layer“-Men
 - Einzelne Layergruppen ein- oder ausklappen
 - Die Hintergrundkarte anpassen: in den Dunkelmodus wechseln oder komplett ausblenden
 
-<div class="img-row">
-  <img src="/images/manual/teil-a/map_legend.jpg" alt="Screenshot Karte mit Hervorhebung der Legende oben rechts" />
-  <img src="/images/manual/teil-a/map_legend_actions.jpg" alt="Vier Screenshots Legende und Kartenausschnitt und verschiedenen Auswahlmöglichkeiten" />
-</div>
+![Screenshot Karte mit Hervorhebung der Legende oben rechts](/images/manual/teil-a/map_legend.jpg)
+![Vier Screenshots Legende und Kartenausschnitt und verschiedenen Auswahlmöglichkeiten](/images/manual/teil-a/map_legend_actions.jpg)
+{.img-row}
 
 ## 5.3 Auswahl von Objekten
 
@@ -54,11 +43,7 @@ Sobald Sie ein anderes Objekt auswählen, ändern sich die Einträge in der Info
 
 Sie können die Auswahl aufheben und somit die Info-Box schließen, indem Sie in einen Bereich in der Karte klicken, der kein Element enthält. Sollten Sie große Elemente ausgewählt haben (z. B, Gebiete), zoomen Sie zum Abwählen aus der Karte und klicken Sie in einen Bereich, außerhalb des Elements.
 
-<img
-  src="/images/manual/teil-a/map_selected_object.jpg"
-  alt="Screenshot Karte mit Hervorhebung eines ausgewählten Objekts und der Anzeige der Details in einer Info-Box rechts"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Karte mit Hervorhebung eines ausgewählten Objekts und der Anzeige der Details in einer Info-Box rechts](/images/manual/teil-a/map_selected_object.jpg)
 
 ### 5.3.1 Anhänge von Kartenobjekten
 
@@ -78,11 +63,7 @@ Sollte dies nicht sichtbar sein, ist eventuell Ihr Fenster zu klein. Sie können
 
 Oben links befindet sich eine **Suchfunktion**. Hier können Sie gezielt nach Objekten suchen. Dazu gehen Sie folgendermaßen vor:
 
-<img
-  src="/images/manual/teil-a/map_search.jpg"
-  alt="Screenshot Karte mit Hervorhebung des Suchfeldes oben links"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Karte mit Hervorhebung des Suchfeldes oben links](/images/manual/teil-a/map_search.jpg)
 
 1. Geben Sie einen Begriff oder einen Teil davon in das Suchfeld ein.
 2. Drücken Sie Enter oder klicken Sie auf das grüne Lupen-Symbol.
@@ -91,11 +72,7 @@ Oben links befindet sich eine **Suchfunktion**. Hier können Sie gezielt nach Ob
 5. Um die Auswahl zu verfeinern, können Sie in dem zweiten Feld einen weiteren Suchbegriff eingeben.
 6. Sobald Sie ein Objekt auswählen, springt die Karte an die passende Stelle und das Objekt blinkt dreimal auf.
 
-<img
-  src="/images/manual/teil-a/map_search_flow.jpg"
-  alt="Screenshots Suchfeld in Karte mit Userflow und Nummerierung"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshots Suchfeld in Karte mit Userflow und Nummerierung](/images/manual/teil-a/map_search_flow.jpg)
 
 Sollten Sie sich Details zu diesem Objekt anzeigen lassen wollen, klicken Sie auf das Objekt in der Karte (siehe auch weiter oben "Auswahl von Objekten").
 

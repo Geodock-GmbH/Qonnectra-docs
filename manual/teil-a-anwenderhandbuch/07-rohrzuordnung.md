@@ -2,11 +2,7 @@
 
 Die **Rohrzuordnung** dient ausschließlich der Zuordnung von Rohren zu bestehenden **Trassenabschnitten (Trassensegmenten)**. Ziel ist es, zu dokumentieren, welche Rohre auf welchen Trassenverläufen liegen. Die Rohrzuordnung ist damit ein zentrales Werkzeug zur strukturellen Verknüpfung von Netzbestandteilen – nicht zur allgemeinen Kartennavigation.
 
-<img
-  src="/images/manual/teil-a/conduit_connection.jpg"
-  alt="Screenshot Rohrzurdnung Übersicht"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Rohrzurdnung Übersicht](/images/manual/teil-a/conduit_connection.jpg)
 
 ## 7.1 Grundprinzip
 
@@ -22,21 +18,13 @@ Die Kartenfunktionen entsprechen vollständig denen in der allgemeinen Karte (si
 
 Rechts neben der Karte befindet sich der Bearbeitungsbereich mit verschiedenen Auswahlmöglichkeiten und einer Liste der zugeordneten Trassensegmente zu einem ausgewählten Rohr. 
 
-<img
-  src="/images/manual/teil-a/conduit_connection_editArea.jpg"
-  alt="Screenshot Rohrzuordnung mit Hervorhebung des Bearbeitungsbereichs rechts"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Rohrzuordnung mit Hervorhebung des Bearbeitungsbereichs rechts](/images/manual/teil-a/conduit_connection_editArea.jpg)
 
 ### 7.2.1 Routing-Modus
 
 Der Routing-Modus bestimmt, wie die Zuordnung von Rohr zu Trasse beim Klicken auf Trassensegmente in der Karte vollzogen wird.
 
-<img
-  src="/images/manual/teil-a/conduit_connection_routing.jpg"
-  alt="Screenshot Rohrverwaltung Arbeitsbereich mit Hervorhebung der Schaltfläche für den Routing-Modus"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Rohrverwaltung Arbeitsbereich mit Hervorhebung der Schaltfläche für den Routing-Modus](/images/manual/teil-a/conduit_connection_routing.jpg)
 
 - Routing-Modus **ausgeschaltet** (Regler links und grau): Einzelne Trassenabschnitte können per Klick ausgewählt und dem Rohr hinzugefügt werden. Hierbei wird immer nur ein Trassensegment der Liste hinzugefügt.
 
@@ -46,11 +34,7 @@ Der Routing-Modus bestimmt, wie die Zuordnung von Rohr zu Trasse beim Klicken au
 
 Beim Umschalter "Trassenverbindungen anzeigen" haben Sie die Möglichkeit bei einer Rohrauswahl, eine visuelle Rückmeldung über bereits bestehende Zuordnungen zu Segmenten in der Karte zu erhalten. 
 
-<img
-  src="/images/manual/teil-a/conduit_connection_showTrench.jpg"
-  alt="Screenshot Rohrverwaltung Arbeitsbereich mit Hervorhebung der Schaltfläche Trassenverbindungen anzeigen"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Rohrverwaltung Arbeitsbereich mit Hervorhebung der Schaltfläche Trassenverbindungen anzeigen](/images/manual/teil-a/conduit_connection_showTrench.jpg)
 
 - Trassenverbindungen anzeigen **ausgeschaltet** (Regler links und grau): Es erfolgt keine visuelle Hervorhebung in der Karte.
 
@@ -73,21 +57,13 @@ Mit Auswahl eines Rohrs wird automatisch der Bearbeitungsmodus aktiviert, in dem
 
 Die verfügbaren Rohre richten sich nach dem oben ausgewählten Projekt (oben links in der Kopfzeile) und dem eingestellten Kennzeichen (direkt über der Rohrauswahl). 
 
-<img
-  src="/images/manual/teil-a/conduit_connection_conduitSelection.jpg"
-  alt="Screenshot mit Hervorhebung Projektauswahl und Kennzeichenauswahl"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot mit Hervorhebung Projektauswahl und Kennzeichenauswahl](/images/manual/teil-a/conduit_connection_conduitSelection.jpg)
 
 Zur Auswahl eines Kennzeichens klicken Sie auf den "Pfeil-nach-unten" neben dem Eingabefeld oder tippen Sie in das Eingabefeld. Danach öffnet sich eine Liste, aus der Sie das entsprechende Kennzeichen wählen können.
 
 Die Rohrauswahl im Feld darunter funktioniert ebenso. Zur Auswahl eines Rohrs klicken Sie auf den "Pfeil-nach-unten" neben dem Eingabefeld oder tippen Sie in das Eingabefeld. Danach öffnet sich eine Liste, aus der Sie das entsprechende Rohr wählen können.
 
-<img
-  src="/images/manual/teil-a/conduit_connection_conduit.jpg"
-  alt="Screenshot Bearbeitungsbereich mit Hervorhebung Eingabefeld Rohr"
-  style="display: block; max-width: 512px; width: 100%; margin: 0 auto;"
-/>
+![Screenshot Bearbeitungsbereich mit Hervorhebung Eingabefeld Rohr](/images/manual/teil-a/conduit_connection_conduit.jpg)
 
 Ist das ausgewählte Rohr bereits Trassensegmenten auf der Karte zugeordnet, erscheint anschließend darunter eine Liste mit Einträgen zu Trassensegmenten (Bezeichnung: Trassen-ID). 
 
