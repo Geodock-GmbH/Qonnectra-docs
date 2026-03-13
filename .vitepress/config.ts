@@ -65,6 +65,7 @@ export default defineConfig({
     // Site navigation
     nav: [
       { text: 'Startseite', link: '/' },
+      { text: 'Dienstleistungen', link: '/services'},
       { text: 'Handbuch', link: '/manual/' },
       { text: 'Kontakt', link: '/contact' }
     ],
