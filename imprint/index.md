@@ -17,7 +17,8 @@ Geschäftsführer: Christoph Bechtel
 Telefon: 0431 720041-80
 <br>E-Mail: info@planneo.de
 <br>Web: planneo.de
-<br>Umsatzsteuer-ID
+
+### Umsatzsteuer-ID
 
 Umsatzsteuer-Identifikationsnummer gemäß §27 a Umsatzsteuergesetz:
 DE 321906951
