@@ -65,6 +65,7 @@ export default defineConfig({
     // Site navigation
     nav: [
       { text: 'Startseite', link: '/' },
+      { text: 'Dienstleistungen', link: '/services'},
       { text: 'Handbuch', link: '/manual/' },
       { text: 'Kontakt', link: '/contact' }
     ],
@@ -87,7 +88,7 @@ export default defineConfig({
         '', // leere Zeile
         'Open-Source-Software für kommunale Netzdokumentation. Lizenziert unter AGPL-3.0.'
       ].join('<br>'),
-      copyright: 'Copyright © 2025 Geodock GmbH & plan[neo] GmbH'
+      copyright: 'Copyright © 2026 Geodock GmbH & plan[neo] GmbH'
     },
 
     // Social links

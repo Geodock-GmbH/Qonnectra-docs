@@ -23,12 +23,6 @@
     var(--vp-c-accent-1)
   );
 
-  --vp-home-hero-image-background-image: radial-gradient(
-    circle at center,
-    var(--vp-c-brand-1),
-    transparent 65%
-  );
-  --vp-home-hero-image-filter: blur(56px);
 }
 
 /* Navbar on home page when scrolled to top:
@@ -106,6 +100,10 @@
   color: var(--vp-c-neutral-inverse);
 }
 
+/* box styling*/
+.vp-doc .info {
+  margin: 40px 0;
+}
 
 /* Custom components */
 
