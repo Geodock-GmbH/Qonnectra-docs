@@ -1,6 +1,8 @@
 ---
 layout: home
 
+pageClass: page-services
+
 hero:
   name: false
   text: "Dienstleistungen"
@@ -14,53 +16,43 @@ hero:
       link: /contact/
 
 features:
+- title: 1. Kostenfreie Präsentation
+  details: Lernen Sie Qonnectra unverbindlich kennen, online oder vor Ort. Wir zeigen die Software in einer persönlichen Live-Demo und gehen auf Ihre Anwendungsfälle und Fragen ein.
 
-  - title: Kostenfreie Präsentation
-    details:  Lernen Sie Qonnectra unverbindlich kennen – online oder vor Ort. Wir zeigen Ihnen die Software in einer persönlichen Live-Demonstration und gehen auf Ihre Anwendungsfälle, Datenstrukturen und Fragen ein.
+- title: 2. Setup und Hosting
+  details: Wir richten Qonnectra für Sie ein, auf Ihrer Infrastruktur oder in einer passenden Hosting-Umgebung. Dazu gehören Installation, Konfiguration und die betriebsbereite Übergabe.
 
-  - title: Setup und Hosting
-    details: Wir richten Qonnectra technisch für Sie ein – auf Ihrer eigenen Infrastruktur oder in einer passenden Hosting-Umgebung. Dazu gehören Installation, Grundkonfiguration, Rollen- und Rechtekonzept sowie die betriebsbereite Übergabe.
+- title: 3. Datenmigration
+  details: Wir analysieren Ihre Netzdokumentation und übernehmen die strukturierte Aufbereitung und Migration nach Qonnectra. Dabei berücksichtigen wir GIS, CAD Daten, Tabellen und weitere Quellen.
 
-  - title: Datenmigration
-    details: Wir analysieren Ihre bestehende Netzdokumentation und übernehmen die strukturierte Aufbereitung und Migration nach Qonnectra. Dabei berücksichtigen wir GIS-Daten, CAD-Daten, Tabellen und weitere Bestandsquellen.
+- title: 4. Betrieb und Systembetreuung
+  details: Wir übernehmen den Betrieb und die Betreuung Ihrer Qonnectra Umgebung. Dazu gehören Support, Fehleranalyse, Nutzerverwaltung und Backups.
 
-  - title: Betrieb und Systembetreuung
-    details: Auf Wunsch übernehmen wir den technischen Betrieb und die laufende Betreuung Ihrer Qonnectra-Umgebung. Dazu zählen Support, Fehleranalyse, Nutzerverwaltung, Backups und die Betreuung der Systemkomponenten.
+- title: 5. Fortführung der Netzdokumentation
+  details: Wir unterstützen die Pflege und Weiterentwicklung Ihrer Netzdokumentation, zum Beispiel bei Netzauskünften, Exporten und der Dokumentation von Erweiterungen.
 
-  - title: Fortführung der Netzdokumentation
-    details: Wir unterstützen Sie bei der laufenden Pflege und Weiterentwicklung Ihrer Netzdokumentation. Dazu gehören Netzauskünfte, Exporte, kartographische Aufbereitungen sowie die Dokumentation von Netzerweiterungen und Neubauten.
-
-  - title: Schulungen und Weiterbildung
-    details:  Wir schulen Anwenderinnen und Anwender, Fachverantwortliche und Administratoren im praktischen Einsatz von Qonnectra. Ergänzend bieten wir Schulungen zu Netzdokumentation und QGIS an.
+- title: 6. Schulungen und Weiterbildung
+  details: Wir schulen Anwender und Verantwortliche im Umgang mit Qonnectra und bieten ergänzende Schulungen zu Netzdokumentation und QGIS an.
 ---
 
 
+Wir begleiten Sie bei der Einführung und dem Betrieb von Qonnectra von Anfang an. Von der ersten Vorstellung über die technische Einrichtung und Datenmigration bis hin zum laufenden Betrieb, der Pflege Ihrer Netzdokumentation und gezielten Schulungen stehen wir Ihnen verlässlich zur Seite.
 
-Neben der kostenfreien Open-Source-Software **Qonnectra** bieten wir umfassende Dienstleistungen für Einführung, Betrieb und Weiterentwicklung Ihrer Netzdokumentation. 
-Ob **Setup**, **Hosting**, **Migration bestehender Daten**, **laufende Betreuung** oder **Schulungen**: Wir unterstützen Sie genau dort, wo Sie es brauchen – modular, praxisnah und abgestimmt auf Ihre Anforderungen.
+Die folgenden Leistungen zeigen die einzelnen Schritte entlang dieses Prozesses und geben Ihnen einen Überblick darüber, wie wir Sie in jeder Phase unterstützen.
 
-<div class="actions">
-  <a class="VPButton medium brand" href="/kontakt">Kostenfreie Präsentation anfragen</a>
+
+## 1. Kostenfreie Präsentation
+
+Sie möchten Qonnectra kennenlernen oder prüfen, wie sich Ihre bestehende Netzdokumentation in Qonnectra überführen lässt? Wir zeigen Ihnen die Software gerne in einer **kostenfreien persönlichen Präsentation** und besprechen mit Ihnen passende nächste Schritte.
+
+<div data-v-0151da24="" class="action">
+  <a data-v-0ddc9776="" data-v-0151da24="" class="VPButton medium brand" href="/contact/">Präsentation anfragen</a>
 </div>
 
-::: info So unterstützen wir Sie
 
-1. **Einstieg und Bedarfsklärung**  
-In einer kostenfreien Präsentation zeigen wir Ihnen Qonnectra im praktischen Einsatz und besprechen gemeinsam Ihre Ausgangssituation, Ziele und Anforderungen.
+## 2. Setup und Hosting
 
-2. **Technische Einführung**  
-Wir übernehmen das Setup, richten die Plattform ein und konfigurieren die Grundlagen für den produktiven Einsatz.
-
-3. **Datenbewertung und Migration**  
-Bestehende Datenbestände werden analysiert, bewertet und – wenn gewünscht – für die Nutzung in Qonnectra aufbereitet und importiert.
-
-4. **Laufender Betrieb und Weiterentwicklung**  
-Nach dem Start begleiten wir Sie auf Wunsch dauerhaft weiter – mit Support, Betreuung, Schulungen und individuellen Erweiterungen.
-:::
-
-## Setup und Hosting
-
-Wir übernehmen die technische Einrichtung von Qonnectra und schaffen die Grundlage für einen stabilen produktiven Betrieb.
+Wir übernehmen die technische Einrichtung von Qonnectra und schaffen die Grundlage für einen stabilen produktiven Betrieb. Diese Leistung eignet sich für Organisationen, die Qonnectra schnell und sauber in Betrieb nehmen möchten.
 
 ::: details Typische Leistungen {open}
 - Installation aller benötigten Open-Source-Komponenten
@@ -70,20 +62,10 @@ Wir übernehmen die technische Einrichtung von Qonnectra und schaffen die Grundl
 - Übergabe eines einsatzbereiten Systems
 :::
 
-Diese Leistung eignet sich für Organisationen, die Qonnectra schnell und sauber in Betrieb nehmen möchten.
 
+## 3. Datenmigration
 
-## Aufbereitung und Migration bestehender Daten
-
-Der Wechsel auf eine neue Plattform ist nur dann erfolgreich, wenn auch bestehende Daten sinnvoll übernommen werden können. Deshalb unterstützen wir Sie bei der Sichtung, Bewertung und Migration Ihrer vorhandenen Netzdokumentation.
-
-::: details Mögliche Datenquellen {open}
-- GIS-Daten
-- CAD-Daten
-- CSV- und Tabellendaten
-- bestehende Dokumentationssysteme
-- weitere strukturierte oder teilstrukturierte Datenbestände
-:::
+Der Wechsel auf eine neue Plattform ist nur dann erfolgreich, wenn auch bestehende Daten sinnvoll übernommen werden können. Deshalb unterstützen wir Sie bei der Sichtung, Bewertung und Migration Ihrer vorhandenen Netzdokumentation. So entsteht eine belastbare Datengrundlage für den weiteren Betrieb.
 
 ::: details Typische Leistungen {open}
 - Analyse vorhandener Datenbestände
@@ -94,12 +76,18 @@ Der Wechsel auf eine neue Plattform ist nur dann erfolgreich, wenn auch bestehen
 - Vollständiger Import der Bestandsdaten in Qonnectra
 :::
 
-So entsteht eine belastbare Datengrundlage für den weiteren Betrieb.
+::: details Mögliche Datenquellen
+- GIS-Daten
+- CAD-Daten
+- CSV- und Tabellendaten
+- bestehende Dokumentationssysteme
+- weitere strukturierte oder teilstrukturierte Datenbestände
+:::
 
 
-## Betrieb, Support und Betreuung
+## 4. Betrieb und Systembetreuung
 
-Auch nach der Einführung unterstützen wir Sie beim zuverlässigen Betrieb Ihrer Qonnectra-Umgebung.
+Auch nach der Einführung unterstützen wir Sie beim zuverlässigen Betrieb Ihrer Qonnectra-Umgebung. Je nach Bedarf kann die Betreuung projektbezogen, stundenweise oder im Rahmen einer dauerhaften Vereinbarung erfolgen.
 
 ::: details Leistungen im laufenden Betrieb: {open}
 - Betreuung der Qonnectra-Systemkomponenten
@@ -110,12 +98,10 @@ Auch nach der Einführung unterstützen wir Sie beim zuverlässigen Betrieb Ihre
 - persönliche Unterstützung im Rahmen von Support und Hotline
 :::
 
-Je nach Bedarf kann die Betreuung projektbezogen, stundenweise oder im Rahmen einer dauerhaften Vereinbarung erfolgen.
 
+## 5. Fortführung der Netzdokumentation
 
-## Fortführung Ihrer Netzdokumentation
-
-Auf Wunsch unterstützen wir Sie nicht nur technisch, sondern auch fachlich bei der laufenden Pflege Ihrer Netzdokumentation.
+Auf Wunsch unterstützen wir Sie nicht nur technisch, sondern auch fachlich bei der laufenden Pflege Ihrer Netzdokumentation. Damit bleibt Ihre Dokumentation aktuell, konsistent und nutzbar.
 
 ::: details Beispiele {open}
 - Fortführung von Netzerweiterungen und Neubauten
@@ -125,28 +111,10 @@ Auf Wunsch unterstützen wir Sie nicht nur technisch, sondern auch fachlich bei 
 - Unterstützung bei dokumentationsbezogenen Anfragen Dritter
 :::
 
-Damit bleibt Ihre Dokumentation aktuell, konsistent und nutzbar.
 
+## 6. Schulungen und Weiterbildung
 
-## Individuelle Erweiterungen
-
-Qonnectra kann an spezifische Anforderungen angepasst und funktional erweitert werden.
-
-Wir entwickeln bei Bedarf zusätzliche Features, Schnittstellen oder Workflows, die über die Standardfunktionen hinausgehen.
-
-::: details Beispiele für individuelle Leistungen {open}
-- zusätzliche Softwarefunktionen
-- projektspezifische Workflows
-- Schnittstellen zu Drittsystemen
-- fachliche Erweiterungen für besondere Anforderungen
-:::
-
-So lässt sich Qonnectra passgenau in bestehende Prozesse integrieren.
-
-
-## Schulungen
-
-Damit Ihr Team sicher mit Qonnectra arbeiten kann, bieten wir praxisnahe Schulungen für unterschiedliche Zielgruppen an.
+Damit Ihr Team sicher mit Qonnectra arbeiten kann, bieten wir praxisnahe Schulungen für unterschiedliche Zielgruppen an. Das [Softwarehandbuch](/manual/) steht kostenfrei zur Verfügung. Ergänzend helfen Schulungen dabei, Prozesse schneller und sicherer in die Praxis zu überführen.
 
 ::: details Mögliche Formate {open}
 - Qonnectra-Grundlagenschulungen
@@ -157,7 +125,17 @@ Damit Ihr Team sicher mit Qonnectra arbeiten kann, bieten wir praxisnahe Schulun
 - QGIS im Zusammenspiel mit Qonnectra
 :::
 
-Das [Softwarehandbuch](/manual/) steht kostenfrei zur Verfügung. Ergänzend helfen Schulungen dabei, Prozesse schneller und sicherer in die Praxis zu überführen.
+
+## Individuelle Erweiterungen
+
+Qonnectra kann an spezifische Anforderungen angepasst und funktional erweitert werden. Wir entwickeln bei Bedarf zusätzliche Features, Schnittstellen oder Workflows, die über die Standardfunktionen hinausgehen. So lässt sich Qonnectra passgenau in bestehende Prozesse integrieren.
+
+::: details Beispiele für individuelle Leistungen
+- zusätzliche Softwarefunktionen
+- projektspezifische Workflows
+- Schnittstellen zu Drittsystemen
+- fachliche Erweiterungen für besondere Anforderungen
+:::
 
 
 ## Für wen sich unsere Dienstleistungen eignen
@@ -172,12 +150,45 @@ Besonders relevant sind unsere Leistungen für:
 - Organisationen mit gewachsenen Bestandsdaten und Migrationsbedarf
 
 
-## Kostenfreie Präsentation anfragen
-
-Sie möchten Qonnectra kennenlernen oder prüfen, wie sich Ihre bestehende Netzdokumentation in Qonnectra überführen lässt?
-
-Wir zeigen Ihnen die Software gerne in einer **kostenfreien persönlichen Präsentation** und besprechen mit Ihnen passende nächste Schritte.
-
-<div class="actions">
-  <a class="VPButton medium brand" href="/kontakt">Jetzt Präsentation anfragen</a>
+<div data-v-0151da24="" class="action">
+  <a data-v-0ddc9776="" data-v-0151da24="" class="VPButton medium brand" href="/contact/">Kontakt aufnehmen</a>
 </div>
+
+
+<style>
+/* Keep the outer wrappers transparent */
+.page-services .VPFeatures .item,
+.page-services .VPFeatures .item .VPFeature {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Style the actual card */
+.page-services .VPFeatures .item .box {
+  background: color-mix(in srgb, var(--vp-c-brand-1) 30%, transparent) !important;
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: none !important;
+  overflow: hidden !important;
+}
+
+/* Remove any extra background from inner content elements */
+.page-services .VPFeatures .item .title,
+.page-services .VPFeatures .item .details {
+  background: transparent !important;
+  color: var(--vp-c-text-1) !important;
+}
+
+/* Explicitly override special styling on the lower three cards */
+.page-services .VPFeatures .item:nth-child(n + 4) .box {
+  background: color-mix(in srgb, var(--vp-c-brand-1) 30%, transparent) !important;
+  border-radius: 12px !important;
+}
+
+.page-services .VPFeatures .item:nth-child(n + 4) .title,
+.page-services .VPFeatures .item:nth-child(n + 4) .details {
+  background: transparent !important;
+  color: var(--vp-c-text-1) !important;
+}
+</style>
