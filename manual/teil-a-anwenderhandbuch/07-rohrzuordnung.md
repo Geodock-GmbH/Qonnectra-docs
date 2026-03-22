@@ -2,7 +2,7 @@
 
 Die **Rohrzuordnung** dient ausschließlich der Zuordnung von Rohren zu bestehenden **Trassenabschnitten (Trassensegmenten)**. Ziel ist es, zu dokumentieren, welche Rohre auf welchen Trassenverläufen liegen. Die Rohrzuordnung ist damit ein zentrales Werkzeug zur strukturellen Verknüpfung von Netzbestandteilen – nicht zur allgemeinen Kartennavigation.
 
-![Screenshot Rohrzurdnung Übersicht](/images/manual/teil-a/conduit_connection.jpg)
+![Screenshot Rohrzuordnung Übersicht](/images/manual/teil-a/conduit_connection.jpg)
 
 ## 7.1 Grundprinzip
 

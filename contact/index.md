@@ -17,7 +17,7 @@ hero:
 ## Projektmanagement
 
 plan[neo] GmbH
-<br>Planungs- und Entwick­lungs­gesellschaft
+<br>Planungs- und Entwicklungsgesellschaft
 
 Schauenburgerstr. 116
 <br>24118 Kiel
