@@ -1,0 +1,28 @@
+name: Tests
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  spelling:
+    name: Spelling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+
+      - name: Setup pnpm 
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+
+      - name: Run spellcheck
+        run: pnpm lint:spelling

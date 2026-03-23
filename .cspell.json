@@ -1,0 +1,30 @@
+{
+  "version": "0.2",
+  "import": [
+    "@cspell/dict-de-de/cspell-ext.json"
+  ],
+  "language": "en,de",
+  "words": [
+    "dbaeumer",
+    "DSGVO",
+    "Elgendorfer",
+    "esbenp",
+    "geodock",
+    "Händelhof",
+    "IONOS",
+    "Montabaur",
+    "pexels",
+    "Pictogrammers",
+    "pixabay",
+    "planneo",
+    "QGIS",
+    "qonnectra",
+    "Schauenburgerstr",
+    "Schauenburgerstraße",
+    "TDDDG"
+  ],
+  "ignorePaths": [
+    ".git/**/*",
+    ".cspell.json"
+  ]
+}
