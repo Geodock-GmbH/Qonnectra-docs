@@ -13,10 +13,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
-          node-version: 24
-      - uses: pnpm/action-setup@v4
+          node-version-file: package.json
+
+      - name: Setup pnpm 
+        uses: pnpm/action-setup@v4
         with:
           run_install: true
-      - run: pnpm spelling
+
+      - name: Run spellcheck
+        run: pnpm lint:spelling
