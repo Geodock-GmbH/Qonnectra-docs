@@ -13,7 +13,6 @@
     "dev": "vitepress dev",
     "build": "vitepress build",
     "preview": "vitepress preview",
-    "lint:format": "prettier --check .",
     "lint:spelling": "cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'"
   },
   "devDependencies": {
