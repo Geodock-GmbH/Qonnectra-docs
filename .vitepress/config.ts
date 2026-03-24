@@ -65,9 +65,9 @@ export default defineConfig({
     // Site navigation
     nav: [
       { text: 'Startseite', link: '/' },
-      { text: 'Dienstleistungen', link: '/services'},
+      { text: 'Dienstleistungen', link: '/services/'},
       { text: 'Handbuch', link: '/manual/' },
-      { text: 'Kontakt', link: '/contact' }
+      { text: 'Kontakt', link: '/contact/' }
     ],
 
     // Sidebar navigation - auto-generated from file structure
