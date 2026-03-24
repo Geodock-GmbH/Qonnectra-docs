@@ -23,6 +23,10 @@
     var(--vp-c-accent-1)
   );
 
+  /* Button */
+  --vp-button-brand-bg: var(--vp-c-brand-1);
+  --vp-button-brand-hover-bg: var(--vp-c-brand-3);
+  --vp-button-brand-active-bg: var(--vp-c-brand-2);
 }
 
 /* Navbar on home page when scrolled to top:
