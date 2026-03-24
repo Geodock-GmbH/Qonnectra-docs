@@ -34,7 +34,7 @@ Auf der linken Seite befindet sich die Navigationsleiste, mit der Sie zu allen v
 - Dashboard (Startansicht mit Gesamtüberblick)
 - Karte (Zeigt die Netzinfrastruktur auf einer Karte)
 - Rohrverwaltung (Anlegen und Verwalten von Rohren und ihren Attributen)
-- Rohrzuordnung (Zuordnung der in der Rohrverwaltung anglegten Rohre zu den Trassen(geometrien))
+- Rohrzuordnung (Zuordnung der in der Rohrverwaltung angelegten Rohre zu den Trassen(Geometrien))
 - Rohrverzweigung
 - Mikrorohrplanung
 - Netzschema
