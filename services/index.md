@@ -45,9 +45,7 @@ Die folgenden Leistungen zeigen die einzelnen Schritte entlang dieses Prozesses 
 
 Sie möchten Qonnectra kennenlernen oder prüfen, wie sich Ihre bestehende Netzdokumentation in Qonnectra überführen lässt? Wir zeigen Ihnen die Software gerne in einer **kostenfreien persönlichen Präsentation** und besprechen mit Ihnen passende nächste Schritte.
 
-<div data-v-0151da24="" class="action">
-  <a data-v-0ddc9776="" data-v-0151da24="" class="VPButton medium brand" href="/contact/">Präsentation anfragen</a>
-</div>
+<VPButton href="/contact/" text="Präsentation anfragen" />
 
 
 ## 2. Setup und Hosting
@@ -150,10 +148,7 @@ Besonders relevant sind unsere Leistungen für:
 - Organisationen mit gewachsenen Bestandsdaten und Migrationsbedarf
 
 
-<div data-v-0151da24="" class="action">
-  <a data-v-0ddc9776="" data-v-0151da24="" class="VPButton medium brand" href="/contact/">Kontakt aufnehmen</a>
-</div>
-
+<VPButton href="/contact/" text="Kontakt aufnehmen" />
 
 <style>
 /* Keep the outer wrappers transparent */

@@ -175,3 +175,8 @@
   max-width: 100%;
   border-radius: 12px;
 }
+
+/* Global button styling */
+.vp-doc a.VPButton {
+  text-decoration: none;
+}
