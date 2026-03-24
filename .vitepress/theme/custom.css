@@ -23,12 +23,10 @@
     var(--vp-c-accent-1)
   );
 
-  --vp-home-hero-image-background-image: radial-gradient(
-    circle at center,
-    var(--vp-c-brand-1),
-    transparent 65%
-  );
-  --vp-home-hero-image-filter: blur(56px);
+  /* Button */
+  --vp-button-brand-bg: var(--vp-c-brand-1);
+  --vp-button-brand-hover-bg: var(--vp-c-brand-3);
+  --vp-button-brand-active-bg: var(--vp-c-brand-2);
 }
 
 /* Navbar on home page when scrolled to top:
@@ -106,6 +104,10 @@
   color: var(--vp-c-neutral-inverse);
 }
 
+/* box styling*/
+.vp-doc .info {
+  margin: 40px 0;
+}
 
 /* Custom components */
 
@@ -176,4 +178,9 @@
 .vp-doc video {
   max-width: 100%;
   border-radius: 12px;
+}
+
+/* Global button styling */
+.vp-doc a.VPButton {
+  text-decoration: none;
 }
