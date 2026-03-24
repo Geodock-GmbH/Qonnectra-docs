@@ -54,7 +54,7 @@ export default defineConfig({
             'html5 media description': 'Hier ist eine Beschreibung des Inhalts: %s'
           }
         },
-        videoAttrs: 'controls playsinline preload="metadata"'
+        videoAttrs: 'controls playsinline preload="metadata"' // cspell:ignore playsinline
       })
     }
   },
