@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 import { generateSidebar } from 'vitepress-sidebar'
 import { VitePressSidebarOptions } from 'vitepress-sidebar/types'
 import { html5Media } from 'markdown-it-html5-media'
+import lightbox from 'vitepress-plugin-lightbox'
 
 function generateSidebarConfig(path: string, override: Partial<VitePressSidebarOptions> = {}): VitePressSidebarOptions {
   return {
@@ -45,6 +46,7 @@ export default defineConfig({
       dark: 'github-dark'
     },
     config: (md) => {
+      md.use(lightbox, {})
       md.use(html5Media, {
         messages: {
           en: {
