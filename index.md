@@ -47,11 +47,15 @@ features:
 
 ## Einfache Ermittlung von Daten für das Netzmonitoring 
 
-![Screenshot Dashboard](/images/view_dashboard.png){.no-border}
+![Screenshot Dashboard](/images/view_dashboard_2.png){.no-border}
+![Screenshot Dashboard](/images/view_faserverfolgung.png){.no-border}
+{.img-row}
 
 ## Übersichtliche Abbildungen aller Netzinfrastrukturen
 
-![Screenshot Kartenansicht](/images/view_map.png){.no-border}
+![Screenshot Kartenansicht](/images/view_map_2.png){.no-border}
+![Screenshot Netzschema](/images/view_netzschema.png){.no-border}
+{.img-row}
 
 </div>
 
