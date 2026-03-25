@@ -56,13 +56,14 @@
   content: '';
   position: absolute;
   inset: 0;
-  background-image: url('/images/hero-bg.png');
+  /* background-image: url('/images/header.jpg'); */
+  background-image: url('/images/header-2.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 
   /* image styling */
-  opacity: 0.5;
+  opacity: 0.3;
 
   z-index: -2;
 }
