@@ -6,3 +6,10 @@ dist/
 .vitepress/cache
 .vitepress/dist
 
+.env
+
+# Playwright
+auth-state.json
+/test-results/
+/playwright-report/
+/tests/screenshots/
