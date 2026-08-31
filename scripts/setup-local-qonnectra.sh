@@ -71,6 +71,21 @@ else
 	git clone "$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR"
 fi
 
+DEMO_DATA_COMMAND_SRC="$REPO_ROOT/scripts/qonnectra-demo-data/generate_demo_project.py"
+DEMO_DATA_COMMAND_DEST="$LOCAL_APP_DIR/backend/apps/api/management/commands/generate_demo_project.py"
+
+# --- Demo-Datensatz-Command einspielen ---------------------------------------
+#
+# local-app/ ist gitignored (siehe oben) und wird bei jedem Lauf frisch
+# geklont bzw. wiederverwendet - das Management-Command für die fiktiven
+# Handbuch-Testdaten liegt daher versioniert in diesem Repo
+# (scripts/qonnectra-demo-data/) und wird hier vor dem Image-Build in den
+# Checkout kopiert (das Backend-Image bäckt den Code zur Build-Zeit ein, ein
+# reiner Volume-Mount für Quellcode existiert nicht).
+
+log "Kopiere generate_demo_project-Command nach local-app/"
+cp "$DEMO_DATA_COMMAND_SRC" "$DEMO_DATA_COMMAND_DEST"
+
 cd "$DEPLOY_DIR"
 
 # --- .env erzeugen (nur beim ersten Lauf, danach idempotent) ----------------
@@ -220,6 +235,9 @@ for _ in $(seq 1 60); do
 done
 if [ "$READY" -eq 1 ]; then
 	log "App antwortet."
+
+	log "Erzeuge fiktives Demo-Ausbaugebiet 'Glashofen' für Handbuch-Screenshots (idempotent)"
+	"${COMPOSE[@]}" exec -T backend python manage.py generate_demo_project || true
 else
 	warn "App antwortet nach 2 Minuten noch nicht - Container-Logs prüfen: docker compose -f docker-compose.yml -f docker-compose.override.yml logs backend"
 fi
@@ -244,6 +262,11 @@ Qonnectra läuft unter:
   API      : https://api.qonnectra.localhost
 
 Login: ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
+
+Für Screenshots/Videos steht das fiktive Projekt "Ausbaugebiet Glashofen"
+zur Verfügung (nach Login oben links auswählen). Neu erzeugen (z. B. nach
+Datenänderungen für Screenshots):
+  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py generate_demo_project --force
 
 Zertifikatswarnung im Browser: Die *.qonnectra.localhost-Zertifikate stammen
 von einer lokalen Caddy-CA (kein echtes Let's Encrypt möglich für *.localhost,
