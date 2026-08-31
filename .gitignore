@@ -8,6 +8,9 @@ dist/
 
 .env
 
+# geklontes Qonnectra-App-Repo (siehe local-app/README.md)
+/local-app/
+
 # Playwright
 auth-state.json
 /test-results/
