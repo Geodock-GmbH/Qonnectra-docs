@@ -9,12 +9,18 @@
 # Skript ist der reproduzierbare Ersatz dafür und darf beliebig oft und auf
 # jeder Maschine neu ausgeführt werden (idempotent).
 #
-# Voraussetzungen: git, Docker Engine 24+, Docker Compose v2 ("docker compose").
-# Der ausführende Nutzer muss den Docker-Daemon ansprechen können (Mitglied
-# der "docker"-Gruppe oder root).
+# Voraussetzungen: git, curl, openssl, Docker Engine 24+, Docker Compose v2
+# ("docker compose"). Der ausführende Nutzer muss den Docker-Daemon ansprechen
+# können (Mitglied der "docker"-Gruppe oder root).
 #
 # Verwendung:
 #   scripts/setup-local-qonnectra.sh
+#
+# HTTPS läuft über eine persistente lokale Dev-CA in ~/.local/share/
+# qonnectra-local-ca/, die read-only in den Caddy-Container gemountet wird.
+# Sie liegt außerhalb von local-app/ und außerhalb der Docker-Volumes und muss
+# deshalb nur einmal pro Rechner in die Truststores importiert werden
+# (scripts/install-local-ca.sh) - nicht nach jedem Rebuild.
 #
 # Nach dem Lauf erreichbar unter https://app.qonnectra.localhost (siehe
 # Ausgabe am Skriptende für Zugangsdaten und Zertifikats-Import).
@@ -25,6 +31,16 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOCAL_APP_DIR="$REPO_ROOT/local-app"
 DEPLOY_DIR="$LOCAL_APP_DIR/deployment"
 QONNECTRA_REPO_URL="https://github.com/Geodock-GmbH/Qonnectra.git"
+
+# Persistente lokale Dev-CA. Liegt bewusst AUSSERHALB von local-app/ (wird
+# geklont/gelöscht) und außerhalb dieses Repos (enthält einen privaten
+# Schlüssel), damit sie Rebuilds, "docker compose down -v" und Neu-Klone
+# überlebt und nur EINMAL in die Truststores von System/Browser importiert
+# werden muss. Überschreibbar via QONNECTRA_CA_DIR.
+CA_DIR="${QONNECTRA_CA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/qonnectra-local-ca}"
+CA_CRT="$CA_DIR/root.crt"
+CA_KEY="$CA_DIR/root.key"
+CA_NAME="Qonnectra Local Dev CA"
 
 # Alle Services außer "wireguard" (VPN-Zugang, für lokales Ausprobieren/
 # Handbuch-Screenshots irrelevant, würde nur zusätzliche Host-Capabilities
@@ -48,6 +64,7 @@ random_fernet_key() {
 
 command -v git >/dev/null 2>&1 || die "git ist nicht installiert."
 command -v curl >/dev/null 2>&1 || die "curl ist nicht installiert."
+command -v openssl >/dev/null 2>&1 || die "openssl ist nicht installiert."
 command -v docker >/dev/null 2>&1 || die "docker ist nicht installiert."
 docker compose version >/dev/null 2>&1 || die "docker compose (v2 Plugin) ist nicht verfügbar."
 
@@ -161,18 +178,70 @@ fi
 # shellcheck disable=SC1091
 source "$DEPLOY_DIR/.env"
 
+# --- Persistente lokale Dev-CA erzeugen/wiederverwenden ---------------------
+#
+# Ohne das hier legt Caddy bei jedem frischen caddy_data-Volume eine NEUE
+# eigene CA an ("Caddy Local Authority") - der Truststore-Import im Browser
+# ist danach wertlos und muss wiederholt werden. Stattdessen: einmalig eine
+# eigene Root-CA auf dem Host erzeugen, read-only in den Caddy-Container
+# mounten (siehe pki-Block in Caddyfile.production.local) und nur diese
+# importieren.
+
+if [ -f "$CA_CRT" ] && [ -f "$CA_KEY" ]; then
+	log "Verwende vorhandene lokale Dev-CA aus $CA_DIR"
+else
+	log "Erzeuge lokale Dev-CA in $CA_DIR (einmalig, überlebt Rebuilds)"
+	mkdir -p "$CA_DIR"
+	chmod 700 "$CA_DIR"
+	openssl ecparam -name prime256v1 -genkey -noout -out "$CA_KEY"
+	chmod 600 "$CA_KEY"
+	openssl req -x509 -new -key "$CA_KEY" -sha256 -days 3650 \
+		-subj "/CN=$CA_NAME/O=Qonnectra lokale Entwicklung" \
+		-addext "basicConstraints=critical,CA:TRUE,pathlen:1" \
+		-addext "keyUsage=critical,keyCertSign,cRLSign" \
+		-addext "subjectKeyIdentifier=hash" \
+		-out "$CA_CRT"
+	chmod 644 "$CA_CRT"
+fi
+
+CA_FINGERPRINT="$(openssl x509 -in "$CA_CRT" -noout -fingerprint -sha256 | cut -d= -f2)"
+
 # --- Caddyfile.production.local erzeugen ------------------------------------
 #
 # Caddyfile.production erwartet echte, öffentlich auflösbare Domains für
 # automatisches Let's-Encrypt-HTTPS. Für *.qonnectra.localhost gibt es keine
-# öffentliche Validierung, daher hier "tls internal" (Caddys eigene lokale CA)
-# pro Domain-Block ergänzen. Wird bei jedem Lauf neu aus der aktuellen
-# Caddyfile.production erzeugt.
+# öffentliche Validierung, daher hier "tls internal" pro Domain-Block ergänzen
+# und global die interne CA auf die Dev-CA von oben umbiegen. Wird bei jedem
+# Lauf neu aus der aktuellen Caddyfile.production erzeugt.
 
-log "Erzeuge Caddyfile.production.local (tls internal pro Domain)"
-sed -E \
-	-e 's/^(\{\$(API|ADMIN|APP|FILES|QGIS|TILE_SERVER)_DOMAIN\} \{)$/\1\n    tls internal/' \
-	"$DEPLOY_DIR/Caddyfile.production" >"$DEPLOY_DIR/Caddyfile.production.local"
+log "Erzeuge Caddyfile.production.local (eigene Dev-CA + tls internal pro Domain)"
+{
+	cat <<EOF
+# Automatisch erzeugt von scripts/setup-local-qonnectra.sh - nicht bearbeiten.
+#
+# Der globale pki-Block biegt die von "tls internal" (unten pro Domain)
+# genutzte interne CA "local" auf die persistente Dev-CA vom Host um, die
+# read-only nach /etc/caddy/ca gemountet ist:
+#   $CA_CRT
+# Ohne das würde Caddy die CA bei jedem frischen caddy_data-Volume neu
+# erzeugen und der Truststore-Import müsste jedes Mal wiederholt werden.
+{
+    pki {
+        ca local {
+            name "$CA_NAME"
+            root {
+                cert /etc/caddy/ca/root.crt
+                key /etc/caddy/ca/root.key
+            }
+        }
+    }
+}
+
+EOF
+	sed -E \
+		-e 's/^(\{\$(API|ADMIN|APP|FILES|QGIS|TILE_SERVER)_DOMAIN\} \{)$/\1\n    tls internal/' \
+		"$DEPLOY_DIR/Caddyfile.production"
+} >"$DEPLOY_DIR/Caddyfile.production.local"
 
 # --- docker-compose.override.yml erzeugen -----------------------------------
 #
@@ -182,7 +251,7 @@ sed -E \
 # docker-compose.dev.yml) bereits korrekt.
 
 log "Erzeuge docker-compose.override.yml"
-cat >"$DEPLOY_DIR/docker-compose.override.yml" <<'EOF'
+cat >"$DEPLOY_DIR/docker-compose.override.yml" <<EOF
 # Automatisch erzeugt von scripts/setup-local-qonnectra.sh - lokale
 # Anpassung an docker-compose.yml (Produktion) für *.qonnectra.localhost
 # statt echter Domains mit Let's-Encrypt-Zertifikaten.
@@ -191,6 +260,8 @@ services:
     volumes:
       - ./Caddyfile.production.local:/etc/caddy/Caddyfile:ro
       - ./caddy/extra:/etc/caddy/extra:ro
+      # Persistente lokale Dev-CA vom Host (siehe pki-Block in der Caddyfile)
+      - $CA_DIR:/etc/caddy/ca:ro
       - caddy_data:/data
       - caddy_config:/config
       - ./logs:/var/log/caddy
@@ -223,10 +294,29 @@ fi
 # eigenen Start auf und cached dessen Container-IP).
 "${COMPOSE[@]}" restart nginx >/dev/null
 
+# --- Alte Caddy-PKI im Volume verwerfen -------------------------------------
+#
+# Im caddy_data-Volume können noch Intermediate + Leaf-Zertifikate einer
+# früheren (selbst erzeugten) Caddy-CA liegen. Die ketten nicht zu unserer
+# Dev-CA und würden weiter ausgeliefert. Deshalb: Fingerprint der aktiven CA
+# im Volume hinterlegen und bei Abweichung die lokale PKI einmalig verwerfen -
+# Caddy erzeugt Intermediate und Leaf-Zertifikate dann unter unserer Root neu.
+
+CA_MARKER=/data/caddy/.qonnectra-local-ca-fingerprint
+STORED_FINGERPRINT="$("${COMPOSE[@]}" exec -T caddy cat "$CA_MARKER" 2>/dev/null || true)"
+if [ "$STORED_FINGERPRINT" != "$CA_FINGERPRINT" ]; then
+	log "Setze Caddy-PKI im Volume auf die lokale Dev-CA zurück"
+	"${COMPOSE[@]}" exec -T caddy sh -c \
+		"rm -rf /data/caddy/pki/authorities/local /data/caddy/certificates/local && printf '%s' '$CA_FINGERPRINT' >$CA_MARKER"
+	"${COMPOSE[@]}" restart caddy >/dev/null
+fi
+
 log "Warte, bis die App über Caddy antwortet (Migrationen, nginx-Neustart, TLS-Zertifikate)..."
 READY=0
 for _ in $(seq 1 60); do
-	code="$(curl -sk -o /dev/null -w '%{http_code}' "https://app.qonnectra.localhost/login" 2>/dev/null || true)"
+	# Bewusst mit --cacert statt -k: prüft zugleich, dass die ausgelieferte
+	# Zertifikatskette wirklich unter unserer Dev-CA hängt.
+	code="$(curl -s --cacert "$CA_CRT" -o /dev/null -w '%{http_code}' "https://${APP_DOMAIN}/login" 2>/dev/null || true)"
 	if [ "$code" = "200" ]; then
 		READY=1
 		break
@@ -239,19 +329,47 @@ if [ "$READY" -eq 1 ]; then
 	log "Erzeuge fiktives Demo-Ausbaugebiet 'Glashofen' für Handbuch-Screenshots (idempotent)"
 	"${COMPOSE[@]}" exec -T backend python manage.py generate_demo_project || true
 else
-	warn "App antwortet nach 2 Minuten noch nicht - Container-Logs prüfen: docker compose -f docker-compose.yml -f docker-compose.override.yml logs backend"
+	if [ "$(curl -sk -o /dev/null -w '%{http_code}' "https://${APP_DOMAIN}/login" 2>/dev/null || true)" = "200" ]; then
+		warn "App antwortet, aber ihr Zertifikat kettet nicht zur lokalen Dev-CA ($CA_CRT) - Caddy-Logs prüfen: docker compose -f docker-compose.yml -f docker-compose.override.yml logs caddy"
+	else
+		warn "App antwortet nach 2 Minuten noch nicht - Container-Logs prüfen: docker compose -f docker-compose.yml -f docker-compose.override.yml logs backend"
+	fi
 fi
 
-# --- Lokale CA extrahieren (für warnungsfreies HTTPS im Browser) -----------
+# --- Truststore-Status der lokalen CA ---------------------------------------
+#
+# Die CA selbst wird nicht mehr aus dem Container exportiert (sie kommt vom
+# Host), es bleibt nur die Frage, ob sie schon importiert ist.
 
-CA_CERT_PATH="$DEPLOY_DIR/qonnectra-local-dev-ca.crt"
-if docker cp qonnectra_caddy_prod:/data/caddy/pki/authorities/local/root.crt "$CA_CERT_PATH" >/dev/null 2>&1; then
-	log "Lokale CA nach $CA_CERT_PATH exportiert"
+if openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt "$CA_CRT" >/dev/null 2>&1; then
+	CA_TRUSTED=1
 else
-	warn "Konnte die lokale CA noch nicht exportieren (Caddy evtl. noch nicht bereit). Einfach das Skript erneut ausführen, sobald der Stack läuft."
+	CA_TRUSTED=0
 fi
+
+# Veralteten Export früherer Skript-Versionen entfernen, damit niemand
+# versehentlich die alte, nicht mehr genutzte Caddy-CA importiert.
+rm -f "$DEPLOY_DIR/qonnectra-local-dev-ca.crt"
 
 # --- Zusammenfassung ---------------------------------------------------------
+
+if [ "$CA_TRUSTED" -eq 1 ]; then
+	CA_SECTION="Lokale Dev-CA: $CA_CRT
+Bereits im System-Truststore. Die CA liegt außerhalb von local-app/ und des
+Docker-Volumes und überlebt damit Rebuilds inkl. \"docker compose down -v\" -
+ein erneuter Import ist nur nötig, wenn $CA_DIR gelöscht wird.
+
+Firefox und snap-/flatpak-Browser (z. B. snap-Chromium) haben eigene
+Truststores und sind damit NICHT automatisch abgedeckt. Falls dort noch eine
+Zertifikatswarnung kommt, einmal nachziehen - das Skript ist idempotent und
+braucht kein sudo mehr, wenn der System-Truststore schon steht:
+  $REPO_ROOT/scripts/install-local-ca.sh"
+else
+	CA_SECTION="Lokale Dev-CA: $CA_CRT
+Noch nicht importiert, der Browser warnt daher weiterhin. Einmalig importieren
+(gilt danach für alle künftigen Rebuilds, die CA wird nicht mehr neu erzeugt):
+  $REPO_ROOT/scripts/install-local-ca.sh"
+fi
 
 log "Fertig!"
 cat <<EOF
@@ -268,15 +386,11 @@ zur Verfügung (nach Login oben links auswählen). Neu erzeugen (z. B. nach
 Datenänderungen für Screenshots):
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py generate_demo_project --force
 
-Zertifikatswarnung im Browser: Die *.qonnectra.localhost-Zertifikate stammen
-von einer lokalen Caddy-CA (kein echtes Let's Encrypt möglich für *.localhost,
-siehe RFC 6761). Einmalig importieren, dann keine Warnungen mehr:
-  $CA_CERT_PATH
-  Firefox: Einstellungen > Datenschutz & Sicherheit > Zertifikate anzeigen >
-           Zertifizierungsstellen > Importieren > "Dieser CA vertrauen..." setzen
-  Chrome/Linux (System-Speicher):
-    sudo cp $CA_CERT_PATH /usr/local/share/ca-certificates/qonnectra-local-dev-ca.crt
-    sudo update-ca-certificates
+Zertifikate: Für *.localhost gibt es kein echtes Let's Encrypt (RFC 6761),
+Caddy signiert die Zertifikate daher lokal - hier mit der Dev-CA vom Host
+statt mit einer bei jedem frischen Volume neu erzeugten Caddy-CA.
+
+$CA_SECTION
 
 Hinweis: tileserver (Kartenkacheln als Basiskarte) läuft ohne echte
 Kartendaten (.mbtiles) weiter in einer Restart-Schleife - das Frontend fällt
