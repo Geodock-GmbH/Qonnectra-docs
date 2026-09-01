@@ -88,20 +88,35 @@ else
 	git clone "$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR"
 fi
 
-DEMO_DATA_COMMAND_SRC="$REPO_ROOT/scripts/qonnectra-demo-data/generate_demo_project.py"
-DEMO_DATA_COMMAND_DEST="$LOCAL_APP_DIR/backend/apps/api/management/commands/generate_demo_project.py"
+IMPORT_COMMAND_SRC="$REPO_ROOT/scripts/qonnectra-demo-data/import_geodock_export.py"
+COMMANDS_DIR="$LOCAL_APP_DIR/backend/apps/api/management/commands"
 
-# --- Demo-Datensatz-Command einspielen ---------------------------------------
+# JSON-Export des echten "Testprojekt" aus der Qonnectra-Demo-Umgebung
+# (app.geodock.de), versioniert in diesem Repo. Wie er aktualisiert wird,
+# steht in scripts/qonnectra-demo-data/README.md. Ein abweichender Export
+# lässt sich über QONNECTRA_EXPORT_FILE einhängen.
+EXPORT_FILE="${QONNECTRA_EXPORT_FILE:-$REPO_ROOT/scripts/qonnectra-demo-data/testprojekt-export.json}"
+EXPORT_FILE_IN_CONTAINER=/tmp/testprojekt-export.json
+
+# --- Import-Command einspielen -----------------------------------------------
 #
 # local-app/ ist gitignored (siehe oben) und wird bei jedem Lauf frisch
-# geklont bzw. wiederverwendet - das Management-Command für die fiktiven
-# Handbuch-Testdaten liegt daher versioniert in diesem Repo
+# geklont bzw. wiederverwendet - das Management-Command für den Import des
+# Testprojekt-Exports liegt daher versioniert in diesem Repo
 # (scripts/qonnectra-demo-data/) und wird hier vor dem Image-Build in den
 # Checkout kopiert (das Backend-Image bäckt den Code zur Build-Zeit ein, ein
 # reiner Volume-Mount für Quellcode existiert nicht).
 
-log "Kopiere generate_demo_project-Command nach local-app/"
-cp "$DEMO_DATA_COMMAND_SRC" "$DEMO_DATA_COMMAND_DEST"
+log "Kopiere import_geodock_export-Command nach local-app/"
+cp "$IMPORT_COMMAND_SRC" "$COMMANDS_DIR/import_geodock_export.py"
+
+# Rückstand älterer Skript-Versionen: der fiktive Demo-Generator ist durch den
+# Import des echten Testprojekts ersetzt und würde sonst im Image bleiben.
+rm -f "$COMMANDS_DIR/generate_demo_project.py"
+
+if [ ! -f "$EXPORT_FILE" ]; then
+	warn "Kein Testprojekt-Export unter $EXPORT_FILE - der Stack startet ohne Projektdaten (Hinweis am Skriptende)."
+fi
 
 cd "$DEPLOY_DIR"
 
@@ -326,8 +341,12 @@ done
 if [ "$READY" -eq 1 ]; then
 	log "App antwortet."
 
-	log "Erzeuge fiktives Demo-Ausbaugebiet 'Glashofen' für Handbuch-Screenshots (idempotent)"
-	"${COMPOSE[@]}" exec -T backend python manage.py generate_demo_project || true
+	if [ -f "$EXPORT_FILE" ]; then
+		log "Importiere Testprojekt-Export für Handbuch-Screenshots (idempotent: ein bereits importiertes Projekt bleibt unangetastet)"
+		"${COMPOSE[@]}" cp "$EXPORT_FILE" "backend:$EXPORT_FILE_IN_CONTAINER"
+		"${COMPOSE[@]}" exec -T backend python manage.py import_geodock_export \
+			--file "$EXPORT_FILE_IN_CONTAINER" || true
+	fi
 else
 	if [ "$(curl -sk -o /dev/null -w '%{http_code}' "https://${APP_DOMAIN}/login" 2>/dev/null || true)" = "200" ]; then
 		warn "App antwortet, aber ihr Zertifikat kettet nicht zur lokalen Dev-CA ($CA_CRT) - Caddy-Logs prüfen: docker compose -f docker-compose.yml -f docker-compose.override.yml logs caddy"
@@ -371,6 +390,23 @@ Noch nicht importiert, der Browser warnt daher weiterhin. Einmalig importieren
   $REPO_ROOT/scripts/install-local-ca.sh"
 fi
 
+if [ -f "$EXPORT_FILE" ]; then
+	PROJECT_SECTION="Für Screenshots/Videos steht das aus der Demo-Umgebung exportierte Projekt
+\"Testprojekt\" zur Verfügung (nach Login oben links auswählen). Nach einem
+aktualisierten Export neu importieren (--force wirft das lokale Projekt vorher
+weg):
+  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml cp $EXPORT_FILE backend:$EXPORT_FILE_IN_CONTAINER
+  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py import_geodock_export --file $EXPORT_FILE_IN_CONTAINER --force"
+else
+	PROJECT_SECTION="Die Instanz enthält noch KEINE Projektdaten: unter
+  $EXPORT_FILE
+liegt kein Export des \"Testprojekt\". Normalerweise kommt er mit diesem Repo
+(scripts/qonnectra-demo-data/testprojekt-export.json, siehe README.md dort) -
+Datei wiederherstellen und Skript erneut ausführen (oder direkt importieren):
+  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml cp <export.json> backend:$EXPORT_FILE_IN_CONTAINER
+  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py import_geodock_export --file $EXPORT_FILE_IN_CONTAINER"
+fi
+
 log "Fertig!"
 cat <<EOF
 
@@ -381,10 +417,7 @@ Qonnectra läuft unter:
 
 Login: ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
 
-Für Screenshots/Videos steht das fiktive Projekt "Ausbaugebiet Glashofen"
-zur Verfügung (nach Login oben links auswählen). Neu erzeugen (z. B. nach
-Datenänderungen für Screenshots):
-  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py generate_demo_project --force
+$PROJECT_SECTION
 
 Zertifikate: Für *.localhost gibt es kein echtes Let's Encrypt (RFC 6761),
 Caddy signiert die Zertifikate daher lokal - hier mit der Dev-CA vom Host
