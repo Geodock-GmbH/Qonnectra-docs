@@ -10,7 +10,8 @@
 # jeder Maschine neu ausgeführt werden (idempotent).
 #
 # Voraussetzungen: git, curl, openssl, Docker Engine 24+, Docker Compose v2
-# ("docker compose"). Der ausführende Nutzer muss den Docker-Daemon ansprechen
+# ("docker compose") sowie Java 21+ für die Kartenkacheln (siehe
+# --skip-tiles). Der ausführende Nutzer muss den Docker-Daemon ansprechen
 # können (Mitglied der "docker"-Gruppe oder root).
 #
 # Verwendung:
@@ -46,6 +47,24 @@ CA_CRT="$CA_DIR/root.crt"
 CA_KEY="$CA_DIR/root.key"
 CA_NAME="Qonnectra Local Dev CA"
 
+# Kartenkacheln (.mbtiles) für den tileserver. Die App liefert bewusst keine
+# mit aus, tileserver-gl beendet sich ohne sie aber sofort und läuft dank
+# "restart: always" in eine Endlosschleife - die Karte fiele dann auf
+# OSM-Rasterkacheln zurück statt die echte Vektor-Basiskarte zu zeigen.
+#
+# Die Kacheln liegen wie die Dev-CA AUSSERHALB von local-app/ (wird geklont/
+# gelöscht) und außerhalb dieses Repos (mehrere hundert MB), damit --reset,
+# --reset-checkout und ein Neu-Klon nicht jedes Mal einen mehrminütigen
+# Planetiler-Lauf auslösen. Voreingestellt ist Schleswig-Holstein: das
+# Testprojekt liegt vollständig bei 9,74° O / 54,73° N (nordöstlich von
+# Flensburg). Überschreibbar via QONNECTRA_TILE_AREA (z. B. "germany",
+# dauert dann deutlich länger und braucht ~3 GB).
+TILES_DIR="${QONNECTRA_TILES_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/qonnectra-local-tiles}"
+TILE_AREA="${QONNECTRA_TILE_AREA:-schleswig-holstein}"
+TILE_MBTILES="$TILES_DIR/$TILE_AREA.mbtiles"
+PLANETILER_JAR="$TILES_DIR/planetiler.jar"
+PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar"
+
 # Alle Services außer "wireguard" (VPN-Zugang, für lokales Ausprobieren/
 # Handbuch-Screenshots irrelevant, würde nur zusätzliche Host-Capabilities
 # brauchen).
@@ -66,7 +85,7 @@ random_fernet_key() {
 
 usage() {
 	cat <<EOF
-Verwendung: $(basename "$0") [--reset] [--reset-checkout]
+Verwendung: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
 
   --reset           Daten der lokalen Instanz verwerfen und neu aufbauen:
                     Container, Docker-Volumes (Datenbank, Medien,
@@ -77,22 +96,29 @@ Verwendung: $(basename "$0") [--reset] [--reset-checkout]
                     auch eigene Änderungen darin. Lässt für sich genommen
                     Datenbank und Secrets in Ruhe, ist mit --reset
                     kombinierbar.
+  --skip-tiles      Keine Kartenkacheln erzeugen. Der tileserver läuft dann
+                    ohne Daten in eine Restart-Schleife, die Karte fällt auf
+                    OSM-Rasterkacheln zurück.
   -h, --help        Diese Hilfe anzeigen.
 
 Die lokale Dev-CA in
   $CA_DIR
 bleibt in jedem Fall erhalten - der Truststore-Import muss also nicht
-wiederholt werden.
+wiederholt werden. Ebenso bleiben die Kartenkacheln in
+  $TILES_DIR
+erhalten; sie werden nur erzeugt, wenn sie dort fehlen.
 EOF
 }
 
 RESET=0
 RESET_CHECKOUT=0
+SKIP_TILES=0
 ENV_BACKUP=""
 for arg in "$@"; do
 	case "$arg" in
 	--reset) RESET=1 ;;
 	--reset-checkout) RESET_CHECKOUT=1 ;;
+	--skip-tiles) SKIP_TILES=1 ;;
 	-h | --help)
 		usage
 		exit 0
@@ -384,6 +410,79 @@ EOF
 		"$DEPLOY_DIR/Caddyfile.production"
 } >"$DEPLOY_DIR/Caddyfile.production.local"
 
+# --- Kartenkacheln erzeugen --------------------------------------------------
+#
+# tileserver-gl braucht eine .mbtiles-Datei; die App liefert keine mit (siehe
+# local-app/deployment/README.md, "Generating Map Tiles with Planetiler").
+# Ohne sie beendet sich der Container beim Start ("Not valid input file") und
+# wird von "restart: always" endlos neu gestartet.
+#
+# Der Lauf passiert nur einmal pro Rechner: Ergebnis und heruntergeladene
+# OSM-Rohdaten liegen in $TILES_DIR außerhalb von local-app/.
+
+if [ "$SKIP_TILES" -eq 1 ]; then
+	warn "--skip-tiles: überspringe Kartenkacheln. Der tileserver wird in einer Restart-Schleife laufen, die Karte nutzt OSM-Rasterkacheln."
+elif [ -f "$TILE_MBTILES" ]; then
+	log "Kartenkacheln vorhanden: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
+elif ! command -v java >/dev/null 2>&1; then
+	warn "java fehlt - Kartenkacheln können nicht erzeugt werden (Planetiler braucht Java 21+). Der tileserver läuft dadurch in einer Restart-Schleife, die Karte nutzt OSM-Rasterkacheln. Java installieren und Skript erneut ausführen, oder mit --skip-tiles absichtlich darauf verzichten."
+else
+	mkdir -p "$TILES_DIR"
+
+	if [ ! -f "$PLANETILER_JAR" ]; then
+		log "Lade Planetiler nach $PLANETILER_JAR"
+		curl -fSL --retry 3 -o "$PLANETILER_JAR.tmp" "$PLANETILER_URL" ||
+			die "Planetiler konnte nicht geladen werden: $PLANETILER_URL"
+		mv "$PLANETILER_JAR.tmp" "$PLANETILER_JAR"
+	fi
+
+	log "Erzeuge Kartenkacheln für \"$TILE_AREA\" (einmalig, dauert einige Minuten)"
+	# Erst unter einem Zwischennamen schreiben und dann umbenennen: ein
+	# abgebrochener Lauf hinterlässt sonst eine halbe .mbtiles, die beim
+	# nächsten Lauf als fertig gilt. Die Endung muss dabei .mbtiles bleiben -
+	# Planetiler leitet das Archivformat aus ihr ab und bricht sonst mit
+	# "Unsupported format" ab.
+	# Arbeitsverzeichnis $TILES_DIR, damit Planetiler seine Downloads
+	# (data/sources) und temporären Dateien ebenfalls dort ablegt und beim
+	# nächsten Mal wiederverwenden kann.
+	TILE_TMP="$TILES_DIR/.$TILE_AREA.partial.mbtiles"
+	if (cd "$TILES_DIR" && java -Xmx4g -jar "$PLANETILER_JAR" \
+		--download --area="$TILE_AREA" --force \
+		--output="$TILE_TMP"); then
+		mv "$TILE_TMP" "$TILE_MBTILES"
+		log "Kartenkacheln fertig: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
+	else
+		rm -f "$TILE_TMP"
+		warn "Planetiler-Lauf für \"$TILE_AREA\" fehlgeschlagen. Der tileserver läuft dadurch in einer Restart-Schleife, die Karte nutzt OSM-Rasterkacheln."
+	fi
+fi
+
+# Die Kacheln müssen als $DEPLOY_DIR/tiles/germany.mbtiles neben config.json
+# liegen: docker-compose.yml mountet ./tiles read-only nach /data, und
+# config.json verweist fest auf /data/germany.mbtiles. Ein zusätzlicher
+# Bind-Mount nur für die Datei funktioniert nicht - Docker kann den
+# Mountpoint im read-only gemounteten /data nicht anlegen ("create target of
+# file bind-mount ... read-only file system").
+#
+# Deshalb eine harte Verknüpfung (kein Kopieren: spart die 130+ MB doppelt,
+# und der Cache in $TILES_DIR bleibt die einzige echte Kopie). Liegt
+# $TILES_DIR auf einem anderen Dateisystem als local-app/, wird kopiert.
+# Der Name ist immer germany.mbtiles, unabhängig von der erzeugten Region.
+if [ -f "$TILE_MBTILES" ]; then
+	TILE_LINK="$DEPLOY_DIR/tiles/germany.mbtiles"
+	# Neu verknüpfen, wenn die Datei fehlt oder einen anderen Stand als den
+	# Cache hat. Der Größenvergleich deckt beides ab: eine harte Verknüpfung
+	# ist immer gleich groß (kein unnötiges Neuanlegen), ein neu erzeugter
+	# Extrakt oder ein Wechsel von QONNECTRA_TILE_AREA praktisch nie.
+	if [ ! -e "$TILE_LINK" ] ||
+		[ "$(stat -c %s "$TILE_MBTILES")" != "$(stat -c %s "$TILE_LINK")" ]; then
+		rm -f "$TILE_LINK"
+		ln "$TILE_MBTILES" "$TILE_LINK" 2>/dev/null ||
+			cp "$TILE_MBTILES" "$TILE_LINK" ||
+			warn "Kartenkacheln konnten nicht nach $TILE_LINK verknüpft werden."
+	fi
+fi
+
 # --- docker-compose.override.yml erzeugen -----------------------------------
 #
 # Einzige lokal nötige Anpassung an der Produktions-Compose: Caddy auf die
@@ -565,6 +664,19 @@ Datei wiederherstellen und Skript erneut ausführen (oder direkt importieren):
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py import_geodock_export --file $EXPORT_FILE_IN_CONTAINER"
 fi
 
+if [ -f "$TILE_MBTILES" ]; then
+	TILES_SECTION="Kartenkacheln: $TILE_MBTILES
+Die Karte zeigt damit die echte Vektor-Basiskarte (Hell-/Dunkelmodus), nicht
+den OSM-Fallback. Die Kacheln liegen außerhalb von local-app/ und überleben
+--reset und --reset-checkout. Für eine andere Region löschen und neu erzeugen:
+  QONNECTRA_TILE_AREA=<region> $REPO_ROOT/scripts/setup-local-qonnectra.sh"
+else
+	TILES_SECTION="Kartenkacheln: KEINE unter $TILE_MBTILES
+Der tileserver läuft deshalb in einer Restart-Schleife; das Frontend fällt
+automatisch auf OSM-Rasterkacheln zurück. Erzeugen (braucht Java 21+):
+  $REPO_ROOT/scripts/setup-local-qonnectra.sh"
+fi
+
 log "Fertig!"
 cat <<EOF
 
@@ -583,11 +695,7 @@ statt mit einer bei jedem frischen Volume neu erzeugten Caddy-CA.
 
 $CA_SECTION
 
-Hinweis: tileserver (Kartenkacheln als Basiskarte) läuft ohne echte
-Kartendaten (.mbtiles) weiter in einer Restart-Schleife - das Frontend fällt
-dafür automatisch auf OSM-Kacheln zurück. Siehe local-app/deployment/README.md
-Abschnitt "Generating Map Tiles with Planetiler", falls echte Kacheln
-gebraucht werden.
+$TILES_SECTION
 
 Stack stoppen:
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml down

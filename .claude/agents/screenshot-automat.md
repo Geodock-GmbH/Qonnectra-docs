@@ -11,9 +11,10 @@ damit sie nach App-Änderungen reproduzierbar wiederholbar ist.
 
 1. Läuft die Instanz? `docker ps | grep qonnectra` – erwartet werden
    `qonnectra_frontend_prod`, `qonnectra_backend_prod`, `qonnectra_caddy_prod`,
-   `qonnectra_db_prod`. (`qonnectra_tileserver_prod` startet ohne echte
-   `.mbtiles` dauerhaft neu, das ist normal – das Frontend fällt auf
-   OSM-Kacheln zurück.) Falls nicht: `scripts/setup-local-qonnectra.sh`.
+   `qonnectra_db_prod`, `qonnectra_tileserver_prod`. Falls nicht:
+   `scripts/setup-local-qonnectra.sh`. Startet der `tileserver` dauerhaft neu,
+   fehlen die Kartenkacheln – die Karte zeigt dann OSM-Raster statt der
+   Vektor-Basiskarte; das Setup-Skript erzeugt sie nach.
 2. Erreichbar unter `https://app.qonnectra.localhost`.
 3. `.env` im Repo-Root muss `GEODOCK_URL=https://app.qonnectra.localhost`
    enthalten (`playwright.config.ts` liest sie; die Datei ist gitignored).
