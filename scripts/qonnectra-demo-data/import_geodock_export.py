@@ -52,6 +52,7 @@ from apps.api.models import (
     Microduct,
     MicroductCableConnection,
     MicroductConnection,
+    NetworkSchemaSettings,
     Node,
     Projects,
     ResidentialUnit,
@@ -60,6 +61,15 @@ from apps.api.models import (
 )
 
 PROJECT_NAME = "Testprojekt"
+
+# NetworkSchemaSettings.excluded_node_types hat keinen API-Endpunkt und war
+# daher aus dem Export nicht ermittelbar. Durch Abgleich des Netzschemas auf
+# app.geodock.de (nur NVt/FCC/Schacht/POP sichtbar) mit den lokal
+# importierten Knotentypen manuell rekonstruiert: Hausanschluss (zu viele
+# fuers Netzschema, werden ueber die Kindansicht aufgerufen), Rohrabzweig
+# (reiner Trassen-Verzweigungspunkt) und Bauerschwernis (Hindernis-Marker,
+# kein echter Netzknoten) sind dort ausgeblendet.
+NETWORK_SCHEMA_EXCLUDED_NODE_TYPES = ["Hausanschluss", "Rohrabzweig", "Bauerschwernis"]
 
 
 def dedupe_by_uuid(rows):
@@ -519,3 +529,14 @@ class Command(BaseCommand):
         ]
         Area.objects.bulk_create(areas, batch_size=200)
         self.stdout.write(f"  Gebiete: {len(areas)}")
+
+        # --- Netzschema-Einstellungen (siehe Kommentar oben) ----------------
+        schema_settings = NetworkSchemaSettings.objects.create(project=project)
+        excluded_types = AttributesNodeType.objects.filter(
+            node_type__in=NETWORK_SCHEMA_EXCLUDED_NODE_TYPES
+        )
+        schema_settings.excluded_node_types.set(excluded_types)
+        self.stdout.write(
+            "  Netzschema-Ausschlüsse: "
+            + ", ".join(sorted(t.node_type for t in excluded_types))
+        )
