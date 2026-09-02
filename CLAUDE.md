@@ -159,10 +159,21 @@ lokale Instanz, damit sie bei Änderungen der App neu erzeugt werden können.
   sie über die **Produktions**-Compose. Idempotent, beliebig oft ausführbar.
 - Erreichbar unter `https://app.qonnectra.localhost` (Admin:
   `https://admin.qonnectra.localhost/admin`, API: `https://api.qonnectra.localhost`).
-- Zugangsdaten stehen in `local-app/deployment/.env`
-  (`DJANGO_SUPERUSER_USERNAME` / `DJANGO_SUPERUSER_PASSWORD`) und werden beim
-  ersten Lauf zufällig erzeugt. **Nie in Doku, Tests, Skripte oder Commits
-  schreiben** – immer über `process.env` bzw. die `.env`-Datei einlesen.
+- Zwei Konten, Zugangsdaten in `local-app/deployment/.env`, beim ersten Lauf
+  zufällig erzeugt. **Nie in Doku, Tests, Skripte oder Commits schreiben** –
+  immer über `process.env` bzw. die `.env`-Datei einlesen.
+  - `APP_USER_USERNAME` / `APP_USER_PASSWORD` – Konto **ohne**
+    Administrationsrechte, Gruppe aus `APP_USER_GROUP` (Voreinstellung
+    `Editor`: alle Fachdaten bearbeitbar, kein Zugriff auf `/admin/*`).
+    **Der Standard für alle Aufnahmen** – Teil A beschreibt die Sicht normaler
+    Nutzender. Das Setup legt es bei jedem Lauf neu an bzw. aktualisiert es.
+  - `DJANGO_SUPERUSER_USERNAME` / `DJANGO_SUPERUSER_PASSWORD` – Django-Superuser
+    für die Administration. Nur für Bilder von `/admin/*` benutzen: er umgeht
+    jede Rechteprüfung und sieht zusätzlich den Menüpunkt „Logs“.
+- `PUBLIC_DOCUMENTATION_URL` in `.env` ist der Hilfe-Link, den die App in
+  Kopfzeile und Navigationsleiste zeigt; das Setup setzt ihn bei jedem Lauf auf
+  `https://qonnectra.de/` (überschreibbar via `QONNECTRA_DOCUMENTATION_URL`).
+  Ist die Variable leer, blendet die App den Link aus und er fehlt im Bild.
 - HTTPS läuft über eine lokale Dev-CA; einmalig `scripts/install-local-ca.sh`
   ausführen, alternativ in Playwright `ignoreHTTPSErrors: true` setzen.
 - Demodaten: Projekt **„Testprojekt“** aus
@@ -179,8 +190,13 @@ wird nicht mehr gelesen.
 
 - `playwright/local-app.ts` ist die einzige Quelle für Adresse und Zugangsdaten
   und liest `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`,
-  `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`). Zugangsdaten nur
-  über `localApp()` beziehen, nie in Specs, Ausgaben oder Commits schreiben.
+  `APP_USER_*`, `DJANGO_SUPERUSER_*`). Zugangsdaten nur über `localApp()`
+  beziehen, nie in Specs, Ausgaben oder Commits schreiben.
+- Angemeldet wird sich standardmäßig mit dem Konto **ohne**
+  Administrationsrechte. `QONNECTRA_LOGIN=admin pnpm test:e2e` schaltet auf den
+  Superuser um – nur für Bereiche, die normalen Nutzenden verborgen bleiben.
+  Bilder aus einem Admin-Lauf zeigen sonst eine Oberfläche, die es für die
+  Zielgruppe von Teil A nicht gibt.
 - `playwright/auth.setup.ts` läuft als Setup-Projekt automatisch vor jedem Spec:
   prüft die Erreichbarkeit (mit Hinweis auf `scripts/setup-local-qonnectra.sh`,
   falls der Stack steht), meldet sich per `POST /api/v1/auth/login/` an und
@@ -210,9 +226,11 @@ wird nicht mehr gelesen.
   handgezeichneten Markierungen (Muster 3) werden nach dem Übernehmen
   nachbearbeitet – `--dry-run` vorher ansehen, sonst überschreibt der Lauf die
   Handarbeit mit einer Rohaufnahme.
-- Kapitel 3 braucht als einziges den abgemeldeten Zustand und setzt daher
-  `test.use({ storageState: { cookies: [], origins: [] } })`; angemeldete Aufrufe
-  von `/login` leitet die App auf `/map` um.
+- Kapitel 3 braucht als einziges auch den abgemeldeten Zustand: die Bilder der
+  Anmeldeseite stehen in einem `test.describe`-Block mit
+  `test.use({ storageState: { cookies: [], origins: [] } })`, die Bilder der
+  Oberfläche daneben im normalen angemeldeten Zustand. Angemeldete Aufrufe von
+  `/login` leitet die App auf `/map` um.
 - `workers: 1` und `fullyParallel: false` sind Absicht: alle Specs teilen sich
   eine Instanz samt Projektauswahl und Kartenposition.
 - Determinismus-Helfer in `playwright/manual-shots.ts`: `animationenAus()`
@@ -266,12 +284,35 @@ wird nicht mehr gelesen.
   nicht (es ist kein Kachel-Rennen) – für einen deterministischen Treffer den
   Layer „Gebiet" vor dem Klick ausblenden. Wieder einschalten geht danach nicht,
   weil die geöffnete Info-Box die Legende verdeckt.
+- Die Navigationsleiste ist bei 1280 × 800 höher als das Fenster (gemessen:
+  1093 px Inhalt): mit allen aufgeklappten Gruppen liegt die Gruppe „System"
+  („Logs", „Einstellungen") unter dem sichtbaren Bereich. Scroll-Container ist
+  das Raster der Leiste, greifbar über
+  `div[class*="grid-rows-[auto_1fr_auto]"]` (`SideBar.svelte`) – für Bilder des
+  Leistenfußes dort `scrollTop = scrollHeight` setzen und **nicht** Gruppen
+  einklappen; das wäre ein Zustand, den Nutzende erst selbst herstellen müssen.
 
 **Die App (Kontext für Selektoren und Routen)**
 
-SvelteKit + Skeleton, Routen: `/login`, `/dashboard`, `/map`, `/conduit`
-(Rohrverwaltung), `/trench` (Rohrzuordnung), `/pipe-branch` (Rohrverzweigung),
-`/network-schema` (Netzschema), `/house-connections`, `/trace`, `/settings`.
+SvelteKit + Skeleton. Die Navigationsleiste ist nach Gruppen sortiert; die
+Beschriftungen sind kurz und erst mit der Gruppe eindeutig (Gruppe „Rohr“ →
+„Verwaltung“ = Rohrverwaltung). Routen und Beschriftungen:
+
+| Gruppe | Route → Beschriftung |
+|---|---|
+| „Info“ | `/dashboard` „Dashboard“, `/map` „Karte“ |
+| „Funktionen“ | `/fault-simulation` „Störungsanalyse“, `/post-compaction` „Nachverdichtung“, `/pipeline-records` „Leitungsauskunft“, `/valuation` „Wertermittlung“ |
+| „Rohr“ | `/conduit` „Verwaltung“, `/trench` „Zuordnung“, `/pipe-branch` „Verzweigung“, `/house-connections` „Mikrorohre“ |
+| „Kabel“ | `/network-schema` „Netzschema“, `/trace` „Faserweg“ |
+| „Gebäude“ | `/address` „Adressen“ |
+| „System“ | `/admin/logs` „Logs“, `/settings` „Einstellungen“ |
+
+Dazu `/login` ohne Navigationsleiste. Welche Einträge erscheinen, hängt an den
+Rechten (`canAccessRoute`); als Superuser sind alle sichtbar. Mit dem
+Standardkonto der Aufnahmen (Gruppe „Editor“) fehlt in der Gruppe „System“ der
+Eintrag „Logs“ – die Gruppe besteht dort nur aus „Einstellungen“. `/admin/*`
+ist der einzige gesperrte Pfad; alles ohne eigenen `RoutePermission`-Eintrag
+gilt als erlaubt.
 Navigationsdefinition: `local-app/frontend/src/lib/config/navLinks.ts`,
 UI-Texte: `local-app/frontend/messages/de.json`.
 

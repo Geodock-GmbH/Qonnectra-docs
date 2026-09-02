@@ -4,6 +4,12 @@
 // Zugangsdaten aus local-app/deployment/.env an und legt den angemeldeten
 // Zustand in auth-state.json ab. Kein manueller Login-Schritt mehr nötig.
 //
+// Angemeldet wird sich mit dem Konto OHNE Administrationsrechte
+// (APP_USER_USERNAME, Gruppe „Editor“), damit die Bilder die Oberfläche so
+// zeigen, wie normale Nutzende sie sehen. Für Bereiche, die nur der
+// Superuser sieht, den Lauf mit QONNECTRA_LOGIN=admin starten – dann fehlt
+// aber jede Rechteprüfung und der Menüpunkt „Logs“ ist zusätzlich im Bild.
+//
 // Die Zugangsdaten werden nur an die API geschickt, nie ausgegeben.
 //
 // auth-state.json wird bei jedem Lauf neu erzeugt und ist absichtlich nicht
@@ -29,7 +35,17 @@ const KARTE_MITTE = [1083532, 7308590]
 const KARTE_ZOOM = 16.5
 
 setup('Anmelden und Zustand speichern', async ({ browser, request }) => {
-  const { appUrl, apiUrl, username, password } = localApp()
+  const { appUrl, apiUrl, username, password, rolle } = localApp()
+
+  // Nur die Rolle in die Ausgabe, nie der Kontoname – an ihm hängen die
+  // Zugangsdaten in .env.
+  setup.info().annotations.push({
+    type: 'Anmeldung',
+    description:
+      rolle === 'admin'
+        ? 'Django-Superuser (QONNECTRA_LOGIN=admin)'
+        : 'Konto ohne Administrationsrechte (Standard)',
+  })
 
   // 1. Erreichbarkeit zuerst prüfen, damit ein nicht laufender Stack nicht als
   //    Login-Fehler erscheint.
@@ -77,9 +93,14 @@ setup('Anmelden und Zustand speichern', async ({ browser, request }) => {
           'Container-IP des Backends zwischengespeichert (Log: „Host is unreachable“).\n' +
           'Dann hilft:\n  docker restart qonnectra_nginx_prod'
         : login.status() === 401 || login.status() === 400
-          ? 'Zugangsdaten abgelehnt. Stimmen DJANGO_SUPERUSER_USERNAME/-PASSWORD in ' +
-            'local-app/deployment/.env? Neu aufbauen mit:\n' +
-            '  scripts/setup-local-qonnectra.sh --reset'
+          ? rolle === 'admin'
+            ? 'Zugangsdaten abgelehnt. Stimmen DJANGO_SUPERUSER_USERNAME/-PASSWORD in ' +
+              'local-app/deployment/.env? Neu aufbauen mit:\n' +
+              '  scripts/setup-local-qonnectra.sh --reset'
+            : 'Zugangsdaten abgelehnt. Das Konto zu APP_USER_USERNAME aus ' +
+              'local-app/deployment/.env existiert nicht oder hat ein anderes\n' +
+              'Passwort. Das Setup legt es an und setzt das Passwort bei jedem Lauf neu:\n' +
+              '  scripts/setup-local-qonnectra.sh'
           : `Unerwartete Antwort HTTP ${login.status()}.`
     throw new Error(`Anmeldung an ${apiUrl}/api/v1/auth/login/ fehlgeschlagen.\n${grund}`)
   }

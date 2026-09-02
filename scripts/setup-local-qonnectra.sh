@@ -65,6 +65,31 @@ TILE_MBTILES="$TILES_DIR/$TILE_AREA.mbtiles"
 PLANETILER_JAR="$TILES_DIR/planetiler.jar"
 PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar"
 
+# Hilfe-Link der App (PUBLIC_DOCUMENTATION_URL). Die App zeigt ihn in
+# Kopfzeile, Navigationsleiste und mobiler Navigation und blendet ihn aus,
+# solange die Variable leer ist - für Screenshots der Oberfläche muss sie
+# also gesetzt sein. Zeigt auf diese Doku-Site.
+DOCUMENTATION_URL="${QONNECTRA_DOCUMENTATION_URL:-https://qonnectra.de/}"
+
+# Zweites Konto OHNE Administrationsrechte. Der Django-Superuser sieht alle
+# Menüpunkte und darf alles - Bilder daraus zeigen eine Oberfläche, die
+# normale Nutzende so nie zu Gesicht bekommen. Teil A des Handbuchs
+# beschreibt aber genau deren Sicht, deshalb entstehen die Screenshots mit
+# diesem Konto (siehe playwright/local-app.ts).
+#
+# Gruppe "Editor" (aus Migration api/0058_seed_permission_data): alle
+# Fachdaten bearbeitbar - "Speichern" und die Bearbeitungsdialoge sind also
+# im Bild -, aber kein Zugriff auf /admin/* und damit kein Menüpunkt "Logs".
+# Alternativen: "Viewer" (nur lesend, keine Bearbeitungsschaltflächen) oder
+# "Admin" (wie Editor plus /admin/*).
+#
+# Beide Werte greifen nur, solange local-app/deployment/.env noch nicht
+# existiert - danach gilt, was dort steht (Name und Passwort müssen zum
+# Nutzer in der Datenbank passen). Die Gruppe lässt sich nachträglich in
+# .env ändern, sie wird bei jedem Lauf neu zugewiesen.
+APP_USER_NAME="${QONNECTRA_APP_USER:-anwender}"
+APP_USER_GROUP_NAME="${QONNECTRA_APP_USER_GROUP:-Editor}"
+
 # Alle Services außer "wireguard" (VPN-Zugang, für lokales Ausprobieren/
 # Handbuch-Screenshots irrelevant, würde nur zusätzliche Host-Capabilities
 # brauchen).
@@ -107,6 +132,12 @@ bleibt in jedem Fall erhalten - der Truststore-Import muss also nicht
 wiederholt werden. Ebenso bleiben die Kartenkacheln in
   $TILES_DIR
 erhalten; sie werden nur erzeugt, wenn sie dort fehlen.
+
+Angelegt werden zwei Konten: der Django-Superuser für die Administration und
+ein Konto ohne Administrationsrechte, mit dem die Handbuch-Screenshots
+entstehen (Name/Gruppe beim ersten Lauf über QONNECTRA_APP_USER bzw.
+QONNECTRA_APP_USER_GROUP wählbar, danach über local-app/deployment/.env).
+Den Hilfe-Link der App setzt QONNECTRA_DOCUMENTATION_URL.
 EOF
 }
 
@@ -249,6 +280,7 @@ COMMANDS_DIR="$LOCAL_APP_DIR/backend/apps/api/management/commands"
 EXPORT_FILE="${QONNECTRA_EXPORT_FILE:-$REPO_ROOT/scripts/qonnectra-demo-data/testprojekt-export.json}"
 EXPORT_FILE_IN_CONTAINER=/tmp/testprojekt-export.json
 IMPORT_OK=0
+APP_USER_OK=0
 
 # --- Import-Command einspielen -----------------------------------------------
 #
@@ -339,8 +371,65 @@ FIELD_ENCRYPTION_KEY=$(random_fernet_key)
 API_URL=http://backend:8000/api/v1/
 PUBLIC_API_URL=https://api.qonnectra.localhost/api/v1/
 PUBLIC_TILE_SERVER_URL=https://tiles.qonnectra.localhost
+
+# Hilfe-Link in Kopfzeile und Navigationsleiste. Leer = Link ausgeblendet.
+PUBLIC_DOCUMENTATION_URL=$DOCUMENTATION_URL
+
+# Konto ohne Administrationsrechte für Screenshots aus Sicht normaler
+# Nutzender. Wird nach dem Start angelegt und der Gruppe unten zugeordnet;
+# angemeldet wird sich damit standardmäßig in allen Playwright-Läufen.
+APP_USER_USERNAME=$APP_USER_NAME
+APP_USER_EMAIL=$APP_USER_NAME@example.com
+APP_USER_PASSWORD=$(random_alnum 16)
+APP_USER_GROUP=$APP_USER_GROUP_NAME
 EOF
 fi
+
+# --- Fehlende Schlüssel in einer bestehenden .env nachtragen ----------------
+#
+# Der Block oben läuft nur beim ersten Lauf. Instanzen, die mit einer
+# früheren Skript-Version aufgesetzt wurden, haben die neueren Schlüssel
+# deshalb nicht - ohne Nachtragen wäre ein --reset (und damit eine leere
+# Datenbank) nötig, nur um an einen Konfigurationswert zu kommen.
+
+# Fügt den Schlüssel an, falls er fehlt. Ein vorhandener Wert bleibt
+# unangetastet: Secrets aus dem ersten Lauf müssen zum Stand der Datenbank
+# passen, ein neu gewürfeltes Passwort passte nicht mehr zum Nutzer darin.
+env_nachtragen() {
+	local schluessel="$1" wert="$2" kommentar="${3:-}"
+	if grep -qE "^[[:space:]]*$schluessel=" "$DEPLOY_DIR/.env"; then
+		return
+	fi
+	log "Trage $schluessel in local-app/deployment/.env nach"
+	{
+		printf '\n'
+		if [ -n "$kommentar" ]; then printf '%s\n' "$kommentar"; fi
+		printf '%s=%s\n' "$schluessel" "$wert"
+	} >>"$DEPLOY_DIR/.env"
+}
+
+# Wie env_nachtragen, überschreibt aber einen abweichenden Wert. Nur für
+# Werte ohne Geheimnischarakter, die das Skript vorgibt - für Secrets nicht
+# benutzen (siehe Kommentar oben).
+env_setzen() {
+	local schluessel="$1" wert="$2" kommentar="${3:-}"
+	if ! grep -qE "^[[:space:]]*$schluessel=" "$DEPLOY_DIR/.env"; then
+		env_nachtragen "$schluessel" "$wert" "$kommentar"
+		return
+	fi
+	if [ "$(sed -nE "s|^[[:space:]]*$schluessel=||p" "$DEPLOY_DIR/.env" | head -1)" != "$wert" ]; then
+		log "Setze $schluessel in local-app/deployment/.env auf $wert"
+		sed -i -E "s|^[[:space:]]*$schluessel=.*|$schluessel=$wert|" "$DEPLOY_DIR/.env"
+	fi
+}
+
+env_setzen PUBLIC_DOCUMENTATION_URL "$DOCUMENTATION_URL" \
+	"# Hilfe-Link in Kopfzeile und Navigationsleiste. Leer = Link ausgeblendet."
+env_nachtragen APP_USER_USERNAME "$APP_USER_NAME" \
+	"# Konto ohne Administrationsrechte für Screenshots aus Sicht normaler Nutzender."
+env_nachtragen APP_USER_EMAIL "$APP_USER_NAME@example.com"
+env_nachtragen APP_USER_PASSWORD "$(random_alnum 16)"
+env_nachtragen APP_USER_GROUP "$APP_USER_GROUP_NAME"
 
 # shellcheck disable=SC1091
 source "$DEPLOY_DIR/.env"
@@ -496,6 +585,19 @@ cat >"$DEPLOY_DIR/docker-compose.override.yml" <<EOF
 # Anpassung an docker-compose.yml (Produktion) für *.qonnectra.localhost
 # statt echter Domains mit Let's-Encrypt-Zertifikaten.
 services:
+  # docker-compose.yml listet die Umgebung des Backends einzeln auf und liest
+  # kein env_file - die APP_USER_*-Werte müssen deshalb hier ergänzt werden.
+  # Sie stehen im Container, damit das Skript das Konto per "manage.py shell"
+  # anlegen kann, ohne das Passwort auf die Kommandozeile des Hosts (und
+  # damit in die Prozessliste) zu schreiben. Die Platzhalter bleiben
+  # absichtlich unaufgelöst: Compose setzt sie beim Start aus .env ein, in
+  # dieser Datei steht damit kein Passwort.
+  backend:
+    environment:
+      - APP_USER_USERNAME=\${APP_USER_USERNAME}
+      - APP_USER_EMAIL=\${APP_USER_EMAIL}
+      - APP_USER_PASSWORD=\${APP_USER_PASSWORD}
+      - APP_USER_GROUP=\${APP_USER_GROUP}
   caddy:
     volumes:
       - ./Caddyfile.production.local:/etc/caddy/Caddyfile:ro
@@ -566,26 +668,29 @@ done
 if [ "$READY" -eq 1 ]; then
 	log "App antwortet."
 
-	if [ -f "$EXPORT_FILE" ]; then
-		# Die Prüfung oben betrifft nur das Frontend. Das Backend arbeitet zu
-		# dem Zeitpunkt bei leerer Datenbank noch an Migrationen und
-		# load_initial_data - ein Import davor scheitert an fehlenden Tabellen
-		# bzw. würde Referenzdaten ohne die Werte aus den Fixtures anlegen.
-		# Deshalb hier auf beides warten: Tabellen vorhanden (Projects) und
-		# Fixtures eingespielt (AttributesCableType).
-		log "Warte auf Migrationen und Initialdaten im Backend..."
-		BACKEND_READY=0
-		for _ in $(seq 1 60); do
-			if "${COMPOSE[@]}" exec -T backend python manage.py shell -c \
-				"from apps.api.models import AttributesCableType, Projects; assert AttributesCableType.objects.exists() and Projects.objects.exists()" \
-				>/dev/null 2>&1; then
-				BACKEND_READY=1
-				break
-			fi
-			sleep 3
-		done
+	# Die Prüfung oben betrifft nur das Frontend. Das Backend arbeitet zu dem
+	# Zeitpunkt bei leerer Datenbank noch an Migrationen und
+	# load_initial_data - ein Import davor scheitert an fehlenden Tabellen
+	# bzw. würde Referenzdaten ohne die Werte aus den Fixtures anlegen, und
+	# die Gruppen für das Anwender-Konto legt erst die Migration
+	# 0058_seed_permission_data an. Deshalb hier auf beides warten: Tabellen
+	# vorhanden (Projects) und Fixtures eingespielt (AttributesCableType).
+	log "Warte auf Migrationen und Initialdaten im Backend..."
+	BACKEND_READY=0
+	for _ in $(seq 1 60); do
+		if "${COMPOSE[@]}" exec -T backend python manage.py shell -c \
+			"from apps.api.models import AttributesCableType, Projects; assert AttributesCableType.objects.exists() and Projects.objects.exists()" \
+			>/dev/null 2>&1; then
+			BACKEND_READY=1
+			break
+		fi
+		sleep 3
+	done
 
-		if [ "$BACKEND_READY" -eq 1 ]; then
+	if [ "$BACKEND_READY" -eq 0 ]; then
+		warn "Backend hat Migrationen/Initialdaten nach 3 Minuten nicht abgeschlossen - Import des Testprojekts und Anlegen des Anwender-Kontos übersprungen."
+	else
+		if [ -f "$EXPORT_FILE" ]; then
 			log "Importiere Testprojekt-Export für Handbuch-Screenshots (idempotent: ein bereits importiertes Projekt bleibt unangetastet)"
 			"${COMPOSE[@]}" cp "$EXPORT_FILE" "backend:$EXPORT_FILE_IN_CONTAINER"
 			if "${COMPOSE[@]}" exec -T backend python manage.py import_geodock_export \
@@ -594,8 +699,60 @@ if [ "$READY" -eq 1 ]; then
 			else
 				warn "Import des Testprojekt-Exports fehlgeschlagen (Ausgabe oben)."
 			fi
+		fi
+
+		# --- Konto ohne Administrationsrechte anlegen -----------------------
+		#
+		# Das Skript schickt den Python-Code über die Standardeingabe an
+		# "manage.py shell" (ohne Terminal führt der Befehl aus, was dort
+		# ankommt). Die Zugangsdaten liest der Code aus der Umgebung des
+		# Containers, die docker-compose.override.yml gesetzt hat - so
+		# tauchen sie weder in der Prozessliste des Hosts noch in der
+		# Skript-Ausgabe auf.
+		#
+		# Idempotent: bei jedem Lauf werden Passwort, Rechte-Flags und
+		# Gruppenzuordnung neu gesetzt. Ein von Hand geändertes Passwort in
+		# .env wirkt damit beim nächsten Lauf.
+		log "Lege Konto \"$APP_USER_USERNAME\" (Gruppe \"$APP_USER_GROUP\", keine Administrationsrechte) an"
+		if "${COMPOSE[@]}" exec -T backend python manage.py shell <<'PYTHON'; then
+import os
+
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import Group
+from django.core.cache import cache
+
+username = os.environ["APP_USER_USERNAME"]
+gruppenname = os.environ["APP_USER_GROUP"]
+
+gruppe = Group.objects.filter(name=gruppenname).first()
+if gruppe is None:
+    vorhanden = ", ".join(Group.objects.values_list("name", flat=True)) or "keine"
+    raise SystemExit(
+        f"Gruppe {gruppenname!r} existiert nicht. Vorhandene Gruppen: {vorhanden}"
+    )
+
+User = get_user_model()
+nutzer, neu = User.objects.get_or_create(username=username)
+nutzer.email = os.environ.get("APP_USER_EMAIL", "")
+# Ausdrücklich beides aus: is_staff öffnet die Django-Administration,
+# is_superuser umgeht in der App jede Rechteprüfung (get_user_permissions
+# gibt dann Platzhalter-Vollzugriff zurück).
+nutzer.is_staff = False
+nutzer.is_superuser = False
+nutzer.is_active = True
+nutzer.set_password(os.environ["APP_USER_PASSWORD"])
+nutzer.save()
+nutzer.groups.set([gruppe])
+
+# Die Rechteprüfung der API hält die Zugriffsstufen fünf Minuten im Cache;
+# nach einem Gruppenwechsel gälte sonst noch die alte Zuordnung.
+cache.delete(f"user_permissions:{nutzer.pk}")
+
+print(f"Konto {username!r} {'angelegt' if neu else 'aktualisiert'}, Gruppe {gruppenname!r}.")
+PYTHON
+			APP_USER_OK=1
 		else
-			warn "Backend hat Migrationen/Initialdaten nach 3 Minuten nicht abgeschlossen - Import übersprungen."
+			warn "Das Konto \"$APP_USER_USERNAME\" konnte nicht angelegt werden (Ausgabe oben). Playwright-Läufe scheitern dann an der Anmeldung; als Notbehelf mit QONNECTRA_LOGIN=admin arbeiten."
 		fi
 	fi
 else
@@ -664,6 +821,26 @@ Datei wiederherstellen und Skript erneut ausführen (oder direkt importieren):
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py import_geodock_export --file $EXPORT_FILE_IN_CONTAINER"
 fi
 
+if [ "$APP_USER_OK" -eq 1 ]; then
+	LOGIN_SECTION="Zwei Konten stehen bereit:
+
+  Anwendung (Standard für Screenshots, keine Administrationsrechte):
+    ${APP_USER_USERNAME} / ${APP_USER_PASSWORD}   (Gruppe \"${APP_USER_GROUP}\")
+  Administration (Django-Superuser, sieht und darf alles):
+    ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
+
+Playwright melden sich standardmäßig mit dem Anwender-Konto an, damit die
+Bilder die Sicht normaler Nutzender zeigen. Für einen Lauf als Superuser:
+  QONNECTRA_LOGIN=admin pnpm test:e2e"
+else
+	LOGIN_SECTION="Login (Django-Superuser): ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
+
+Das Konto ohne Administrationsrechte wurde NICHT angelegt (siehe Warnungen
+oben). Playwright-Läufe scheitern damit an der Anmeldung, solange sie nicht
+mit QONNECTRA_LOGIN=admin gestartet werden. Nach dem Beheben genügt ein
+erneuter Lauf dieses Skripts."
+fi
+
 if [ -f "$TILE_MBTILES" ]; then
 	TILES_SECTION="Kartenkacheln: $TILE_MBTILES
 Die Karte zeigt damit die echte Vektor-Basiskarte (Hell-/Dunkelmodus), nicht
@@ -685,7 +862,9 @@ Qonnectra läuft unter:
   Admin    : https://admin.qonnectra.localhost/admin
   API      : https://api.qonnectra.localhost
 
-Login: ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
+$LOGIN_SECTION
+
+Hilfe-Link der App (PUBLIC_DOCUMENTATION_URL): $DOCUMENTATION_URL
 
 $PROJECT_SECTION
 

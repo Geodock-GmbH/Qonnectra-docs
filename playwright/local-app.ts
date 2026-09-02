@@ -5,6 +5,10 @@
 // local-app/deployment/.env, nicht aus einer eigenen Konfigurationsdatei –
 // damit kann kein Lauf versehentlich gegen eine echte Installation gehen.
 //
+// Die Instanz kennt zwei Konten: den Django-Superuser für die Administration
+// und ein Konto ohne Administrationsrechte, mit dem die Bilder entstehen.
+// Standard ist das zweite, siehe Rolle/rolle() weiter unten.
+//
 // Instanz aufsetzen/starten: scripts/setup-local-qonnectra.sh
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
@@ -46,12 +50,52 @@ function required(env: Record<string, string>, key: string): string {
   return value
 }
 
+/**
+ * Wie required(), aber für Schlüssel, die es in früheren Fassungen des
+ * Setup-Skripts noch nicht gab. Dafür genügt ein erneuter Lauf ohne --reset:
+ * das Skript trägt fehlende Schlüssel in .env nach und legt das Konto an.
+ */
+function requiredNeu(env: Record<string, string>, key: string): string {
+  const value = env[key]
+  if (!value) {
+    throw new Error(
+      `${key} fehlt oder ist leer in ${deploymentEnvPath}.\n` +
+        'Die Instanz wurde mit einer älteren Fassung des Setup-Skripts aufgesetzt.\n' +
+        'Einmal erneut ausführen (Datenbank und bestehende Secrets bleiben erhalten):\n' +
+        '  scripts/setup-local-qonnectra.sh',
+    )
+  }
+  return value
+}
+
+/**
+ * Mit welchem Konto sich ein Lauf anmeldet.
+ *
+ * - `user`: Konto ohne Administrationsrechte (Gruppe „Editor“). Standard,
+ *   weil Teil A des Handbuchs die Sicht normaler Nutzender beschreibt – der
+ *   Superuser sieht zusätzlich den Menüpunkt „Logs“ und umgeht jede
+ *   Rechteprüfung.
+ * - `admin`: Django-Superuser. Nur für Bilder von Bereichen, die Nutzenden
+ *   ohne Administrationsrechte verborgen bleiben (`/admin/*`).
+ */
+export type Rolle = 'user' | 'admin'
+
+/** Umschaltbar über QONNECTRA_LOGIN=admin (siehe Rolle). */
+export function rolle(): Rolle {
+  const wert = process.env.QONNECTRA_LOGIN?.trim().toLowerCase()
+  if (!wert || wert === 'user') return 'user'
+  if (wert === 'admin') return 'admin'
+  throw new Error(`QONNECTRA_LOGIN=${wert} ist unbekannt. Erlaubt sind "user" (Standard) und "admin".`)
+}
+
 export interface LocalApp {
   /** Frontend, z. B. https://app.qonnectra.localhost */
   appUrl: string
   /** Backend-API, z. B. https://api.qonnectra.localhost */
   apiUrl: string
-  /** Django-Superuser der lokalen Instanz – niemals ausgeben oder committen. */
+  /** Konto, mit dem dieser Lauf arbeitet (siehe rolle()). */
+  rolle: Rolle
+  /** Zugangsdaten der gewählten Rolle – niemals ausgeben oder committen. */
   username: string
   password: string
 }
@@ -62,11 +106,19 @@ export function localApp(): LocalApp {
   if (cached) return cached
 
   const env = readDeploymentEnv()
+  const gewaehlt = rolle()
   cached = {
     appUrl: `https://${required(env, 'APP_DOMAIN')}`,
     apiUrl: `https://${required(env, 'API_DOMAIN')}`,
-    username: required(env, 'DJANGO_SUPERUSER_USERNAME'),
-    password: required(env, 'DJANGO_SUPERUSER_PASSWORD'),
+    rolle: gewaehlt,
+    username:
+      gewaehlt === 'admin'
+        ? required(env, 'DJANGO_SUPERUSER_USERNAME')
+        : requiredNeu(env, 'APP_USER_USERNAME'),
+    password:
+      gewaehlt === 'admin'
+        ? required(env, 'DJANGO_SUPERUSER_PASSWORD')
+        : requiredNeu(env, 'APP_USER_PASSWORD'),
   }
   return cached
 }
