@@ -32,6 +32,11 @@ export default defineConfig({
   title: 'Qonnectra',
   description: 'Netzdokumentation für kommunale Infrastrukturen - Handbuch',
   lang: 'de',
+
+  // local-app/ ist der geklonte Qonnectra-App-Checkout (siehe
+  // scripts/setup-local-qonnectra.sh). Ohne diesen Ausschluss zieht VitePress
+  // dessen Markdown-Dateien in den Build und scheitert an HTML darin.
+  srcExclude: ['local-app/**', '**/node_modules/**'],
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }]
   ],

@@ -14,8 +14,10 @@
     "build": "vitepress build",
     "preview": "vitepress preview",
     "lint:spelling": "cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'",
-    "test:e2e:setup": "node playwright/auth-setup.ts",
-    "test:e2e": "playwright test"
+    "test:e2e:setup": "playwright test --project=setup",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "screenshots:publish": "scripts/publish-screenshots.sh"
   },
   "devDependencies": {
     "@cspell/dict-de-de": "^4.1.2",

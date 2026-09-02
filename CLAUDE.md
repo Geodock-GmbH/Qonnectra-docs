@@ -98,9 +98,9 @@ exakt; im Zweifel `manual/teil-a-anwenderhandbuch/05-karte.md` und
 | Inhalt | nur der App-Viewport, kein Browser-Chrome, kein Mauszeiger |
 | Daten | ausschließlich das Demoprojekt „Testprojekt“ – keine echten personenbezogenen Daten |
 
-> Abweichung: `playwright.config.ts` nutzt derzeit 1920 × 1080 @1x. Wer die
-> Screenshot-Automatisierung ausbaut, gleicht das auf 1280 × 800 @2x an,
-> sonst passen neue Bilder optisch nicht zu den bestehenden.
+> `playwright.config.ts` setzt diese Werte zentral. Kein `devices[...]`-Preset in
+> die Projekt-Konfiguration spreaden – die Presets bringen eigene `viewport`- und
+> `deviceScaleFactor`-Werte mit und überschreiben die Zielwerte still.
 
 **Ablage und Benennung**
 - Bilder: `public/images/manual/teil-a/<name>.jpg` (je Handbuchteil ein Ordner)
@@ -115,11 +115,15 @@ exakt; im Zweifel `manual/teil-a-anwenderhandbuch/05-karte.md` und
 
 1. **Übersichtsbild, unbearbeitet** – der ganze App-Viewport, ohne Markierung.
    Steht am Kapitelanfang (`dashboard.jpg`, `map.jpg`, `conduit.jpg`).
-2. **Dim + Spotlight** – die gesamte Oberfläche wird mit einem halbtransparenten
-   grauen Schleier abgedunkelt, nur der beschriebene Bereich bleibt in voller
-   Helligkeit und bekommt eine weiße, abgerundete Kontur. Das Standardmittel für
-   „Wo finde ich X?“ (`dashboard_project.jpg`, `conduit_excel.jpg`,
-   `map_selected_object.jpg`).
+2. **Dim + Spotlight** – die gesamte Oberfläche wird abgedunkelt, nur der
+   beschriebene Bereich bleibt in voller Helligkeit und bekommt eine weiße,
+   abgerundete Kontur. Das Standardmittel für „Wo finde ich X?“
+   (`dashboard_project.jpg`, `conduit_excel.jpg`, `map_selected_object.jpg`).
+   Der Schleier ist **`rgba(0, 0, 0, 0.5)`** – schwarz bei 50 %, nicht grau.
+   An den Altbildern nachgemessen: jeder abgedunkelte Bildpunkt hat exakt den
+   halben Wert des unabgedunkelten Bildes (255 → 128, 220 → 110). Ein grauer
+   oder schwächerer Schleier wirkt neben den bestehenden Bildern deutlich zu
+   hell; `spotlight()` in `playwright/manual-shots.ts` setzt diesen Wert.
 3. **Handgezeichnete Markierung in Marken-Grün** (`#11ba81`) – geschwungene
    Ellipsen um Elemente, gebogene Pfeile und handschriftlich wirkende Labels.
    Für Orientierungsbilder mit mehreren Beschriftungen gleichzeitig
@@ -168,23 +172,100 @@ lokale Instanz, damit sie bei Änderungen der App neu erzeugt werden können.
   Setup-Skript verändern.
 
 **Playwright-Setup im Doku-Repo**
-- `playwright.config.ts` liest `.env` im Repo-Root (gitignored). Benötigt wird
-  `GEODOCK_URL=https://app.qonnectra.localhost`.
-- `pnpm test:e2e:setup` (`playwright/auth-setup.ts`) öffnet einen Browser zum
-  manuellen Login und legt `auth-state.json` an. Ein programmatischer Login mit
-  den Credentials aus `local-app/deployment/.env` ist die bessere Zielvariante.
+
+Alle Läufe gehen ausschließlich gegen die lokale Instanz. Es gibt keine
+konfigurierbare Zieladresse und kein `.env` im Repo-Root mehr – `GEODOCK_URL`
+wird nicht mehr gelesen.
+
+- `playwright/local-app.ts` ist die einzige Quelle für Adresse und Zugangsdaten
+  und liest `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`,
+  `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD`). Zugangsdaten nur
+  über `localApp()` beziehen, nie in Specs, Ausgaben oder Commits schreiben.
+- `playwright/auth.setup.ts` läuft als Setup-Projekt automatisch vor jedem Spec:
+  prüft die Erreichbarkeit (mit Hinweis auf `scripts/setup-local-qonnectra.sh`,
+  falls der Stack steht), meldet sich per `POST /api/v1/auth/login/` an und
+  schreibt `auth-state.json`. `pnpm test:e2e:setup` führt nur diesen Schritt aus.
+- `auth-state.json` ist **nicht** wiederverwendbar und wird pro Lauf neu erzeugt:
+  das Access-Token lebt 15 Minuten, und das Backend rotiert Refresh-Tokens mit
+  Blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`).
+- Das Setup legt den Zustand fest, an dem die Bilder hängen: Cookie
+  `selected-project=2` („Testprojekt“; ein UI-Login würde `1` = „Default“
+  schreiben) sowie im `localStorage` `PARAGLIDE_LOCALE=de`, `mode=light`,
+  `basemapTheme`, `mapCenter` und `mapZoom`. Die Karte hat kein Auto-Fit – ohne
+  gesetzte `mapCenter`/`mapZoom` (EPSG:3857) startet sie bei Zoom 2 im Atlantik.
 - Ein Spec pro Handbuchkapitel: `tests/<NN>-<kapitel-slug>.spec.ts` mit Kommentar,
-  auf welches Kapitel es sich bezieht (siehe `tests/03-einstieg-anmeldung.spec.ts`).
-- Ausgabe nach `tests/screenshots/<kapitel-slug>/<bildname>.png`.
-  `tests/screenshots/`, `test-results/`, `playwright-report/` und `auth-state.json`
-  sind gitignored – fertige Bilder werden bewusst nach `public/images/…` kopiert,
-  in JPEG konvertiert und committet.
-- Determinismus: Projekt explizit auswählen, feste Kartenposition/Zoom ansteuern,
-  `networkidle` bzw. konkrete Elemente abwarten, Animationen ausklingen lassen,
-  Mauszeiger aus dem Bild halten.
-- Muster 2 (Dim + Spotlight) lässt sich reproduzierbar per injiziertem CSS
-  erzeugen (`box-shadow: 0 0 0 9999px rgba(…)` auf dem Zielelement). Muster 3
+  auf welches Kapitel es sich bezieht (siehe `tests/05-karte.spec.ts`).
+- Ausgabe nach `tests/screenshots/<kapitel-slug>/<bildname>.png` über
+  `shotPath()`. `tests/screenshots/`, `test-results/`, `playwright-report/` und
+  `auth-state.json` sind gitignored – das sind Rohaufnahmen, nicht die Bilder
+  des Handbuchs.
+- `pnpm screenshots:publish` (`scripts/publish-screenshots.sh`) übernimmt sie
+  nach `public/images/manual/…` und wandelt sie dabei in JPEG (Qualität 85,
+  Qualität wird gesenkt, bis die Datei unter 1,2 MB liegt). Das Zielverzeichnis
+  kommt aus dem Handbuch selbst: das Skript sucht in `manual/` die Einbindung
+  `/images/manual/<teil>/<name>.jpg`. Bilder ohne Einbindung werden
+  übersprungen, damit nichts im falschen Teil-Ordner landet.
+  `--dry-run` zeigt vorher, was neu angelegt und was ersetzt würde.
+- Nur Muster 1 und 2 gehen komplett automatisch durch. Bilder mit
+  handgezeichneten Markierungen (Muster 3) werden nach dem Übernehmen
+  nachbearbeitet – `--dry-run` vorher ansehen, sonst überschreibt der Lauf die
+  Handarbeit mit einer Rohaufnahme.
+- Kapitel 3 braucht als einziges den abgemeldeten Zustand und setzt daher
+  `test.use({ storageState: { cookies: [], origins: [] } })`; angemeldete Aufrufe
+  von `/login` leitet die App auf `/map` um.
+- `workers: 1` und `fullyParallel: false` sind Absicht: alle Specs teilen sich
+  eine Instanz samt Projektauswahl und Kartenposition.
+- Determinismus-Helfer in `playwright/manual-shots.ts`: `animationenAus()`
+  (Übergänge und Text-Cursor aus), `zeigerWeg()` (keine Hover-Zustände im Bild),
+  `spotlight()` für Muster 2 und `composite2x2()` für Muster 4. Das Raster wird
+  im Browser montiert, das Repo braucht dafür keine Bildbibliothek. Muster 3
   (handgezeichnete Ellipsen/Pfeile) bleibt Nachbearbeitung.
+  `spotlight()` legt ein SVG mit Aussparung über die Seite und verändert das
+  Zielelement nicht. Der naheliegende Weg über `box-shadow: 0 0 0 9999px` am
+  Element selbst scheitert hier zweifach: der Schleier wird am nächsten
+  Vorfahren mit `overflow: hidden` abgeschnitten, und macht man die Vorfahren
+  durchlässig, verliert die Karte (OpenLayers) beim Reflow ihren Canvas-Inhalt.
+- Composite-Raster sind montiert und deshalb **nicht** 2560 × 1600, sondern
+  2656 × 1936 (zwei Kacheln plus Fugen). Das Seitenverhältnis der Montage
+  ergibt sich aus dem Kartenausschnitt und lässt sich nicht auf beide Zielmaße
+  gleichzeitig bringen; im Handbuch werden die Bilder ohnehin auf 512 px
+  gerendert.
+- Die Kartenkacheln erzeugt `scripts/setup-local-qonnectra.sh` einmalig per
+  Planetiler (Region `schleswig-holstein`, dort liegt das Testprojekt) und legt
+  sie unter `~/.local/share/qonnectra-local-tiles/` ab – außerhalb von
+  `local-app/`, damit `--reset` sie nicht wegwirft. Der `tileserver` bekommt sie
+  als harte Verknüpfung unter `local-app/deployment/tiles/germany.mbtiles`
+  (ein Bind-Mount nur für die Datei scheitert, weil Docker den Mountpoint im
+  read-only gemounteten `/data` nicht anlegen kann).
+  Kartenbilder zeigen damit die echte Vektor-Basiskarte im Hellmodus. Fehlt die
+  `.mbtiles` (Lauf mit `--skip-tiles`, kein Java), läuft der `tileserver` in
+  einer Restart-Schleife und die Karte fällt auf OSM-Rasterkacheln zurück.
+
+- Antwortet die API mit **502**, obwohl der Backend-Container läuft: nach einem
+  Neustart des Backends hat `nginx` dessen alte Container-IP zwischengespeichert
+  (nginx-Log: „Host is unreachable“) und löst sie nicht neu auf. Behebt sich mit
+  `docker restart qonnectra_nginx_prod`. Das Setup-Projekt wartet eine Minute auf
+  5xx-Antworten, weil ein kalt gestarteter Stack kurz mit 502 antwortet.
+- Die Zahl der Canvas-Elemente in der Karte hängt vom Tileserver ab: mit
+  Vektorkacheln legt OpenLayers zwei an, im OSM-Rasterfallback eines. Deshalb
+  `page.locator('div.map canvas').first()` verwenden.
+- Kartenposition immer per `page.addInitScript()` setzen, nicht per
+  „laden, `localStorage` setzen, neu laden“. Die App schreibt `mapCenter` und
+  `mapZoom` bei jedem `moveend` zurück; landet das zwischen Setzen und Neuladen,
+  ist der Seed weg und die Karte startet in der Übersicht. Tests, die auf eine
+  bestimmte Stelle klicken, treffen dann nichts und die Info-Box öffnet nicht
+  (Symptom: `#drawer-title` nicht gefunden).
+- Der Basiskarten-Layer ist von der Objektauswahl unabhängig: `getClickedFeatures`
+  filtert per `layerFilter` auf Trasse, Adresse, Netzknoten und Gebiet
+  (`MapInteractionManager.svelte.ts`). Ob der Tileserver läuft, hat auf Klicks
+  also keinen Einfluss.
+- Ein Kartenobjekt per Klick auszuwählen ist nicht ohne Weiteres reproduzierbar:
+  Eine Trassenlinie ist nur wenige Pixel breit, und darunter liegt das
+  Projektgebiet, dessen Fläche das ganze Netz überdeckt. Dieselbe Stelle liefert
+  je nach Lauf verschiedene Trassen oder das Gebiet. Wiederholtes Klicken hilft
+  nicht (es ist kein Kachel-Rennen) – für einen deterministischen Treffer den
+  Layer „Gebiet" vor dem Klick ausblenden. Wieder einschalten geht danach nicht,
+  weil die geöffnete Info-Box die Legende verdeckt.
 
 **Die App (Kontext für Selektoren und Routen)**
 
