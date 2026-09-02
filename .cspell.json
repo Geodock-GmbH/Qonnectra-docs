@@ -25,6 +25,7 @@
     "Elgendorfer",
     "EPSG",
     "esbenp",
+    "feld",
     "gehostet",
     "geodock",
     "gescrollt",
@@ -108,7 +109,9 @@
     "Websitezugriffe",
     "widerrufbar",
     "zeiger",
-    "ziffer"
+    "ziffer",
+    "Zoomstufe",
+    "Zoomstufen"
   ],
   "ignorePaths": [
     ".git/**/*",
