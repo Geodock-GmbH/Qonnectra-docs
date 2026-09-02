@@ -14,7 +14,11 @@
 # können (Mitglied der "docker"-Gruppe oder root).
 #
 # Verwendung:
-#   scripts/setup-local-qonnectra.sh
+#   scripts/setup-local-qonnectra.sh [--reset] [--reset-checkout]
+#
+# --reset verwirft die Daten der Instanz (Container, Volumes inkl. Datenbank,
+# generierte Konfiguration samt Secrets), --reset-checkout zusätzlich den
+# Checkout local-app/. Die lokale Dev-CA bleibt in beiden Fällen erhalten.
 #
 # HTTPS läuft über eine persistente lokale Dev-CA in ~/.local/share/
 # qonnectra-local-ca/, die read-only in den Caddy-Container gemountet wird.
@@ -60,6 +64,46 @@ random_fernet_key() {
 	head -c 32 /dev/urandom | base64 | tr '+/' '-_'
 }
 
+usage() {
+	cat <<EOF
+Verwendung: $(basename "$0") [--reset] [--reset-checkout]
+
+  --reset           Daten der lokalen Instanz verwerfen und neu aufbauen:
+                    Container, Docker-Volumes (Datenbank, Medien,
+                    Caddy-Daten) und die generierte Konfiguration inkl.
+                    Secrets in local-app/deployment/.env. Der Checkout
+                    local-app/ bleibt unangetastet.
+  --reset-checkout  Den Checkout local-app/ löschen und neu klonen. Verwirft
+                    auch eigene Änderungen darin. Lässt für sich genommen
+                    Datenbank und Secrets in Ruhe, ist mit --reset
+                    kombinierbar.
+  -h, --help        Diese Hilfe anzeigen.
+
+Die lokale Dev-CA in
+  $CA_DIR
+bleibt in jedem Fall erhalten - der Truststore-Import muss also nicht
+wiederholt werden.
+EOF
+}
+
+RESET=0
+RESET_CHECKOUT=0
+ENV_BACKUP=""
+for arg in "$@"; do
+	case "$arg" in
+	--reset) RESET=1 ;;
+	--reset-checkout) RESET_CHECKOUT=1 ;;
+	-h | --help)
+		usage
+		exit 0
+		;;
+	*)
+		usage >&2
+		die "Unbekannte Option: $arg"
+		;;
+	esac
+done
+
 # --- Voraussetzungen prüfen -------------------------------------------------
 
 command -v git >/dev/null 2>&1 || die "git ist nicht installiert."
@@ -79,6 +123,81 @@ if ! docker info >/dev/null 2>&1; then
 	die "Kein Zugriff auf den Docker-Daemon. Nutzer zur docker-Gruppe hinzufügen: sudo usermod -aG docker \$USER (danach neu einloggen)."
 fi
 
+# --- Reset (nur mit --reset / --reset-checkout) ------------------------------
+#
+# --reset entfernt alles, was Zustand hält: Container, die Docker-Volumes mit
+# Datenbank/Medien/Caddy-Daten und die generierte Konfiguration samt Secrets.
+# --reset-checkout wirft zusätzlich den Checkout local-app/ weg. Beides wird
+# weiter unten neu erzeugt. Ausgenommen ist in jedem Fall die Dev-CA in
+# $CA_DIR: sie liegt außerhalb und soll den einmaligen Truststore-Import
+# überleben.
+
+if [ "$RESET" -eq 1 ] || [ "$RESET_CHECKOUT" -eq 1 ]; then
+	# Container in beiden Fällen anhalten - bei --reset samt Volumes, sonst
+	# nur die Container, damit der neue Checkout nicht gegen Reste des alten
+	# hochgefahren wird. Muss vor dem Löschen von local-app/ passieren, weil
+	# die Compose-Dateien dort liegen.
+	if [ -f "$DEPLOY_DIR/docker-compose.yml" ]; then
+		DOWN=(docker compose -f "$DEPLOY_DIR/docker-compose.yml")
+		if [ -f "$DEPLOY_DIR/docker-compose.override.yml" ]; then
+			DOWN+=(-f "$DEPLOY_DIR/docker-compose.override.yml")
+		fi
+		if [ "$RESET" -eq 1 ]; then
+			log "Reset: verwerfe Container, Volumes (inkl. Datenbank) und Secrets"
+			DOWN+=(down -v --remove-orphans)
+		else
+			log "Halte Container an (Volumes und Datenbank bleiben erhalten)"
+			DOWN+=(down --remove-orphans)
+		fi
+		# Aus $DEPLOY_DIR heraus, damit derselbe Compose-Projektname wie beim
+		# Start greift (er leitet sich vom Verzeichnisnamen ab).
+		(cd "$DEPLOY_DIR" && "${DOWN[@]}") ||
+			warn "\"docker compose down\" schlug fehl - Reste werden gleich direkt entfernt."
+	fi
+
+	if [ "$RESET" -eq 1 ]; then
+		# Nachlauf bzw. Fallback: die Volumes tragen feste Namen (siehe
+		# docker-compose.yml) und überleben sonst, wenn local-app/ vorher von
+		# Hand gelöscht wurde oder "down" fehlgeschlagen ist.
+		VOLUMES=(
+			qonnectra_postgres_data_prod
+			qonnectra_caddy_data_prod
+			qonnectra_caddy_config_prod
+			qonnectra_static_prod
+			qonnectra_media_prod
+			qonnectra_wms_cache_prod
+		)
+		docker volume rm -f "${VOLUMES[@]}" >/dev/null 2>&1 || true
+		REMAINING="$(docker volume ls -q --filter name='^qonnectra_.*_prod$' || true)"
+		if [ -n "$REMAINING" ]; then
+			warn "Diese Volumes ließen sich nicht entfernen (vermutlich noch von einem Container belegt): $(echo "$REMAINING" | tr '\n' ' ')"
+		fi
+
+		# Generierte Konfiguration inkl. Secrets. Ohne das behielte die neue,
+		# leere Datenbank die alten Passwörter aus .env.
+		rm -f "$DEPLOY_DIR/.env" \
+			"$DEPLOY_DIR/Caddyfile.production.local" \
+			"$DEPLOY_DIR/docker-compose.override.yml"
+	fi
+
+	if [ "$RESET_CHECKOUT" -eq 1 ]; then
+		# .env liegt zwar im Checkout, gehört aber zur Instanz und nicht zum
+		# App-Code: ohne sie bekäme die bei --reset-checkout absichtlich
+		# erhaltene Datenbank neue Zufallspasswörter und wäre für das Backend
+		# nicht mehr erreichbar. Also zwischenspeichern und nach dem Klonen
+		# zurücklegen - bei --reset sollen die Secrets dagegen neu sein.
+		if [ "$RESET" -eq 0 ] && [ -f "$DEPLOY_DIR/.env" ]; then
+			ENV_BACKUP="$(mktemp)"
+			cp "$DEPLOY_DIR/.env" "$ENV_BACKUP"
+		fi
+
+		log "Verwerfe Checkout local-app/ (wird neu geklont)"
+		rm -rf "$LOCAL_APP_DIR"
+	fi
+
+	log "Reset abgeschlossen. Die lokale Dev-CA in $CA_DIR bleibt erhalten."
+fi
+
 # --- App-Repo klonen/aktualisieren ------------------------------------------
 
 if [ -d "$LOCAL_APP_DIR/.git" ]; then
@@ -86,6 +205,12 @@ if [ -d "$LOCAL_APP_DIR/.git" ]; then
 else
 	log "Klone $QONNECTRA_REPO_URL nach local-app/"
 	git clone "$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR"
+fi
+
+if [ -n "$ENV_BACKUP" ]; then
+	log "Übernehme bisherige .env (Secrets) in den neuen Checkout"
+	mv "$ENV_BACKUP" "$DEPLOY_DIR/.env"
+	ENV_BACKUP=""
 fi
 
 IMPORT_COMMAND_SRC="$REPO_ROOT/scripts/qonnectra-demo-data/import_geodock_export.py"
@@ -97,6 +222,7 @@ COMMANDS_DIR="$LOCAL_APP_DIR/backend/apps/api/management/commands"
 # lässt sich über QONNECTRA_EXPORT_FILE einhängen.
 EXPORT_FILE="${QONNECTRA_EXPORT_FILE:-$REPO_ROOT/scripts/qonnectra-demo-data/testprojekt-export.json}"
 EXPORT_FILE_IN_CONTAINER=/tmp/testprojekt-export.json
+IMPORT_OK=0
 
 # --- Import-Command einspielen -----------------------------------------------
 #
@@ -342,10 +468,36 @@ if [ "$READY" -eq 1 ]; then
 	log "App antwortet."
 
 	if [ -f "$EXPORT_FILE" ]; then
-		log "Importiere Testprojekt-Export für Handbuch-Screenshots (idempotent: ein bereits importiertes Projekt bleibt unangetastet)"
-		"${COMPOSE[@]}" cp "$EXPORT_FILE" "backend:$EXPORT_FILE_IN_CONTAINER"
-		"${COMPOSE[@]}" exec -T backend python manage.py import_geodock_export \
-			--file "$EXPORT_FILE_IN_CONTAINER" || true
+		# Die Prüfung oben betrifft nur das Frontend. Das Backend arbeitet zu
+		# dem Zeitpunkt bei leerer Datenbank noch an Migrationen und
+		# load_initial_data - ein Import davor scheitert an fehlenden Tabellen
+		# bzw. würde Referenzdaten ohne die Werte aus den Fixtures anlegen.
+		# Deshalb hier auf beides warten: Tabellen vorhanden (Projects) und
+		# Fixtures eingespielt (AttributesCableType).
+		log "Warte auf Migrationen und Initialdaten im Backend..."
+		BACKEND_READY=0
+		for _ in $(seq 1 60); do
+			if "${COMPOSE[@]}" exec -T backend python manage.py shell -c \
+				"from apps.api.models import AttributesCableType, Projects; assert AttributesCableType.objects.exists() and Projects.objects.exists()" \
+				>/dev/null 2>&1; then
+				BACKEND_READY=1
+				break
+			fi
+			sleep 3
+		done
+
+		if [ "$BACKEND_READY" -eq 1 ]; then
+			log "Importiere Testprojekt-Export für Handbuch-Screenshots (idempotent: ein bereits importiertes Projekt bleibt unangetastet)"
+			"${COMPOSE[@]}" cp "$EXPORT_FILE" "backend:$EXPORT_FILE_IN_CONTAINER"
+			if "${COMPOSE[@]}" exec -T backend python manage.py import_geodock_export \
+				--file "$EXPORT_FILE_IN_CONTAINER"; then
+				IMPORT_OK=1
+			else
+				warn "Import des Testprojekt-Exports fehlgeschlagen (Ausgabe oben)."
+			fi
+		else
+			warn "Backend hat Migrationen/Initialdaten nach 3 Minuten nicht abgeschlossen - Import übersprungen."
+		fi
 	fi
 else
 	if [ "$(curl -sk -o /dev/null -w '%{http_code}' "https://${APP_DOMAIN}/login" 2>/dev/null || true)" = "200" ]; then
@@ -390,13 +542,19 @@ Noch nicht importiert, der Browser warnt daher weiterhin. Einmalig importieren
   $REPO_ROOT/scripts/install-local-ca.sh"
 fi
 
-if [ -f "$EXPORT_FILE" ]; then
+if [ "$IMPORT_OK" -eq 1 ]; then
 	PROJECT_SECTION="Für Screenshots/Videos steht das aus der Demo-Umgebung exportierte Projekt
 \"Testprojekt\" zur Verfügung (nach Login oben links auswählen). Nach einem
 aktualisierten Export neu importieren (--force wirft das lokale Projekt vorher
 weg):
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml cp $EXPORT_FILE backend:$EXPORT_FILE_IN_CONTAINER
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py import_geodock_export --file $EXPORT_FILE_IN_CONTAINER --force"
+elif [ -f "$EXPORT_FILE" ]; then
+	PROJECT_SECTION="Der Testprojekt-Export wurde NICHT importiert (siehe Warnungen oben), die
+Instanz enthält also keine Projektdaten. Import nachholen, sobald die App
+vollständig läuft:
+  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml cp $EXPORT_FILE backend:$EXPORT_FILE_IN_CONTAINER
+  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py import_geodock_export --file $EXPORT_FILE_IN_CONTAINER"
 else
 	PROJECT_SECTION="Die Instanz enthält noch KEINE Projektdaten: unter
   $EXPORT_FILE
@@ -435,5 +593,9 @@ Stack stoppen:
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml down
 
 Skript erneut ausführen, um den Stack neu zu bauen/starten (Secrets/DB bleiben
-erhalten, solange local-app/deployment/.env nicht gelöscht wird).
+erhalten, solange local-app/deployment/.env nicht gelöscht wird). Für einen
+Neuaufbau mit leerer Datenbank und frischen Secrets:
+  $REPO_ROOT/scripts/setup-local-qonnectra.sh --reset
+Zusätzlich den App-Checkout neu klonen (verwirft Änderungen in local-app/):
+  $REPO_ROOT/scripts/setup-local-qonnectra.sh --reset --reset-checkout
 EOF
