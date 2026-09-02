@@ -48,8 +48,11 @@ du das explizit genannte Kapitel.
 - Bild steht nach dem erklärenden Absatz, nicht davor.
 - Bildpaare: zwei `![]()`-Zeilen direkt untereinander, danach eigene Zeile
   `{.img-row}`.
-- Bildformat `.jpg`, Videos `.webm`; Abmessungen 2560 × 1600 (`file <bild>`),
-  Dateigröße < 1,2 MB. Abweichungen melden.
+- Bildformat `.jpg`, Videos `.webm`; Abmessungen 3584 × 2240 (`file <bild>`),
+  Dateigröße < 1,2 MB. Abweichungen melden – außer bei Composite-Rastern
+  (montiert, 2656 px breit) und bei Altbildern aus der Zeit des kleineren
+  Viewports (2560 × 1600); die werden beim nächsten Lauf ihres Kapitel-Specs
+  ersetzt.
 - Dateinamen englisch, `snake_case`, mit passendem Bereichspräfix.
 
 **Querverweise und Rechtschreibung**

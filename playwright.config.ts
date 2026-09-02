@@ -3,8 +3,8 @@
 // scripts/setup-local-qonnectra.sh) – es gibt bewusst keine Möglichkeit,
 // eine andere Adresse zu konfigurieren.
 //
-// Kontextwerte entsprechen den Zielwerten aus CLAUDE.md: 1280 × 800 bei
-// deviceScaleFactor 2 (= Bilder mit 2560 × 1600), Hellmodus, Sprache DE.
+// Kontextwerte entsprechen den Zielwerten aus CLAUDE.md: 1792 × 1120 bei
+// deviceScaleFactor 2 (= Bilder mit 3584 × 2240), Hellmodus, Sprache DE.
 import { defineConfig } from '@playwright/test'
 
 import { localAppUrl } from './playwright/local-app'
@@ -41,7 +41,13 @@ export default defineConfig({
     // (scripts/install-local-ca.sh ist optional).
     ignoreHTTPSErrors: true,
 
-    viewport: { width: 1280, height: 800 },
+    // 1120 px Höhe, weil die Navigationsleiste mit allen aufgeklappten Gruppen
+    // 1093 px braucht (gemessen) – bei 800 px lag die Gruppe „System“ unter dem
+    // sichtbaren Bereich und musste für Bilder erst herangescrollt werden. Die
+    // Breite hält das Seitenverhältnis bei 16 : 10, wie bei allen bestehenden
+    // Handbuchbildern und beim 16-:-10-Rahmen der Bildpaare (`.img-row` in
+    // .vitepress/theme/custom.css).
+    viewport: { width: 1792, height: 1120 },
     deviceScaleFactor: 2,
 
     locale: 'de-DE',

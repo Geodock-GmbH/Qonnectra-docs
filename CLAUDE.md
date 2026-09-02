@@ -91,9 +91,9 @@ exakt; im Zweifel `manual/teil-a-anwenderhandbuch/05-karte.md` und
 
 | | Wert |
 |---|---|
-| Viewport | 1280 × 800, `deviceScaleFactor: 2` → Bild **2560 × 1600** |
+| Viewport | 1792 × 1120, `deviceScaleFactor: 2` → Bild **3584 × 2240** |
 | Bildformat | `.jpg`, Qualität ~85, Zieldateigröße < 1,2 MB |
-| Videoformat | `.webm`, ca. 1280 × 800 |
+| Videoformat | `.webm`, ca. 1792 × 1120 |
 | Modus | immer Hellmodus, Sprache **DE** |
 | Inhalt | nur der App-Viewport, kein Browser-Chrome, kein Mauszeiger |
 | Daten | ausschließlich das Demoprojekt „Testprojekt“ – keine echten personenbezogenen Daten |
@@ -243,11 +243,11 @@ wird nicht mehr gelesen.
   Element selbst scheitert hier zweifach: der Schleier wird am nächsten
   Vorfahren mit `overflow: hidden` abgeschnitten, und macht man die Vorfahren
   durchlässig, verliert die Karte (OpenLayers) beim Reflow ihren Canvas-Inhalt.
-- Composite-Raster sind montiert und deshalb **nicht** 2560 × 1600, sondern
-  2656 × 1936 (zwei Kacheln plus Fugen). Das Seitenverhältnis der Montage
-  ergibt sich aus dem Kartenausschnitt und lässt sich nicht auf beide Zielmaße
-  gleichzeitig bringen; im Handbuch werden die Bilder ohnehin auf 512 px
-  gerendert.
+- Composite-Raster sind montiert und deshalb **nicht** 3584 × 2240, sondern
+  2656 px breit bei einer Höhe, die sich aus dem Kartenausschnitt der Kacheln
+  ergibt (zuletzt 2656 × 1854). Das Seitenverhältnis der Montage lässt sich
+  nicht auf beide Zielmaße gleichzeitig bringen; im Handbuch werden die Bilder
+  ohnehin auf 512 px gerendert.
 - Die Kartenkacheln erzeugt `scripts/setup-local-qonnectra.sh` einmalig per
   Planetiler (Region `schleswig-holstein`, dort liegt das Testprojekt) und legt
   sie unter `~/.local/share/qonnectra-local-tiles/` ab – außerhalb von
@@ -284,13 +284,14 @@ wird nicht mehr gelesen.
   nicht (es ist kein Kachel-Rennen) – für einen deterministischen Treffer den
   Layer „Gebiet" vor dem Klick ausblenden. Wieder einschalten geht danach nicht,
   weil die geöffnete Info-Box die Legende verdeckt.
-- Die Navigationsleiste ist bei 1280 × 800 höher als das Fenster (gemessen:
-  1093 px Inhalt): mit allen aufgeklappten Gruppen liegt die Gruppe „System"
-  („Logs", „Einstellungen") unter dem sichtbaren Bereich. Scroll-Container ist
-  das Raster der Leiste, greifbar über
-  `div[class*="grid-rows-[auto_1fr_auto]"]` (`SideBar.svelte`) – für Bilder des
-  Leistenfußes dort `scrollTop = scrollHeight` setzen und **nicht** Gruppen
-  einklappen; das wäre ein Zustand, den Nutzende erst selbst herstellen müssen.
+- Die Fensterhöhe von 1120 px ist an der Navigationsleiste bemessen: mit allen
+  aufgeklappten Gruppen braucht sie 1093 px Inhalt (gemessen), bei den früheren
+  800 px lag die Gruppe „System" unter dem sichtbaren Bereich und musste erst
+  herangescrollt werden. Wächst die Leiste über 1120 px hinaus, den Viewport in
+  `playwright.config.ts` erhöhen und **nicht** Gruppen einklappen; das wäre ein
+  Zustand, den Nutzende erst selbst herstellen müssen. Scroll-Container der
+  Leiste ist ihr Raster, greifbar über
+  `div[class*="grid-rows-[auto_1fr_auto]"]` (`SideBar.svelte`).
 
 **Die App (Kontext für Selektoren und Routen)**
 

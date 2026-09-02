@@ -52,7 +52,7 @@ export async function animationenAus(page: Page): Promise<void> {
  */
 export async function zeigerWeg(page: Page): Promise<void> {
   const size = page.viewportSize()
-  await page.mouse.move(size ? size.width - 1 : 1279, size ? size.height - 1 : 799)
+  await page.mouse.move(size ? size.width - 1 : 1791, size ? size.height - 1 : 1119)
 }
 
 export interface SpotlightOptions {

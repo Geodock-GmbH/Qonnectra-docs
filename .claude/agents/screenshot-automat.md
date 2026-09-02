@@ -30,17 +30,18 @@ damit sie nach App-Änderungen reproduzierbar wiederholbar ist.
 
 | | Wert |
 |---|---|
-| Viewport | 1280 × 800 mit `deviceScaleFactor: 2` → Bild **2560 × 1600** |
+| Viewport | 1792 × 1120 mit `deviceScaleFactor: 2` → Bild **3584 × 2240** |
 | Bildformat im Repo | `.jpg`, Qualität ~85, < 1,2 MB |
-| Video | `.webm`, ca. 1280 × 800, ohne Ton |
+| Video | `.webm`, ca. 1792 × 1120, ohne Ton |
 | Modus | Hellmodus, Sprache DE |
 | Inhalt | nur App-Viewport, kein Browser-Chrome, kein Mauszeiger im Bild |
 | Daten | ausschließlich Projekt „Testprojekt“ |
 
-`playwright.config.ts` steht derzeit auf 1920 × 1080 @1x. Das passt nicht zu den
-bestehenden Handbuchbildern – gleiche es an bzw. setze die Werte pro Test über
-einen eigenen Context, und weise in deinem Bericht darauf hin, wenn du die
-globale Config änderst.
+`playwright.config.ts` setzt diese Werte zentral; setze sie nicht pro Spec neu.
+Die 1120 px Höhe hängen an der Navigationsleiste: mit allen aufgeklappten
+Gruppen braucht sie 1093 px. Bilder, die noch mit 1280 × 800 entstanden sind,
+liegen als 2560 × 1600 in `public/images/` – sie werden beim nächsten Lauf ihres
+Kapitels ersetzt.
 
 ## Specs schreiben
 
