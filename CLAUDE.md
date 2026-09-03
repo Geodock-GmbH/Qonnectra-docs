@@ -134,10 +134,15 @@ nicht.
    halben Wert des unabgedunkelten Bildes (255 → 128, 220 → 110). Ein grauer
    oder schwächerer Schleier wirkt neben den bestehenden Bildern deutlich zu
    hell; `spotlight()` in `playwright/manual-shots.ts` setzt diesen Wert.
+   Freigestellt werden dürfen auch mehrere Stellen gleichzeitig, wenn sie
+   zusammengehören – `map_selected_object.jpg` zeigt das ausgewählte
+   Kartenobjekt und die Info-Box mit seinen Werten, alles dazwischen bleibt
+   abgedunkelt. Für Kartenobjekte ist die Aussparung eine an der Linie
+   ausgerichtete Ellipse, kein Rechteck.
 3. **Handgezeichnete Markierung in Marken-Grün** (`#11ba81`) – geschwungene
    Ellipsen um Elemente, gebogene Pfeile und handschriftlich wirkende Labels.
    Für Orientierungsbilder mit mehreren Beschriftungen gleichzeitig
-   (`login_navigation.jpg`) und zum Hervorheben eines Kartenobjekts.
+   (`login_navigation.jpg`).
 4. **Composite-Raster** – 2 × 2 Einzelbilder mit weißen Fugen, jeder Schritt unten
    rechts mit einer großen grünen Ziffer nummeriert; die Ziffern entsprechen den
    Schritten der nummerierten Liste im Text (`map_search_flow.jpg`,
@@ -259,6 +264,18 @@ wird nicht mehr gelesen.
   `spotlight()` für Muster 2 und `composite2x2()` für Muster 4. Das Raster wird
   im Browser montiert, das Repo braucht dafür keine Bildbibliothek. Muster 3
   (handgezeichnete Ellipsen/Pfeile) bleibt Nachbearbeitung.
+  `spotlight()` nimmt ein Ziel oder eine Liste aus Zielen und stellt jedes
+  davon frei; ein Ziel ist entweder ein Locator oder eine `SpotlightEllipse`
+  in CSS-Pixeln des Viewports. Die Ellipse ist für alles gedacht, was kein
+  Element hat: Trassen, Adressen und Netzknoten zeichnet die Karte ins Canvas.
+  Wo sie liegt, wird gemessen und nicht festgeschrieben –
+  `ausgewaehltesKartenobjekt()` in `tests/05-karte.spec.ts` sucht im Canvas die
+  Auswahlfarbe der App (`DEFAULT_SELECTED_COLOR` = `#fff700`) und richtet die
+  Ellipse an der Hauptachse der Fundpunkte aus. Nötig ist das, weil unter der
+  Kartenmitte mehrere Trassen zusammenlaufen und je Lauf eine andere getroffen
+  wird; Neigung und Länge der Linie wechseln damit mit. Ist ein Canvas durch
+  fremde Rasterkacheln für `getImageData` gesperrt, wird es übersprungen – die
+  Objekte liegen ohnehin in einem anderen.
   `spotlight()` legt ein SVG mit Aussparung über die Seite und verändert das
   Zielelement nicht. Der naheliegende Weg über `box-shadow: 0 0 0 9999px` am
   Element selbst scheitert hier zweifach: der Schleier wird am nächsten

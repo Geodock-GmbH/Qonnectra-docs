@@ -5,13 +5,14 @@ import {
   composite2x2,
   shotPath,
   spotlight,
+  type SpotlightEllipse,
   zeigerWeg,
 } from '../playwright/manual-shots'
 
 // Screenshots für Kapitel „5. Karte" im Handbuch
 // (manual/teil-a-anwenderhandbuch/05-karte.md). Erzeugt alle Bilder des
-// Kapitels; die handgezeichneten Markierungen (Muster 3) in
-// map_address_detail_select und map_selected_object bleiben Nachbearbeitung.
+// Kapitels; die handgezeichnete Markierung (Muster 3) in
+// map_address_detail_select bleibt Nachbearbeitung.
 //
 // Übernehmen nach public/images/ mit: pnpm screenshots:publish 05-karte
 const KAPITEL = '05-karte'
@@ -101,6 +102,126 @@ function legende(page: Page): Locator {
 /** Zeile eines Layers in der Legende, z. B. „Adresse". */
 function legendenZeile(page: Page, name: string): Locator {
   return legende(page).getByText(name, { exact: true }).locator('xpath=..')
+}
+
+/**
+ * Misst das ausgewählte Kartenobjekt im gezeichneten Bild und liefert die
+ * Ellipse, die es umschließt – als Ziel für `spotlight()`.
+ *
+ * Trassen, Adressen und Netzknoten zeichnet die Karte ins Canvas; ein Element,
+ * auf das ein Locator zeigen könnte, gibt es dafür nicht. Deshalb wird nach der
+ * Auswahlfarbe der App gesucht (`DEFAULT_SELECTED_COLOR` = `#fff700` in
+ * `local-app/frontend/src/lib/map/defaultColors.ts`); nichts anderes auf der
+ * Karte ist so gelb.
+ *
+ * Gemessen statt festgeschrieben, weil unter der Kartenmitte mehrere Trassen
+ * zusammenlaufen und von Lauf zu Lauf eine andere getroffen wird (siehe
+ * TRASSE_MUSTER). Lage, Länge und Neigung der Linie wechseln damit mit.
+ *
+ * Die Ellipse wird an der Hauptachse der Fundpunkte ausgerichtet (Kovarianz wie
+ * bei einer Hauptkomponentenanalyse). Ohne Drehung bräuchte eine schräg
+ * liegende Trasse eine Ellipse, die vor allem leeren Kartenausschnitt
+ * freistellt.
+ */
+async function ausgewaehltesKartenobjekt(page: Page): Promise<SpotlightEllipse> {
+  /** Luft zwischen Objekt und weißer Kontur, in CSS-Pixeln. */
+  const LUFT = 18
+  /**
+   * Eine Trassenlinie ist nur wenige Pixel breit. Ohne Mindestmaß quer zur
+   * Achse fiele die Ellipse zu einem Strich zusammen.
+   */
+  const MINDEST_QUER = 34
+
+  const mass = await page.evaluate(() => {
+    const punkte: number[][] = []
+
+    for (const canvas of Array.from(document.querySelectorAll('div.map canvas'))) {
+      const flaeche = canvas as HTMLCanvasElement
+      let daten
+      try {
+        const ctx = flaeche.getContext('2d')
+        if (!ctx) continue
+        daten = ctx.getImageData(0, 0, flaeche.width, flaeche.height).data
+      } catch {
+        // Ein Canvas mit Rasterkacheln fremder Herkunft ist für getImageData
+        // gesperrt. Die Objekte der Karte liegen ohnehin in einem anderen.
+        continue
+      }
+
+      // Das Canvas hat Gerätepunkte (deviceScaleFactor 2), die Ellipse braucht
+      // CSS-Pixel des Viewports.
+      const rect = flaeche.getBoundingClientRect()
+      const skalaX = rect.width / flaeche.width
+      const skalaY = rect.height / flaeche.height
+
+      for (let py = 0; py < flaeche.height; py += 1) {
+        const zeile = py * flaeche.width * 4
+        for (let px = 0; px < flaeche.width; px += 1) {
+          const i = zeile + px * 4
+          // Toleranz gegen Kantenglättung, aber eng genug, dass die orangen
+          // Adresspunkte und die gelblichen Straßen der Basiskarte draußen
+          // bleiben.
+          if (daten[i + 3] <= 200) continue
+          if (daten[i] <= 225 || daten[i + 1] <= 215 || daten[i + 2] >= 110) continue
+          punkte.push([rect.left + (px + 0.5) * skalaX, rect.top + (py + 0.5) * skalaY])
+        }
+      }
+    }
+
+    const anzahl = punkte.length
+    if (anzahl === 0) return { anzahl, x: 0, y: 0, laengs: 0, quer: 0, drehung: 0 }
+
+    let mx = 0
+    let my = 0
+    for (const [x, y] of punkte) {
+      mx += x
+      my += y
+    }
+    mx /= anzahl
+    my /= anzahl
+
+    let sxx = 0
+    let syy = 0
+    let sxy = 0
+    for (const [x, y] of punkte) {
+      const dx = x - mx
+      const dy = y - my
+      sxx += dx * dx
+      syy += dy * dy
+      sxy += dx * dy
+    }
+
+    // Richtung der Hauptachse der Punktwolke.
+    const winkel = 0.5 * Math.atan2(2 * sxy, sxx - syy)
+    const cos = Math.cos(winkel)
+    const sin = Math.sin(winkel)
+
+    let laengs = 0
+    let quer = 0
+    for (const [x, y] of punkte) {
+      const dx = x - mx
+      const dy = y - my
+      laengs = Math.max(laengs, Math.abs(dx * cos + dy * sin))
+      quer = Math.max(quer, Math.abs(dy * cos - dx * sin))
+    }
+
+    return { anzahl, x: mx, y: my, laengs, quer, drehung: (winkel * 180) / Math.PI }
+  })
+
+  expect(
+    mass.anzahl,
+    'Auf der Karte ist kein Objekt in der Auswahlfarbe #fff700 gezeichnet – ' +
+      'ist die Auswahl wirklich gesetzt, und stimmt die Farbe noch mit ' +
+      'DEFAULT_SELECTED_COLOR der App überein?',
+  ).toBeGreaterThan(50)
+
+  return {
+    x: mass.x,
+    y: mass.y,
+    rx: mass.laengs + LUFT,
+    ry: Math.max(mass.quer + LUFT, MINDEST_QUER),
+    drehung: mass.drehung,
+  }
 }
 
 /**
@@ -272,7 +393,12 @@ test('5.3 Ausgewähltes Objekt mit Info-Box', async ({ page }) => {
   await zeigerWeg(page)
   await page.waitForTimeout(500)
 
-  const spotAus = await spotlight(page, page.locator('[data-drawer]'))
+  // Freigestellt wird beides: das ausgewählte Objekt in der Karte und die
+  // Info-Box mit seinen Werten. Nur die Info-Box hervorzuheben lässt offen,
+  // welches Objekt überhaupt ausgewählt ist – die dünne gelbe Trassenlinie
+  // geht im abgedunkelten Kartenbild unter.
+  const objekt = await ausgewaehltesKartenobjekt(page)
+  const spotAus = await spotlight(page, [objekt, page.locator('[data-drawer]')])
   await page.screenshot({ path: shotPath(KAPITEL, 'map_selected_object') })
   await spotAus()
 })

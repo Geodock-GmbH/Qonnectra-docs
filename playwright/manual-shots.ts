@@ -58,24 +58,92 @@ export async function zeigerWeg(page: Page): Promise<void> {
 export interface SpotlightOptions {
   /** Deckkraft des grauen Schleiers über dem Rest der Oberfläche. */
   dim?: number
-  /** Eckenradius der Aussparung in px. */
+  /** Eckenradius der Aussparung in px. Gilt nur für Element-Ziele. */
   radius?: number
-  /** Abstand zwischen Zielelement und Kontur in px. */
+  /** Abstand zwischen Zielelement und Kontur in px. Gilt nur für Element-Ziele. */
   padding?: number
   /** Strichstärke der weißen Kontur in px. */
   konturStaerke?: number
 }
 
+/**
+ * Freie Ellipse als Spotlight-Ziel, in CSS-Pixeln des Viewports.
+ *
+ * Für alles, was kein eigenes Element hat: Trassen, Adressen und Netzknoten
+ * zeichnet die Karte ins Canvas, einen Locator gibt es dafür nicht. `padding`
+ * und `radius` aus den Optionen greifen hier nicht – Lage und Größe stehen
+ * schon in der Ellipse.
+ */
+export interface SpotlightEllipse {
+  /** Mittelpunkt im Viewport. */
+  x: number
+  y: number
+  /** Halbachse längs bzw. quer zur Drehachse. */
+  rx: number
+  ry: number
+  /** Drehung um den Mittelpunkt in Grad, für schräg liegende Objekte. */
+  drehung?: number
+}
+
+/** Ein Spotlight kann mehrere Stellen gleichzeitig freistellen. */
+export type SpotlightZiel = Locator | SpotlightEllipse
+
 /** Kennzeichnet die eingefügte Überlagerung, damit sie wieder entfernbar ist. */
 const SPOTLIGHT_ID = 'qonnectra-doku-spotlight'
+
+function istEllipse(ziel: SpotlightZiel): ziel is SpotlightEllipse {
+  return 'rx' in ziel
+}
+
+/** Abgerundetes Rechteck um ein Element, als SVG-Pfad. */
+function rechteckPfad(
+  rect: { x: number; y: number; width: number; height: number },
+  padding: number,
+  radius: number,
+): string {
+  const x = rect.x - padding
+  const y = rect.y - padding
+  const w = rect.width + padding * 2
+  const h = rect.height + padding * 2
+  const r = Math.min(radius, w / 2, h / 2)
+
+  return (
+    `M${x + r},${y} H${x + w - r} A${r},${r} 0 0 1 ${x + w},${y + r} ` +
+    `V${y + h - r} A${r},${r} 0 0 1 ${x + w - r},${y + h} ` +
+    `H${x + r} A${r},${r} 0 0 1 ${x},${y + h - r} ` +
+    `V${y + r} A${r},${r} 0 0 1 ${x + r},${y} Z`
+  )
+}
+
+/**
+ * Ellipse als SVG-Pfad aus zwei Halbbögen. Die Drehung steckt in der
+ * `x-axis-rotation` der Bögen und nicht in einem `transform` – nur so lässt
+ * sich der Pfad mit den Rechtecken in einem gemeinsamen `d` kombinieren, und
+ * genau das macht die Aussparung per `fill-rule: evenodd` möglich.
+ */
+function ellipsenPfad({ x, y, rx, ry, drehung = 0 }: SpotlightEllipse): string {
+  const bogenmass = (drehung * Math.PI) / 180
+  const dx = rx * Math.cos(bogenmass)
+  const dy = rx * Math.sin(bogenmass)
+
+  return (
+    `M${x - dx},${y - dy} A${rx},${ry} ${drehung} 0 1 ${x + dx},${y + dy} ` +
+    `A${rx},${ry} ${drehung} 0 1 ${x - dx},${y - dy} Z`
+  )
+}
 
 /**
  * Muster 2: dunkelt die gesamte Oberfläche ab und lässt nur `ziel` in voller
  * Helligkeit mit weißer, abgerundeter Kontur stehen.
  *
- * Umgesetzt als eigenes SVG über der Seite, mit einer Aussparung an der Stelle
- * des Zielelements (`fill-rule: evenodd`). Am Zielelement und an seinen
- * Vorfahren wird bewusst **nichts** verändert. Der naheliegende Weg über
+ * `ziel` darf ein Element, eine Ellipse oder eine Liste aus beidem sein.
+ * Mehrere Ziele gleichzeitig braucht z. B. das ausgewählte Kartenobjekt: das
+ * Objekt selbst liegt im Canvas, seine Werte stehen in der Info-Box am rechten
+ * Rand – beide Stellen gehören ins Bild, alles dazwischen nicht.
+ *
+ * Umgesetzt als eigenes SVG über der Seite, mit einer Aussparung je Ziel
+ * (`fill-rule: evenodd`). An den Zielelementen und an ihren Vorfahren wird
+ * bewusst **nichts** verändert. Der naheliegende Weg über
  * `box-shadow: 0 0 0 9999px` am Zielelement funktioniert hier nicht:
  *
  * - Der Schatten endet am nächsten Vorfahren mit `overflow != visible`. Beim
@@ -93,34 +161,33 @@ const SPOTLIGHT_ID = 'qonnectra-doku-spotlight'
  */
 export async function spotlight(
   page: Page,
-  ziel: Locator,
+  ziel: SpotlightZiel | SpotlightZiel[],
   options: SpotlightOptions = {},
 ): Promise<() => Promise<void>> {
   const { dim = 0.5, radius = 8, padding = 6, konturStaerke = 3 } = options
 
-  await ziel.waitFor({ state: 'visible' })
+  const pfade: string[] = []
+  for (const einzelziel of Array.isArray(ziel) ? ziel : [ziel]) {
+    if (istEllipse(einzelziel)) {
+      pfade.push(ellipsenPfad(einzelziel))
+      continue
+    }
 
-  await ziel.evaluate(
-    (element: HTMLElement, { dim, radius, padding, konturStaerke, overlayId }) => {
+    await einzelziel.waitFor({ state: 'visible' })
+    const rect = await einzelziel.boundingBox()
+    if (!rect) {
+      throw new Error('Spotlight: Ziel ist sichtbar, hat aber keine Ausdehnung im Viewport.')
+    }
+    pfade.push(rechteckPfad(rect, padding, radius))
+  }
+
+  await page.evaluate(
+    ({ pfade, dim, konturStaerke, overlayId }) => {
       document.getElementById(overlayId)?.remove()
-
-      const rect = element.getBoundingClientRect()
-      const x = rect.left - padding
-      const y = rect.top - padding
-      const w = rect.width + padding * 2
-      const h = rect.height + padding * 2
-      const r = Math.min(radius, w / 2, h / 2)
 
       const breite = window.innerWidth
       const hoehe = window.innerHeight
-
-      // Abgerundetes Rechteck als zweiter Teilpfad; mit evenodd wird daraus
-      // die Aussparung im vollflächigen Schleier.
-      const loch =
-        `M${x + r},${y} H${x + w - r} A${r},${r} 0 0 1 ${x + w},${y + r} ` +
-        `V${y + h - r} A${r},${r} 0 0 1 ${x + w - r},${y + h} ` +
-        `H${x + r} A${r},${r} 0 0 1 ${x},${y + h - r} ` +
-        `V${y + r} A${r},${r} 0 0 1 ${x + r},${y} Z`
+      const loecher = pfade.join(' ')
 
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
       svg.id = overlayId
@@ -130,14 +197,16 @@ export async function spotlight(
       svg.style.cssText =
         'position:fixed;top:0;left:0;pointer-events:none;z-index:2147483647'
 
+      // Die Ziele sind weitere Teilpfade im vollflächigen Rechteck; mit evenodd
+      // werden daraus die Aussparungen im Schleier.
       const schleier = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-      schleier.setAttribute('d', `M0,0 H${breite} V${hoehe} H0 Z ${loch}`)
+      schleier.setAttribute('d', `M0,0 H${breite} V${hoehe} H0 Z ${loecher}`)
       schleier.setAttribute('fill', `rgba(0, 0, 0, ${dim})`)
       schleier.setAttribute('fill-rule', 'evenodd')
       svg.appendChild(schleier)
 
       const kontur = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-      kontur.setAttribute('d', loch)
+      kontur.setAttribute('d', loecher)
       kontur.setAttribute('fill', 'none')
       kontur.setAttribute('stroke', '#fff')
       kontur.setAttribute('stroke-width', String(konturStaerke))
@@ -145,7 +214,7 @@ export async function spotlight(
 
       document.body.appendChild(svg)
     },
-    { dim, radius, padding, konturStaerke, overlayId: SPOTLIGHT_ID },
+    { pfade, dim, konturStaerke, overlayId: SPOTLIGHT_ID },
   )
 
   return async () => {
