@@ -124,6 +124,25 @@ export function localApp(): LocalApp {
 }
 
 /**
+ * Zugangsdaten des Django-Superusers – unabhängig davon, mit welcher Rolle der
+ * Lauf arbeitet.
+ *
+ * Ausschließlich zum **Aufräumen** nach Aufnahmen gedacht, nie für die
+ * Aufnahme selbst. Hintergrund: Die Gruppe „Editor“, mit der die Bilder
+ * entstehen, hat auf alle Fachmodelle die Zugriffsstufe „edit“ und darf damit
+ * kein DELETE (`RoleBasedPermission` im Backend). Ein Spec, das zur Aufnahme
+ * etwas anlegt – etwa einen Anhang –, bekommt es mit dem Aufnahmekonto nicht
+ * wieder weg und der nächste Lauf startet in einem anderen Zustand.
+ */
+export function superuserZugang(): { username: string; password: string } {
+  const env = readDeploymentEnv()
+  return {
+    username: required(env, 'DJANGO_SUPERUSER_USERNAME'),
+    password: required(env, 'DJANGO_SUPERUSER_PASSWORD'),
+  }
+}
+
+/**
  * Von scripts/setup-local-qonnectra.sh vergebene Frontend-Adresse. Dient als
  * Rückfallwert, solange die Instanz noch nicht eingerichtet ist, damit
  * `playwright test --list` auch dann funktioniert.

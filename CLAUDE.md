@@ -93,14 +93,24 @@ exakt; im Zweifel `manual/teil-a-anwenderhandbuch/05-karte.md` und
 |---|---|
 | Viewport | 1792 × 1120, `deviceScaleFactor: 2` → Bild **3584 × 2240** |
 | Bildformat | `.jpg`, Qualität ~85, Zieldateigröße < 1,2 MB |
-| Videoformat | `.webm`, ca. 1792 × 1120 |
+| Videoformat | `.webm` (VP8), Ausschnitt der Oberfläche, ca. 1000 × 700 |
 | Modus | immer Hellmodus, Sprache **DE** |
-| Inhalt | nur der App-Viewport, kein Browser-Chrome, kein Mauszeiger |
+| Inhalt | nur der App-Viewport, kein Browser-Chrome; Bilder ohne Mauszeiger, Videos **mit** |
 | Daten | ausschließlich das Demoprojekt „Testprojekt“ – keine echten personenbezogenen Daten |
 
 > `playwright.config.ts` setzt diese Werte zentral. Kein `devices[...]`-Preset in
 > die Projekt-Konfiguration spreaden – die Presets bringen eigene `viewport`- und
 > `deviceScaleFactor`-Werte mit und überschreiben die Zielwerte still.
+
+Videos sind bewusst **kein** Vollbild der Oberfläche. Das Handbuch rendert sie
+mit der Breite des Textbereichs (rund 690 px); bei 1792 CSS-Pixeln Aufnahmebreite
+blieben von einer 16-px-Beschriftung der App keine 7 px übrig. Ein Ausschnitt von
+rund 1000 CSS-Pixeln Breite entspricht den bestehenden Videos (`map_attachment.webm`
+zeigte einen Bereich von etwa 924 × 638 CSS-Pixeln) und bleibt lesbar. Maßgeblich
+ist allein die **Breite** – die Höhe ändert den Maßstab im Handbuch nicht.
+Anders als Screenshots werden Videos außerdem in CSS-Pixeln aufgenommen: Chromiums
+Screencast liefert keine Gerätepunkte, der `deviceScaleFactor` von 2 wirkt dort
+nicht.
 
 **Ablage und Benennung**
 - Bilder: `public/images/manual/teil-a/<name>.jpg` (je Handbuchteil ein Ordner)
@@ -134,7 +144,11 @@ exakt; im Zweifel `manual/teil-a-anwenderhandbuch/05-karte.md` und
    `map_legend_actions.jpg`).
 
 Muster 2 und 3 werden kombiniert (abdunkeln + Ellipse + Pfeil). Videos sind
-kurze, ungeschnittene Interaktionsaufnahmen ohne Ton, Text oder Markierung.
+kurze, ungeschnittene Interaktionsaufnahmen ohne Ton, Text oder Markierung – mit
+sichtbarem Mauszeiger, weil Zustände wie „Schaltflächen erscheinen beim Zeigen“
+sonst grundlos wirken (`mauszeigerAn()` in `playwright/manual-videos.ts` legt
+einen nachgebildeten Zeiger in die Seite; Playwright zeichnet den echten nicht
+mit). Animationen bleiben an, `animationenAus()` gilt nur für Standbilder.
 
 **Einbindung in Markdown**
 - Bild steht **nach** dem erklärenden Absatz, nie davor.
@@ -210,22 +224,29 @@ wird nicht mehr gelesen.
   `basemapTheme`, `mapCenter` und `mapZoom`. Die Karte hat kein Auto-Fit – ohne
   gesetzte `mapCenter`/`mapZoom` (EPSG:3857) startet sie bei Zoom 2 im Atlantik.
 - Ein Spec pro Handbuchkapitel: `tests/<NN>-<kapitel-slug>.spec.ts` mit Kommentar,
-  auf welches Kapitel es sich bezieht (siehe `tests/05-karte.spec.ts`).
+  auf welches Kapitel es sich bezieht (siehe `tests/05-karte.spec.ts`). Videos
+  eines Kapitels liegen daneben in `tests/<NN>-<kapitel-slug>-video.spec.ts`;
+  eine eigene Datei ist Pflicht, weil `test.use({ video: … })` nur auf
+  Dateiebene erlaubt ist („forces a new worker“ in einer `test.describe`-Gruppe).
 - Ausgabe nach `tests/screenshots/<kapitel-slug>/<bildname>.png` über
-  `shotPath()`. `tests/screenshots/`, `test-results/`, `playwright-report/` und
-  `auth-state.json` sind gitignored – das sind Rohaufnahmen, nicht die Bilder
-  des Handbuchs.
+  `shotPath()` bzw. `tests/videos/<kapitel-slug>/<name>.webm` über
+  `videoPfad()`. `tests/screenshots/`, `tests/videos/`, `test-results/`,
+  `playwright-report/` und `auth-state.json` sind gitignored – das sind
+  Rohaufnahmen, nicht die Dateien des Handbuchs.
 - `pnpm screenshots:publish` (`scripts/publish-screenshots.sh`) übernimmt sie
-  nach `public/images/manual/…` und wandelt sie dabei in JPEG (Qualität 85,
-  Qualität wird gesenkt, bis die Datei unter 1,2 MB liegt). Das Zielverzeichnis
-  kommt aus dem Handbuch selbst: das Skript sucht in `manual/` die Einbindung
-  `/images/manual/<teil>/<name>.jpg`. Bilder ohne Einbindung werden
-  übersprungen, damit nichts im falschen Teil-Ordner landet.
-  `--dry-run` zeigt vorher, was neu angelegt und was ersetzt würde.
+  nach `public/images/manual/…` bzw. `public/videos/…` und wandelt Bilder dabei
+  in JPEG (Qualität 85, Qualität wird gesenkt, bis die Datei unter 1,2 MB
+  liegt); Videos werden nur kopiert, Zuschnitt und Kodierung erledigt die Spec.
+  Das Ziel kommt aus dem Handbuch selbst: das Skript sucht in `manual/` die
+  Einbindung `/images/manual/<teil>/<name>.jpg` bzw. `/videos/<name>.webm`.
+  Aufnahmen ohne Einbindung werden übersprungen, damit nichts im falschen
+  Ordner landet. `--dry-run` zeigt vorher, was neu angelegt und was ersetzt
+  würde, `--videos` und `--bilder` schränken auf eine Art ein.
 - Nur Muster 1 und 2 gehen komplett automatisch durch. Bilder mit
   handgezeichneten Markierungen (Muster 3) werden nach dem Übernehmen
   nachbearbeitet – `--dry-run` vorher ansehen, sonst überschreibt der Lauf die
-  Handarbeit mit einer Rohaufnahme.
+  Handarbeit mit einer Rohaufnahme. Wer nur ein Video erneuert, nimmt
+  `--videos`.
 - Kapitel 3 braucht als einziges auch den abgemeldeten Zustand: die Bilder der
   Anmeldeseite stehen in einem `test.describe`-Block mit
   `test.use({ storageState: { cookies: [], origins: [] } })`, die Bilder der
@@ -243,6 +264,30 @@ wird nicht mehr gelesen.
   Element selbst scheitert hier zweifach: der Schleier wird am nächsten
   Vorfahren mit `overflow: hidden` abgeschnitten, und macht man die Vorfahren
   durchlässig, verliert die Karte (OpenLayers) beim Reflow ihren Canvas-Inhalt.
+- Video-Helfer in `playwright/manual-videos.ts`: `mauszeigerAn()` legt einen
+  nachgebildeten Mauszeiger in die Seite, `zeigeAuf()`, `klicke()`, `ziehe()`
+  und `tippe()` führen ihn in Handgeschwindigkeit, `videoNachbearbeiten()`
+  schneidet Seitenaufbau und Bildrand weg. Fallstricke, die dort schon gelöst
+  sind und beim Nachbauen sofort wieder auftauchen:
+  - Der Zeiger darf **keine** eigene Compositor-Ebene bekommen (also
+    `left`/`top` statt `transform`, kein `will-change`). Sonst zeichnet
+    Chromium ihn weiter aktuell, während das Rastern des übrigen Inhalts
+    hinterherhinkt – beim Breiterziehen der Info-Box lief der Zeiger der Kante
+    um gut 180 px voraus.
+  - Der Zeiger muss auf `pointermove` **und** `mousemove` hören: Der Griff der
+    Info-Box ruft in seinem `pointerdown` `preventDefault()` auf, danach
+    liefert Chromium für diesen Zeiger keine `mouse`-Ereignisse mehr.
+  - Beim Ziehen rund 90 ms je Schritt lassen. An der Breite der Info-Box hängt
+    die Karte, OpenLayers zeichnet bei jeder Änderung neu (gemessen ~70 ms);
+    dichtere Ereignisse stauen sich sichtbar auf.
+  - Geschnitten wird mit dem ffmpeg, das `playwright install` ohnehin
+    mitbringt (`ffmpegPfad()`) – kein zusätzliches Werkzeug auf dem Rechner.
+    `-ss` muss **hinter** `-i` stehen; davor spult ffmpeg nur bis zum letzten
+    Schlüsselbild, und die sitzen in Playwrights Aufnahme weit auseinander.
+  - Legt eine Aufnahme Daten an (z. B. einen Anhang), räumt die Spec sie über
+    die API wieder weg – und zwar mit `superuserZugang()`. Die Gruppe „Editor“
+    des Aufnahmekontos hat auf alle Fachmodelle nur die Stufe „edit“ und darf
+    kein DELETE (`RoleBasedPermission`); die API antwortet mit 403.
 - Composite-Raster sind montiert und deshalb **nicht** 3584 × 2240, sondern
   2656 px breit bei einer Höhe, die sich aus dem Kartenausschnitt der Kacheln
   ergibt (zuletzt 2656 × 1854). Das Seitenverhältnis der Montage lässt sich

@@ -16,6 +16,7 @@ auth-state.json
 /test-results/
 /playwright-report/
 /tests/screenshots/
+/tests/videos/
 
 # Wegwerf-Specs zum Prüfen von Selektoren (siehe testIgnore in playwright.config.ts)
 /tests/.tmp-*/
