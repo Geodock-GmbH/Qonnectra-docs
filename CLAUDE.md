@@ -119,7 +119,7 @@ nicht.
   `login_`, `dashboard_`, `map_`, `conduit_`, `conduit_connection_`
   → `dashboard_trasse_hover.jpg`, `map_legend_actions.jpg`, `conduit_search_columns.jpg`
 - Ausschnittvergrößerungen bekommen das Suffix `_detail`
-  (`login_start_detail.jpg`, `map_adress_detail.jpg`).
+  (`login_start_detail.jpg`, `map_address_detail.jpg`).
 
 **Bildsprache – vier Muster, die konsistent wiederkehren**
 

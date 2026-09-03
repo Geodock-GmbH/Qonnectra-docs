@@ -11,7 +11,7 @@ import {
 // Screenshots für Kapitel „5. Karte" im Handbuch
 // (manual/teil-a-anwenderhandbuch/05-karte.md). Erzeugt alle Bilder des
 // Kapitels; die handgezeichneten Markierungen (Muster 3) in
-// map_adress_detail_select und map_selected_object bleiben Nachbearbeitung.
+// map_address_detail_select und map_selected_object bleiben Nachbearbeitung.
 //
 // Übernehmen nach public/images/ mit: pnpm screenshots:publish 05-karte
 const KAPITEL = '05-karte'
@@ -134,7 +134,7 @@ test('5.1 Legendeneintrag „Adresse" und Zoom auf den Layer', async ({ page }) 
 
   // Vollbild mit hervorgehobener Zeile „Adresse".
   const spotAus = await spotlight(page, legendenZeile(page, 'Adresse'))
-  await page.screenshot({ path: shotPath(KAPITEL, 'map_adress_detail') })
+  await page.screenshot({ path: shotPath(KAPITEL, 'map_address_detail') })
   await spotAus()
 
   // Nach dem Zoom auf die Ausdehnung des Layers.
@@ -144,7 +144,7 @@ test('5.1 Legendeneintrag „Adresse" und Zoom auf den Layer', async ({ page }) 
   await zeigerWeg(page)
   // view.fit läuft 800 ms, danach laden Kacheln nach.
   await page.waitForTimeout(3000)
-  await page.screenshot({ path: shotPath(KAPITEL, 'map_adress_detail_select') })
+  await page.screenshot({ path: shotPath(KAPITEL, 'map_address_detail_select') })
 })
 
 test('5.2 Transparenz-Regler', async ({ page }) => {
