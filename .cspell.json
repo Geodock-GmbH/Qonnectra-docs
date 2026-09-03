@@ -147,6 +147,7 @@
   ],
   "ignorePaths": [
     ".git/**/*",
-    ".cspell.json"
+    ".cspell.json",
+    "scripts/qonnectra-demo-data/testprojekt-export.json"
   ]
 }
