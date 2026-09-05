@@ -6,3 +6,17 @@ dist/
 .vitepress/cache
 .vitepress/dist
 
+.env
+
+# geklontes Qonnectra-App-Repo (siehe local-app/README.md)
+/local-app/
+
+# Playwright
+auth-state.json
+/test-results/
+/playwright-report/
+/tests/screenshots/
+/tests/videos/
+
+# Wegwerf-Specs zum Prüfen von Selektoren (siehe testIgnore in playwright.config.ts)
+/tests/.tmp-*/

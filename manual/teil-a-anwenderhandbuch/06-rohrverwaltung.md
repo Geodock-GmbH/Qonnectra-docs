@@ -40,11 +40,15 @@ Wenn Sie ein Rohr aus der Liste anklicken, öffnet sich auf der rechten Seite ei
 
 Hier können Sie alle Eigenschaften des ausgewählten Rohrs einsehen und ändern. Alle Änderungen müssen mit dem „Speichern“-Button ganz unten bestätigt werden.
 
-Hinweis: Wenn der Button nicht sichtbar ist, scrollen Sie im Feld nach unten. Auf kleineren Bildschirmen oder bei vielen Eingabefeldern kann der Button außerhalb des sichtbaren Bereichs liegen.
+::: info
+Wenn der Button nicht sichtbar ist, scrollen Sie im Feld nach unten. Auf kleineren Bildschirmen oder bei vielen Eingabefeldern kann der Button außerhalb des sichtbaren Bereichs liegen.
+:::
 
 ![Screenshot Bearbeitung von Rohreigenschaften](/images/manual/teil-a/conduit_properties.jpg)
 
-Wichtiger Hinweis: Wenn Sie Eigenschaften ändern, klicken Sie auf „Speichern“, bevor Sie ein anderes Rohr aus der Liste auswählen. Andernfalls gehen die Änderungen ohne Warnung verloren.
+::: danger
+Wenn Sie Eigenschaften ändern, klicken Sie auf „Speichern“, bevor Sie ein anderes Rohr aus der Liste auswählen. Andernfalls gehen die Änderungen ohne Warnung verloren.
+:::
 
 ### 6.3.2 Reiter „Anhänge“
 
@@ -64,4 +68,6 @@ Oben rechts finden Sie zwei Buttons zur Arbeit mit Excel-Dateien:
 
 ![Screenshot mit Hervorhebung der beiden Button Excel-Import und Vorlage](/images/manual/teil-a/conduit_excel.jpg)
 
-Wichtig: Die Struktur der Excel-Datei muss genau der Vorlage entsprechen, sonst kann der Import nicht durchgeführt werden.
+::: warning
+Die Struktur der Excel-Datei muss genau der Vorlage entsprechen, sonst kann der Import nicht durchgeführt werden.
+:::

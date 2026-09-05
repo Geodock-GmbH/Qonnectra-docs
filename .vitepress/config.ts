@@ -32,6 +32,11 @@ export default defineConfig({
   title: 'Qonnectra',
   description: 'Netzdokumentation für kommunale Infrastrukturen - Handbuch',
   lang: 'de',
+
+  // local-app/ is the cloned Qonnectra app checkout (see
+  // scripts/setup-local-qonnectra.sh). Without this exclusion VitePress pulls
+  // its Markdown files into the build and fails on the HTML inside them.
+  srcExclude: ['local-app/**', '**/node_modules/**'],
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }]
   ],
@@ -44,6 +49,15 @@ export default defineConfig({
     theme: {
       light: 'github-light',
       dark: 'github-dark'
+    },
+
+    // Default titles of the note containers of the manual. Without them
+    // VitePress writes its English defaults ("INFO", "WARNING", "DANGER"); a
+    // chapter only spells out a title of its own where it deviates from these.
+    container: {
+      infoLabel: 'Hinweis',
+      warningLabel: 'Wichtig',
+      dangerLabel: 'Achtung'
     },
     config: (md) => {
       md.use(lightbox, {})

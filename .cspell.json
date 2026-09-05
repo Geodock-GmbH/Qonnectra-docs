@@ -3,67 +3,108 @@
   "import": [
     "@cspell/dict-de-de/cspell-ext.json"
   ],
-  "language": "en,de",
+  "language": "en,en-GB,de",
+  "languageSettings": [
+    {
+      "languageId": "*",
+      "locale": "de,de_DE",
+      "allowCompoundWords": true,
+      "dictionaries": [
+        "de-de"
+      ]
+    }
+  ],
   "words": [
     "Anfrageformular",
+    "Ausschnittvergrößerung",
     "Browserzeile",
     "dbaeumer",
+    "dedupe",
     "dokumentationsbezogenen",
     "DSGVO",
+    "ecparam",
     "Elgendorfer",
+    "EPSG",
     "esbenp",
     "gehostet",
-    "geodock",
-    "gescrollt",
     "gezoomt",
-    "Händelhof",
-    "Hellmodus",
-    "herauszoomen",
-    "Hoster",
+    "gunicorn",
     "Hosters",
-    "Hovereffekt",
     "hovern",
+    "Händelhof",
     "Impressumspflicht",
     "Infrastrukturakteure",
+    "initdb",
     "IONOS",
     "kundeneigener",
+    "Layergruppe",
     "Layergruppen",
     "Layern",
+    "libnss",
+    "libpsl",
+    "libvpx",
     "Lupensymbol",
+    "Matroska",
+    "mbtiles",
     "Montabaur",
     "Newsletteranmeldeformular",
     "Newsletterdaten",
+    "Nieharde",
+    "noout",
+    "nssdb",
     "pexels",
-    "Pictogrammers",
     "pixabay",
     "planneo",
-    "QGIS",
+    "qgis",
     "qonnectra",
-    "Rohrabzweige",
-    "rollenbasierte",
     "Schauenburgerstr",
     "Schauenburgerstraße",
-    "Scrollrad",
-    "Spaltenspezifische",
     "srgb",
+    "srid",
+    "Sterup",
     "Streitbeilegungsverfahren",
     "Surfverhaltens",
     "Szenariotool",
     "TDDDG",
-    "teilstrukturierte",
     "Topologien",
     "Trassensegementen",
-    "Userflow",
-    "Verlegearten",
+    "Verlegeart",
     "Verwaltungsmitarbeitende",
-    "Webanalytics",
     "Websitebesucher",
-    "Websitebetreiber",
-    "Websitezugriffe",
-    "widerrufbar"
+    "Websitebetreiber"
   ],
   "ignorePaths": [
     ".git/**/*",
-    ".cspell.json"
+    ".cspell.json",
+    "scripts/qonnectra-demo-data/testprojekt-export.json"
+  ],
+  "overrides": [
+    {
+      "filename": [
+        "**/*.ts"
+      ],
+      "languageSettings": [
+        {
+          "languageId": "*",
+          "locale": "de,de_DE",
+          "caseSensitive": false,
+          "allowCompoundWords": true,
+          "dictionaries": [
+            "de-de"
+          ]
+        }
+      ]
+    },
+    {
+      "filename": [
+        "**/*.{sh,py}"
+      ],
+      "languageSettings": [
+        {
+          "languageId": "*",
+          "caseSensitive": false
+        }
+      ]
+    }
   ]
 }
