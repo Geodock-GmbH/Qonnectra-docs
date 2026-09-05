@@ -87,6 +87,26 @@ in doubt read `manual/teil-a-anwenderhandbuch/05-karte.md` and
 `07-rohrzuordnung.md` as templates. The manual is written in German, so the rules
 below quote German.
 
+**Precision over completeness** – the manual is written for people who have the
+app in front of them.
+- Explain what users cannot work out for themselves. Leave out what the
+  interface already tells them: the eye symbol in the password field, that a
+  click on a tab switches the view, that a long list can be scrolled.
+- Do not describe how a value is typeset when the screenshot right next to it
+  shows it („mit angehängtem „x““, „in fetter Schrift“). Name what a view
+  contains, not how it looks.
+- List chart and card titles instead of giving each one a sentence that merely
+  repeats the title („„Trasse“ – Auswertungen zu den Trassen“).
+- Explain a mechanism once, in the section it belongs to – not again in every
+  section it also occurs in.
+- Rule of thumb: a sentence that would be equally true of any other web
+  application does not belong in the manual.
+
+What does **not** fall under this: pitfalls, limits and behaviour that
+contradicts expectation (see the next block). A cache that delays values, a
+chart capped at ten entries, changes lost without a warning – those are the
+sentences the chapter exists for.
+
 **Form of address and tone**
 - Consistently **Sie-Form**, instructions in the imperative: „Klicken Sie auf …“,
   „Geben Sie einen Suchbegriff ein.“
@@ -194,6 +214,11 @@ mouse cursor, because states like "buttons appear on hover" would otherwise look
 unmotivated (`showCursor()` in `playwright/manual-videos.ts` places a replica
 cursor into the page; Playwright does not record the real one). Animations stay
 on; `disableAnimations()` applies to still images only.
+
+A video only earns its place where the movement itself carries the information:
+a drag, a multi-step flow, a state that only exists while the cursor is
+somewhere. Where a still image already shows the result – a tooltip, an
+opened menu – the chapter gets no video of it in addition.
 
 **Embedding in Markdown**
 - The image goes **after** the explaining paragraph, never before it.

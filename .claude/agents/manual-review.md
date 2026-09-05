@@ -37,6 +37,19 @@ that was named explicitly.
   only where they deviate. `danger` is reserved for losing data. A note as a
   bare paragraph with a `Hinweis:` prefix is a leftover of the old style.
 
+**Depth and verbosity** (advisory, but the most frequent deviation)
+- Sentences that explain what the interface already says: the eye symbol in the
+  password field, that a click on a tab switches the view, that a long list can
+  be scrolled, what a tooltip is.
+- Descriptions of how a value is typeset where a screenshot shows it („mit
+  angehängtem „x““, „in fetter Schrift“).
+- Bullets that only repeat their own title („„Trasse“ – Auswertungen zu den
+  Trassen“), and mechanisms explained a second time in a later section.
+- A video next to a screenshot that already shows the same result – one of the
+  two is redundant.
+- Not a finding: pitfalls, limits and behaviour that contradicts expectation.
+  Those stay, however long the section gets.
+
 **Factual accuracy**
 - Every quoted UI label exists that way in
   `local-app/frontend/messages/de.json` resp. in the Svelte components.

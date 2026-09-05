@@ -24,6 +24,29 @@ comments, script output) is English.
    and has to fit the gap in the respective manual part (part A 2–13, part B
    14–16, part C from 17). Never shift existing numbers.
 
+## Depth: precise and smart, not exhaustive
+
+The reader has the app in front of them. Write what they cannot work out for
+themselves and stop there – verbosity is the most common way to miss the style
+of the existing chapters.
+
+- Leave out what the interface already says: the eye symbol in the password
+  field, that a click on a tab switches the view, that a long list can be
+  scrolled, what a tooltip is.
+- Do not describe how a value is typeset when the screenshot next to it shows it
+  („mit angehängtem „x““, „in fetter Schrift“). Name what a view contains, not
+  how it looks.
+- List chart and card titles instead of giving each one a sentence that merely
+  repeats the title („„Trasse“ – Auswertungen zu den Trassen“).
+- Explain a mechanism once, in the section it belongs to – not again in every
+  section it also occurs in.
+- A sentence that would be equally true of any other web application does not
+  belong in the manual.
+
+The exception is the point further down about pitfalls and limits: those
+sentences are the reason the chapter exists and stay, even when they make a
+section longer.
+
 ## Style rules (binding, and quoted in German because the manual is German)
 
 - German, consistent **Sie-Form**, instructions in the imperative: „Klicken Sie
@@ -67,7 +90,10 @@ German description with view, highlight and position:
   512 px with a green border.
 - Image pair full shot + detail: two `![]()` lines directly below one another,
   then a line of its own with `{.img-row}`.
-- Videos: `![](/videos/<name>.webm)` without alt text.
+- Videos: `![](/videos/<name>.webm)` without alt text. Only ask for one where
+  the movement itself carries the information (a drag, a multi-step flow, a
+  state that exists only under the cursor) – never in addition to a screenshot
+  that already shows the same result.
 
 If the image does not exist yet, embed it under the correct target path anyway
 and list all missing files at the end of your answer, each with the view,
