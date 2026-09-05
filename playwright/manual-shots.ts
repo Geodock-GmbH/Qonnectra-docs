@@ -1,37 +1,37 @@
-// Werkzeuge für Handbuch-Screenshots. Setzt die in CLAUDE.md beschriebene
-// Bildsprache um, soweit sie sich reproduzierbar automatisieren lässt:
+// Tools for manual screenshots. Implements the visual language described in
+// CLAUDE.md, as far as it can be automated reproducibly:
 //
-//   Muster 1  Übersichtsbild, unbearbeitet   -> page.screenshot()
-//   Muster 2  Dim + Spotlight                -> spotlight()
-//   Muster 3  handgezeichnete Markierung     -> bleibt Nachbearbeitung
-//   Muster 4  Composite-Raster 2 × 2         -> composite2x2()
+//   Pattern 1  plain overview shot            -> page.screenshot()
+//   Pattern 2  dim + spotlight                -> spotlight()
+//   Pattern 3  hand-drawn annotation          -> stays manual post-processing
+//   Pattern 4  composite grid 2 x 2           -> composite2x2()
 //
-// Ausgabe immer als PNG nach tests/screenshots/<kapitel>/<name>.png. Die
-// Umwandlung nach JPEG und das Kopieren nach public/images/ passiert bewusst
-// von Hand (siehe CLAUDE.md).
+// Output is always PNG to tests/screenshots/<chapter>/<name>.png. Converting to
+// JPEG and copying into public/images/ is done by `pnpm screenshots:publish`
+// (scripts/publish-screenshots.sh), not here.
 import { mkdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 
 import type { Locator, Page } from '@playwright/test'
 
-/** Marken-Grün, u. a. für die Ziffern im Composite-Raster. */
-export const MARKENGRUEN = '#11ba81'
+/** Brand green, used among other things for the digits in the composite grid. */
+export const BRAND_GREEN = '#11ba81'
 
 const SHOT_ROOT = 'tests/screenshots'
 
-/** Pfad für ein Kapitelbild, z. B. shotPath('05-karte', 'map') */
-export function shotPath(kapitel: string, name: string): string {
-  const path = join(SHOT_ROOT, kapitel, `${name}.png`)
+/** Path for a chapter image, e.g. shotPath('05-karte', 'map') */
+export function shotPath(chapter: string, name: string): string {
+  const path = join(SHOT_ROOT, chapter, `${name}.png`)
   mkdirSync(dirname(path), { recursive: true })
   return path
 }
 
 /**
- * Blendet alle CSS-Animationen und -Übergänge aus und stoppt den blinkenden
- * Text-Cursor. Ohne das erwischt ein Screenshot je nach Timing eine halb
- * ausgefahrene Info-Box oder ein halb geöffnetes Menü.
+ * Disables all CSS animations and transitions and stops the blinking text
+ * caret. Without this a screenshot catches, depending on timing, a half
+ * extended info box or a half opened menu.
  */
-export async function animationenAus(page: Page): Promise<void> {
+export async function disableAnimations(page: Page): Promise<void> {
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
@@ -46,57 +46,57 @@ export async function animationenAus(page: Page): Promise<void> {
 }
 
 /**
- * Hält den Mauszeiger aus dem Bild. Playwright zeichnet den Zeiger selbst
- * nicht mit, aber Hover-Zustände (hervorgehobene Buttons, Tooltips) landen
- * sonst ungewollt im Screenshot.
+ * Keeps the mouse cursor out of the shot. Playwright does not draw the cursor
+ * itself, but hover states (highlighted buttons, tooltips) would otherwise end
+ * up in the screenshot unintentionally.
  */
-export async function zeigerWeg(page: Page): Promise<void> {
+export async function moveCursorAway(page: Page): Promise<void> {
   const size = page.viewportSize()
   await page.mouse.move(size ? size.width - 1 : 1791, size ? size.height - 1 : 1119)
 }
 
 export interface SpotlightOptions {
-  /** Deckkraft des grauen Schleiers über dem Rest der Oberfläche. */
+  /** Opacity of the scrim covering the rest of the interface. */
   dim?: number
-  /** Eckenradius der Aussparung in px. Gilt nur für Element-Ziele. */
+  /** Corner radius of the cut-out in px. Applies to element targets only. */
   radius?: number
-  /** Abstand zwischen Zielelement und Kontur in px. Gilt nur für Element-Ziele. */
+  /** Gap between target element and outline in px. Applies to element targets only. */
   padding?: number
-  /** Strichstärke der weißen Kontur in px. */
-  konturStaerke?: number
+  /** Stroke width of the white outline in px. */
+  outlineWidth?: number
 }
 
 /**
- * Freie Ellipse als Spotlight-Ziel, in CSS-Pixeln des Viewports.
+ * Free-form ellipse as a spotlight target, in CSS pixels of the viewport.
  *
- * Für alles, was kein eigenes Element hat: Trassen, Adressen und Netzknoten
- * zeichnet die Karte ins Canvas, einen Locator gibt es dafür nicht. `padding`
- * und `radius` aus den Optionen greifen hier nicht – Lage und Größe stehen
- * schon in der Ellipse.
+ * For everything that has no element of its own: trenches, addresses and nodes
+ * are drawn into the canvas by the map, there is no locator for them. `padding`
+ * and `radius` from the options have no effect here - position and size are
+ * already part of the ellipse.
  */
 export interface SpotlightEllipse {
-  /** Mittelpunkt im Viewport. */
+  /** Centre point in the viewport. */
   x: number
   y: number
-  /** Halbachse längs bzw. quer zur Drehachse. */
+  /** Semi-axis along and across the axis of rotation. */
   rx: number
   ry: number
-  /** Drehung um den Mittelpunkt in Grad, für schräg liegende Objekte. */
-  drehung?: number
+  /** Rotation around the centre in degrees, for objects lying at an angle. */
+  rotation?: number
 }
 
-/** Ein Spotlight kann mehrere Stellen gleichzeitig freistellen. */
-export type SpotlightZiel = Locator | SpotlightEllipse
+/** A spotlight can expose several places at once. */
+export type SpotlightTarget = Locator | SpotlightEllipse
 
-/** Kennzeichnet die eingefügte Überlagerung, damit sie wieder entfernbar ist. */
-const SPOTLIGHT_ID = 'qonnectra-doku-spotlight'
+/** Marks the inserted overlay so that it can be removed again. */
+const SPOTLIGHT_ID = 'qonnectra-docs-spotlight'
 
-function istEllipse(ziel: SpotlightZiel): ziel is SpotlightEllipse {
-  return 'rx' in ziel
+function isEllipse(target: SpotlightTarget): target is SpotlightEllipse {
+  return 'rx' in target
 }
 
-/** Abgerundetes Rechteck um ein Element, als SVG-Pfad. */
-function rechteckPfad(
+/** Rounded rectangle around an element, as an SVG path. */
+function rectPath(
   rect: { x: number; y: number; width: number; height: number },
   padding: number,
   radius: number,
@@ -116,105 +116,105 @@ function rechteckPfad(
 }
 
 /**
- * Ellipse als SVG-Pfad aus zwei Halbbögen. Die Drehung steckt in der
- * `x-axis-rotation` der Bögen und nicht in einem `transform` – nur so lässt
- * sich der Pfad mit den Rechtecken in einem gemeinsamen `d` kombinieren, und
- * genau das macht die Aussparung per `fill-rule: evenodd` möglich.
+ * Ellipse as an SVG path built from two half arcs. The rotation lives in the
+ * `x-axis-rotation` of the arcs and not in a `transform` - only that way can
+ * the path be combined with the rectangles in a shared `d`, and exactly that is
+ * what makes the cut-out via `fill-rule: evenodd` possible.
  */
-function ellipsenPfad({ x, y, rx, ry, drehung = 0 }: SpotlightEllipse): string {
-  const bogenmass = (drehung * Math.PI) / 180
-  const dx = rx * Math.cos(bogenmass)
-  const dy = rx * Math.sin(bogenmass)
+function ellipsePath({ x, y, rx, ry, rotation = 0 }: SpotlightEllipse): string {
+  const radians = (rotation * Math.PI) / 180
+  const dx = rx * Math.cos(radians)
+  const dy = rx * Math.sin(radians)
 
   return (
-    `M${x - dx},${y - dy} A${rx},${ry} ${drehung} 0 1 ${x + dx},${y + dy} ` +
-    `A${rx},${ry} ${drehung} 0 1 ${x - dx},${y - dy} Z`
+    `M${x - dx},${y - dy} A${rx},${ry} ${rotation} 0 1 ${x + dx},${y + dy} ` +
+    `A${rx},${ry} ${rotation} 0 1 ${x - dx},${y - dy} Z`
   )
 }
 
 /**
- * Muster 2: dunkelt die gesamte Oberfläche ab und lässt nur `ziel` in voller
- * Helligkeit mit weißer, abgerundeter Kontur stehen.
+ * Pattern 2: dims the entire interface and leaves only `target` at full
+ * brightness with a white, rounded outline.
  *
- * `ziel` darf ein Element, eine Ellipse oder eine Liste aus beidem sein.
- * Mehrere Ziele gleichzeitig braucht z. B. das ausgewählte Kartenobjekt: das
- * Objekt selbst liegt im Canvas, seine Werte stehen in der Info-Box am rechten
- * Rand – beide Stellen gehören ins Bild, alles dazwischen nicht.
+ * `target` may be an element, an ellipse or a list of both. Several targets at
+ * once are needed e.g. for the selected map object: the object itself sits in
+ * the canvas, its values are shown in the info box on the right - both places
+ * belong in the picture, everything in between does not.
  *
- * Umgesetzt als eigenes SVG über der Seite, mit einer Aussparung je Ziel
- * (`fill-rule: evenodd`). An den Zielelementen und an ihren Vorfahren wird
- * bewusst **nichts** verändert. Der naheliegende Weg über
- * `box-shadow: 0 0 0 9999px` am Zielelement funktioniert hier nicht:
+ * Implemented as a separate SVG above the page, with one cut-out per target
+ * (`fill-rule: evenodd`). Deliberately **nothing** is changed on the target
+ * elements or their ancestors. The obvious route via
+ * `box-shadow: 0 0 0 9999px` on the target element does not work here:
  *
- * - Der Schatten endet am nächsten Vorfahren mit `overflow != visible`. Beim
- *   Transparenz-Regler blieb dadurch nur die weiße Kontur übrig, der Schleier
- *   war komplett weggeschnitten.
- * - Macht man die Vorfahren durchlässig, um das zu umgehen, verliert die
- *   Kartenansicht (OpenLayers) beim Reflow ihren Canvas-Inhalt und die Karte
- *   ist im Screenshot leer.
+ * - The shadow ends at the nearest ancestor with `overflow != visible`. For the
+ *   opacity slider that left only the white outline, the scrim was cut away
+ *   completely.
+ * - Making the ancestors transparent to work around this makes the map view
+ *   (OpenLayers) lose its canvas content on reflow, and the map ends up empty
+ *   in the screenshot.
  *
- * Rückgabewert entfernt die Überlagerung wieder:
+ * The return value removes the overlay again:
  *
- *   const aus = await spotlight(page, legende)
+ *   const off = await spotlight(page, legend)
  *   await page.screenshot({ path: shotPath('05-karte', 'map_legend') })
- *   await aus()
+ *   await off()
  */
 export async function spotlight(
   page: Page,
-  ziel: SpotlightZiel | SpotlightZiel[],
+  target: SpotlightTarget | SpotlightTarget[],
   options: SpotlightOptions = {},
 ): Promise<() => Promise<void>> {
-  const { dim = 0.5, radius = 8, padding = 6, konturStaerke = 3 } = options
+  const { dim = 0.5, radius = 8, padding = 6, outlineWidth = 3 } = options
 
-  const pfade: string[] = []
-  for (const einzelziel of Array.isArray(ziel) ? ziel : [ziel]) {
-    if (istEllipse(einzelziel)) {
-      pfade.push(ellipsenPfad(einzelziel))
+  const paths: string[] = []
+  for (const singleTarget of Array.isArray(target) ? target : [target]) {
+    if (isEllipse(singleTarget)) {
+      paths.push(ellipsePath(singleTarget))
       continue
     }
 
-    await einzelziel.waitFor({ state: 'visible' })
-    const rect = await einzelziel.boundingBox()
+    await singleTarget.waitFor({ state: 'visible' })
+    const rect = await singleTarget.boundingBox()
     if (!rect) {
-      throw new Error('Spotlight: Ziel ist sichtbar, hat aber keine Ausdehnung im Viewport.')
+      throw new Error('Spotlight: target is visible but has no extent in the viewport.')
     }
-    pfade.push(rechteckPfad(rect, padding, radius))
+    paths.push(rectPath(rect, padding, radius))
   }
 
   await page.evaluate(
-    ({ pfade, dim, konturStaerke, overlayId }) => {
+    ({ paths, dim, outlineWidth, overlayId }) => {
       document.getElementById(overlayId)?.remove()
 
-      const breite = window.innerWidth
-      const hoehe = window.innerHeight
-      const loecher = pfade.join(' ')
+      const width = window.innerWidth
+      const height = window.innerHeight
+      const holes = paths.join(' ')
 
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
       svg.id = overlayId
-      svg.setAttribute('width', String(breite))
-      svg.setAttribute('height', String(hoehe))
-      svg.setAttribute('viewBox', `0 0 ${breite} ${hoehe}`)
+      svg.setAttribute('width', String(width))
+      svg.setAttribute('height', String(height))
+      svg.setAttribute('viewBox', `0 0 ${width} ${height}`)
       svg.style.cssText =
         'position:fixed;top:0;left:0;pointer-events:none;z-index:2147483647'
 
-      // Die Ziele sind weitere Teilpfade im vollflächigen Rechteck; mit evenodd
-      // werden daraus die Aussparungen im Schleier.
-      const schleier = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-      schleier.setAttribute('d', `M0,0 H${breite} V${hoehe} H0 Z ${loecher}`)
-      schleier.setAttribute('fill', `rgba(0, 0, 0, ${dim})`)
-      schleier.setAttribute('fill-rule', 'evenodd')
-      svg.appendChild(schleier)
+      // The targets are further sub-paths inside the full-area rectangle; with
+      // evenodd they become the cut-outs in the scrim.
+      const scrim = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      scrim.setAttribute('d', `M0,0 H${width} V${height} H0 Z ${holes}`)
+      scrim.setAttribute('fill', `rgba(0, 0, 0, ${dim})`)
+      scrim.setAttribute('fill-rule', 'evenodd')
+      svg.appendChild(scrim)
 
-      const kontur = document.createElementNS('http://www.w3.org/2000/svg', 'path')
-      kontur.setAttribute('d', loecher)
-      kontur.setAttribute('fill', 'none')
-      kontur.setAttribute('stroke', '#fff')
-      kontur.setAttribute('stroke-width', String(konturStaerke))
-      svg.appendChild(kontur)
+      const outline = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+      outline.setAttribute('d', holes)
+      outline.setAttribute('fill', 'none')
+      outline.setAttribute('stroke', '#fff')
+      outline.setAttribute('stroke-width', String(outlineWidth))
+      svg.appendChild(outline)
 
       document.body.appendChild(svg)
     },
-    { pfade, dim, konturStaerke, overlayId: SPOTLIGHT_ID },
+    { paths, dim, outlineWidth, overlayId: SPOTLIGHT_ID },
   )
 
   return async () => {
@@ -222,55 +222,123 @@ export async function spotlight(
   }
 }
 
+/** Padding around detail crops, in CSS pixels. */
+const CROP_PADDING = 24
+
+export interface Crop16by10Options {
+  /** Padding around the target in CSS pixels. Default: 24. */
+  padding?: number
+}
+
+/**
+ * Crop around `target`, expanded to 16 : 10 and pushed inside the window -
+ * to be used as `clip` for `page.screenshot()`.
+ *
+ * The aspect ratio is not cosmetic: image pairs (full shot + detail) sit in an
+ * `.img-row` in the manual, and that renders its images in a 16-to-10 frame
+ * with `object-fit: contain` (`.vitepress/theme/custom.css`). A detail image
+ * cropped portrait would stay small in there, with empty space left and right.
+ *
+ * `target` may be a list; then the common hull of all targets is framed. Needed
+ * for subjects that consist of two parts - the opened project picker for
+ * instance sits in the header, while its list renders through a portal far
+ * below it in the DOM (`ProjectCombobox.svelte`).
+ */
+export async function crop16by10(
+  page: Page,
+  target: Locator | Locator[],
+  options: Crop16by10Options = {},
+): Promise<{ x: number; y: number; width: number; height: number }> {
+  const { padding = CROP_PADDING } = options
+
+  let left = Infinity
+  let top = Infinity
+  let right = -Infinity
+  let bottom = -Infinity
+
+  for (const singleTarget of Array.isArray(target) ? target : [target]) {
+    await singleTarget.waitFor({ state: 'visible' })
+    const box = await singleTarget.boundingBox()
+    if (!box) {
+      throw new Error('Crop: target is visible but has no extent in the viewport.')
+    }
+    left = Math.min(left, box.x)
+    top = Math.min(top, box.y)
+    right = Math.max(right, box.x + box.width)
+    bottom = Math.max(bottom, box.y + box.height)
+  }
+
+  const viewport = page.viewportSize()!
+
+  let height = Math.min(bottom - top + padding * 2, viewport.height)
+  let width = (height * 16) / 10
+  if (width > viewport.width) {
+    width = viewport.width
+    height = (width * 10) / 16
+  }
+
+  // Centre on the target, but not past the window edge - there is no image out
+  // there, and Playwright would silently trim the crop.
+  const centred = (centre: number, length: number, limit: number) =>
+    Math.min(Math.max(centre - length / 2, 0), limit - length)
+
+  return {
+    x: centred((left + right) / 2, width, viewport.width),
+    y: centred((top + bottom) / 2, height, viewport.height),
+    width,
+    height,
+  }
+}
+
 export interface Composite2x2Options {
   /**
-   * Beschriftung je Kachel, im Original handschriftlich wirkende grüne
-   * Ziffern. `null` lässt eine Kachel unbeschriftet. Ein Eintrag darf auch
-   * mehrere Schritte zusammenfassen („1, 2, 3“), wenn eine Kachel mehrere
-   * Schritte der nummerierten Liste im Text abdeckt.
+   * Label per tile, in the original hand-written looking green digits. `null`
+   * leaves a tile unlabelled. One entry may also cover several steps at once
+   * ("1, 2, 3") when a tile covers several steps of the numbered list in the
+   * text.
    *
-   * Default: „1“ bis „4“. Für ein Raster ganz ohne Ziffern
+   * Default: "1" to "4". For a grid without any digits use
    * `labels: [null, null, null, null]`.
    */
   labels?: (string | null)[]
 }
 
 /**
- * Muster 4: setzt vier Screenshots zu einem 2 × 2-Raster mit weißen Fugen
- * zusammen und beschriftet sie unten rechts in Marken-Grün.
+ * Pattern 4: assembles four screenshots into a 2 x 2 grid with white gutters
+ * and labels them in the bottom right corner in brand green.
  *
- * Die Montage passiert im Browser (eine leere Seite mit CSS-Grid), damit das
- * Repo ohne zusätzliche Bildbibliothek auskommt.
+ * The assembly happens in the browser (a blank page with a CSS grid) so that
+ * the repo gets by without an additional image library.
  */
 export async function composite2x2(
   page: Page,
-  bilder: Buffer[],
-  zielPfad: string,
+  images: Buffer[],
+  targetPath: string,
   options: Composite2x2Options = {},
 ): Promise<void> {
-  if (bilder.length !== 4) {
-    throw new Error(`Composite-Raster erwartet genau 4 Bilder, bekommen: ${bilder.length}`)
+  if (images.length !== 4) {
+    throw new Error(`Composite grid expects exactly 4 images, got: ${images.length}`)
   }
 
   const { labels = ['1', '2', '3', '4'] } = options
 
-  const kacheln = bilder
-    .map((bild, index) => {
-      const quelle = `data:image/png;base64,${bild.toString('base64')}`
+  const tiles = images
+    .map((image, index) => {
+      const source = `data:image/png;base64,${image.toString('base64')}`
       const label = labels[index]
-      const ziffer = label ? `<span class="ziffer">${label}</span>` : ''
-      return `<figure class="kachel"><img src="${quelle}" alt="">${ziffer}</figure>`
+      const digit = label ? `<span class="digit">${label}</span>` : ''
+      return `<figure class="tile"><img src="${source}" alt="">${digit}</figure>`
     })
     .join('\n')
 
-  const montage = await page.context().newPage()
+  const assembly = await page.context().newPage()
   try {
-    await montage.setContent(
+    await assembly.setContent(
       `<!doctype html>
       <html lang="de">
       <head><meta charset="utf-8"><style>
         html, body { margin: 0; background: #fff; }
-        #raster {
+        #grid {
           display: grid;
           grid-template-columns: repeat(2, 1fr);
           gap: 16px;
@@ -278,33 +346,33 @@ export async function composite2x2(
           background: #fff;
           width: max-content;
         }
-        .kachel { position: relative; margin: 0; line-height: 0; }
-        .kachel img { display: block; width: 640px; height: auto; }
-        .ziffer {
+        .tile { position: relative; margin: 0; line-height: 0; }
+        .tile img { display: block; width: 640px; height: auto; }
+        .digit {
           position: absolute;
           right: 16px;
           bottom: 12px;
           font: 700 56px/1 "DejaVu Sans", system-ui, sans-serif;
           white-space: nowrap;
-          color: ${MARKENGRUEN};
+          color: ${BRAND_GREEN};
           -webkit-text-stroke: 3px #fff;
           paint-order: stroke fill;
         }
       </style></head>
-      <body><div id="raster">${kacheln}</div></body>
+      <body><div id="grid">${tiles}</div></body>
       </html>`,
       { waitUntil: 'load' },
     )
 
-    // Erst schießen, wenn alle vier Bilder tatsächlich dekodiert sind.
-    await montage.evaluate(() =>
+    // Only shoot once all four images are actually decoded.
+    await assembly.evaluate(() =>
       Promise.all(
         Array.from(document.images).map((img) => (img.complete ? undefined : img.decode())),
       ),
     )
 
-    await montage.locator('#raster').screenshot({ path: zielPfad })
+    await assembly.locator('#grid').screenshot({ path: targetPath })
   } finally {
-    await montage.close()
+    await assembly.close()
   }
 }

@@ -1,22 +1,20 @@
-"""Importiert einen JSON-Export des echten "Testprojekt" von app.geodock.de
-1:1 in die lokale Qonnectra-Instanz, für authentische Handbuch-Screenshots.
+"""Imports a JSON export of the real "Testprojekt" from app.geodock.de 1:1
+into the local Qonnectra instance, for authentic manual screenshots.
 
-Der Export wird über die Qonnectra-API (mit einer eingeloggten Session)
-erzeugt (siehe scripts/qonnectra-demo-data/README.md) und liegt als eine
-JSON-Datei vor, die pro Ressourcenname (z.B. "trench", "node", "fiber") die
-vollständige, unpaginierte Liste der API-Objekte enthält.
+The export is produced through the Qonnectra API (with a logged-in session,
+see scripts/qonnectra-demo-data/README.md) and comes as a single JSON file
+holding, per resource name (e.g. "trench", "node", "fiber"), the complete,
+unpaginated list of API objects.
 
-Referenzdaten (Firmen, Rohr-/Kabeltypen, Kennzeichen, ...) werden per
-Namensabgleich mit den lokal bereits vorhandenen Einträgen zusammengeführt
-(get_or_create) - Objekte mit UUID-Primärschlüssel (Trasse, Rohr, Knoten,
-Adresse, Kabel, Faser, Mikrorohr, ...) werden mit der ORIGINALEN UUID aus
-der Produktion angelegt, damit Beziehungen zwischen den Objekten ohne
-zusätzliches ID-Mapping funktionieren.
+Reference data (companies, conduit/cable types, flags, ...) is merged with the
+entries already present locally by matching names (get_or_create) - objects
+with a UUID primary key (trench, conduit, node, address, cable, fiber,
+microduct, ...) are created with the ORIGINAL UUID from production, so that
+relations between the objects work without an additional ID mapping.
 
-Bewusst nicht importiert (nicht Teil des aktuellen Handbuch-Umfangs):
-Container/ContainerType, FiberSplice, NodeStructure und die
-Patch-Panel/Slot-Modelle (node-structure, node-slot-*), Pipeline-Anfragen,
-Wertermittlung.
+Deliberately not imported (not part of the current scope of the manual):
+Container/ContainerType, FiberSplice, NodeStructure and the patch panel/slot
+models (node-structure, node-slot-*), pipeline requests, valuation.
 """
 
 import json
@@ -62,18 +60,18 @@ from apps.api.models import (
 
 PROJECT_NAME = "Testprojekt"
 
-# NetworkSchemaSettings.excluded_node_types hat keinen API-Endpunkt und war
-# daher aus dem Export nicht ermittelbar. Durch Abgleich des Netzschemas auf
-# app.geodock.de (nur NVt/FCC/Schacht/POP sichtbar) mit den lokal
-# importierten Knotentypen manuell rekonstruiert: Hausanschluss (zu viele
-# fuers Netzschema, werden ueber die Kindansicht aufgerufen), Rohrabzweig
-# (reiner Trassen-Verzweigungspunkt) und Bauerschwernis (Hindernis-Marker,
-# kein echter Netzknoten) sind dort ausgeblendet.
+# NetworkSchemaSettings.excluded_node_types has no API endpoint and could
+# therefore not be derived from the export. Reconstructed manually by comparing
+# the network schema on app.geodock.de (only NVt/FCC/Schacht/POP visible) with
+# the locally imported node types: Hausanschluss (too many for the network
+# schema, they are reached through the child view), Rohrabzweig (a pure trench
+# branching point) and Bauerschwernis (obstacle marker, not a real node) are
+# hidden there.
 NETWORK_SCHEMA_EXCLUDED_NODE_TYPES = ["Hausanschluss", "Rohrabzweig", "Bauerschwernis"]
 
 
 def dedupe_by_uuid(rows):
-    """Entfernt Duplikate (z.B. durch instabile Seitenumbrueche beim Export)."""
+    """Removes duplicates (e.g. from unstable page breaks during the export)."""
     seen = set()
     out = []
     for row in rows:
@@ -85,8 +83,8 @@ def dedupe_by_uuid(rows):
 
 
 def uuid_of(value):
-    """UUID eines verschachtelten Objekt-Verweises (dict mit 'uuid' oder
-    GeoJSON-Feature mit 'id'), einer rohen UUID-Zeichenkette, oder None."""
+    """UUID of a nested object reference (dict with 'uuid' or GeoJSON feature
+    with 'id'), of a raw UUID string, or None."""
     if value is None:
         return None
     if isinstance(value, str):
@@ -117,20 +115,20 @@ def polygon(geo):
 
 class Command(BaseCommand):
     help = (
-        "Importiert einen JSON-Export des echten 'Testprojekt' von "
-        "app.geodock.de in die lokale Instanz (siehe --file)."
+        "Imports a JSON export of the real 'Testprojekt' from "
+        "app.geodock.de into the local instance (see --file)."
     )
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--file",
             required=True,
-            help="Pfad zur JSON-Exportdatei (innerhalb des Backend-Containers).",
+            help="Path to the JSON export file (inside the backend container).",
         )
         parser.add_argument(
             "--force",
             action="store_true",
-            help="Vorhandenes lokales Projekt 'Testprojekt' vorher loeschen und neu importieren.",
+            help="Delete an existing local project 'Testprojekt' first and import it again.",
         )
 
     def handle(self, *args, **options):
@@ -138,15 +136,15 @@ class Command(BaseCommand):
             with open(options["file"], encoding="utf-8") as fh:
                 data = json.load(fh)
         except FileNotFoundError as exc:
-            raise CommandError(f"Datei nicht gefunden: {options['file']}") from exc
+            raise CommandError(f"File not found: {options['file']}") from exc
 
         existing = Projects.objects.filter(project=PROJECT_NAME).first()
         if existing:
             if not options["force"]:
                 self.stdout.write(
                     self.style.WARNING(
-                        f'Projekt "{PROJECT_NAME}" existiert bereits lokal, '
-                        "ueberspringe (--force zum Neuimportieren)."
+                        f'Project "{PROJECT_NAME}" already exists locally, '
+                        "skipping (--force to import it again)."
                     )
                 )
                 return
@@ -156,7 +154,7 @@ class Command(BaseCommand):
             self._import(data)
 
         self.stdout.write(
-            self.style.SUCCESS(f'Projekt "{PROJECT_NAME}" wurde importiert.')
+            self.style.SUCCESS(f'Project "{PROJECT_NAME}" has been imported.')
         )
 
     def _cleanup(self, project):
@@ -176,7 +174,7 @@ class Command(BaseCommand):
         project.delete()
 
     def _attr_map(self, rows, model, key_field, extra_fields=()):
-        """Baut {alte_id: lokale_instanz} per get_or_create auf Namensbasis."""
+        """Builds {old_id: local_instance} via get_or_create, matching on name."""
         result = {}
         for row in rows:
             name = row[key_field]
@@ -201,8 +199,8 @@ class Command(BaseCommand):
             data["attributes_construction_type"], AttributesConstructionType, "construction_type"
         )
         statuses = self._attr_map(data["attributes_status"], AttributesStatus, "status")
-        # AttributesPhase hat keinen eigenen API-Endpunkt - Werte kommen nur
-        # eingebettet in trench-Zeilen vor, daher hier direkt daraus ableiten.
+        # AttributesPhase has no API endpoint of its own - values only appear
+        # embedded in trench rows, so they are derived from those directly here.
         phase_rows = {
             row["phase"]["id"]: row["phase"] for row in data["trench"] if row["phase"]
         }
@@ -262,7 +260,7 @@ class Command(BaseCommand):
             active=True,
         )
 
-        # --- Trassen -----------------------------------------------------
+        # --- Trenches ----------------------------------------------------
         trenches = []
         for row in data["trench"]:
             trenches.append(
@@ -289,9 +287,9 @@ class Command(BaseCommand):
                 )
             )
         Trench.objects.bulk_create(trenches, batch_size=200)
-        self.stdout.write(f"  Trassen: {len(trenches)}")
+        self.stdout.write(f"  Trenches: {len(trenches)}")
 
-        # --- Adressen + Wohneinheiten --------------------------------------
+        # --- Addresses + residential units ---------------------------------
         addresses = []
         for row in data["address"]:
             addresses.append(
@@ -310,7 +308,7 @@ class Command(BaseCommand):
                 )
             )
         Address.objects.bulk_create(addresses, batch_size=200)
-        self.stdout.write(f"  Adressen: {len(addresses)}")
+        self.stdout.write(f"  Addresses: {len(addresses)}")
 
         residential_units = []
         for row in data["residential-unit"]:
@@ -331,9 +329,9 @@ class Command(BaseCommand):
                 )
             )
         ResidentialUnit.objects.bulk_create(residential_units, batch_size=200)
-        self.stdout.write(f"  Wohneinheiten: {len(residential_units)}")
+        self.stdout.write(f"  Residential units: {len(residential_units)}")
 
-        # --- Netzknoten (zwei Durchgaenge wegen parent_node-Selbstbezug) ---
+        # --- Nodes (two passes because of the parent_node self-reference) --
         nodes = []
         for row in data["node"]:
             nodes.append(
@@ -366,9 +364,9 @@ class Command(BaseCommand):
                 parent_updates.append(Node(uuid=row["uuid"], parent_node_id=parent_uuid))
         if parent_updates:
             Node.objects.bulk_update(parent_updates, ["parent_node"], batch_size=200)
-        self.stdout.write(f"  Netzknoten: {len(nodes)}")
+        self.stdout.write(f"  Nodes: {len(nodes)}")
 
-        # --- Rohre + Rohrzuordnung -----------------------------------------
+        # --- Conduits + conduit assignment ---------------------------------
         conduits = []
         for row in data["conduit"]:
             conduits.append(
@@ -388,7 +386,7 @@ class Command(BaseCommand):
                 )
             )
         Conduit.objects.bulk_create(conduits, batch_size=200)
-        self.stdout.write(f"  Rohre: {len(conduits)}")
+        self.stdout.write(f"  Conduits: {len(conduits)}")
 
         connections = [
             TrenchConduitConnection(
@@ -399,9 +397,9 @@ class Command(BaseCommand):
             for row in data["trench_conduit_connection"]
         ]
         TrenchConduitConnection.objects.bulk_create(connections, batch_size=200)
-        self.stdout.write(f"  Rohrzuordnungen: {len(connections)}")
+        self.stdout.write(f"  Conduit assignments: {len(connections)}")
 
-        # --- Mikrorohre + -verbindungen -------------------------------------
+        # --- Microducts + microduct connections ------------------------------
         microducts = []
         for row in data["microduct"]:
             microducts.append(
@@ -415,7 +413,7 @@ class Command(BaseCommand):
                 )
             )
         Microduct.objects.bulk_create(microducts, batch_size=200)
-        self.stdout.write(f"  Mikrorohre: {len(microducts)}")
+        self.stdout.write(f"  Microducts: {len(microducts)}")
 
         microduct_connections = []
         for row in data["microduct_connection"]:
@@ -430,9 +428,9 @@ class Command(BaseCommand):
                 )
             )
         MicroductConnection.objects.bulk_create(microduct_connections, batch_size=200)
-        self.stdout.write(f"  Mikrorohr-Verbindungen: {len(microduct_connections)}")
+        self.stdout.write(f"  Microduct connections: {len(microduct_connections)}")
 
-        # --- Kabel + Beschriftungen + Mikrorohr-Kabel-Verbindungen ----------
+        # --- Cables + labels + microduct cable connections -----------------
         cables = []
         for row in data["cable"]:
             cables.append(
@@ -462,7 +460,7 @@ class Command(BaseCommand):
                 )
             )
         Cable.objects.bulk_create(cables, batch_size=200)
-        self.stdout.write(f"  Kabel: {len(cables)}")
+        self.stdout.write(f"  Cables: {len(cables)}")
 
         cable_labels = [
             CableLabel(
@@ -476,7 +474,7 @@ class Command(BaseCommand):
             for row in data["cable_label"]
         ]
         CableLabel.objects.bulk_create(cable_labels, batch_size=200)
-        self.stdout.write(f"  Kabel-Beschriftungen: {len(cable_labels)}")
+        self.stdout.write(f"  Cable labels: {len(cable_labels)}")
 
         microduct_cable_connections = [
             MicroductCableConnection(
@@ -490,10 +488,10 @@ class Command(BaseCommand):
             microduct_cable_connections, batch_size=200
         )
         self.stdout.write(
-            f"  Mikrorohr-Kabel-Verbindungen: {len(microduct_cable_connections)}"
+            f"  Microduct cable connections: {len(microduct_cable_connections)}"
         )
 
-        # --- Fasern ----------------------------------------------------------
+        # --- Fibers ----------------------------------------------------------
         fibers = []
         for row in data["fiber"]:
             fibers.append(
@@ -513,9 +511,9 @@ class Command(BaseCommand):
                 )
             )
         Fiber.objects.bulk_create(fibers, batch_size=500)
-        self.stdout.write(f"  Fasern: {len(fibers)}")
+        self.stdout.write(f"  Fibers: {len(fibers)}")
 
-        # --- Gebiete -----------------------------------------------------------
+        # --- Areas -------------------------------------------------------------
         areas = [
             Area(
                 uuid=row["uuid"],
@@ -528,15 +526,15 @@ class Command(BaseCommand):
             for row in data["area"]
         ]
         Area.objects.bulk_create(areas, batch_size=200)
-        self.stdout.write(f"  Gebiete: {len(areas)}")
+        self.stdout.write(f"  Areas: {len(areas)}")
 
-        # --- Netzschema-Einstellungen (siehe Kommentar oben) ----------------
+        # --- Network schema settings (see the comment above) ----------------
         schema_settings = NetworkSchemaSettings.objects.create(project=project)
         excluded_types = AttributesNodeType.objects.filter(
             node_type__in=NETWORK_SCHEMA_EXCLUDED_NODE_TYPES
         )
         schema_settings.excluded_node_types.set(excluded_types)
         self.stdout.write(
-            "  Netzschema-Ausschlüsse: "
+            "  Network schema exclusions: "
             + ", ".join(sorted(t.node_type for t in excluded_types))
         )

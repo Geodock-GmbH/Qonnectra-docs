@@ -1,24 +1,22 @@
-// Werkzeuge für Handbuch-Videos. Gegenstück zu playwright/manual-shots.ts:
-// dort die Standbilder, hier die kurzen Interaktionsaufnahmen aus
-// public/videos/.
+// Tools for manual videos. Counterpart to playwright/manual-shots.ts: still
+// images there, the short interaction recordings from public/videos/ here.
 //
-// Ein Handbuch-Video entsteht in drei Schritten:
+// A manual video is produced in three steps:
 //
-//   1. Playwright nimmt die ganze Lebenszeit der Seite auf
-//      (test.use({ video: { mode: 'on', size: … } })).
-//   2. Die Spec führt den Ablauf mit sichtbarem Mauszeiger vor
-//      (mauszeigerAn(), zeigeAuf(), klicke(), tippe()).
-//   3. videoNachbearbeiten() schneidet den Seitenaufbau ab, beschneidet das
-//      Bild auf den beschriebenen Bereich und kodiert neu.
+//   1. Playwright records the entire lifetime of the page
+//      (test.use({ video: { mode: 'on', size: ... } })).
+//   2. The spec performs the flow with a visible mouse cursor
+//      (showCursor(), pointAt(), click(), typeText()).
+//   3. postProcessVideo() cuts off the page load, crops the picture to the
+//      described area and re-encodes.
 //
-// Warum überhaupt beschneiden: Das Handbuch rendert Videos mit der Breite des
-// Textbereichs (rund 690 px). Die volle Oberfläche mit 1792 CSS-Pixeln Breite
-// landet damit bei 38 % – Beschriftungen der App wären keine 7 px hoch und
-// nicht mehr lesbar. Ein Ausschnitt von rund 1000 CSS-Pixeln Breite trifft die
-// Größe der bestehenden Videos (map_attachment.webm: 1849 × 1277 Bildpunkte
-// für einen Ausschnitt von etwa 924 × 638 CSS-Pixeln) und bleibt lesbar.
-// Maßgeblich ist allein die **Breite** des Ausschnitts – die Höhe ändert den
-// Maßstab im Handbuch nicht.
+// Why crop at all: the manual renders videos at the width of the text column
+// (around 690 px). The full interface at 1792 CSS pixels wide would end up at
+// 38 % - labels in the app would be less than 7 px high and no longer legible.
+// A crop of around 1000 CSS pixels wide matches the size of the existing videos
+// (map_attachment.webm: 1849 x 1277 pixels for a crop of about 924 x 638 CSS
+// pixels) and stays legible. Only the **width** of the crop matters - the
+// height does not change the scale in the manual.
 import { execFileSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync } from 'node:fs'
 import { homedir } from 'node:os'
@@ -28,38 +26,38 @@ import type { Locator, Page } from '@playwright/test'
 
 const VIDEO_ROOT = 'tests/videos'
 
-/** Pfad für ein Kapitelvideo, z. B. videoPfad('05-karte', 'map_attachment') */
-export function videoPfad(kapitel: string, name: string): string {
-  const pfad = join(VIDEO_ROOT, kapitel, `${name}.webm`)
-  mkdirSync(dirname(pfad), { recursive: true })
-  return pfad
+/** Path for a chapter video, e.g. videoPath('05-karte', 'map_attachment') */
+export function videoPath(chapter: string, name: string): string {
+  const path = join(VIDEO_ROOT, chapter, `${name}.webm`)
+  mkdirSync(dirname(path), { recursive: true })
+  return path
 }
 
 // ---------------------------------------------------------------------------
-// Mauszeiger
+// Mouse cursor
 // ---------------------------------------------------------------------------
 
 /**
- * Screenshots zeigen bewusst keinen Mauszeiger (siehe zeigerWeg() in
- * manual-shots.ts). In einem Video ist er dagegen nötig: Ohne ihn erscheinen
- * die Schaltflächen einer Dateizeile, die erst beim Zeigen sichtbar werden,
- * ohne erkennbaren Grund. Die bestehenden Videos des Handbuchs sind
- * Bildschirmaufnahmen und zeigen deshalb einen echten Zeiger.
+ * Screenshots deliberately show no mouse cursor (see moveCursorAway() in
+ * manual-shots.ts). In a video it is required though: without it the buttons of
+ * a file row, which only appear on hover, show up for no visible reason. The
+ * existing videos in the manual are screen recordings and therefore show a real
+ * cursor.
  *
- * Playwright zeichnet den Zeiger nicht mit, also wird er in die Seite gelegt:
- * ein Element, das auf jedes mousemove springt. Die Form richtet sich nach der
- * CSS-Eigenschaft `cursor` des Elements unter dem Zeiger, damit Zeigefinger
- * (Schaltflächen) und Breitenpfeil (Griff der Info-Box) so aussehen wie im
- * Betriebssystem.
+ * Playwright does not record the cursor, so it gets placed into the page: an
+ * element that jumps to every mousemove. The shape follows the CSS `cursor`
+ * property of the element underneath, so that the pointing hand (buttons) and
+ * the resize arrow (handle of the info box) look like they do in the operating
+ * system.
  */
-const ZEIGER_ID = 'qonnectra-doku-zeiger'
+const CURSOR_ID = 'qonnectra-docs-cursor'
 
-export async function mauszeigerAn(page: Page): Promise<void> {
+export async function showCursor(page: Page): Promise<void> {
   await page.evaluate((id) => {
     document.getElementById(id)?.remove()
 
-    // Pfade in einem 24 × 24-Feld, Spitze bzw. Mittelpunkt bei (0,0) bzw. (12,12).
-    const formen: Record<string, { d: string; ax: number; ay: number }> = {
+    // Paths in a 24 x 24 box, tip resp. centre at (0,0) resp. (12,12).
+    const shapes: Record<string, { d: string; ax: number; ay: number }> = {
       default: { d: 'M1,1 L1,20 L6,15.5 L9,22.5 L12.5,21 L9.5,14 L16,14 Z', ax: 0, ay: 0 },
       pointer: {
         d:
@@ -77,134 +75,133 @@ export async function mauszeigerAn(page: Page): Promise<void> {
       },
     }
 
-    const zeiger = document.createElement('div')
-    zeiger.id = id
-    // Bewusst über left/top statt transform und ohne will-change: Beides
-    // schöbe den Zeiger auf eine eigene Compositor-Ebene. Die wird auch dann
-    // noch aktuell gezeichnet, wenn das Rastern des übrigen Inhalts hinterher
-    // hinkt – im Video zöge der Zeiger der Kante der Info-Box dann um gut
-    // 180 px voraus, obwohl die App denselben Ereignissen folgt.
-    zeiger.style.cssText =
+    const cursor = document.createElement('div')
+    cursor.id = id
+    // Deliberately via left/top instead of transform and without will-change:
+    // both would push the cursor onto its own compositor layer. That layer keeps
+    // being painted up to date even when rasterising the remaining content lags
+    // behind - in the video the cursor would then run a good 180 px ahead of the
+    // edge of the info box, even though the app follows the very same events.
+    cursor.style.cssText =
       'position:fixed;top:-100px;left:-100px;width:24px;height:24px;' +
       'pointer-events:none;z-index:2147483647'
-    zeiger.innerHTML =
+    cursor.innerHTML =
       '<svg width="24" height="24" viewBox="0 0 24 24">' +
-      '<path id="' + id + '-pfad" fill="#fff" stroke="#111" stroke-width="1.4" ' +
-      'stroke-linejoin="round" d="' + formen.default.d + '"/></svg>'
-    document.body.appendChild(zeiger)
+      '<path id="' + id + '-path" fill="#fff" stroke="#111" stroke-width="1.4" ' +
+      'stroke-linejoin="round" d="' + shapes.default.d + '"/></svg>'
+    document.body.appendChild(cursor)
 
-    const pfad = zeiger.querySelector('path') as SVGPathElement
-    let aktuelleForm = 'default'
-    let gedrueckt = false
+    const path = cursor.querySelector('path') as SVGPathElement
+    let currentShape = 'default'
+    let pressed = false
 
-    const bewege = (x: number, y: number) => {
-      // Form nach dem Element unter dem Zeiger wählen. Der Zeiger selbst ist
-      // pointer-events:none und taucht dabei nicht auf. Während die Taste
-      // gedrückt ist, bleibt die Form stehen – so hält es das Betriebssystem
-      // beim Ziehen auch.
-      if (!gedrueckt) {
-        const unten = document.elementFromPoint(x, y)
-        const css = unten ? getComputedStyle(unten).cursor : 'default'
-        const form = css in formen ? css : 'default'
-        if (form !== aktuelleForm) {
-          pfad.setAttribute('d', formen[form].d)
-          aktuelleForm = form
+    const move = (x: number, y: number) => {
+      // Pick the shape from the element underneath the cursor. The cursor itself
+      // is pointer-events:none and does not show up there. While the button is
+      // held down the shape stays put - that is what the operating system does
+      // while dragging, too.
+      if (!pressed) {
+        const below = document.elementFromPoint(x, y)
+        const css = below ? getComputedStyle(below).cursor : 'default'
+        const shape = css in shapes ? css : 'default'
+        if (shape !== currentShape) {
+          path.setAttribute('d', shapes[shape].d)
+          currentShape = shape
         }
       }
-      const { ax, ay } = formen[aktuelleForm]
-      zeiger.style.left = `${x - ax}px`
-      zeiger.style.top = `${y - ay}px`
+      const { ax, ay } = shapes[currentShape]
+      cursor.style.left = `${x - ax}px`
+      cursor.style.top = `${y - ay}px`
     }
 
-    // Sowohl mousemove als auch pointermove: Der Griff der Info-Box ruft in
-    // seinem pointerdown-Handler preventDefault() auf, und danach liefert
-    // Chromium für diesen Zeiger keine mouse-Ereignisse mehr. Ohne
-    // pointermove bliebe der Zeiger beim Breiterziehen stehen, während sich
-    // die Info-Box unter ihm bewegt.
-    for (const art of ['mousemove', 'pointermove']) {
-      window.addEventListener(art, (e) => bewege((e as MouseEvent).clientX, (e as MouseEvent).clientY), true)
+    // Both mousemove and pointermove: the handle of the info box calls
+    // preventDefault() in its pointerdown handler, and after that Chromium sends
+    // no more mouse events for this pointer. Without pointermove the cursor
+    // would stand still while dragging, with the info box moving underneath it.
+    for (const eventType of ['mousemove', 'pointermove']) {
+      window.addEventListener(eventType, (e) => move((e as MouseEvent).clientX, (e as MouseEvent).clientY), true)
     }
-    // Beim Klicken kurz einstauchen, damit der Klick im Video zu sehen ist.
+    // Squash briefly on click so that the click is visible in the video.
     window.addEventListener(
       'pointerdown',
       () => {
-        gedrueckt = true
-        zeiger.style.scale = '0.82'
+        pressed = true
+        cursor.style.scale = '0.82'
       },
       true,
     )
     window.addEventListener(
       'pointerup',
       () => {
-        gedrueckt = false
-        zeiger.style.scale = '1'
+        pressed = false
+        cursor.style.scale = '1'
       },
       true,
     )
-  }, ZEIGER_ID)
+  }, CURSOR_ID)
 }
 
-/** Zuletzt angefahrene Position je Seite – Ausgangspunkt der nächsten Fahrt. */
-const zeigerPosition = new WeakMap<Page, { x: number; y: number }>()
+/** Last position approached per page - starting point of the next motion. */
+const cursorPosition = new WeakMap<Page, { x: number; y: number }>()
 
-export interface FahrtOptions {
-  /** Dauer der Zeigerfahrt in Millisekunden. */
-  dauer?: number
-  /** Punkt innerhalb des Ziels, 0–1 je Achse. Vorgabe: Mitte. */
-  anteil?: { x?: number; y?: number }
+export interface MotionOptions {
+  /** Duration of the cursor motion in milliseconds. */
+  duration?: number
+  /** Point inside the target, 0-1 per axis. Default: centre. */
+  fraction?: { x?: number; y?: number }
 }
 
-/** Zielpunkt in Fensterkoordinaten auflösen. */
-async function zielPunkt(
-  ziel: Locator | { x: number; y: number },
-  anteil: { x?: number; y?: number } = {},
+/** Resolve the target point into window coordinates. */
+async function targetPoint(
+  target: Locator | { x: number; y: number },
+  fraction: { x?: number; y?: number } = {},
 ): Promise<{ x: number; y: number }> {
-  if ('x' in ziel && typeof ziel.x === 'number') return ziel as { x: number; y: number }
+  if ('x' in target && typeof target.x === 'number') return target as { x: number; y: number }
 
-  const locator = ziel as Locator
+  const locator = target as Locator
   await locator.waitFor({ state: 'visible' })
   const box = await locator.boundingBox()
-  if (!box) throw new Error('Ziel hat keine Ausdehnung – ist es sichtbar?')
+  if (!box) throw new Error('Target has no extent - is it visible?')
   return {
-    x: box.x + box.width * (anteil.x ?? 0.5),
-    y: box.y + box.height * (anteil.y ?? 0.5),
+    x: box.x + box.width * (fraction.x ?? 0.5),
+    y: box.y + box.height * (fraction.y ?? 0.5),
   }
 }
 
 /**
- * Fährt den Zeiger weich auf ein Ziel. Bewusst nicht page.mouse.move() mit
- * `steps`: das verschickt alle Zwischenschritte ohne Pause, im Video springt
- * der Zeiger dann. Hier liegt zwischen den Schritten echte Zeit, und die
- * Geschwindigkeit folgt einer Sinuskurve (langsam an, langsam ab).
+ * Moves the cursor smoothly onto a target. Deliberately not page.mouse.move()
+ * with `steps`: that sends all intermediate steps without a pause, and the
+ * cursor jumps in the video. Here there is real time between the steps, and the
+ * speed follows a sine curve (slow in, slow out).
  */
-export async function zeigeAuf(
+export async function pointAt(
   page: Page,
-  ziel: Locator | { x: number; y: number },
-  options: FahrtOptions = {},
+  target: Locator | { x: number; y: number },
+  options: MotionOptions = {},
 ): Promise<{ x: number; y: number }> {
-  const { dauer = 600, anteil } = options
-  const bis = await zielPunkt(ziel, anteil)
-  const von = zeigerPosition.get(page) ?? { x: bis.x, y: bis.y + 240 }
+  const { duration = 600, fraction } = options
+  const to = await targetPoint(target, fraction)
+  const from = cursorPosition.get(page) ?? { x: to.x, y: to.y + 240 }
 
-  const schritte = Math.max(4, Math.round(dauer / 20))
-  for (let i = 1; i <= schritte; i++) {
-    const t = i / schritte
-    const weich = 0.5 - Math.cos(Math.PI * t) / 2
-    await page.mouse.move(von.x + (bis.x - von.x) * weich, von.y + (bis.y - von.y) * weich)
-    await page.waitForTimeout(dauer / schritte)
+  const steps = Math.max(4, Math.round(duration / 20))
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps
+    const eased = 0.5 - Math.cos(Math.PI * t) / 2
+    await page.mouse.move(from.x + (to.x - from.x) * eased, from.y + (to.y - from.y) * eased)
+    await page.waitForTimeout(duration / steps)
   }
 
-  zeigerPosition.set(page, bis)
-  return bis
+  cursorPosition.set(page, to)
+  return to
 }
 
-/** Fährt auf das Ziel und klickt es – mit sichtbarer Druckphase. */
-export async function klicke(
+/** Moves onto the target and clicks it - with a visible press phase. */
+export async function click(
   page: Page,
-  ziel: Locator | { x: number; y: number },
-  options: FahrtOptions = {},
+  target: Locator | { x: number; y: number },
+  options: MotionOptions = {},
 ): Promise<void> {
-  await zeigeAuf(page, ziel, options)
+  await pointAt(page, target, options)
   await page.waitForTimeout(180)
   await page.mouse.down()
   await page.waitForTimeout(110)
@@ -212,153 +209,153 @@ export async function klicke(
 }
 
 /**
- * Zieht mit gedrückter Maustaste von der aktuellen Zeigerposition um `dx`/`dy`.
- * Für den Griff der Info-Box; der Ablauf ist derselbe wie beim Fahren, nur
- * mit gedrückter Taste.
+ * Drags with the mouse button held down from the current cursor position by
+ * `dx`/`dy`. For the handle of the info box; the flow is the same as moving,
+ * just with the button pressed.
  */
-export async function ziehe(
+export async function drag(
   page: Page,
   dx: number,
   dy = 0,
-  options: { dauer?: number } = {},
+  options: { duration?: number } = {},
 ): Promise<void> {
-  const { dauer = 1200 } = options
-  const von = zeigerPosition.get(page)
-  if (!von) throw new Error('ziehe() braucht eine Zeigerposition – vorher zeigeAuf() aufrufen.')
+  const { duration = 1200 } = options
+  const from = cursorPosition.get(page)
+  if (!from) throw new Error('drag() needs a cursor position - call pointAt() first.')
 
   await page.mouse.down()
   await page.waitForTimeout(200)
 
-  // Deutlich größere Schrittweite als beim reinen Fahren (90 statt 20 ms).
-  // Am Griff der Info-Box hängt die Breite der Karte: OpenLayers zeichnet bei
-  // jeder Änderung neu, gemessen rund 70 ms je Schritt. Kommen die Ereignisse
-  // dichter, staut sich die Darstellung auf und die Info-Box läuft dem Zeiger
-  // im Video sichtbar hinterher (bei 20 ms waren es über 500 ms Rückstand).
-  const schritte = Math.max(6, Math.round(dauer / 90))
-  for (let i = 1; i <= schritte; i++) {
-    const t = i / schritte
-    const weich = 0.5 - Math.cos(Math.PI * t) / 2
-    await page.mouse.move(von.x + dx * weich, von.y + dy * weich)
-    await page.waitForTimeout(dauer / schritte)
+  // Noticeably larger step size than for plain motion (90 instead of 20 ms).
+  // The width of the map hangs off the handle of the info box: OpenLayers
+  // repaints on every change, measured at around 70 ms per step. If the events
+  // come in closer than that, the rendering piles up and the info box visibly
+  // lags behind the cursor in the video (at 20 ms it was over 500 ms behind).
+  const steps = Math.max(6, Math.round(duration / 90))
+  for (let i = 1; i <= steps; i++) {
+    const t = i / steps
+    const eased = 0.5 - Math.cos(Math.PI * t) / 2
+    await page.mouse.move(from.x + dx * eased, from.y + dy * eased)
+    await page.waitForTimeout(duration / steps)
   }
 
   await page.waitForTimeout(150)
   await page.mouse.up()
-  zeigerPosition.set(page, { x: von.x + dx, y: von.y + dy })
+  cursorPosition.set(page, { x: from.x + dx, y: from.y + dy })
 }
 
-/** Tippt in Handgeschwindigkeit, damit der Text im Video mitlesbar ist. */
-export async function tippe(page: Page, text: string, verzoegerung = 55): Promise<void> {
-  await page.keyboard.type(text, { delay: verzoegerung })
+/** Types at hand speed so that the text can be read along in the video. */
+export async function typeText(page: Page, text: string, delay = 55): Promise<void> {
+  await page.keyboard.type(text, { delay })
 }
 
 // ---------------------------------------------------------------------------
-// Nachbearbeitung
+// Post-processing
 // ---------------------------------------------------------------------------
 
 /**
- * ffmpeg, das Playwright ohnehin mitbringt (`playwright install` lädt es neben
- * den Browsern). Damit braucht das Repo kein zusätzliches Werkzeug auf dem
- * Rechner. Der Build kann nur, was Playwright dafür braucht – Matroska lesen,
- * VP8 dekodieren und kodieren, WebM schreiben, crop/scale/pad. Genau das wird
- * hier gebraucht.
+ * The ffmpeg that Playwright ships anyway (`playwright install` downloads it
+ * next to the browsers). That way the repo needs no additional tool on the
+ * machine. The build can only do what Playwright needs it for - read Matroska,
+ * decode and encode VP8, write WebM, crop/scale/pad. Which is exactly what is
+ * needed here.
  */
-export function ffmpegPfad(): string {
-  const basis =
+export function ffmpegPath(): string {
+  const base =
     process.env.PLAYWRIGHT_BROWSERS_PATH || join(homedir(), '.cache', 'ms-playwright')
-  const datei =
+  const file =
     process.platform === 'win32'
       ? 'ffmpeg-win64.exe'
       : process.platform === 'darwin'
         ? 'ffmpeg-mac'
         : 'ffmpeg-linux'
 
-  const ordner = existsSync(basis)
-    ? readdirSync(basis)
+  const folders = existsSync(base)
+    ? readdirSync(base)
         .filter((name) => name.startsWith('ffmpeg-'))
         .sort((a, b) => Number(b.slice(7)) - Number(a.slice(7)))
     : []
 
-  for (const name of ordner) {
-    const pfad = join(basis, name, datei)
-    if (existsSync(pfad)) return pfad
+  for (const name of folders) {
+    const path = join(base, name, file)
+    if (existsSync(path)) return path
   }
 
   throw new Error(
-    `Das von Playwright mitgelieferte ffmpeg fehlt (gesucht in ${basis}/ffmpeg-*/${datei}).\n` +
-      'Nachinstallieren mit:\n  pnpm exec playwright install',
+    `The ffmpeg shipped with Playwright is missing (looked in ${base}/ffmpeg-*/${file}).\n` +
+      'Install it with:\n  pnpm exec playwright install',
   )
 }
 
-export interface Ausschnitt {
-  /** Linke obere Ecke in CSS-Pixeln des Fensters. */
+export interface Crop {
+  /** Top left corner in CSS pixels of the window. */
   x: number
   y: number
-  /** Größe in CSS-Pixeln. */
-  breite: number
-  hoehe: number
+  /** Size in CSS pixels. */
+  width: number
+  height: number
 }
 
-export interface NachbearbeitungOptions {
-  /** Rohaufnahme aus Playwright. */
-  quelle: string
-  /** Fertiges Video. */
-  ziel: string
-  /** Ausschnitt in CSS-Pixeln (siehe Kopf dieser Datei). */
-  ausschnitt: Ausschnitt
+export interface PostProcessOptions {
+  /** Raw recording from Playwright. */
+  source: string
+  /** Finished video. */
+  target: string
+  /** Crop in CSS pixels (see the head of this file). */
+  crop: Crop
   /**
-   * Verhältnis von Bildpunkten der Aufnahme zu CSS-Pixeln.
+   * Ratio of recorded pixels to CSS pixels.
    *
-   * Vorgabe 1 – und dabei bleibt es: Chromiums Screencast, aus dem Playwright
-   * das Video baut, liefert Bilder in CSS-Pixeln, nicht in Gerätepunkten. Der
-   * deviceScaleFactor von 2 aus playwright.config.ts wirkt sich auf die
-   * Aufnahme also **nicht** aus. Eine größere Aufnahmegröße hilft nicht:
-   * Playwright verkleinert nur, wenn nötig, und füllt den Rest grau auf
-   * (nachgemessen mit size: 3584 × 2240 – das Bild lag im linken oberen
-   * Viertel). Deshalb entspricht die Aufnahmegröße dem Viewport.
+   * Default 1 - and it stays that way: Chromium's screencast, from which
+   * Playwright builds the video, delivers frames in CSS pixels, not in device
+   * pixels. The deviceScaleFactor of 2 from playwright.config.ts therefore does
+   * **not** affect the recording. A larger recording size does not help:
+   * Playwright only scales down when necessary and pads the rest with grey
+   * (measured with size: 3584 x 2240 - the picture sat in the top left quarter).
+   * That is why the recording size matches the viewport.
    */
-  skalierung?: number
-  /** Sekunden, die am Anfang wegfallen (Seitenaufbau). */
-  ab?: number
-  /** Qualität von libvpx (0–63, kleiner = besser). */
-  qualitaet?: number
+  scale?: number
+  /** Seconds dropped at the start (page load). */
+  startAt?: number
+  /** Quality of libvpx (0-63, smaller = better). */
+  quality?: number
 }
 
 /**
- * Schneidet den Seitenaufbau ab, beschneidet auf den Ausschnitt und kodiert
- * neu. Ohne Skalierung: der Ausschnitt behält die Bildpunkte der Aufnahme,
- * damit nichts unnötig weichgerechnet wird.
+ * Cuts off the page load, crops to the given region and re-encodes. Without
+ * scaling: the crop keeps the pixels of the recording so that nothing is
+ * needlessly blurred.
  */
-export function videoNachbearbeiten(options: NachbearbeitungOptions): void {
-  const { quelle, ziel, ausschnitt, skalierung = 1, ab = 0, qualitaet = 32 } = options
+export function postProcessVideo(options: PostProcessOptions): void {
+  const { source, target, crop, scale = 1, startAt = 0, quality = 32 } = options
 
-  // libvpx verlangt gerade Kantenlängen.
-  const gerade = (wert: number) => Math.round(wert / 2) * 2
-  const w = gerade(ausschnitt.breite * skalierung)
-  const h = gerade(ausschnitt.hoehe * skalierung)
-  const x = gerade(ausschnitt.x * skalierung)
-  const y = gerade(ausschnitt.y * skalierung)
+  // libvpx requires even edge lengths.
+  const even = (value: number) => Math.round(value / 2) * 2
+  const w = even(crop.width * scale)
+  const h = even(crop.height * scale)
+  const x = even(crop.x * scale)
+  const y = even(crop.y * scale)
 
-  mkdirSync(dirname(ziel), { recursive: true })
+  mkdirSync(dirname(target), { recursive: true })
 
   execFileSync(
-    ffmpegPfad(),
+    ffmpegPath(),
     [
       '-y',
       '-loglevel', 'error',
-      '-i', quelle,
-      // -ss bewusst **nach** -i: davor spult ffmpeg nur bis zum letzten
-      // Schlüsselbild, und Playwrights VP8-Aufnahme setzt Schlüsselbilder in
-      // großem Abstand – der Seitenaufbau bliebe dann sichtbar. Hinter -i wird
-      // dekodiert und bildgenau verworfen; bei Videos dieser Länge egal.
-      ...(ab > 0 ? ['-ss', ab.toFixed(3)] : []),
+      '-i', source,
+      // -ss deliberately **after** -i: before it, ffmpeg only seeks to the last
+      // keyframe, and Playwright's VP8 recording places keyframes far apart -
+      // the page load would then stay visible. After -i the stream is decoded
+      // and discarded frame-accurately; irrelevant for videos of this length.
+      ...(startAt > 0 ? ['-ss', startAt.toFixed(3)] : []),
       '-vf', `crop=${w}:${h}:${x}:${y}`,
       '-c:v', 'libvpx',
-      '-crf', String(qualitaet),
-      // Bei libvpx ist -crf nur zusammen mit -b:v 0 eine reine Qualitätsvorgabe.
+      '-crf', String(quality),
+      // With libvpx, -crf is only a pure quality target together with -b:v 0.
       '-b:v', '0',
       '-an',
-      ziel,
+      target,
     ],
     { stdio: ['ignore', 'ignore', 'inherit'] },
   )

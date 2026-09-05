@@ -1,90 +1,90 @@
-// Video für Kapitel „5. Karte" im Handbuch
-// (manual/teil-a-anwenderhandbuch/05-karte.md), Abschnitt 5.3.1
-// „Anhänge von Kartenobjekten".
+// Video for chapter "5. Karte" in the manual
+// (manual/teil-a-anwenderhandbuch/05-karte.md), section 5.3.1
+// "Anhänge von Kartenobjekten".
 //
-// Eigene Datei, weil `test.use({ video: … })` nur auf Dateiebene erlaubt ist –
-// in einer test.describe-Gruppe lehnt Playwright es ab („forces a new
-// worker"). Die Standbilder des Kapitels stehen in tests/05-karte.spec.ts.
+// A file of its own, because `test.use({ video: ... })` is only allowed at file
+// level - inside a test.describe group Playwright rejects it ("forces a new
+// worker"). The still images of the chapter live in tests/05-karte.spec.ts.
 //
-// Übernehmen nach public/videos/ mit: pnpm screenshots:publish 05-karte
+// Publish to public/videos/ with: pnpm screenshots:publish 05-karte
 import { expect, request, test } from '@playwright/test'
 
-import { localApp, superuserZugang } from '../playwright/local-app'
+import { localApp, superuserCredentials } from '../playwright/local-app'
 import {
-  klicke,
-  mauszeigerAn,
-  tippe,
-  videoNachbearbeiten,
-  videoPfad,
-  zeigeAuf,
-  ziehe,
+  click,
+  drag,
+  pointAt,
+  postProcessVideo,
+  showCursor,
+  typeText,
+  videoPath,
 } from '../playwright/manual-videos'
 
-const KAPITEL = '05-karte'
+const CHAPTER = '05-karte'
 
 // ---------------------------------------------------------------------------
-// Video zu Abschnitt 5.3.1 „Anhänge von Kartenobjekten"
+// Video for section 5.3.1 "Anhänge von Kartenobjekten"
 // ---------------------------------------------------------------------------
 //
-// Zeigt den Ablauf, den der Abschnitt beschreibt: Objekt anklicken, Reiter
-// „Anhänge" öffnen, Info-Box breiter ziehen, Datei hochladen, Ordner
-// aufklappen, Schaltflächen der Dateizeile zeigen und die Datei umbenennen.
+// Shows the flow the section describes: click the object, open the tab
+// "Anhänge", drag the info box wider, upload a file, expand the folder, show the
+// buttons of the file row and rename the file.
 //
-// Bewusst **ohne** den Schritt „löschen": Das Aufnahmekonto gehört zur Gruppe
-// „Editor" und die hat auf alle Fachmodelle die Zugriffsstufe „edit" – DELETE
-// beantwortet die API mit 403 und die App zeigt eine Fehlermeldung. Ein Video
-// davon wäre irreführend. Aufgeräumt wird deshalb über die API mit dem
-// Superuser (siehe anhaengeAufraeumen()).
+// Deliberately **without** the "delete" step: the capture account belongs to the
+// group "Editor", which has access level "edit" on all domain models - the API
+// answers DELETE with 403 and the app shows an error message. A video of that
+// would be misleading. Cleaning up therefore happens through the API with the
+// superuser (see cleanUpAttachments()).
 
-// Aufnahmegröße = Viewport aus playwright.config.ts. Ohne Angabe verkleinert
-// Playwright das Video, bis es in 800 × 800 passt, und der Ausschnitt wäre
-// unscharf. Größer als der Viewport bringt nichts: Chromiums Screencast
-// liefert CSS-Pixel, der deviceScaleFactor von 2 wirkt hier nicht (siehe
-// NachbearbeitungOptions.skalierung in playwright/manual-videos.ts).
+// Recording size = viewport from playwright.config.ts. Without it Playwright
+// scales the video down until it fits into 800 x 800, and the crop would be
+// blurry. Larger than the viewport gains nothing: Chromium's screencast delivers
+// CSS pixels, the deviceScaleFactor of 2 has no effect here (see
+// PostProcessOptions.scale in playwright/manual-videos.ts).
 test.use({ video: { mode: 'on', size: { width: 1792, height: 1120 } } })
 
-/** Adresse „Nieharde 12" des Testprojekts, EPSG:3857. */
-const HAUS = [1083847.2737702988, 7308943.7974595595]
-const HAUS_TITEL = 'Nieharde 12, 24972 Sterup'
-/** Ordner der Adresse im Medienpfad – daran erkennt das Aufräumen die Anhänge. */
-const HAUS_ORDNER = 'addresses/Nieharde 12, 24972 Sterup/'
+/** Address "Nieharde 12" of the test project, EPSG:3857. */
+const HOUSE = [1083847.2737702988, 7308943.7974595595]
+const HOUSE_TITLE = 'Nieharde 12, 24972 Sterup'
+/** Folder of the address in the media path - the clean-up finds attachments by it. */
+const HOUSE_FOLDER = 'addresses/Nieharde 12, 24972 Sterup/'
 
 const VIDEO_ZOOM = 19
 
 /**
- * Wo das Haus im Fenster liegen soll. Links von der breitgezogenen Info-Box
- * (deren linke Kante bei 800 px Breite auf x ≈ 976 liegt), damit es im Video
- * sichtbar bleibt, und weit genug rechts, um im Ausschnitt zu liegen.
+ * Where the house should sit in the window. To the left of the widened info box
+ * (whose left edge sits at x ~ 976 at a width of 800 px) so that it stays
+ * visible in the video, and far enough right to be inside the crop.
  */
-const HAUS_X = 870
-const HAUS_Y = 430
+const HOUSE_X = 870
+const HOUSE_Y = 430
 
-/** Breite, auf die die Info-Box gezogen wird. */
-const INFOBOX_BREITE = 800
+/** Width the info box is dragged to. */
+const INFOBOX_WIDTH = 800
 
 /**
- * Kartenstreifen links der Info-Box, der im Ausschnitt bleibt. Mehr Breite
- * verkleinert im Handbuch alles andere (siehe Kopf von manual-videos.ts).
+ * Strip of map to the left of the info box that stays inside the crop. More
+ * width shrinks everything else in the manual (see the head of manual-videos.ts).
  */
-const KARTENSTREIFEN = 200
+const MAP_STRIP = 200
 
 /**
- * Höhe des Ausschnitts. Reicht von der Oberkante der Info-Box bis unter die
- * Dateiliste. Die Höhe ändert den Maßstab im Handbuch nicht – sie bestimmt
- * nur, wie viel zu sehen ist.
+ * Height of the crop. Reaches from the top edge of the info box to below the
+ * file list. The height does not change the scale in the manual - it only
+ * determines how much is visible.
  */
-const AUSSCHNITT_HOEHE = 720
+const CROP_HEIGHT = 720
 
-/** Sekunden Standbild vor dem ersten Schritt. */
-const VORLAUF = 1.0
+/** Seconds of still image before the first step. */
+const LEAD_IN = 1.0
 
-const DATEI = 'scan_0001.pdf'
-const NEUER_NAME = 'Bestandsplan_2026'
+const FILE = 'scan_0001.pdf'
+const NEW_NAME = 'Bestandsplan_2026'
 
 /**
- * Kleinstmögliche gültige PDF-Datei. Sie wird nur hochgeladen, nie geöffnet;
- * die App wählt Symbol und Ordner allein anhand der Endung. Deshalb liegt
- * hier eine erzeugte Datei statt einer Beispieldatei im Repo.
+ * Smallest possible valid PDF file. It is only uploaded, never opened; the app
+ * picks icon and folder from the extension alone. That is why a generated file
+ * sits here instead of a sample file in the repo.
  */
 const PDF = Buffer.from(
   '%PDF-1.4\n' +
@@ -96,198 +96,196 @@ const PDF = Buffer.from(
 )
 
 /**
- * Entfernt alle Anhänge der Adresse über die API – mit dem Superuser, weil
- * das Aufnahmekonto nicht löschen darf. Läuft vor **und** nach der Aufnahme:
- * davor, damit das Video mit „Keine Dateien hochgeladen" beginnt, danach,
- * damit der nächste Lauf dasselbe vorfindet.
+ * Removes all attachments of the address through the API - with the superuser,
+ * because the capture account is not allowed to delete. Runs before **and**
+ * after the capture: before, so that the video starts with "Keine Dateien
+ * hochgeladen", afterwards so that the next run finds the same state.
  */
-async function anhaengeAufraeumen() {
+async function cleanUpAttachments() {
   const { apiUrl } = localApp()
-  const { username, password } = superuserZugang()
+  const { username, password } = superuserCredentials()
 
   const api = await request.newContext({ baseURL: apiUrl, ignoreHTTPSErrors: true })
   try {
     const login = await api.post('/api/v1/auth/login/', { data: { username, password } })
     expect(
       login.ok(),
-      'Anmeldung des Superusers zum Aufräumen fehlgeschlagen – ' +
-        'DJANGO_SUPERUSER_* in local-app/deployment/.env prüfen.',
+      'Superuser login for the clean-up failed - check DJANGO_SUPERUSER_* in ' +
+        'local-app/deployment/.env.',
     ).toBe(true)
 
-    const antwort = await api.get('/api/v1/feature-files/?page_size=200')
-    const inhalt = await antwort.json()
-    const dateien: Array<{ uuid: string; file_path: string }> = Array.isArray(inhalt)
-      ? inhalt
-      : (inhalt.results ?? [])
+    const response = await api.get('/api/v1/feature-files/?page_size=200')
+    const body = await response.json()
+    const files: Array<{ uuid: string; file_path: string }> = Array.isArray(body)
+      ? body
+      : (body.results ?? [])
 
-    for (const datei of dateien) {
-      if (!decodeURIComponent(datei.file_path).includes(HAUS_ORDNER)) continue
-      await api.delete(`/api/v1/feature-files/${datei.uuid}/`)
+    for (const file of files) {
+      if (!decodeURIComponent(file.file_path).includes(HOUSE_FOLDER)) continue
+      await api.delete(`/api/v1/feature-files/${file.uuid}/`)
     }
   } finally {
     await api.dispose()
   }
 }
 
-test.beforeEach(anhaengeAufraeumen)
-test.afterEach(anhaengeAufraeumen)
+test.beforeEach(cleanUpAttachments)
+test.afterEach(cleanUpAttachments)
 
 test('5.3.1 Anhänge hinzufügen und bearbeiten', async ({ page, context }) => {
   test.setTimeout(180_000)
 
-  // 1. Aufwärmseite. Sie misst die Kartenfläche und füllt nebenbei den
-  //    HTTP-Zwischenspeicher des Kontexts. Die eigentliche Aufnahmeseite
-  //    steht dadurch nach Bruchteilen einer Sekunde – Playwright nimmt eine
-  //    Seite ab ihrer Erzeugung auf, ein langer Seitenaufbau wäre im Video.
+  // 1. Warm-up page. It measures the map area and fills the HTTP cache of the
+  //    context along the way. The actual recording page is therefore up within
+  //    a fraction of a second - Playwright records a page from its creation, and
+  //    a long page load would end up in the video.
   await page.goto('/map')
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
-  const kartenFlaeche = (await page.locator('div.map').boundingBox())!
+  const mapArea = (await page.locator('div.map').boundingBox())!
   await page.close()
 
-  // 2. Kartenmitte so wählen, dass das Haus auf (HAUS_X, HAUS_Y) liegt.
-  //    Auflösung der Kartenansicht in EPSG:3857 bei gegebenem Zoom.
-  const aufloesung = 156543.03392804097 / 2 ** VIDEO_ZOOM
-  const mitteX = kartenFlaeche.x + kartenFlaeche.width / 2
-  const mitteY = kartenFlaeche.y + kartenFlaeche.height / 2
-  const kartenMitte = [
-    HAUS[0] - (HAUS_X - mitteX) * aufloesung,
-    HAUS[1] + (HAUS_Y - mitteY) * aufloesung,
+  // 2. Choose the map centre so that the house sits at (HOUSE_X, HOUSE_Y).
+  //    Resolution of the map view in EPSG:3857 at the given zoom.
+  const resolution = 156543.03392804097 / 2 ** VIDEO_ZOOM
+  const centreX = mapArea.x + mapArea.width / 2
+  const centreY = mapArea.y + mapArea.height / 2
+  const mapCentre = [
+    HOUSE[0] - (HOUSE_X - centreX) * resolution,
+    HOUSE[1] + (HOUSE_Y - centreY) * resolution,
   ]
 
-  const aufnahme = await context.newPage()
-  const seitenStart = Date.now()
+  const capture = await context.newPage()
+  const pageStart = Date.now()
 
-  await aufnahme.addInitScript(
+  await capture.addInitScript(
     (a) => {
-      localStorage.setItem('mapCenter', JSON.stringify(a.mitte))
+      localStorage.setItem('mapCenter', JSON.stringify(a.centre))
       localStorage.setItem('mapZoom', JSON.stringify(a.zoom))
-      // Die Info-Box beginnt in ihrer Voreinstellung; das Breiterziehen ist
-      // Teil des Videos.
+      // The info box starts at its default; widening it is part of the video.
       localStorage.setItem('drawerWidth', '400')
     },
-    { mitte: kartenMitte, zoom: VIDEO_ZOOM },
+    { centre: mapCentre, zoom: VIDEO_ZOOM },
   )
 
-  await aufnahme.goto('/map')
-  await expect(aufnahme.locator('div.map canvas').first()).toBeVisible()
-  await aufnahme.waitForLoadState('networkidle')
-  // Die Kacheln kommen über einen Worker-Pool nach, den networkidle nicht sieht.
-  await aufnahme.waitForTimeout(2500)
-  await mauszeigerAn(aufnahme)
+  await capture.goto('/map')
+  await expect(capture.locator('div.map canvas').first()).toBeVisible()
+  await capture.waitForLoadState('networkidle')
+  // The tiles arrive through a worker pool that networkidle does not see.
+  await capture.waitForTimeout(2500)
+  await showCursor(capture)
 
-  const infobox = aufnahme.locator('[data-drawer]')
+  const infobox = capture.locator('[data-drawer]')
 
-  // Ab hier läuft die Vorführung; alles davor schneidet
-  // videoNachbearbeiten() weg.
-  const vorfuehrungStart = Date.now()
-  await aufnahme.waitForTimeout(VORLAUF * 1000)
+  // From here the demonstration runs; everything before it is cut away by
+  // postProcessVideo().
+  const demoStart = Date.now()
+  await capture.waitForTimeout(LEAD_IN * 1000)
 
-  // 3. Objekt in der Karte auswählen.
-  await klicke(aufnahme, { x: HAUS_X, y: HAUS_Y }, { dauer: 700 })
-  await expect(aufnahme.locator('#drawer-title')).toHaveText(HAUS_TITEL)
-  await aufnahme.waitForTimeout(1200)
+  // 3. Select the object on the map.
+  await click(capture, { x: HOUSE_X, y: HOUSE_Y }, { duration: 700 })
+  await expect(capture.locator('#drawer-title')).toHaveText(HOUSE_TITLE)
+  await capture.waitForTimeout(1200)
 
-  // 4. Reiter „Anhänge".
-  await klicke(aufnahme, infobox.getByRole('tab', { name: 'Anhänge', exact: true }))
+  // 4. Tab "Anhänge".
+  await click(capture, infobox.getByRole('tab', { name: 'Anhänge', exact: true }))
   await expect(infobox.getByText('Dateien hochladen')).toBeVisible()
-  // Gegenprobe zum Aufräumen: Das Video soll mit einer leeren Liste beginnen.
-  // Ohne das zeigt ein Lauf nach einem abgebrochenen Vorlauf „documents (2)".
+  // Cross-check for the clean-up: the video should start with an empty list.
+  // Without it a run after an aborted attempt shows "documents (2)".
   await expect(
     infobox.getByText('Keine Dateien hochgeladen'),
-    'Die Adresse hat noch Anhänge – anhaengeAufraeumen() hat nicht gegriffen.',
+    'The address still has attachments - cleanUpAttachments() did not take effect.',
   ).toBeVisible()
-  await aufnahme.waitForTimeout(1400)
+  await capture.waitForTimeout(1400)
 
-  // 5. Info-Box breiter ziehen. In der Voreinstellung von 400 px ist der
-  //    Reiter zu schmal: Überschriften werden abgeschnitten und die
-  //    Schaltflächen einer Dateizeile liegen außerhalb. Genau das beschreibt
-  //    der Abschnitt („die Box am linken Rand breiter ziehen").
-  const griff = aufnahme.getByRole('button', { name: 'Größe der Seitenleiste ändern' })
-  await zeigeAuf(aufnahme, griff, { anteil: { y: 0.35 } })
-  await aufnahme.waitForTimeout(400)
-  const vorherBreite = (await infobox.boundingBox())!.width
-  await ziehe(aufnahme, -(INFOBOX_BREITE - vorherBreite), 0, { dauer: 1400 })
-  await aufnahme.waitForTimeout(1000)
+  // 5. Drag the info box wider. At the default of 400 px the tab is too narrow:
+  //    headings get cut off and the buttons of a file row sit outside. That is
+  //    exactly what the section describes ("drag the box wider at its left
+  //    edge").
+  const handle = capture.getByRole('button', { name: 'Größe der Seitenleiste ändern' })
+  await pointAt(capture, handle, { fraction: { y: 0.35 } })
+  await capture.waitForTimeout(400)
+  const widthBefore = (await infobox.boundingBox())!.width
+  await drag(capture, -(INFOBOX_WIDTH - widthBefore), 0, { duration: 1400 })
+  await capture.waitForTimeout(1000)
 
-  // 6. Datei hochladen. Der Klick auf „Dateien auswählen" öffnet den
-  //    Dateidialog des Betriebssystems; Playwright fängt ihn ab, im Video
-  //    erscheint die Datei direkt in der Auswahlliste.
-  const dialog = aufnahme.waitForEvent('filechooser')
-  await klicke(aufnahme, infobox.getByRole('button', { name: 'Dateien auswählen', exact: true }))
-  await (await dialog).setFiles({ name: DATEI, mimeType: 'application/pdf', buffer: PDF })
-  await aufnahme.waitForTimeout(1200)
+  // 6. Upload a file. The click on "Dateien auswählen" opens the file dialog of
+  //    the operating system; Playwright intercepts it, and in the video the file
+  //    appears directly in the selection list.
+  const dialog = capture.waitForEvent('filechooser')
+  await click(capture, infobox.getByRole('button', { name: 'Dateien auswählen', exact: true }))
+  await (await dialog).setFiles({ name: FILE, mimeType: 'application/pdf', buffer: PDF })
+  await capture.waitForTimeout(1200)
 
-  await klicke(aufnahme, infobox.getByRole('button', { name: /^Upload/ }))
-  const ordner = infobox.getByText(/documents \(\d+\)/)
-  await expect(ordner).toBeVisible({ timeout: 20_000 })
-  await aufnahme.waitForTimeout(1200)
+  await click(capture, infobox.getByRole('button', { name: /^Upload/ }))
+  const folder = infobox.getByText(/documents \(\d+\)/)
+  await expect(folder).toBeVisible({ timeout: 20_000 })
+  await capture.waitForTimeout(1200)
 
-  // 7. Ordner aufklappen – erst dann werden die Dateien sichtbar.
-  await klicke(aufnahme, ordner)
-  const datei = infobox.getByText(DATEI, { exact: true })
-  await expect(datei).toBeVisible()
-  await aufnahme.waitForTimeout(1200)
+  // 7. Expand the folder - only then do the files become visible.
+  await click(capture, folder)
+  const file = infobox.getByText(FILE, { exact: true })
+  await expect(file).toBeVisible()
+  await capture.waitForTimeout(1200)
 
-  // 8. Auf die Zeile zeigen: erst dadurch erscheinen die drei
-  //    Symbolschaltflächen.
-  await zeigeAuf(aufnahme, datei)
-  const herunterladen = infobox.getByLabel('Herunterladen', { exact: true })
-  await expect(herunterladen).toBeVisible()
-  await aufnahme.waitForTimeout(800)
+  // 8. Point at the row: only that makes the three icon buttons appear.
+  await pointAt(capture, file)
+  const download = infobox.getByLabel('Herunterladen', { exact: true })
+  await expect(download).toBeVisible()
+  await capture.waitForTimeout(800)
 
-  // 9. Auf die Schaltflächen zeigen, damit die Kurzhinweise erscheinen.
-  await zeigeAuf(aufnahme, herunterladen, { dauer: 450 })
-  await aufnahme.waitForTimeout(1400)
+  // 9. Point at the buttons so that the tooltips appear.
+  await pointAt(capture, download, { duration: 450 })
+  await capture.waitForTimeout(1400)
 
-  const umbenennen = infobox.getByLabel('Umbenennen', { exact: true })
-  await zeigeAuf(aufnahme, umbenennen, { dauer: 300 })
-  await aufnahme.waitForTimeout(1200)
+  const rename = infobox.getByLabel('Umbenennen', { exact: true })
+  await pointAt(capture, rename, { duration: 300 })
+  await capture.waitForTimeout(1200)
 
-  // 10. Umbenennen.
-  await klicke(aufnahme, umbenennen, { dauer: 120 })
-  const eingabe = infobox.locator('input[type="text"]')
-  await expect(eingabe).toBeVisible()
-  await klicke(aufnahme, eingabe, { dauer: 300 })
-  await aufnahme.keyboard.press('ControlOrMeta+a')
-  await aufnahme.waitForTimeout(300)
-  await tippe(aufnahme, NEUER_NAME)
-  await aufnahme.waitForTimeout(600)
+  // 10. Rename.
+  await click(capture, rename, { duration: 120 })
+  const input = infobox.locator('input[type="text"]')
+  await expect(input).toBeVisible()
+  await click(capture, input, { duration: 300 })
+  await capture.keyboard.press('ControlOrMeta+a')
+  await capture.waitForTimeout(300)
+  await typeText(capture, NEW_NAME)
+  await capture.waitForTimeout(600)
 
-  await klicke(aufnahme, infobox.getByLabel('Speichern', { exact: true }), { dauer: 350 })
+  await click(capture, infobox.getByLabel('Speichern', { exact: true }), { duration: 350 })
 
-  // 11. Nach dem Umbenennen lädt die App die Dateiliste neu und baut den Baum
-  //     dabei neu auf – der Ordner ist danach wieder zugeklappt. Also noch
-  //     einmal aufklappen; das Video endet mit dem neuen Namen in der Liste.
-  const umbenannt = infobox.getByText(`${NEUER_NAME}.pdf`, { exact: true })
-  await expect(umbenannt).toBeAttached({ timeout: 20_000 })
-  await expect(ordner).toBeVisible()
-  await aufnahme.waitForTimeout(900)
-  await klicke(aufnahme, ordner)
-  await expect(umbenannt).toBeVisible()
-  await aufnahme.waitForTimeout(1800)
+  // 11. After renaming, the app reloads the file list and rebuilds the tree in
+  //     the process - the folder is collapsed again afterwards. So expand it
+  //     once more; the video ends with the new name in the list.
+  const renamed = infobox.getByText(`${NEW_NAME}.pdf`, { exact: true })
+  await expect(renamed).toBeAttached({ timeout: 20_000 })
+  await expect(folder).toBeVisible()
+  await capture.waitForTimeout(900)
+  await click(capture, folder)
+  await expect(renamed).toBeVisible()
+  await capture.waitForTimeout(1800)
 
-  // 12. Ausschnitt aus der Lage der Info-Box ableiten und Video sichern.
+  // 12. Derive the crop from the position of the info box and save the video.
   const box = (await infobox.boundingBox())!
-  const ausschnitt = {
-    x: Math.max(0, Math.round(box.x - KARTENSTREIFEN)),
+  const crop = {
+    x: Math.max(0, Math.round(box.x - MAP_STRIP)),
     y: Math.max(0, Math.round(box.y - 2)),
-    breite: 0,
-    hoehe: AUSSCHNITT_HOEHE,
+    width: 0,
+    height: CROP_HEIGHT,
   }
-  ausschnitt.breite = (aufnahme.viewportSize()?.width ?? 1792) - ausschnitt.x
+  crop.width = (capture.viewportSize()?.width ?? 1792) - crop.x
 
-  const video = aufnahme.video()
-  expect(video, 'Playwright hat kein Video aufgezeichnet – test.use({ video }) prüfen.').toBeTruthy()
-  await aufnahme.close()
+  const video = capture.video()
+  expect(video, 'Playwright recorded no video - check test.use({ video }).').toBeTruthy()
+  await capture.close()
 
-  const roh = test.info().outputPath('map_attachment-roh.webm')
-  await video!.saveAs(roh)
+  const raw = test.info().outputPath('map_attachment-raw.webm')
+  await video!.saveAs(raw)
 
-  videoNachbearbeiten({
-    quelle: roh,
-    ziel: videoPfad(KAPITEL, 'map_attachment'),
-    ausschnitt,
-    ab: Math.max(0, (vorfuehrungStart - seitenStart) / 1000 - VORLAUF),
+  postProcessVideo({
+    source: raw,
+    target: videoPath(CHAPTER, 'map_attachment'),
+    crop,
+    startAt: Math.max(0, (demoStart - pageStart) / 1000 - LEAD_IN),
   })
 })

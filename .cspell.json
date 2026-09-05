@@ -3,7 +3,7 @@
   "import": [
     "@cspell/dict-de-de/cspell-ext.json"
   ],
-  "language": "en,de",
+  "language": "en,en-GB,de",
   "languageSettings": [
     {
       "languageId": "*",
@@ -17,7 +17,6 @@
   "words": [
     "Anfrageformular",
     "Ausschnittvergrößerung",
-    "ausserhalb",
     "Browserzeile",
     "dbaeumer",
     "dedupe",
@@ -28,17 +27,14 @@
     "EPSG",
     "esbenp",
     "gehostet",
-    "gescrollt",
     "gezoomt",
     "gunicorn",
     "Hosters",
-    "Hovereffekt",
     "hovern",
     "Händelhof",
     "Impressumspflicht",
     "Infrastrukturakteure",
     "initdb",
-    "Interaktionsaufnahmen",
     "IONOS",
     "kundeneigener",
     "Layergruppe",
@@ -72,10 +68,8 @@
     "TDDDG",
     "Topologien",
     "Trassensegementen",
-    "unpaginierte",
-    "versioniert",
+    "Verlegeart",
     "Verwaltungsmitarbeitende",
-    "verzweigungspunkt",
     "Websitebesucher",
     "Websitebetreiber"
   ],
@@ -87,20 +81,28 @@
   "overrides": [
     {
       "filename": [
-        "**/*.{ts,sh,py}",
-        "CLAUDE.md",
-        ".claude/**",
-        "scripts/**/*.md"
+        "**/*.ts"
       ],
       "languageSettings": [
         {
           "languageId": "*",
           "locale": "de,de_DE",
           "caseSensitive": false,
+          "allowCompoundWords": true,
           "dictionaries": [
             "de-de"
-          ],
-          "allowCompoundWords": true
+          ]
+        }
+      ]
+    },
+    {
+      "filename": [
+        "**/*.{sh,py}"
+      ],
+      "languageSettings": [
+        {
+          "languageId": "*",
+          "caseSensitive": false
         }
       ]
     }

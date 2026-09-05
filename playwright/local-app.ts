@@ -1,22 +1,22 @@
-// Zugangsdaten und URLs der lokalen Qonnectra-Instanz.
+// Credentials and URLs of the local Qonnectra instance.
 //
-// Alle Playwright-Läufe in diesem Repo richten sich ausschließlich auf die
-// lokale Instanz aus local-app/. Die Werte kommen aus der beim Setup erzeugten
-// local-app/deployment/.env, nicht aus einer eigenen Konfigurationsdatei –
-// damit kann kein Lauf versehentlich gegen eine echte Installation gehen.
+// All Playwright runs in this repo target the local instance in local-app/ and
+// nothing else. The values come from local-app/deployment/.env, generated
+// during setup, and not from a configuration file of our own - that way no run
+// can accidentally go against a real installation.
 //
-// Die Instanz kennt zwei Konten: den Django-Superuser für die Administration
-// und ein Konto ohne Administrationsrechte, mit dem die Bilder entstehen.
-// Standard ist das zweite, siehe Rolle/rolle() weiter unten.
+// The instance knows two accounts: the Django superuser for administration and
+// an account without administration rights, which the images are made with.
+// The latter is the default, see Role/role() below.
 //
-// Instanz aufsetzen/starten: scripts/setup-local-qonnectra.sh
+// Set up / start the instance: scripts/setup-local-qonnectra.sh
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const deploymentEnvPath = fileURLToPath(new URL('../local-app/deployment/.env', import.meta.url))
 
-const setupHinweis =
-  'Bitte zuerst die lokale Instanz aufsetzen und starten:\n' +
+const setupHint =
+  'Please set up and start the local instance first:\n' +
   '  scripts/setup-local-qonnectra.sh'
 
 function readDeploymentEnv(): Record<string, string> {
@@ -25,7 +25,7 @@ function readDeploymentEnv(): Record<string, string> {
     content = readFileSync(deploymentEnvPath, 'utf8')
   } catch {
     throw new Error(
-      `Die lokale Qonnectra-Instanz ist nicht eingerichtet – ${deploymentEnvPath} fehlt.\n${setupHinweis}`,
+      `The local Qonnectra instance is not set up - ${deploymentEnvPath} is missing.\n${setupHint}`,
     )
   }
 
@@ -42,8 +42,8 @@ function required(env: Record<string, string>, key: string): string {
   const value = env[key]
   if (!value) {
     throw new Error(
-      `${key} fehlt oder ist leer in ${deploymentEnvPath}.\n` +
-        'Die Instanz wurde vermutlich unvollständig eingerichtet. Neu aufbauen mit:\n' +
+      `${key} is missing or empty in ${deploymentEnvPath}.\n` +
+        'The instance was probably set up incompletely. Rebuild it with:\n' +
         '  scripts/setup-local-qonnectra.sh --reset',
     )
   }
@@ -51,17 +51,17 @@ function required(env: Record<string, string>, key: string): string {
 }
 
 /**
- * Wie required(), aber für Schlüssel, die es in früheren Fassungen des
- * Setup-Skripts noch nicht gab. Dafür genügt ein erneuter Lauf ohne --reset:
- * das Skript trägt fehlende Schlüssel in .env nach und legt das Konto an.
+ * Like required(), but for keys that did not exist in earlier versions of the
+ * setup script. For those another run without --reset is enough: the script
+ * appends missing keys to .env and creates the account.
  */
-function requiredNeu(env: Record<string, string>, key: string): string {
+function requiredNew(env: Record<string, string>, key: string): string {
   const value = env[key]
   if (!value) {
     throw new Error(
-      `${key} fehlt oder ist leer in ${deploymentEnvPath}.\n` +
-        'Die Instanz wurde mit einer älteren Fassung des Setup-Skripts aufgesetzt.\n' +
-        'Einmal erneut ausführen (Datenbank und bestehende Secrets bleiben erhalten):\n' +
+      `${key} is missing or empty in ${deploymentEnvPath}.\n` +
+        'The instance was set up with an older version of the setup script.\n' +
+        'Run it once more (database and existing secrets are kept):\n' +
         '  scripts/setup-local-qonnectra.sh',
     )
   }
@@ -69,33 +69,33 @@ function requiredNeu(env: Record<string, string>, key: string): string {
 }
 
 /**
- * Mit welchem Konto sich ein Lauf anmeldet.
+ * Which account a run logs in with.
  *
- * - `user`: Konto ohne Administrationsrechte (Gruppe „Editor“). Standard,
- *   weil Teil A des Handbuchs die Sicht normaler Nutzender beschreibt – der
- *   Superuser sieht zusätzlich den Menüpunkt „Logs“ und umgeht jede
- *   Rechteprüfung.
- * - `admin`: Django-Superuser. Nur für Bilder von Bereichen, die Nutzenden
- *   ohne Administrationsrechte verborgen bleiben (`/admin/*`).
+ * - `user`: account without administration rights (group "Editor"). The
+ *   default, because part A of the manual describes the view of ordinary
+ *   users - the superuser additionally sees the "Logs" menu entry and bypasses
+ *   every permission check.
+ * - `admin`: Django superuser. Only for images of areas that stay hidden from
+ *   users without administration rights (`/admin/*`).
  */
-export type Rolle = 'user' | 'admin'
+export type Role = 'user' | 'admin'
 
-/** Umschaltbar über QONNECTRA_LOGIN=admin (siehe Rolle). */
-export function rolle(): Rolle {
-  const wert = process.env.QONNECTRA_LOGIN?.trim().toLowerCase()
-  if (!wert || wert === 'user') return 'user'
-  if (wert === 'admin') return 'admin'
-  throw new Error(`QONNECTRA_LOGIN=${wert} ist unbekannt. Erlaubt sind "user" (Standard) und "admin".`)
+/** Switchable via QONNECTRA_LOGIN=admin (see Role). */
+export function role(): Role {
+  const value = process.env.QONNECTRA_LOGIN?.trim().toLowerCase()
+  if (!value || value === 'user') return 'user'
+  if (value === 'admin') return 'admin'
+  throw new Error(`QONNECTRA_LOGIN=${value} is unknown. Allowed are "user" (default) and "admin".`)
 }
 
 export interface LocalApp {
-  /** Frontend, z. B. https://app.qonnectra.localhost */
+  /** Frontend, e.g. https://app.qonnectra.localhost */
   appUrl: string
-  /** Backend-API, z. B. https://api.qonnectra.localhost */
+  /** Backend API, e.g. https://api.qonnectra.localhost */
   apiUrl: string
-  /** Konto, mit dem dieser Lauf arbeitet (siehe rolle()). */
-  rolle: Rolle
-  /** Zugangsdaten der gewählten Rolle – niemals ausgeben oder committen. */
+  /** Account this run works with (see role()). */
+  role: Role
+  /** Credentials of the selected role - never print or commit them. */
   username: string
   password: string
 }
@@ -106,35 +106,35 @@ export function localApp(): LocalApp {
   if (cached) return cached
 
   const env = readDeploymentEnv()
-  const gewaehlt = rolle()
+  const selected = role()
   cached = {
     appUrl: `https://${required(env, 'APP_DOMAIN')}`,
     apiUrl: `https://${required(env, 'API_DOMAIN')}`,
-    rolle: gewaehlt,
+    role: selected,
     username:
-      gewaehlt === 'admin'
+      selected === 'admin'
         ? required(env, 'DJANGO_SUPERUSER_USERNAME')
-        : requiredNeu(env, 'APP_USER_USERNAME'),
+        : requiredNew(env, 'APP_USER_USERNAME'),
     password:
-      gewaehlt === 'admin'
+      selected === 'admin'
         ? required(env, 'DJANGO_SUPERUSER_PASSWORD')
-        : requiredNeu(env, 'APP_USER_PASSWORD'),
+        : requiredNew(env, 'APP_USER_PASSWORD'),
   }
   return cached
 }
 
 /**
- * Zugangsdaten des Django-Superusers – unabhängig davon, mit welcher Rolle der
- * Lauf arbeitet.
+ * Credentials of the Django superuser - independent of the role the run works
+ * with.
  *
- * Ausschließlich zum **Aufräumen** nach Aufnahmen gedacht, nie für die
- * Aufnahme selbst. Hintergrund: Die Gruppe „Editor“, mit der die Bilder
- * entstehen, hat auf alle Fachmodelle die Zugriffsstufe „edit“ und darf damit
- * kein DELETE (`RoleBasedPermission` im Backend). Ein Spec, das zur Aufnahme
- * etwas anlegt – etwa einen Anhang –, bekommt es mit dem Aufnahmekonto nicht
- * wieder weg und der nächste Lauf startet in einem anderen Zustand.
+ * Intended exclusively for **cleaning up** after captures, never for the
+ * capture itself. Background: the group "Editor" the images are made with has
+ * access level "edit" on all domain models and is therefore not allowed to
+ * DELETE (`RoleBasedPermission` in the backend). A spec that creates something
+ * for a capture - an attachment, say - cannot remove it again with the capture
+ * account, and the next run would start in a different state.
  */
-export function superuserZugang(): { username: string; password: string } {
+export function superuserCredentials(): { username: string; password: string } {
   const env = readDeploymentEnv()
   return {
     username: required(env, 'DJANGO_SUPERUSER_USERNAME'),
@@ -143,16 +143,16 @@ export function superuserZugang(): { username: string; password: string } {
 }
 
 /**
- * Von scripts/setup-local-qonnectra.sh vergebene Frontend-Adresse. Dient als
- * Rückfallwert, solange die Instanz noch nicht eingerichtet ist, damit
- * `playwright test --list` auch dann funktioniert.
+ * Frontend address assigned by scripts/setup-local-qonnectra.sh. Serves as a
+ * fallback while the instance is not set up yet, so that
+ * `playwright test --list` works even then.
  */
 export const DEFAULT_APP_URL = 'https://app.qonnectra.localhost'
 
 /**
- * Nur die URL – für playwright.config.ts, ohne die Zugangsdaten zu berühren
- * und ohne zu scheitern, wenn die Instanz fehlt. Den harten Check macht das
- * Setup-Projekt (playwright/auth.setup.ts).
+ * The URL only - for playwright.config.ts, without touching the credentials and
+ * without failing when the instance is missing. The hard check is done by the
+ * setup project (playwright/auth.setup.ts).
  */
 export function localAppUrl(): string {
   try {

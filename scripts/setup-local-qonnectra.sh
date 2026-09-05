@@ -1,34 +1,35 @@
 #!/usr/bin/env bash
 #
-# Klont/aktualisiert die Qonnectra-App (Geodock-GmbH/Qonnectra) nach
-# local-app/ und startet sie lokal gegen die PRODUKTIONS-Compose
-# (docker-compose.yml), damit die Screenshots/Beispiele im Handbuch der
-# echten Produktions-Konfiguration entsprechen (nicht docker-compose.dev.yml).
+# Clones/updates the Qonnectra app (Geodock-GmbH/Qonnectra) into local-app/ and
+# runs it locally against the PRODUCTION compose file (docker-compose.yml), so
+# that the screenshots/examples in the manual match the real production
+# configuration (not docker-compose.dev.yml).
 #
-# local-app/ ist bewusst NICHT Teil dieses Repos (siehe .gitignore) - dieses
-# Skript ist der reproduzierbare Ersatz dafür und darf beliebig oft und auf
-# jeder Maschine neu ausgeführt werden (idempotent).
+# local-app/ is deliberately NOT part of this repo (see .gitignore) - this
+# script is the reproducible replacement for it and may be run as often as you
+# like on any machine (idempotent).
 #
-# Voraussetzungen: git, curl, openssl, Docker Engine 24+, Docker Compose v2
-# ("docker compose") sowie Java 21+ für die Kartenkacheln (siehe
-# --skip-tiles). Der ausführende Nutzer muss den Docker-Daemon ansprechen
-# können (Mitglied der "docker"-Gruppe oder root).
+# Requirements: git, curl, openssl, Docker Engine 24+, Docker Compose v2
+# ("docker compose") as well as Java 21+ for the map tiles (see --skip-tiles).
+# The invoking user must be able to talk to the Docker daemon (member of the
+# "docker" group or root).
 #
-# Verwendung:
+# Usage:
 #   scripts/setup-local-qonnectra.sh [--reset] [--reset-checkout]
 #
-# --reset verwirft die Daten der Instanz (Container, Volumes inkl. Datenbank,
-# generierte Konfiguration samt Secrets), --reset-checkout zusätzlich den
-# Checkout local-app/. Die lokale Dev-CA bleibt in beiden Fällen erhalten.
+# --reset discards the data of the instance (containers, volumes including the
+# database, generated configuration together with its secrets),
+# --reset-checkout additionally the checkout in local-app/. The local dev CA is
+# kept in both cases.
 #
-# HTTPS läuft über eine persistente lokale Dev-CA in ~/.local/share/
-# qonnectra-local-ca/, die read-only in den Caddy-Container gemountet wird.
-# Sie liegt außerhalb von local-app/ und außerhalb der Docker-Volumes und muss
-# deshalb nur einmal pro Rechner in die Truststores importiert werden
-# (scripts/install-local-ca.sh) - nicht nach jedem Rebuild.
+# HTTPS runs through a persistent local dev CA in ~/.local/share/
+# qonnectra-local-ca/, mounted read-only into the Caddy container. It lives
+# outside local-app/ and outside the Docker volumes and therefore only has to be
+# imported into the trust stores once per machine
+# (scripts/install-local-ca.sh) - not after every rebuild.
 #
-# Nach dem Lauf erreichbar unter https://app.qonnectra.localhost (siehe
-# Ausgabe am Skriptende für Zugangsdaten und Zertifikats-Import).
+# After the run it is reachable at https://app.qonnectra.localhost (see the
+# output at the end of the script for credentials and certificate import).
 
 set -euo pipefail
 
@@ -37,107 +38,107 @@ LOCAL_APP_DIR="$REPO_ROOT/local-app"
 DEPLOY_DIR="$LOCAL_APP_DIR/deployment"
 QONNECTRA_REPO_URL="https://github.com/Geodock-GmbH/Qonnectra.git"
 
-# Persistente lokale Dev-CA. Liegt bewusst AUSSERHALB von local-app/ (wird
-# geklont/gelöscht) und außerhalb dieses Repos (enthält einen privaten
-# Schlüssel), damit sie Rebuilds, "docker compose down -v" und Neu-Klone
-# überlebt und nur EINMAL in die Truststores von System/Browser importiert
-# werden muss. Überschreibbar via QONNECTRA_CA_DIR.
+# Persistent local dev CA. Deliberately lives OUTSIDE local-app/ (which gets
+# cloned/deleted) and outside this repo (it contains a private key), so that it
+# survives rebuilds, "docker compose down -v" and fresh clones and only has to
+# be imported into the system/browser trust stores ONCE. Overridable via
+# QONNECTRA_CA_DIR.
 CA_DIR="${QONNECTRA_CA_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/qonnectra-local-ca}"
 CA_CRT="$CA_DIR/root.crt"
 CA_KEY="$CA_DIR/root.key"
 CA_NAME="Qonnectra Local Dev CA"
 
-# Kartenkacheln (.mbtiles) für den tileserver. Die App liefert bewusst keine
-# mit aus, tileserver-gl beendet sich ohne sie aber sofort und läuft dank
-# "restart: always" in eine Endlosschleife - die Karte fiele dann auf
-# OSM-Rasterkacheln zurück statt die echte Vektor-Basiskarte zu zeigen.
+# Map tiles (.mbtiles) for the tileserver. The app deliberately ships none, but
+# tileserver-gl exits immediately without them and, thanks to
+# "restart: always", ends up in an endless loop - the map would then fall back
+# to OSM raster tiles instead of showing the real vector base map.
 #
-# Die Kacheln liegen wie die Dev-CA AUSSERHALB von local-app/ (wird geklont/
-# gelöscht) und außerhalb dieses Repos (mehrere hundert MB), damit --reset,
-# --reset-checkout und ein Neu-Klon nicht jedes Mal einen mehrminütigen
-# Planetiler-Lauf auslösen. Voreingestellt ist Schleswig-Holstein: das
-# Testprojekt liegt vollständig bei 9,74° O / 54,73° N (nordöstlich von
-# Flensburg). Überschreibbar via QONNECTRA_TILE_AREA (z. B. "germany",
-# dauert dann deutlich länger und braucht ~3 GB).
+# Like the dev CA, the tiles live OUTSIDE local-app/ (which gets cloned/deleted)
+# and outside this repo (several hundred MB), so that --reset,
+# --reset-checkout and a fresh clone do not trigger a multi-minute Planetiler
+# run every time. The default is Schleswig-Holstein: the test project lies
+# entirely at 9.74 E / 54.73 N (north-east of Flensburg). Overridable via
+# QONNECTRA_TILE_AREA (e.g. "germany", which takes considerably longer and
+# needs ~3 GB).
 TILES_DIR="${QONNECTRA_TILES_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/qonnectra-local-tiles}"
 TILE_AREA="${QONNECTRA_TILE_AREA:-schleswig-holstein}"
 TILE_MBTILES="$TILES_DIR/$TILE_AREA.mbtiles"
 PLANETILER_JAR="$TILES_DIR/planetiler.jar"
 PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar"
 
-# Hilfe-Link der App (PUBLIC_DOCUMENTATION_URL). Die App zeigt ihn in
-# Kopfzeile, Navigationsleiste und mobiler Navigation und blendet ihn aus,
-# solange die Variable leer ist - für Screenshots der Oberfläche muss sie
-# also gesetzt sein. Zeigt auf diese Doku-Site.
+# Help link of the app (PUBLIC_DOCUMENTATION_URL). The app shows it in the
+# header, the navigation bar and the mobile navigation, and hides it while the
+# variable is empty - so for screenshots of the interface it has to be set.
+# Points at this documentation site.
 DOCUMENTATION_URL="${QONNECTRA_DOCUMENTATION_URL:-https://qonnectra.de/}"
 
-# Zweites Konto OHNE Administrationsrechte. Der Django-Superuser sieht alle
-# Menüpunkte und darf alles - Bilder daraus zeigen eine Oberfläche, die
-# normale Nutzende so nie zu Gesicht bekommen. Teil A des Handbuchs
-# beschreibt aber genau deren Sicht, deshalb entstehen die Screenshots mit
-# diesem Konto (siehe playwright/local-app.ts).
+# Second account WITHOUT administration rights. The Django superuser sees every
+# menu entry and may do anything - images taken with it show an interface
+# ordinary users never get to see. Part A of the manual describes exactly their
+# view though, which is why the screenshots are made with this account (see
+# playwright/local-app.ts).
 #
-# Gruppe "Editor" (aus Migration api/0058_seed_permission_data): alle
-# Fachdaten bearbeitbar - "Speichern" und die Bearbeitungsdialoge sind also
-# im Bild -, aber kein Zugriff auf /admin/* und damit kein Menüpunkt "Logs".
-# Alternativen: "Viewer" (nur lesend, keine Bearbeitungsschaltflächen) oder
-# "Admin" (wie Editor plus /admin/*).
+# Group "Editor" (from migration api/0058_seed_permission_data): all domain data
+# editable - so "Speichern" and the editing dialogs are in the picture - but no
+# access to /admin/* and therefore no "Logs" menu entry. Alternatives: "Viewer"
+# (read-only, no editing buttons) or "Admin" (like Editor plus /admin/*).
 #
-# Beide Werte greifen nur, solange local-app/deployment/.env noch nicht
-# existiert - danach gilt, was dort steht (Name und Passwort müssen zum
-# Nutzer in der Datenbank passen). Die Gruppe lässt sich nachträglich in
-# .env ändern, sie wird bei jedem Lauf neu zugewiesen.
+# Both values only take effect while local-app/deployment/.env does not exist
+# yet - after that whatever is in there applies (name and password have to match
+# the user in the database). The group can be changed in .env afterwards; it is
+# reassigned on every run.
 APP_USER_NAME="${QONNECTRA_APP_USER:-anwender}"
 APP_USER_GROUP_NAME="${QONNECTRA_APP_USER_GROUP:-Editor}"
 
-# Alle Services außer "wireguard" (VPN-Zugang, für lokales Ausprobieren/
-# Handbuch-Screenshots irrelevant, würde nur zusätzliche Host-Capabilities
-# brauchen).
+# All services except "wireguard" (VPN access, irrelevant for local
+# experimentation and manual screenshots, and would only need additional host
+# capabilities).
 SERVICES=(db backend backend-wms qgis-server pg-error-parser frontend nginx tileserver caddy)
 
 log() { printf '\n\033[1;32m==>\033[0m %s\n' "$1"; }
-warn() { printf '\033[1;33mWARNUNG:\033[0m %s\n' "$1" >&2; }
-die() { printf '\033[1;31mFEHLER:\033[0m %s\n' "$1" >&2; exit 1; }
+warn() { printf '\033[1;33mWARNING:\033[0m %s\n' "$1" >&2; }
+die() { printf '\033[1;31mERROR:\033[0m %s\n' "$1" >&2; exit 1; }
 
 random_alnum() {
 	LC_ALL=C tr -dc 'A-Za-z0-9' </dev/urandom | head -c "$1"
 }
 
 random_fernet_key() {
-	# Fernet-Key: base64(urlsafe) von 32 Zufallsbytes, siehe FIELD_ENCRYPTION_KEY
+	# Fernet key: base64(urlsafe) of 32 random bytes, see FIELD_ENCRYPTION_KEY
 	head -c 32 /dev/urandom | base64 | tr '+/' '-_'
 }
 
 usage() {
 	cat <<EOF
-Verwendung: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
+Usage: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
 
-  --reset           Daten der lokalen Instanz verwerfen und neu aufbauen:
-                    Container, Docker-Volumes (Datenbank, Medien,
-                    Caddy-Daten) und die generierte Konfiguration inkl.
-                    Secrets in local-app/deployment/.env. Der Checkout
-                    local-app/ bleibt unangetastet.
-  --reset-checkout  Den Checkout local-app/ löschen und neu klonen. Verwirft
-                    auch eigene Änderungen darin. Lässt für sich genommen
-                    Datenbank und Secrets in Ruhe, ist mit --reset
-                    kombinierbar.
-  --skip-tiles      Keine Kartenkacheln erzeugen. Der tileserver läuft dann
-                    ohne Daten in eine Restart-Schleife, die Karte fällt auf
-                    OSM-Rasterkacheln zurück.
-  -h, --help        Diese Hilfe anzeigen.
+  --reset           Discard the data of the local instance and rebuild it:
+                    containers, Docker volumes (database, media, Caddy data)
+                    and the generated configuration including the secrets in
+                    local-app/deployment/.env. The checkout local-app/ is left
+                    untouched.
+  --reset-checkout  Delete the checkout local-app/ and clone it again. This
+                    also discards your own changes in it. On its own it leaves
+                    database and secrets alone, and can be combined with
+                    --reset.
+  --skip-tiles      Do not generate map tiles. The tileserver then runs into a
+                    restart loop without data and the map falls back to OSM
+                    raster tiles.
+  -h, --help        Show this help.
 
-Die lokale Dev-CA in
+The local dev CA in
   $CA_DIR
-bleibt in jedem Fall erhalten - der Truststore-Import muss also nicht
-wiederholt werden. Ebenso bleiben die Kartenkacheln in
+is kept in any case - so the trust store import does not have to be repeated.
+The map tiles in
   $TILES_DIR
-erhalten; sie werden nur erzeugt, wenn sie dort fehlen.
+are likewise kept; they are only generated when they are missing there.
 
-Angelegt werden zwei Konten: der Django-Superuser für die Administration und
-ein Konto ohne Administrationsrechte, mit dem die Handbuch-Screenshots
-entstehen (Name/Gruppe beim ersten Lauf über QONNECTRA_APP_USER bzw.
-QONNECTRA_APP_USER_GROUP wählbar, danach über local-app/deployment/.env).
-Den Hilfe-Link der App setzt QONNECTRA_DOCUMENTATION_URL.
+Two accounts are created: the Django superuser for administration and an
+account without administration rights, which the manual screenshots are made
+with (name/group selectable on the first run via QONNECTRA_APP_USER and
+QONNECTRA_APP_USER_GROUP respectively, afterwards via
+local-app/deployment/.env). The help link of the app is set by
+QONNECTRA_DOCUMENTATION_URL.
 EOF
 }
 
@@ -156,66 +157,66 @@ for arg in "$@"; do
 		;;
 	*)
 		usage >&2
-		die "Unbekannte Option: $arg"
+		die "Unknown option: $arg"
 		;;
 	esac
 done
 
-# --- Voraussetzungen prüfen -------------------------------------------------
+# --- Check requirements -----------------------------------------------------
 
-command -v git >/dev/null 2>&1 || die "git ist nicht installiert."
-command -v curl >/dev/null 2>&1 || die "curl ist nicht installiert."
-command -v openssl >/dev/null 2>&1 || die "openssl ist nicht installiert."
-command -v docker >/dev/null 2>&1 || die "docker ist nicht installiert."
-docker compose version >/dev/null 2>&1 || die "docker compose (v2 Plugin) ist nicht verfügbar."
+command -v git >/dev/null 2>&1 || die "git is not installed."
+command -v curl >/dev/null 2>&1 || die "curl is not installed."
+command -v openssl >/dev/null 2>&1 || die "openssl is not installed."
+command -v docker >/dev/null 2>&1 || die "docker is not installed."
+docker compose version >/dev/null 2>&1 || die "docker compose (v2 plugin) is not available."
 
-# Docker-Zugriff sicherstellen. Falls der aktuelle Login noch nicht die
-# docker-Gruppenmitgliedschaft im laufenden Prozess hat (z. B. direkt nach
-# "usermod -aG docker"), einmalig über "sg docker" neu ausführen.
+# Make sure Docker is reachable. If the current login does not have the docker
+# group membership in the running process yet (e.g. right after
+# "usermod -aG docker"), re-run once through "sg docker".
 if ! docker info >/dev/null 2>&1; then
 	if command -v sg >/dev/null 2>&1 && sg docker -c "docker info" >/dev/null 2>&1; then
-		warn "Kein Docker-Zugriff in dieser Shell, starte Skript erneut über 'sg docker'."
+		warn "No Docker access in this shell, restarting the script through 'sg docker'."
 		exec sg docker -c "'$0' $*"
 	fi
-	die "Kein Zugriff auf den Docker-Daemon. Nutzer zur docker-Gruppe hinzufügen: sudo usermod -aG docker \$USER (danach neu einloggen)."
+	die "No access to the Docker daemon. Add the user to the docker group: sudo usermod -aG docker \$USER (then log in again)."
 fi
 
-# --- Reset (nur mit --reset / --reset-checkout) ------------------------------
+# --- Reset (only with --reset / --reset-checkout) ---------------------------
 #
-# --reset entfernt alles, was Zustand hält: Container, die Docker-Volumes mit
-# Datenbank/Medien/Caddy-Daten und die generierte Konfiguration samt Secrets.
-# --reset-checkout wirft zusätzlich den Checkout local-app/ weg. Beides wird
-# weiter unten neu erzeugt. Ausgenommen ist in jedem Fall die Dev-CA in
-# $CA_DIR: sie liegt außerhalb und soll den einmaligen Truststore-Import
-# überleben.
+# --reset removes everything that holds state: containers, the Docker volumes
+# with database/media/Caddy data and the generated configuration together with
+# its secrets. --reset-checkout additionally throws away the checkout in
+# local-app/. Both are recreated further below. Excluded in any case is the dev
+# CA in $CA_DIR: it lives outside and is meant to survive the one-off trust
+# store import.
 
 if [ "$RESET" -eq 1 ] || [ "$RESET_CHECKOUT" -eq 1 ]; then
-	# Container in beiden Fällen anhalten - bei --reset samt Volumes, sonst
-	# nur die Container, damit der neue Checkout nicht gegen Reste des alten
-	# hochgefahren wird. Muss vor dem Löschen von local-app/ passieren, weil
-	# die Compose-Dateien dort liegen.
+	# Stop the containers in both cases - with --reset including the volumes,
+	# otherwise only the containers, so that the new checkout is not brought up
+	# against leftovers of the old one. This has to happen before deleting
+	# local-app/, because the compose files live there.
 	if [ -f "$DEPLOY_DIR/docker-compose.yml" ]; then
 		DOWN=(docker compose -f "$DEPLOY_DIR/docker-compose.yml")
 		if [ -f "$DEPLOY_DIR/docker-compose.override.yml" ]; then
 			DOWN+=(-f "$DEPLOY_DIR/docker-compose.override.yml")
 		fi
 		if [ "$RESET" -eq 1 ]; then
-			log "Reset: verwerfe Container, Volumes (inkl. Datenbank) und Secrets"
+			log "Reset: discarding containers, volumes (including the database) and secrets"
 			DOWN+=(down -v --remove-orphans)
 		else
-			log "Halte Container an (Volumes und Datenbank bleiben erhalten)"
+			log "Stopping containers (volumes and database are kept)"
 			DOWN+=(down --remove-orphans)
 		fi
-		# Aus $DEPLOY_DIR heraus, damit derselbe Compose-Projektname wie beim
-		# Start greift (er leitet sich vom Verzeichnisnamen ab).
+		# From within $DEPLOY_DIR, so that the same compose project name as on
+		# startup applies (it is derived from the directory name).
 		(cd "$DEPLOY_DIR" && "${DOWN[@]}") ||
-			warn "\"docker compose down\" schlug fehl - Reste werden gleich direkt entfernt."
+			warn "\"docker compose down\" failed - leftovers are removed directly in a moment."
 	fi
 
 	if [ "$RESET" -eq 1 ]; then
-		# Nachlauf bzw. Fallback: die Volumes tragen feste Namen (siehe
-		# docker-compose.yml) und überleben sonst, wenn local-app/ vorher von
-		# Hand gelöscht wurde oder "down" fehlgeschlagen ist.
+		# Follow-up resp. fallback: the volumes have fixed names (see
+		# docker-compose.yml) and would otherwise survive if local-app/ had been
+		# deleted by hand beforehand or if "down" failed.
 		VOLUMES=(
 			qonnectra_postgres_data_prod
 			qonnectra_caddy_data_prod
@@ -227,45 +228,45 @@ if [ "$RESET" -eq 1 ] || [ "$RESET_CHECKOUT" -eq 1 ]; then
 		docker volume rm -f "${VOLUMES[@]}" >/dev/null 2>&1 || true
 		REMAINING="$(docker volume ls -q --filter name='^qonnectra_.*_prod$' || true)"
 		if [ -n "$REMAINING" ]; then
-			warn "Diese Volumes ließen sich nicht entfernen (vermutlich noch von einem Container belegt): $(echo "$REMAINING" | tr '\n' ' ')"
+			warn "These volumes could not be removed (probably still in use by a container): $(echo "$REMAINING" | tr '\n' ' ')"
 		fi
 
-		# Generierte Konfiguration inkl. Secrets. Ohne das behielte die neue,
-		# leere Datenbank die alten Passwörter aus .env.
+		# Generated configuration including the secrets. Without this the new,
+		# empty database would keep the old passwords from .env.
 		rm -f "$DEPLOY_DIR/.env" \
 			"$DEPLOY_DIR/Caddyfile.production.local" \
 			"$DEPLOY_DIR/docker-compose.override.yml"
 	fi
 
 	if [ "$RESET_CHECKOUT" -eq 1 ]; then
-		# .env liegt zwar im Checkout, gehört aber zur Instanz und nicht zum
-		# App-Code: ohne sie bekäme die bei --reset-checkout absichtlich
-		# erhaltene Datenbank neue Zufallspasswörter und wäre für das Backend
-		# nicht mehr erreichbar. Also zwischenspeichern und nach dem Klonen
-		# zurücklegen - bei --reset sollen die Secrets dagegen neu sein.
+		# .env does live inside the checkout, but it belongs to the instance and
+		# not to the app code: without it the database that --reset-checkout
+		# deliberately keeps would get new random passwords and would no longer
+		# be reachable for the backend. So keep a copy and put it back after
+		# cloning - with --reset, by contrast, the secrets are meant to be new.
 		if [ "$RESET" -eq 0 ] && [ -f "$DEPLOY_DIR/.env" ]; then
 			ENV_BACKUP="$(mktemp)"
 			cp "$DEPLOY_DIR/.env" "$ENV_BACKUP"
 		fi
 
-		log "Verwerfe Checkout local-app/ (wird neu geklont)"
+		log "Discarding checkout local-app/ (will be cloned again)"
 		rm -rf "$LOCAL_APP_DIR"
 	fi
 
-	log "Reset abgeschlossen. Die lokale Dev-CA in $CA_DIR bleibt erhalten."
+	log "Reset finished. The local dev CA in $CA_DIR is kept."
 fi
 
-# --- App-Repo klonen/aktualisieren ------------------------------------------
+# --- Clone/update the app repo ----------------------------------------------
 
 if [ -d "$LOCAL_APP_DIR/.git" ]; then
-	log "local-app/ existiert bereits, überspringe Klonen (kein automatisches 'git pull', um lokale Änderungen nicht zu überschreiben)."
+	log "local-app/ already exists, skipping the clone (no automatic 'git pull', so that local changes are not overwritten)."
 else
-	log "Klone $QONNECTRA_REPO_URL nach local-app/"
+	log "Cloning $QONNECTRA_REPO_URL into local-app/"
 	git clone "$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR"
 fi
 
 if [ -n "$ENV_BACKUP" ]; then
-	log "Übernehme bisherige .env (Secrets) in den neuen Checkout"
+	log "Carrying the previous .env (secrets) over into the new checkout"
 	mv "$ENV_BACKUP" "$DEPLOY_DIR/.env"
 	ENV_BACKUP=""
 fi
@@ -273,57 +274,57 @@ fi
 IMPORT_COMMAND_SRC="$REPO_ROOT/scripts/qonnectra-demo-data/import_geodock_export.py"
 COMMANDS_DIR="$LOCAL_APP_DIR/backend/apps/api/management/commands"
 
-# JSON-Export des echten "Testprojekt" aus der Qonnectra-Demo-Umgebung
-# (app.geodock.de), versioniert in diesem Repo. Wie er aktualisiert wird,
-# steht in scripts/qonnectra-demo-data/README.md. Ein abweichender Export
-# lässt sich über QONNECTRA_EXPORT_FILE einhängen.
+# JSON export of the real "Testprojekt" from the Qonnectra demo environment
+# (app.geodock.de), versioned in this repo. How it is updated is described in
+# scripts/qonnectra-demo-data/README.md. A different export can be plugged in
+# through QONNECTRA_EXPORT_FILE.
 EXPORT_FILE="${QONNECTRA_EXPORT_FILE:-$REPO_ROOT/scripts/qonnectra-demo-data/testprojekt-export.json}"
 EXPORT_FILE_IN_CONTAINER=/tmp/testprojekt-export.json
 IMPORT_OK=0
 APP_USER_OK=0
 
-# --- Import-Command einspielen -----------------------------------------------
+# --- Install the import command ---------------------------------------------
 #
-# local-app/ ist gitignored (siehe oben) und wird bei jedem Lauf frisch
-# geklont bzw. wiederverwendet - das Management-Command für den Import des
-# Testprojekt-Exports liegt daher versioniert in diesem Repo
-# (scripts/qonnectra-demo-data/) und wird hier vor dem Image-Build in den
-# Checkout kopiert (das Backend-Image bäckt den Code zur Build-Zeit ein, ein
-# reiner Volume-Mount für Quellcode existiert nicht).
+# local-app/ is gitignored (see above) and is freshly cloned resp. reused on
+# every run - the management command for importing the test project export
+# therefore lives versioned in this repo (scripts/qonnectra-demo-data/) and is
+# copied into the checkout here before the image build (the backend image bakes
+# the code in at build time, there is no plain volume mount for source code).
 
-log "Kopiere import_geodock_export-Command nach local-app/"
+log "Copying the import_geodock_export command into local-app/"
 cp "$IMPORT_COMMAND_SRC" "$COMMANDS_DIR/import_geodock_export.py"
 
-# Rückstand älterer Skript-Versionen: der fiktive Demo-Generator ist durch den
-# Import des echten Testprojekts ersetzt und würde sonst im Image bleiben.
+# Leftover from older script versions: the fictional demo generator has been
+# replaced by the import of the real test project and would otherwise stay in
+# the image.
 rm -f "$COMMANDS_DIR/generate_demo_project.py"
 
 if [ ! -f "$EXPORT_FILE" ]; then
-	warn "Kein Testprojekt-Export unter $EXPORT_FILE - der Stack startet ohne Projektdaten (Hinweis am Skriptende)."
+	warn "No test project export at $EXPORT_FILE - the stack starts without project data (note at the end of the script)."
 fi
 
 cd "$DEPLOY_DIR"
 
-# --- .env erzeugen (nur beim ersten Lauf, danach idempotent) ----------------
+# --- Create .env (only on the first run, idempotent afterwards) -------------
 #
-# "qonnectra.localhost" statt nur "localhost" als Basisdomain: Browser lehnen
-# Cookies mit Domain=.localhost als Public-Suffix ab (verifiziert per curl/
-# libpsl und im echten Browser reproduziert), eine Ebene tiefer
-# (.qonnectra.localhost) wird akzeptiert. Jede Subdomain-Tiefe unter
-# .localhost löst weiterhin automatisch auf 127.0.0.1 auf (RFC 6761), kein
-# /etc/hosts-Eintrag nötig.
+# "qonnectra.localhost" instead of just "localhost" as the base domain:
+# browsers reject cookies with Domain=.localhost as a public suffix (verified
+# with curl/libpsl and reproduced in a real browser), one level deeper
+# (.qonnectra.localhost) is accepted. Any subdomain depth below .localhost
+# still resolves to 127.0.0.1 automatically (RFC 6761), no /etc/hosts entry
+# needed.
 
 if [ -f "$DEPLOY_DIR/.env" ]; then
-	log ".env existiert bereits, überspringe Erzeugung (Secrets/Domains bleiben erhalten)."
+	log ".env already exists, skipping creation (secrets/domains are kept)."
 else
-	log "Erzeuge .env mit lokalen Test-Secrets"
+	log "Creating .env with local test secrets"
 	cat >"$DEPLOY_DIR/.env" <<EOF
-# Lokale Test-Umgebung, Produktions-Compose (docker-compose.yml) gegen
-# *.qonnectra.localhost-Domains statt echter Domains mit Let's-Encrypt-
-# Zertifikaten (siehe Caddyfile.production.local + docker-compose.override.yml,
-# beide werden von scripts/setup-local-qonnectra.sh generiert).
+# Local test environment, production compose (docker-compose.yml) against
+# *.qonnectra.localhost domains instead of real domains with Let's Encrypt
+# certificates (see Caddyfile.production.local + docker-compose.override.yml,
+# both generated by scripts/setup-local-qonnectra.sh).
 #
-# NUR für lokales Ausprobieren/Handbuch-Screenshots. Nicht für Produktion.
+# ONLY for local experimentation / manual screenshots. Not for production.
 
 DOMAIN_NAME=qonnectra.localhost
 API_DOMAIN=api.qonnectra.localhost
@@ -356,28 +357,28 @@ DJANGO_SUPERUSER_USERNAME=admin
 DJANGO_SUPERUSER_EMAIL=admin@example.com
 DJANGO_SUPERUSER_PASSWORD=$(random_alnum 16)
 
-# Browser lehnen Domain=.localhost-Cookies ab, Domain=.qonnectra.localhost
-# (eine Ebene tiefer) wird akzeptiert -> Cross-Domain-Auth-Cookies
-# (api-access-token/api-refresh-token, für Kartenkacheln u.a.) UND der
-# same-origin Admin-Login funktionieren damit beide gleichzeitig.
+# Browsers reject Domain=.localhost cookies, Domain=.qonnectra.localhost (one
+# level deeper) is accepted -> cross-domain auth cookies
+# (api-access-token/api-refresh-token, for map tiles among others) AND the
+# same-origin admin login both work at the same time.
 USE_COOKIE_DOMAIN_MIDDLEWARE=True
 COOKIE_DOMAIN=.qonnectra.localhost
 
 FIELD_ENCRYPTION_KEY=$(random_fernet_key)
 
-# API_URL ist der serverseitige (SSR) Aufruf des Frontend-Containers selbst
-# -> muss auf den internen Docker-Service zeigen, "api.qonnectra.localhost"
-# ist aus dem Container heraus nicht erreichbar (nur über Caddy vom Host aus).
+# API_URL is the server-side (SSR) call of the frontend container itself
+# -> it has to point at the internal Docker service, "api.qonnectra.localhost"
+# is not reachable from inside the container (only through Caddy from the host).
 API_URL=http://backend:8000/api/v1/
 PUBLIC_API_URL=https://api.qonnectra.localhost/api/v1/
 PUBLIC_TILE_SERVER_URL=https://tiles.qonnectra.localhost
 
-# Hilfe-Link in Kopfzeile und Navigationsleiste. Leer = Link ausgeblendet.
+# Help link in the header and the navigation bar. Empty = link hidden.
 PUBLIC_DOCUMENTATION_URL=$DOCUMENTATION_URL
 
-# Konto ohne Administrationsrechte für Screenshots aus Sicht normaler
-# Nutzender. Wird nach dem Start angelegt und der Gruppe unten zugeordnet;
-# angemeldet wird sich damit standardmäßig in allen Playwright-Läufen.
+# Account without administration rights, for screenshots from the perspective
+# of ordinary users. Created after startup and assigned to the group below;
+# all Playwright runs log in with it by default.
 APP_USER_USERNAME=$APP_USER_NAME
 APP_USER_EMAIL=$APP_USER_NAME@example.com
 APP_USER_PASSWORD=$(random_alnum 16)
@@ -385,74 +386,73 @@ APP_USER_GROUP=$APP_USER_GROUP_NAME
 EOF
 fi
 
-# --- Fehlende Schlüssel in einer bestehenden .env nachtragen ----------------
+# --- Append missing keys to an existing .env --------------------------------
 #
-# Der Block oben läuft nur beim ersten Lauf. Instanzen, die mit einer
-# früheren Skript-Version aufgesetzt wurden, haben die neueren Schlüssel
-# deshalb nicht - ohne Nachtragen wäre ein --reset (und damit eine leere
-# Datenbank) nötig, nur um an einen Konfigurationswert zu kommen.
+# The block above only runs on the first run. Instances that were set up with
+# an earlier version of the script therefore do not have the newer keys -
+# without appending them a --reset (and with it an empty database) would be
+# necessary just to get at a configuration value.
 
-# Fügt den Schlüssel an, falls er fehlt. Ein vorhandener Wert bleibt
-# unangetastet: Secrets aus dem ersten Lauf müssen zum Stand der Datenbank
-# passen, ein neu gewürfeltes Passwort passte nicht mehr zum Nutzer darin.
-env_nachtragen() {
-	local schluessel="$1" wert="$2" kommentar="${3:-}"
-	if grep -qE "^[[:space:]]*$schluessel=" "$DEPLOY_DIR/.env"; then
+# Appends the key if it is missing. An existing value is left untouched:
+# secrets from the first run have to match the state of the database, and a
+# freshly rolled password would no longer match the user in it.
+env_append() {
+	local key="$1" value="$2" comment="${3:-}"
+	if grep -qE "^[[:space:]]*$key=" "$DEPLOY_DIR/.env"; then
 		return
 	fi
-	log "Trage $schluessel in local-app/deployment/.env nach"
+	log "Appending $key to local-app/deployment/.env"
 	{
 		printf '\n'
-		if [ -n "$kommentar" ]; then printf '%s\n' "$kommentar"; fi
-		printf '%s=%s\n' "$schluessel" "$wert"
+		if [ -n "$comment" ]; then printf '%s\n' "$comment"; fi
+		printf '%s=%s\n' "$key" "$value"
 	} >>"$DEPLOY_DIR/.env"
 }
 
-# Wie env_nachtragen, überschreibt aber einen abweichenden Wert. Nur für
-# Werte ohne Geheimnischarakter, die das Skript vorgibt - für Secrets nicht
-# benutzen (siehe Kommentar oben).
-env_setzen() {
-	local schluessel="$1" wert="$2" kommentar="${3:-}"
-	if ! grep -qE "^[[:space:]]*$schluessel=" "$DEPLOY_DIR/.env"; then
-		env_nachtragen "$schluessel" "$wert" "$kommentar"
+# Like env_append, but overwrites a differing value. Only for values without
+# secret character that the script dictates - do not use it for secrets (see
+# the comment above).
+env_set() {
+	local key="$1" value="$2" comment="${3:-}"
+	if ! grep -qE "^[[:space:]]*$key=" "$DEPLOY_DIR/.env"; then
+		env_append "$key" "$value" "$comment"
 		return
 	fi
-	if [ "$(sed -nE "s|^[[:space:]]*$schluessel=||p" "$DEPLOY_DIR/.env" | head -1)" != "$wert" ]; then
-		log "Setze $schluessel in local-app/deployment/.env auf $wert"
-		sed -i -E "s|^[[:space:]]*$schluessel=.*|$schluessel=$wert|" "$DEPLOY_DIR/.env"
+	if [ "$(sed -nE "s|^[[:space:]]*$key=||p" "$DEPLOY_DIR/.env" | head -1)" != "$value" ]; then
+		log "Setting $key in local-app/deployment/.env to $value"
+		sed -i -E "s|^[[:space:]]*$key=.*|$key=$value|" "$DEPLOY_DIR/.env"
 	fi
 }
 
-env_setzen PUBLIC_DOCUMENTATION_URL "$DOCUMENTATION_URL" \
-	"# Hilfe-Link in Kopfzeile und Navigationsleiste. Leer = Link ausgeblendet."
-env_nachtragen APP_USER_USERNAME "$APP_USER_NAME" \
-	"# Konto ohne Administrationsrechte für Screenshots aus Sicht normaler Nutzender."
-env_nachtragen APP_USER_EMAIL "$APP_USER_NAME@example.com"
-env_nachtragen APP_USER_PASSWORD "$(random_alnum 16)"
-env_nachtragen APP_USER_GROUP "$APP_USER_GROUP_NAME"
+env_set PUBLIC_DOCUMENTATION_URL "$DOCUMENTATION_URL" \
+	"# Help link in the header and the navigation bar. Empty = link hidden."
+env_append APP_USER_USERNAME "$APP_USER_NAME" \
+	"# Account without administration rights, for screenshots from the perspective of ordinary users."
+env_append APP_USER_EMAIL "$APP_USER_NAME@example.com"
+env_append APP_USER_PASSWORD "$(random_alnum 16)"
+env_append APP_USER_GROUP "$APP_USER_GROUP_NAME"
 
 # shellcheck disable=SC1091
 source "$DEPLOY_DIR/.env"
 
-# --- Persistente lokale Dev-CA erzeugen/wiederverwenden ---------------------
+# --- Create/reuse the persistent local dev CA -------------------------------
 #
-# Ohne das hier legt Caddy bei jedem frischen caddy_data-Volume eine NEUE
-# eigene CA an ("Caddy Local Authority") - der Truststore-Import im Browser
-# ist danach wertlos und muss wiederholt werden. Stattdessen: einmalig eine
-# eigene Root-CA auf dem Host erzeugen, read-only in den Caddy-Container
-# mounten (siehe pki-Block in Caddyfile.production.local) und nur diese
-# importieren.
+# Without this, Caddy creates a NEW CA of its own ("Caddy Local Authority") for
+# every fresh caddy_data volume - the trust store import in the browser is
+# worthless afterwards and has to be repeated. Instead: generate our own root
+# CA on the host once, mount it read-only into the Caddy container (see the pki
+# block in Caddyfile.production.local) and import only that one.
 
 if [ -f "$CA_CRT" ] && [ -f "$CA_KEY" ]; then
-	log "Verwende vorhandene lokale Dev-CA aus $CA_DIR"
+	log "Using the existing local dev CA from $CA_DIR"
 else
-	log "Erzeuge lokale Dev-CA in $CA_DIR (einmalig, überlebt Rebuilds)"
+	log "Creating a local dev CA in $CA_DIR (one-off, survives rebuilds)"
 	mkdir -p "$CA_DIR"
 	chmod 700 "$CA_DIR"
 	openssl ecparam -name prime256v1 -genkey -noout -out "$CA_KEY"
 	chmod 600 "$CA_KEY"
 	openssl req -x509 -new -key "$CA_KEY" -sha256 -days 3650 \
-		-subj "/CN=$CA_NAME/O=Qonnectra lokale Entwicklung" \
+		-subj "/CN=$CA_NAME/O=Qonnectra local development" \
 		-addext "basicConstraints=critical,CA:TRUE,pathlen:1" \
 		-addext "keyUsage=critical,keyCertSign,cRLSign" \
 		-addext "subjectKeyIdentifier=hash" \
@@ -462,25 +462,25 @@ fi
 
 CA_FINGERPRINT="$(openssl x509 -in "$CA_CRT" -noout -fingerprint -sha256 | cut -d= -f2)"
 
-# --- Caddyfile.production.local erzeugen ------------------------------------
+# --- Create Caddyfile.production.local --------------------------------------
 #
-# Caddyfile.production erwartet echte, öffentlich auflösbare Domains für
-# automatisches Let's-Encrypt-HTTPS. Für *.qonnectra.localhost gibt es keine
-# öffentliche Validierung, daher hier "tls internal" pro Domain-Block ergänzen
-# und global die interne CA auf die Dev-CA von oben umbiegen. Wird bei jedem
-# Lauf neu aus der aktuellen Caddyfile.production erzeugt.
+# Caddyfile.production expects real, publicly resolvable domains for automatic
+# Let's Encrypt HTTPS. For *.qonnectra.localhost there is no public validation,
+# so "tls internal" is added per domain block here and the internal CA is
+# globally redirected to the dev CA from above. Regenerated from the current
+# Caddyfile.production on every run.
 
-log "Erzeuge Caddyfile.production.local (eigene Dev-CA + tls internal pro Domain)"
+log "Creating Caddyfile.production.local (own dev CA + tls internal per domain)"
 {
 	cat <<EOF
-# Automatisch erzeugt von scripts/setup-local-qonnectra.sh - nicht bearbeiten.
+# Generated automatically by scripts/setup-local-qonnectra.sh - do not edit.
 #
-# Der globale pki-Block biegt die von "tls internal" (unten pro Domain)
-# genutzte interne CA "local" auf die persistente Dev-CA vom Host um, die
-# read-only nach /etc/caddy/ca gemountet ist:
+# The global pki block redirects the internal CA "local" used by "tls internal"
+# (below, per domain) to the persistent dev CA from the host, which is mounted
+# read-only at /etc/caddy/ca:
 #   $CA_CRT
-# Ohne das würde Caddy die CA bei jedem frischen caddy_data-Volume neu
-# erzeugen und der Truststore-Import müsste jedes Mal wiederholt werden.
+# Without this Caddy would recreate the CA for every fresh caddy_data volume and
+# the trust store import would have to be repeated every time.
 {
     pki {
         ca local {
@@ -499,99 +499,99 @@ EOF
 		"$DEPLOY_DIR/Caddyfile.production"
 } >"$DEPLOY_DIR/Caddyfile.production.local"
 
-# --- Kartenkacheln erzeugen --------------------------------------------------
+# --- Generate map tiles ------------------------------------------------------
 #
-# tileserver-gl braucht eine .mbtiles-Datei; die App liefert keine mit (siehe
+# tileserver-gl needs an .mbtiles file; the app ships none (see
 # local-app/deployment/README.md, "Generating Map Tiles with Planetiler").
-# Ohne sie beendet sich der Container beim Start ("Not valid input file") und
-# wird von "restart: always" endlos neu gestartet.
+# Without it the container exits on startup ("Not valid input file") and is
+# restarted endlessly by "restart: always".
 #
-# Der Lauf passiert nur einmal pro Rechner: Ergebnis und heruntergeladene
-# OSM-Rohdaten liegen in $TILES_DIR außerhalb von local-app/.
+# The run only happens once per machine: the result and the downloaded raw OSM
+# data live in $TILES_DIR outside local-app/.
 
 if [ "$SKIP_TILES" -eq 1 ]; then
-	warn "--skip-tiles: überspringe Kartenkacheln. Der tileserver wird in einer Restart-Schleife laufen, die Karte nutzt OSM-Rasterkacheln."
+	warn "--skip-tiles: skipping map tiles. The tileserver will run in a restart loop and the map will use OSM raster tiles."
 elif [ -f "$TILE_MBTILES" ]; then
-	log "Kartenkacheln vorhanden: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
+	log "Map tiles present: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
 elif ! command -v java >/dev/null 2>&1; then
-	warn "java fehlt - Kartenkacheln können nicht erzeugt werden (Planetiler braucht Java 21+). Der tileserver läuft dadurch in einer Restart-Schleife, die Karte nutzt OSM-Rasterkacheln. Java installieren und Skript erneut ausführen, oder mit --skip-tiles absichtlich darauf verzichten."
+	warn "java is missing - map tiles cannot be generated (Planetiler needs Java 21+). Because of that the tileserver runs in a restart loop and the map uses OSM raster tiles. Install Java and run the script again, or deliberately do without them using --skip-tiles."
 else
 	mkdir -p "$TILES_DIR"
 
 	if [ ! -f "$PLANETILER_JAR" ]; then
-		log "Lade Planetiler nach $PLANETILER_JAR"
+		log "Downloading Planetiler to $PLANETILER_JAR"
 		curl -fSL --retry 3 -o "$PLANETILER_JAR.tmp" "$PLANETILER_URL" ||
-			die "Planetiler konnte nicht geladen werden: $PLANETILER_URL"
+			die "Planetiler could not be downloaded: $PLANETILER_URL"
 		mv "$PLANETILER_JAR.tmp" "$PLANETILER_JAR"
 	fi
 
-	log "Erzeuge Kartenkacheln für \"$TILE_AREA\" (einmalig, dauert einige Minuten)"
-	# Erst unter einem Zwischennamen schreiben und dann umbenennen: ein
-	# abgebrochener Lauf hinterlässt sonst eine halbe .mbtiles, die beim
-	# nächsten Lauf als fertig gilt. Die Endung muss dabei .mbtiles bleiben -
-	# Planetiler leitet das Archivformat aus ihr ab und bricht sonst mit
-	# "Unsupported format" ab.
-	# Arbeitsverzeichnis $TILES_DIR, damit Planetiler seine Downloads
-	# (data/sources) und temporären Dateien ebenfalls dort ablegt und beim
-	# nächsten Mal wiederverwenden kann.
+	log "Generating map tiles for \"$TILE_AREA\" (one-off, takes a few minutes)"
+	# Write under an intermediate name first and rename afterwards: an aborted
+	# run would otherwise leave half an .mbtiles behind that counts as finished
+	# on the next run. The extension has to stay .mbtiles - Planetiler derives
+	# the archive format from it and would otherwise abort with
+	# "Unsupported format".
+	# Working directory $TILES_DIR, so that Planetiler puts its downloads
+	# (data/sources) and temporary files there as well and can reuse them next
+	# time.
 	TILE_TMP="$TILES_DIR/.$TILE_AREA.partial.mbtiles"
 	if (cd "$TILES_DIR" && java -Xmx4g -jar "$PLANETILER_JAR" \
 		--download --area="$TILE_AREA" --force \
 		--output="$TILE_TMP"); then
 		mv "$TILE_TMP" "$TILE_MBTILES"
-		log "Kartenkacheln fertig: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
+		log "Map tiles finished: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
 	else
 		rm -f "$TILE_TMP"
-		warn "Planetiler-Lauf für \"$TILE_AREA\" fehlgeschlagen. Der tileserver läuft dadurch in einer Restart-Schleife, die Karte nutzt OSM-Rasterkacheln."
+		warn "Planetiler run for \"$TILE_AREA\" failed. Because of that the tileserver runs in a restart loop and the map uses OSM raster tiles."
 	fi
 fi
 
-# Die Kacheln müssen als $DEPLOY_DIR/tiles/germany.mbtiles neben config.json
-# liegen: docker-compose.yml mountet ./tiles read-only nach /data, und
-# config.json verweist fest auf /data/germany.mbtiles. Ein zusätzlicher
-# Bind-Mount nur für die Datei funktioniert nicht - Docker kann den
-# Mountpoint im read-only gemounteten /data nicht anlegen ("create target of
-# file bind-mount ... read-only file system").
+# The tiles have to sit next to config.json as $DEPLOY_DIR/tiles/germany.mbtiles:
+# docker-compose.yml mounts ./tiles read-only at /data, and config.json refers
+# to /data/germany.mbtiles by a fixed path. An additional bind mount for the
+# file alone does not work - Docker cannot create the mount point inside the
+# read-only mounted /data ("create target of file bind-mount ... read-only file
+# system").
 #
-# Deshalb eine harte Verknüpfung (kein Kopieren: spart die 130+ MB doppelt,
-# und der Cache in $TILES_DIR bleibt die einzige echte Kopie). Liegt
-# $TILES_DIR auf einem anderen Dateisystem als local-app/, wird kopiert.
-# Der Name ist immer germany.mbtiles, unabhängig von der erzeugten Region.
+# Hence a hard link (not a copy: that saves the 130+ MB twice over, and the
+# cache in $TILES_DIR stays the only real copy). If $TILES_DIR sits on a
+# different file system than local-app/, it is copied. The name is always
+# germany.mbtiles, regardless of the region that was generated.
 if [ -f "$TILE_MBTILES" ]; then
 	TILE_LINK="$DEPLOY_DIR/tiles/germany.mbtiles"
-	# Neu verknüpfen, wenn die Datei fehlt oder einen anderen Stand als den
-	# Cache hat. Der Größenvergleich deckt beides ab: eine harte Verknüpfung
-	# ist immer gleich groß (kein unnötiges Neuanlegen), ein neu erzeugter
-	# Extrakt oder ein Wechsel von QONNECTRA_TILE_AREA praktisch nie.
+	# Link again when the file is missing or holds a different state than the
+	# cache. The size comparison covers both: a hard link always has the same
+	# size (no unnecessary recreation), a freshly generated extract or a change
+	# of QONNECTRA_TILE_AREA practically never.
 	if [ ! -e "$TILE_LINK" ] ||
 		[ "$(stat -c %s "$TILE_MBTILES")" != "$(stat -c %s "$TILE_LINK")" ]; then
 		rm -f "$TILE_LINK"
 		ln "$TILE_MBTILES" "$TILE_LINK" 2>/dev/null ||
 			cp "$TILE_MBTILES" "$TILE_LINK" ||
-			warn "Kartenkacheln konnten nicht nach $TILE_LINK verknüpft werden."
+			warn "Map tiles could not be linked to $TILE_LINK."
 	fi
 fi
 
-# --- docker-compose.override.yml erzeugen -----------------------------------
+# --- Create docker-compose.override.yml -------------------------------------
 #
-# Einzige lokal nötige Anpassung an der Produktions-Compose: Caddy auf die
-# oben erzeugte Caddyfile mit "tls internal" umbiegen. nginx- und
-# qgis-server-Kommandos sind in docker-compose.yml (anders als in
-# docker-compose.dev.yml) bereits korrekt.
+# The only adjustment needed locally on the production compose: point Caddy at
+# the Caddyfile generated above with "tls internal". The nginx and qgis-server
+# commands in docker-compose.yml are already correct (unlike in
+# docker-compose.dev.yml).
 
-log "Erzeuge docker-compose.override.yml"
+log "Creating docker-compose.override.yml"
 cat >"$DEPLOY_DIR/docker-compose.override.yml" <<EOF
-# Automatisch erzeugt von scripts/setup-local-qonnectra.sh - lokale
-# Anpassung an docker-compose.yml (Produktion) für *.qonnectra.localhost
-# statt echter Domains mit Let's-Encrypt-Zertifikaten.
+# Generated automatically by scripts/setup-local-qonnectra.sh - local
+# adjustment to docker-compose.yml (production) for *.qonnectra.localhost
+# instead of real domains with Let's Encrypt certificates.
 services:
-  # docker-compose.yml listet die Umgebung des Backends einzeln auf und liest
-  # kein env_file - die APP_USER_*-Werte müssen deshalb hier ergänzt werden.
-  # Sie stehen im Container, damit das Skript das Konto per "manage.py shell"
-  # anlegen kann, ohne das Passwort auf die Kommandozeile des Hosts (und
-  # damit in die Prozessliste) zu schreiben. Die Platzhalter bleiben
-  # absichtlich unaufgelöst: Compose setzt sie beim Start aus .env ein, in
-  # dieser Datei steht damit kein Passwort.
+  # docker-compose.yml lists the environment of the backend one by one and
+  # reads no env_file - the APP_USER_* values therefore have to be added here.
+  # They live inside the container so that the script can create the account
+  # via "manage.py shell" without writing the password onto the command line of
+  # the host (and with it into the process list). The placeholders deliberately
+  # stay unresolved: Compose fills them in from .env on startup, so this file
+  # contains no password.
   backend:
     environment:
       - APP_USER_USERNAME=\${APP_USER_USERNAME}
@@ -602,7 +602,7 @@ services:
     volumes:
       - ./Caddyfile.production.local:/etc/caddy/Caddyfile:ro
       - ./caddy/extra:/etc/caddy/extra:ro
-      # Persistente lokale Dev-CA vom Host (siehe pki-Block in der Caddyfile)
+      # Persistent local dev CA from the host (see the pki block in the Caddyfile)
       - $CA_DIR:/etc/caddy/ca:ro
       - caddy_data:/data
       - caddy_config:/config
@@ -612,52 +612,53 @@ EOF
 
 COMPOSE=(docker compose -f "$DEPLOY_DIR/docker-compose.yml" -f "$DEPLOY_DIR/docker-compose.override.yml")
 
-# --- DNS-Check (informativ, RFC 6761 sollte das immer erfüllen) -------------
+# --- DNS check (informational, RFC 6761 should always satisfy this) ---------
 
 if command -v getent >/dev/null 2>&1 && ! getent hosts app.qonnectra.localhost >/dev/null 2>&1; then
-	warn "app.qonnectra.localhost löst auf diesem Rechner nicht auf. Normalerweise lösen alle *.localhost-Namen automatisch auf 127.0.0.1 auf (RFC 6761); falls nicht, manuell in /etc/hosts eintragen."
+	warn "app.qonnectra.localhost does not resolve on this machine. Normally all *.localhost names resolve to 127.0.0.1 automatically (RFC 6761); if they do not, add an entry to /etc/hosts manually."
 fi
 
-# --- Stack bauen und starten -------------------------------------------------
+# --- Build and start the stack ----------------------------------------------
 
-log "Baue Images und starte Stack (das kann beim ersten Lauf mehrere Minuten dauern)"
+log "Building images and starting the stack (this can take several minutes on the first run)"
 if ! "${COMPOSE[@]}" up -d --build "${SERVICES[@]}"; then
-	# Bekannter Bug in postgres/init.sh: bei komplett leerem DB-Volume schlagen
-	# zwei REVOKE-Statements auf noch nicht existierende Tabellen fehl
-	# (model_permission/route_permission existieren erst nach den Django-
-	# Migrationen). Die Postgres-Cluster-Dateien wurden dabei aber bereits
-	# angelegt, ein zweiter Versuch läuft ohne erneutes initdb sauber durch.
-	warn "Erster Start fehlgeschlagen (vermutlich der bekannte postgres/init.sh-Bug bei leerem DB-Volume), versuche erneut..."
+	# Known bug in postgres/init.sh: with a completely empty DB volume two
+	# REVOKE statements on tables that do not exist yet fail
+	# (model_permission/route_permission only exist after the Django
+	# migrations). The Postgres cluster files have already been created at that
+	# point though, and a second attempt runs through cleanly without another
+	# initdb.
+	warn "First start failed (probably the known postgres/init.sh bug with an empty DB volume), trying again..."
 	"${COMPOSE[@]}" up -d "${SERVICES[@]}"
 fi
 
-# nginx muss ggf. neu gestartet werden, falls der Backend-Container beim
-# ersten Versuch neu erstellt wurde (nginx löst den Upstream-Namen nur beim
-# eigenen Start auf und cached dessen Container-IP).
+# nginx may have to be restarted if the backend container was recreated on the
+# first attempt (nginx only resolves the upstream name on its own startup and
+# caches its container IP).
 "${COMPOSE[@]}" restart nginx >/dev/null
 
-# --- Alte Caddy-PKI im Volume verwerfen -------------------------------------
+# --- Discard the old Caddy PKI in the volume --------------------------------
 #
-# Im caddy_data-Volume können noch Intermediate + Leaf-Zertifikate einer
-# früheren (selbst erzeugten) Caddy-CA liegen. Die ketten nicht zu unserer
-# Dev-CA und würden weiter ausgeliefert. Deshalb: Fingerprint der aktiven CA
-# im Volume hinterlegen und bei Abweichung die lokale PKI einmalig verwerfen -
-# Caddy erzeugt Intermediate und Leaf-Zertifikate dann unter unserer Root neu.
+# The caddy_data volume may still hold intermediate and leaf certificates of an
+# earlier (self-generated) Caddy CA. Those do not chain to our dev CA and would
+# keep being served. Hence: store the fingerprint of the active CA in the volume
+# and, if it differs, discard the local PKI once - Caddy then recreates
+# intermediate and leaf certificates under our root.
 
 CA_MARKER=/data/caddy/.qonnectra-local-ca-fingerprint
 STORED_FINGERPRINT="$("${COMPOSE[@]}" exec -T caddy cat "$CA_MARKER" 2>/dev/null || true)"
 if [ "$STORED_FINGERPRINT" != "$CA_FINGERPRINT" ]; then
-	log "Setze Caddy-PKI im Volume auf die lokale Dev-CA zurück"
+	log "Resetting the Caddy PKI in the volume to the local dev CA"
 	"${COMPOSE[@]}" exec -T caddy sh -c \
 		"rm -rf /data/caddy/pki/authorities/local /data/caddy/certificates/local && printf '%s' '$CA_FINGERPRINT' >$CA_MARKER"
 	"${COMPOSE[@]}" restart caddy >/dev/null
 fi
 
-log "Warte, bis die App über Caddy antwortet (Migrationen, nginx-Neustart, TLS-Zertifikate)..."
+log "Waiting until the app answers through Caddy (migrations, nginx restart, TLS certificates)..."
 READY=0
 for _ in $(seq 1 60); do
-	# Bewusst mit --cacert statt -k: prüft zugleich, dass die ausgelieferte
-	# Zertifikatskette wirklich unter unserer Dev-CA hängt.
+	# Deliberately with --cacert instead of -k: this also checks that the
+	# certificate chain being served really hangs below our dev CA.
 	code="$(curl -s --cacert "$CA_CRT" -o /dev/null -w '%{http_code}' "https://${APP_DOMAIN}/login" 2>/dev/null || true)"
 	if [ "$code" = "200" ]; then
 		READY=1
@@ -666,16 +667,16 @@ for _ in $(seq 1 60); do
 	sleep 2
 done
 if [ "$READY" -eq 1 ]; then
-	log "App antwortet."
+	log "The app answers."
 
-	# Die Prüfung oben betrifft nur das Frontend. Das Backend arbeitet zu dem
-	# Zeitpunkt bei leerer Datenbank noch an Migrationen und
-	# load_initial_data - ein Import davor scheitert an fehlenden Tabellen
-	# bzw. würde Referenzdaten ohne die Werte aus den Fixtures anlegen, und
-	# die Gruppen für das Anwender-Konto legt erst die Migration
-	# 0058_seed_permission_data an. Deshalb hier auf beides warten: Tabellen
-	# vorhanden (Projects) und Fixtures eingespielt (AttributesCableType).
-	log "Warte auf Migrationen und Initialdaten im Backend..."
+	# The check above only covers the frontend. At that point the backend is
+	# still working on migrations and load_initial_data with an empty database -
+	# an import before that would fail on missing tables resp. would create
+	# reference data without the values from the fixtures, and the groups for
+	# the app user account are only created by migration
+	# 0058_seed_permission_data. So wait for both here: tables present
+	# (Projects) and fixtures loaded (AttributesCableType).
+	log "Waiting for migrations and initial data in the backend..."
 	BACKEND_READY=0
 	for _ in $(seq 1 60); do
 		if "${COMPOSE[@]}" exec -T backend python manage.py shell -c \
@@ -688,32 +689,32 @@ if [ "$READY" -eq 1 ]; then
 	done
 
 	if [ "$BACKEND_READY" -eq 0 ]; then
-		warn "Backend hat Migrationen/Initialdaten nach 3 Minuten nicht abgeschlossen - Import des Testprojekts und Anlegen des Anwender-Kontos übersprungen."
+		warn "The backend did not finish migrations/initial data within 3 minutes - skipping the import of the test project and the creation of the app user account."
 	else
 		if [ -f "$EXPORT_FILE" ]; then
-			log "Importiere Testprojekt-Export für Handbuch-Screenshots (idempotent: ein bereits importiertes Projekt bleibt unangetastet)"
+			log "Importing the test project export for manual screenshots (idempotent: an already imported project is left untouched)"
 			"${COMPOSE[@]}" cp "$EXPORT_FILE" "backend:$EXPORT_FILE_IN_CONTAINER"
 			if "${COMPOSE[@]}" exec -T backend python manage.py import_geodock_export \
 				--file "$EXPORT_FILE_IN_CONTAINER"; then
 				IMPORT_OK=1
 			else
-				warn "Import des Testprojekt-Exports fehlgeschlagen (Ausgabe oben)."
+				warn "Import of the test project export failed (output above)."
 			fi
 		fi
 
-		# --- Konto ohne Administrationsrechte anlegen -----------------------
+		# --- Create the account without administration rights ---------------
 		#
-		# Das Skript schickt den Python-Code über die Standardeingabe an
-		# "manage.py shell" (ohne Terminal führt der Befehl aus, was dort
-		# ankommt). Die Zugangsdaten liest der Code aus der Umgebung des
-		# Containers, die docker-compose.override.yml gesetzt hat - so
-		# tauchen sie weder in der Prozessliste des Hosts noch in der
-		# Skript-Ausgabe auf.
+		# The script sends the Python code to "manage.py shell" through standard
+		# input (without a terminal the command executes whatever arrives
+		# there). The code reads the credentials from the environment of the
+		# container, which docker-compose.override.yml has set - that way they
+		# appear neither in the process list of the host nor in the output of
+		# the script.
 		#
-		# Idempotent: bei jedem Lauf werden Passwort, Rechte-Flags und
-		# Gruppenzuordnung neu gesetzt. Ein von Hand geändertes Passwort in
-		# .env wirkt damit beim nächsten Lauf.
-		log "Lege Konto \"$APP_USER_USERNAME\" (Gruppe \"$APP_USER_GROUP\", keine Administrationsrechte) an"
+		# Idempotent: password, permission flags and group assignment are set
+		# anew on every run. A password changed by hand in .env therefore takes
+		# effect on the next run.
+		log "Creating account \"$APP_USER_USERNAME\" (group \"$APP_USER_GROUP\", no administration rights)"
 		if "${COMPOSE[@]}" exec -T backend python manage.py shell <<'PYTHON'; then
 import os
 
@@ -722,51 +723,51 @@ from django.contrib.auth.models import Group
 from django.core.cache import cache
 
 username = os.environ["APP_USER_USERNAME"]
-gruppenname = os.environ["APP_USER_GROUP"]
+group_name = os.environ["APP_USER_GROUP"]
 
-gruppe = Group.objects.filter(name=gruppenname).first()
-if gruppe is None:
-    vorhanden = ", ".join(Group.objects.values_list("name", flat=True)) or "keine"
+group = Group.objects.filter(name=group_name).first()
+if group is None:
+    existing = ", ".join(Group.objects.values_list("name", flat=True)) or "none"
     raise SystemExit(
-        f"Gruppe {gruppenname!r} existiert nicht. Vorhandene Gruppen: {vorhanden}"
+        f"Group {group_name!r} does not exist. Existing groups: {existing}"
     )
 
 User = get_user_model()
-nutzer, neu = User.objects.get_or_create(username=username)
-nutzer.email = os.environ.get("APP_USER_EMAIL", "")
-# Ausdrücklich beides aus: is_staff öffnet die Django-Administration,
-# is_superuser umgeht in der App jede Rechteprüfung (get_user_permissions
-# gibt dann Platzhalter-Vollzugriff zurück).
-nutzer.is_staff = False
-nutzer.is_superuser = False
-nutzer.is_active = True
-nutzer.set_password(os.environ["APP_USER_PASSWORD"])
-nutzer.save()
-nutzer.groups.set([gruppe])
+user, created = User.objects.get_or_create(username=username)
+user.email = os.environ.get("APP_USER_EMAIL", "")
+# Explicitly both off: is_staff opens the Django administration, is_superuser
+# bypasses every permission check in the app (get_user_permissions then returns
+# placeholder full access).
+user.is_staff = False
+user.is_superuser = False
+user.is_active = True
+user.set_password(os.environ["APP_USER_PASSWORD"])
+user.save()
+user.groups.set([group])
 
-# Die Rechteprüfung der API hält die Zugriffsstufen fünf Minuten im Cache;
-# nach einem Gruppenwechsel gälte sonst noch die alte Zuordnung.
-cache.delete(f"user_permissions:{nutzer.pk}")
+# The permission check of the API keeps the access levels in a cache for five
+# minutes; after a group change the old assignment would otherwise still apply.
+cache.delete(f"user_permissions:{user.pk}")
 
-print(f"Konto {username!r} {'angelegt' if neu else 'aktualisiert'}, Gruppe {gruppenname!r}.")
+print(f"Account {username!r} {'created' if created else 'updated'}, group {group_name!r}.")
 PYTHON
 			APP_USER_OK=1
 		else
-			warn "Das Konto \"$APP_USER_USERNAME\" konnte nicht angelegt werden (Ausgabe oben). Playwright-Läufe scheitern dann an der Anmeldung; als Notbehelf mit QONNECTRA_LOGIN=admin arbeiten."
+			warn "The account \"$APP_USER_USERNAME\" could not be created (output above). Playwright runs will then fail at login; as a stopgap work with QONNECTRA_LOGIN=admin."
 		fi
 	fi
 else
 	if [ "$(curl -sk -o /dev/null -w '%{http_code}' "https://${APP_DOMAIN}/login" 2>/dev/null || true)" = "200" ]; then
-		warn "App antwortet, aber ihr Zertifikat kettet nicht zur lokalen Dev-CA ($CA_CRT) - Caddy-Logs prüfen: docker compose -f docker-compose.yml -f docker-compose.override.yml logs caddy"
+		warn "The app answers, but its certificate does not chain to the local dev CA ($CA_CRT) - check the Caddy logs: docker compose -f docker-compose.yml -f docker-compose.override.yml logs caddy"
 	else
-		warn "App antwortet nach 2 Minuten noch nicht - Container-Logs prüfen: docker compose -f docker-compose.yml -f docker-compose.override.yml logs backend"
+		warn "The app still does not answer after 2 minutes - check the container logs: docker compose -f docker-compose.yml -f docker-compose.override.yml logs backend"
 	fi
 fi
 
-# --- Truststore-Status der lokalen CA ---------------------------------------
+# --- Trust store status of the local CA -------------------------------------
 #
-# Die CA selbst wird nicht mehr aus dem Container exportiert (sie kommt vom
-# Host), es bleibt nur die Frage, ob sie schon importiert ist.
+# The CA itself is no longer exported from the container (it comes from the
+# host), the only remaining question is whether it has been imported already.
 
 if openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt "$CA_CRT" >/dev/null 2>&1; then
 	CA_TRUSTED=1
@@ -774,115 +775,117 @@ else
 	CA_TRUSTED=0
 fi
 
-# Veralteten Export früherer Skript-Versionen entfernen, damit niemand
-# versehentlich die alte, nicht mehr genutzte Caddy-CA importiert.
+# Remove the outdated export of earlier script versions, so that nobody
+# accidentally imports the old, no longer used Caddy CA.
 rm -f "$DEPLOY_DIR/qonnectra-local-dev-ca.crt"
 
-# --- Zusammenfassung ---------------------------------------------------------
+# --- Summary -----------------------------------------------------------------
 
 if [ "$CA_TRUSTED" -eq 1 ]; then
-	CA_SECTION="Lokale Dev-CA: $CA_CRT
-Bereits im System-Truststore. Die CA liegt außerhalb von local-app/ und des
-Docker-Volumes und überlebt damit Rebuilds inkl. \"docker compose down -v\" -
-ein erneuter Import ist nur nötig, wenn $CA_DIR gelöscht wird.
+	CA_SECTION="Local dev CA: $CA_CRT
+Already in the system trust store. The CA lives outside local-app/ and outside
+the Docker volume and therefore survives rebuilds including
+\"docker compose down -v\" - another import is only necessary if $CA_DIR is
+deleted.
 
-Firefox und snap-/flatpak-Browser (z. B. snap-Chromium) haben eigene
-Truststores und sind damit NICHT automatisch abgedeckt. Falls dort noch eine
-Zertifikatswarnung kommt, einmal nachziehen - das Skript ist idempotent und
-braucht kein sudo mehr, wenn der System-Truststore schon steht:
+Firefox and snap/flatpak browsers (e.g. snap Chromium) have trust stores of
+their own and are therefore NOT covered automatically. If a certificate warning
+still shows up there, run the import once more - the script is idempotent and
+no longer needs sudo once the system trust store is in place:
   $REPO_ROOT/scripts/install-local-ca.sh"
 else
-	CA_SECTION="Lokale Dev-CA: $CA_CRT
-Noch nicht importiert, der Browser warnt daher weiterhin. Einmalig importieren
-(gilt danach für alle künftigen Rebuilds, die CA wird nicht mehr neu erzeugt):
+	CA_SECTION="Local dev CA: $CA_CRT
+Not imported yet, so the browser keeps warning. Import it once (this then
+applies to all future rebuilds, the CA is not recreated any more):
   $REPO_ROOT/scripts/install-local-ca.sh"
 fi
 
 if [ "$IMPORT_OK" -eq 1 ]; then
-	PROJECT_SECTION="Für Screenshots/Videos steht das aus der Demo-Umgebung exportierte Projekt
-\"Testprojekt\" zur Verfügung (nach Login oben links auswählen). Nach einem
-aktualisierten Export neu importieren (--force wirft das lokale Projekt vorher
-weg):
+	PROJECT_SECTION="For screenshots/videos the project \"Testprojekt\", exported from the demo
+environment, is available (select it in the top left after logging in). After
+an updated export, import it again (--force throws the local project away
+first):
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml cp $EXPORT_FILE backend:$EXPORT_FILE_IN_CONTAINER
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py import_geodock_export --file $EXPORT_FILE_IN_CONTAINER --force"
 elif [ -f "$EXPORT_FILE" ]; then
-	PROJECT_SECTION="Der Testprojekt-Export wurde NICHT importiert (siehe Warnungen oben), die
-Instanz enthält also keine Projektdaten. Import nachholen, sobald die App
-vollständig läuft:
+	PROJECT_SECTION="The test project export was NOT imported (see the warnings above), so the
+instance contains no project data. Catch the import up as soon as the app is
+fully running:
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml cp $EXPORT_FILE backend:$EXPORT_FILE_IN_CONTAINER
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py import_geodock_export --file $EXPORT_FILE_IN_CONTAINER"
 else
-	PROJECT_SECTION="Die Instanz enthält noch KEINE Projektdaten: unter
+	PROJECT_SECTION="The instance contains NO project data yet: there is no export of the
+\"Testprojekt\" at
   $EXPORT_FILE
-liegt kein Export des \"Testprojekt\". Normalerweise kommt er mit diesem Repo
-(scripts/qonnectra-demo-data/testprojekt-export.json, siehe README.md dort) -
-Datei wiederherstellen und Skript erneut ausführen (oder direkt importieren):
+Normally it ships with this repo
+(scripts/qonnectra-demo-data/testprojekt-export.json, see the README.md there) -
+restore the file and run the script again (or import it directly):
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml cp <export.json> backend:$EXPORT_FILE_IN_CONTAINER
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml exec backend python manage.py import_geodock_export --file $EXPORT_FILE_IN_CONTAINER"
 fi
 
 if [ "$APP_USER_OK" -eq 1 ]; then
-	LOGIN_SECTION="Zwei Konten stehen bereit:
+	LOGIN_SECTION="Two accounts are ready:
 
-  Anwendung (Standard für Screenshots, keine Administrationsrechte):
-    ${APP_USER_USERNAME} / ${APP_USER_PASSWORD}   (Gruppe \"${APP_USER_GROUP}\")
-  Administration (Django-Superuser, sieht und darf alles):
+  Application (default for screenshots, no administration rights):
+    ${APP_USER_USERNAME} / ${APP_USER_PASSWORD}   (group \"${APP_USER_GROUP}\")
+  Administration (Django superuser, sees and may do everything):
     ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
 
-Playwright melden sich standardmäßig mit dem Anwender-Konto an, damit die
-Bilder die Sicht normaler Nutzender zeigen. Für einen Lauf als Superuser:
+Playwright logs in with the application account by default, so that the images
+show the view of ordinary users. For a run as the superuser:
   QONNECTRA_LOGIN=admin pnpm test:e2e"
 else
-	LOGIN_SECTION="Login (Django-Superuser): ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
+	LOGIN_SECTION="Login (Django superuser): ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
 
-Das Konto ohne Administrationsrechte wurde NICHT angelegt (siehe Warnungen
-oben). Playwright-Läufe scheitern damit an der Anmeldung, solange sie nicht
-mit QONNECTRA_LOGIN=admin gestartet werden. Nach dem Beheben genügt ein
-erneuter Lauf dieses Skripts."
+The account without administration rights was NOT created (see the warnings
+above). Playwright runs will therefore fail at login unless they are started
+with QONNECTRA_LOGIN=admin. Once that is fixed, another run of this script is
+enough."
 fi
 
 if [ -f "$TILE_MBTILES" ]; then
-	TILES_SECTION="Kartenkacheln: $TILE_MBTILES
-Die Karte zeigt damit die echte Vektor-Basiskarte (Hell-/Dunkelmodus), nicht
-den OSM-Fallback. Die Kacheln liegen außerhalb von local-app/ und überleben
---reset und --reset-checkout. Für eine andere Region löschen und neu erzeugen:
+	TILES_SECTION="Map tiles: $TILE_MBTILES
+With them the map shows the real vector base map (light/dark mode), not the OSM
+fallback. The tiles live outside local-app/ and survive --reset and
+--reset-checkout. For a different region, delete them and generate again:
   QONNECTRA_TILE_AREA=<region> $REPO_ROOT/scripts/setup-local-qonnectra.sh"
 else
-	TILES_SECTION="Kartenkacheln: KEINE unter $TILE_MBTILES
-Der tileserver läuft deshalb in einer Restart-Schleife; das Frontend fällt
-automatisch auf OSM-Rasterkacheln zurück. Erzeugen (braucht Java 21+):
+	TILES_SECTION="Map tiles: NONE at $TILE_MBTILES
+The tileserver therefore runs in a restart loop; the frontend falls back to OSM
+raster tiles automatically. To generate them (needs Java 21+):
   $REPO_ROOT/scripts/setup-local-qonnectra.sh"
 fi
 
-log "Fertig!"
+log "Done."
 cat <<EOF
 
-Qonnectra läuft unter:
+Qonnectra is running at:
   Frontend : https://app.qonnectra.localhost
   Admin    : https://admin.qonnectra.localhost/admin
   API      : https://api.qonnectra.localhost
 
 $LOGIN_SECTION
 
-Hilfe-Link der App (PUBLIC_DOCUMENTATION_URL): $DOCUMENTATION_URL
+Help link of the app (PUBLIC_DOCUMENTATION_URL): $DOCUMENTATION_URL
 
 $PROJECT_SECTION
 
-Zertifikate: Für *.localhost gibt es kein echtes Let's Encrypt (RFC 6761),
-Caddy signiert die Zertifikate daher lokal - hier mit der Dev-CA vom Host
-statt mit einer bei jedem frischen Volume neu erzeugten Caddy-CA.
+Certificates: for *.localhost there is no real Let's Encrypt (RFC 6761), so
+Caddy signs the certificates locally - here with the dev CA from the host
+instead of a Caddy CA recreated for every fresh volume.
 
 $CA_SECTION
 
 $TILES_SECTION
 
-Stack stoppen:
+Stopping the stack:
   cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml down
 
-Skript erneut ausführen, um den Stack neu zu bauen/starten (Secrets/DB bleiben
-erhalten, solange local-app/deployment/.env nicht gelöscht wird). Für einen
-Neuaufbau mit leerer Datenbank und frischen Secrets:
+Run the script again to rebuild/restart the stack (secrets/DB are kept as long
+as local-app/deployment/.env is not deleted). For a rebuild with an empty
+database and fresh secrets:
   $REPO_ROOT/scripts/setup-local-qonnectra.sh --reset
-Zusätzlich den App-Checkout neu klonen (verwirft Änderungen in local-app/):
+Additionally re-clone the app checkout (discards changes in local-app/):
   $REPO_ROOT/scripts/setup-local-qonnectra.sh --reset --reset-checkout
 EOF

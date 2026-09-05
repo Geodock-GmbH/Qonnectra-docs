@@ -1,49 +1,49 @@
-# Testdaten für lokale Handbuch-Screenshots
+# Test data for local manual screenshots
 
-`testprojekt-export.json` ist ein 1:1-Export des echten Projekts
-**"Testprojekt"** von app.geodock.de (Netzknoten, Trassen, Rohre, Adressen,
-Kabel, Fasern, Mikrorohre, Gebiete inkl. der dazugehörigen Referenzdaten wie
-Firmen, Rohr-/Kabeltypen und Kennzeichen). `scripts/setup-local-qonnectra.sh`
-spielt diese Datei automatisch in eine frische lokale Instanz ein.
+`testprojekt-export.json` is a 1:1 export of the real project
+**"Testprojekt"** from app.geodock.de (nodes, trenches, conduits, addresses,
+cables, fibers, microducts, areas including the associated reference data such
+as companies, conduit/cable types and flags). `scripts/setup-local-qonnectra.sh`
+imports this file into a fresh local instance automatically.
 
-Bewusst **nicht** enthalten: Container/ContainerType, FiberSplice,
-NodeStructure/Slot-Konfiguration (Patch-Panel-Modellierung) und
-NetworkSchemaSettings (welche Netzknotentypen im Netzschema ausgeblendet
-werden) - diese sind (noch) nicht Teil des Handbuch-Umfangs bzw. hatten
-keinen passenden API-Endpunkt zum Export.
+Deliberately **not** included: Container/ContainerType, FiberSplice,
+NodeStructure/slot configuration (patch panel modelling) and
+NetworkSchemaSettings (which node types are hidden in the network schema) -
+these are not (yet) part of the scope of the manual, or had no suitable API
+endpoint to export from.
 
-## Daten aktualisieren
+## Updating the data
 
-Der Export wurde per Browser-Skript (JavaScript, gegen die eingeloggte
-Session auf app.geodock.de) erzeugt, da es keinen fertigen "Alles
-exportieren"-Knopf in der App gibt. Kurzfassung, falls die Daten irgendwann
-neu gezogen werden müssen:
+The export was produced with a browser script (JavaScript, against the
+logged-in session on app.geodock.de), because the app has no ready-made
+"export everything" button. Short version, in case the data ever has to be
+pulled again:
 
-1. In app.geodock.de einloggen (im Browser).
-2. Über die Browser-Konsole/DevTools gegen `https://api.geodock.de/api/v1/`
-   für jede benötigte Ressource (`trench`, `conduit`,
-   `trench_conduit_connection`, `microduct`, `microduct_connection`,
-   `microduct_cable_connection`, `node`, `address`, `residential-unit`,
-   `cable`, `cable_label`, `fiber`, `area` jeweils mit `?project=<id>`,
-   sowie die globalen `attributes_*`- und `flags`-Listen ohne Projektfilter)
-   alle Seiten abrufen und zu einem JSON-Objekt zusammenführen.
-   Achtung: `trench`, `node`, `address` und `area` liefern pro Seite eine
-   GeoJSON-`FeatureCollection` (`results.features`), alle anderen Ressourcen
-   ein einfaches `results`-Array - siehe `import_geodock_export.py` für die
-   genaue Verarbeitungslogik.
-3. Als JSON-Datei speichern und mit `import_geodock_export.py --file ... --force`
-   in die lokale Instanz einspielen.
+1. Log in to app.geodock.de (in the browser).
+2. Through the browser console/DevTools, against
+   `https://api.geodock.de/api/v1/`, fetch all pages for every required
+   resource (`trench`, `conduit`, `trench_conduit_connection`, `microduct`,
+   `microduct_connection`, `microduct_cable_connection`, `node`, `address`,
+   `residential-unit`, `cable`, `cable_label`, `fiber`, `area`, each with
+   `?project=<id>`, plus the global `attributes_*` and `flags` lists without a
+   project filter) and merge them into a single JSON object.
+   Careful: `trench`, `node`, `address` and `area` return a GeoJSON
+   `FeatureCollection` per page (`results.features`), all other resources a
+   plain `results` array - see `import_geodock_export.py` for the exact
+   processing logic.
+3. Save it as a JSON file and import it into the local instance with
+   `import_geodock_export.py --file ... --force`.
 
-## Import-Command
+## Import command
 
-`import_geodock_export.py` wird von `setup-local-qonnectra.sh` nach
-`local-app/backend/apps/api/management/commands/` kopiert (lokal-app/ ist
-gitignored und wird bei jedem Lauf neu aus dem Checkout ergänzt). Danach:
+`import_geodock_export.py` is copied by `setup-local-qonnectra.sh` into
+`local-app/backend/apps/api/management/commands/` (local-app/ is gitignored and
+is refilled from the checkout on every run). After that:
 
 ```bash
-python manage.py import_geodock_export --file /pfad/zur/datei.json [--force]
+python manage.py import_geodock_export --file /path/to/file.json [--force]
 ```
 
-Ohne `--force` wird ein bereits vorhandenes lokales Projekt "Testprojekt"
-übersprungen (kein erneuter Import). Mit `--force` wird es vorher komplett
-gelöscht und neu importiert.
+Without `--force` an already existing local project "Testprojekt" is skipped
+(no re-import). With `--force` it is deleted completely first and imported
+again.

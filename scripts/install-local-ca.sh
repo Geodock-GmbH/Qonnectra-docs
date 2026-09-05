@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 #
-# Importiert die lokale Qonnectra-Dev-CA (siehe setup-local-qonnectra.sh) in
-# die Truststores von System und Browsern, damit https://app.qonnectra.localhost
-# & Co. ohne Zertifikatswarnung funktionieren.
+# Imports the local Qonnectra dev CA (see setup-local-qonnectra.sh) into the
+# trust stores of the system and the browsers, so that
+# https://app.qonnectra.localhost & co. work without a certificate warning.
 #
-# Muss nur EINMAL pro Rechner laufen: die CA liegt außerhalb von local-app/ und
-# außerhalb des caddy_data-Volumes und wird von Caddy bei Rebuilds weiter-
-# verwendet statt neu erzeugt.
+# Only has to run ONCE per machine: the CA lives outside local-app/ and outside
+# the caddy_data volume, and Caddy keeps reusing it across rebuilds instead of
+# generating a new one.
 #
-# Verwendung:
+# Usage:
 #   scripts/install-local-ca.sh
 #
-# Der System-Truststore braucht root, das Skript ruft dafür sudo auf.
+# The system trust store needs root, so the script calls sudo for it.
 
 set -euo pipefail
 
@@ -21,41 +21,42 @@ CA_NICKNAME="Qonnectra Local Dev CA"
 CA_FILENAME="qonnectra-local-dev-ca.crt"
 
 log() { printf '\n\033[1;32m==>\033[0m %s\n' "$1"; }
-warn() { printf '\033[1;33mWARNUNG:\033[0m %s\n' "$1" >&2; }
-die() { printf '\033[1;31mFEHLER:\033[0m %s\n' "$1" >&2; exit 1; }
+warn() { printf '\033[1;33mWARNING:\033[0m %s\n' "$1" >&2; }
+die() { printf '\033[1;31mERROR:\033[0m %s\n' "$1" >&2; exit 1; }
 
-[ -f "$CA_CRT" ] || die "Keine lokale Dev-CA unter $CA_CRT gefunden. Zuerst scripts/setup-local-qonnectra.sh ausführen."
+[ -f "$CA_CRT" ] || die "No local dev CA found at $CA_CRT. Run scripts/setup-local-qonnectra.sh first."
 
-# --- System-Truststore ------------------------------------------------------
+# --- System trust store -----------------------------------------------------
 #
-# Deckt curl, wget, Chrome/Chromium (nutzt zusätzlich den NSS-Store unten) und
-# alles ab, was OpenSSL/GnuTLS nutzt.
+# Covers curl, wget, Chrome/Chromium (which additionally uses the NSS store
+# below) and everything that uses OpenSSL/GnuTLS.
 
 if openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt "$CA_CRT" >/dev/null 2>&1; then
-	log "CA liegt bereits im System-Truststore - übersprungen (kein sudo nötig)"
+	log "CA is already in the system trust store - skipped (no sudo needed)"
 elif command -v update-ca-certificates >/dev/null 2>&1; then
 	# Debian/Ubuntu
-	log "Importiere CA in den System-Truststore (sudo)"
+	log "Importing CA into the system trust store (sudo)"
 	sudo install -m 644 "$CA_CRT" "/usr/local/share/ca-certificates/$CA_FILENAME"
 	sudo update-ca-certificates >/dev/null
 elif command -v update-ca-trust >/dev/null 2>&1; then
 	# Fedora/RHEL
-	log "Importiere CA in den System-Truststore (sudo)"
+	log "Importing CA into the system trust store (sudo)"
 	sudo install -m 644 "$CA_CRT" "/etc/pki/ca-trust/source/anchors/$CA_FILENAME"
 	sudo update-ca-trust extract
 else
-	warn "Kein bekanntes Truststore-Tool (update-ca-certificates/update-ca-trust) gefunden - System-Truststore bitte manuell befüllen."
+	warn "No known trust store tool (update-ca-certificates/update-ca-trust) found - please fill the system trust store manually."
 fi
 
-# --- NSS-Truststores (Firefox, Chrome/Chromium) -----------------------------
+# --- NSS trust stores (Firefox, Chrome/Chromium) ----------------------------
 #
-# Firefox nutzt den System-Truststore nicht, sondern eine eigene NSS-Datenbank
-# pro Profil; Chrome/Chromium nutzt zusätzlich ~/.pki/nssdb.
+# Firefox does not use the system trust store but its own NSS database per
+# profile; Chrome/Chromium additionally uses ~/.pki/nssdb.
 #
-# Wichtig: snap- und flatpak-Browser laufen mit eigenem $HOME und sehen
-# ~/.pki/nssdb NICHT - der snap-Chromium liest z. B.
-# ~/snap/chromium/current/.pki/nssdb. Deshalb alle Varianten absuchen statt
-# nur die deb-Pfade. Nicht passende Globs fallen durch die cert9.db-Prüfung.
+# Important: snap and flatpak browsers run with their own $HOME and do NOT see
+# ~/.pki/nssdb - the snap Chromium for instance reads
+# ~/snap/chromium/current/.pki/nssdb. That is why all variants are searched
+# instead of only the deb paths. Globs that do not match fall through the
+# cert9.db check.
 
 NSS_DIRS=()
 for candidate in \
@@ -66,39 +67,39 @@ for candidate in \
 	"$HOME"/snap/firefox/common/.mozilla/firefox/*/ \
 	"$HOME"/.var/app/org.mozilla.firefox/.mozilla/firefox/*/; do
 	candidate="${candidate%/}"
-	# Nur echte Datenbanken/Profile, nicht "Crash Reports" u. ä.
+	# Only real databases/profiles, not "Crash Reports" and the like.
 	if [ -f "$candidate/cert9.db" ] || [ -f "$candidate/cert8.db" ]; then
 		NSS_DIRS+=("$candidate")
 	fi
 done
 
 if [ ${#NSS_DIRS[@]} -eq 0 ]; then
-	log "Keine NSS-Datenbanken (Firefox-Profile, ~/.pki/nssdb) gefunden - übersprungen."
+	log "No NSS databases (Firefox profiles, ~/.pki/nssdb) found - skipped."
 elif ! command -v certutil >/dev/null 2>&1; then
-	warn "certutil fehlt, Browser-Truststores übersprungen. Nachinstallieren und Skript erneut ausführen:
+	warn "certutil is missing, browser trust stores skipped. Install it and run the script again:
   Debian/Ubuntu: sudo apt install libnss3-tools
   Fedora:        sudo dnf install nss-tools
-Gefundene NSS-Datenbanken: ${NSS_DIRS[*]}"
+NSS databases found: ${NSS_DIRS[*]}"
 else
 	for db in "${NSS_DIRS[@]}"; do
-		log "Importiere CA in NSS-Datenbank $db"
-		# Erst löschen, damit ein erneuter Lauf nicht an einem bereits
-		# vorhandenen Nickname scheitert (idempotent).
+		log "Importing CA into NSS database $db"
+		# Delete first so that a repeated run does not fail on an already
+		# existing nickname (idempotent).
 		certutil -D -d "sql:$db" -n "$CA_NICKNAME" >/dev/null 2>&1 || true
 		certutil -A -d "sql:$db" -t "C,," -n "$CA_NICKNAME" -i "$CA_CRT"
 	done
 fi
 
-log "Fertig!"
+log "Done."
 cat <<EOF
 
-Importiert: $CA_CRT
+Imported: $CA_CRT
   Fingerprint: $(openssl x509 -in "$CA_CRT" -noout -fingerprint -sha256 | cut -d= -f2)
 
-Laufende Browser einmal neu starten, danach sind https://app.qonnectra.localhost
-& Co. ohne Warnung erreichbar - auch nach künftigen Rebuilds des Stacks.
+Restart running browsers once, after that https://app.qonnectra.localhost & co.
+are reachable without a warning - including after future rebuilds of the stack.
 
-Entfernen:
+Removing:
   sudo rm -f /usr/local/share/ca-certificates/$CA_FILENAME && sudo update-ca-certificates --fresh
-  certutil -D -d sql:<nss-verzeichnis> -n "$CA_NICKNAME"
+  certutil -D -d sql:<nss-directory> -n "$CA_NICKNAME"
 EOF

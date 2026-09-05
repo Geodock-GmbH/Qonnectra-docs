@@ -1,10 +1,10 @@
-// Playwright-Setup dieses Repos. Läuft immer gegen die lokale
-// Qonnectra-Instanz aus local-app/ (siehe playwright/local-app.ts und
-// scripts/setup-local-qonnectra.sh) – es gibt bewusst keine Möglichkeit,
-// eine andere Adresse zu konfigurieren.
+// Playwright setup of this repo. Always runs against the local Qonnectra
+// instance in local-app/ (see playwright/local-app.ts and
+// scripts/setup-local-qonnectra.sh) - there is deliberately no way to configure
+// a different address.
 //
-// Kontextwerte entsprechen den Zielwerten aus CLAUDE.md: 1792 × 1120 bei
-// deviceScaleFactor 2 (= Bilder mit 3584 × 2240), Hellmodus, Sprache DE.
+// The context values match the target values from CLAUDE.md: 1792 x 1120 at
+// deviceScaleFactor 2 (= images of 3584 x 2240), light mode, language DE.
 import { defineConfig } from '@playwright/test'
 
 import { localAppUrl } from './playwright/local-app'
@@ -12,40 +12,40 @@ import { localAppUrl } from './playwright/local-app'
 export default defineConfig({
   testDir: './tests',
 
-  // Wegwerf-Specs, mit denen Selektoren gegen die laufende Instanz geprüft
-  // werden, gehören nicht in den Lauf. Playwright durchsucht auch Ordner mit
-  // führendem Punkt, ein .tmp-Name allein genügt also nicht.
+  // Throwaway specs used to check selectors against the running instance do not
+  // belong in the run. Playwright also searches folders with a leading dot, so
+  // a .tmp name alone is not enough.
   testIgnore: ['**/.tmp-*/**'],
 
-  // Screenshots entstehen gegen eine einzige lokale Instanz mit gemeinsamem
-  // Zustand (ausgewähltes Projekt, Kartenposition). Parallele Läufe würden
-  // sich gegenseitig die Ansicht verändern.
+  // Screenshots are taken against a single local instance with shared state
+  // (selected project, map position). Parallel runs would change the view for
+  // one another.
   fullyParallel: false,
   workers: 1,
 
-  // Bilder sollen bei jedem Lauf gleich aussehen; ein stiller Retry würde
-  // stattdessen ein Bild aus einem halb aufgeräumten Zustand liefern.
+  // Images should look the same on every run; a silent retry would instead
+  // deliver an image from a half cleaned-up state.
   retries: 0,
 
   reporter: process.env.CI ? 'html' : [['list'], ['html', { open: 'never' }]],
   outputDir: 'test-results',
 
   use: {
-    // Kein devices[...]-Preset: die Presets setzen selbst viewport und
-    // deviceScaleFactor und würden die Zielwerte unten still überschreiben.
+    // No devices[...] preset: the presets set viewport and deviceScaleFactor
+    // themselves and would silently override the target values below.
     browserName: 'chromium',
 
     baseURL: localAppUrl(),
 
-    // Die lokale Dev-CA ist nicht in jedem Browser-Profil importiert
-    // (scripts/install-local-ca.sh ist optional).
+    // The local dev CA is not imported into every browser profile
+    // (scripts/install-local-ca.sh is optional).
     ignoreHTTPSErrors: true,
 
-    // 1120 px Höhe, weil die Navigationsleiste mit allen aufgeklappten Gruppen
-    // 1093 px braucht (gemessen) – bei 800 px lag die Gruppe „System“ unter dem
-    // sichtbaren Bereich und musste für Bilder erst herangescrollt werden. Die
-    // Breite hält das Seitenverhältnis bei 16 : 10, wie bei allen bestehenden
-    // Handbuchbildern und beim 16-:-10-Rahmen der Bildpaare (`.img-row` in
+    // 1120 px high, because the navigation bar with all groups expanded needs
+    // 1093 px (measured) - at 800 px the group "System" sat below the visible
+    // area and had to be scrolled into view for images first. The width keeps
+    // the aspect ratio at 16 : 10, like all existing manual images and like the
+    // 16-to-10 frame of the image pairs (`.img-row` in
     // .vitepress/theme/custom.css).
     viewport: { width: 1792, height: 1120 },
     deviceScaleFactor: 2,
@@ -54,8 +54,8 @@ export default defineConfig({
     timezoneId: 'Europe/Berlin',
     colorScheme: 'light',
 
-    // Handbuch-Screenshots werden in den Specs explizit gespeichert; diese
-    // Artefakte hier dienen nur der Fehlersuche.
+    // Manual screenshots are saved explicitly in the specs; these artefacts
+    // here only serve debugging.
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     trace: 'retain-on-failure',
@@ -63,8 +63,8 @@ export default defineConfig({
 
   projects: [
     {
-      // Prüft die Instanz und meldet sich programmatisch an; Ergebnis landet
-      // in auth-state.json.
+      // Checks the instance and logs in programmatically; the result lands in
+      // auth-state.json.
       name: 'setup',
       testDir: './playwright',
       testMatch: /auth\.setup\.ts/,

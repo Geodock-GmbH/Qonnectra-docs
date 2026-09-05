@@ -1,367 +1,403 @@
 # CLAUDE.md
 
-Leitfaden für Claude Code in diesem Repository.
+Guide for Claude Code in this repository.
 
-**Sprache: Alles Nutzersichtbare ist Deutsch** – Handbuchtexte, Alt-Texte, UI-Zitate,
-Skript-Ausgaben und Code-Kommentare. Commit-Messages sind Englisch.
+**Language: everything is English** – identifiers, comments, script and console
+output, CLI flags, commit messages and this file. German survives in exactly
+three places, each for a reason:
 
-## Was dieses Repo ist
+1. **The manual itself** – `manual/` prose, alt texts, chapter file names
+   (they are public URLs).
+2. **Literals quoted from the German app** – Playwright selectors
+   (`getByRole('tab', { name: 'Trasse' })`), UI labels cited in comments, demo
+   data values (`"Testprojekt"`, `"Hausanschluss"`).
+3. **Test titles** – they mirror the manual's chapter headings 1:1, so a failing
+   capture points straight at the chapter to fix.
 
-VitePress-Site für **Qonnectra** (Open-Source-Netzdokumentation für kommunale
-Infrastrukturen, Geodock GmbH & plan[neo] GmbH, AGPL-3.0). Zwei Inhaltsstränge:
+Everything else is English. When in doubt, English.
 
-- **Landing Page**: `index.md`, `services/`, `contact/`, `imprint/`, `privacy/`
-- **Handbuch**: `manual/` – der Schwerpunkt der laufenden Arbeit
+## Glossary
 
-Das Handbuch ist in drei Teile gegliedert (Zielgruppen siehe `manual/index.md`):
+Derived from the already-English image names, so that code and `public/images/`
+agree:
 
-| Verzeichnis | Teil | Kapitel |
+| German | English | German | English |
+|---|---|---|---|
+| Trasse | trench | Aufnahme | capture |
+| Rohr | conduit | Ausschnitt | crop |
+| Netzknoten | node | Schleier | scrim |
+| Gebiet | area | Kontur | outline |
+| Adresse | address | Zeiger | cursor |
+| Gewährleistung | warranty | Frist | deadline |
+| Anhang | attachment | Vorlauf | lead-in |
+| Reiter | tab | Verzögerung | delay |
+| Kapitel | chapter | übernommen | published |
+| Legende | legend | übersprungen | skipped |
+| Diagramm | chart | Balken | bar |
+
+One word, two meanings: **Karte** is the map in `05-karte.spec.ts`
+(`openMap()`), but a dashboard card in `04-dashboard.spec.ts` (`card()`). Never
+translate it globally.
+
+## What this repo is
+
+VitePress site for **Qonnectra** (open-source network documentation for
+municipal infrastructure, Geodock GmbH & plan[neo] GmbH, AGPL-3.0). Two content
+strands:
+
+- **Landing page**: `index.md`, `services/`, `contact/`, `imprint/`, `privacy/`
+- **Manual**: `manual/` – the focus of ongoing work
+
+The manual is split into three parts (target audiences see `manual/index.md`):
+
+| Directory | Part | Chapters |
 |---|---|---|
-| `manual/index.md` | Einführung | 1 |
-| `manual/teil-a-anwenderhandbuch/` | A – Anwenderhandbuch (Webanwendung, keine GIS-Kenntnisse) | 2–7, reserviert 8–13 |
-| `manual/teil-b-betrieb-admin-qgis/` | B – Betrieb, Administration, QGIS | 14, reserviert 15–16 |
-| `manual/teil-c-entwickler-systemdokumentation/` | C – Entwickler- und Systemdokumentation | 17 ff. |
+| `manual/index.md` | Introduction | 1 |
+| `manual/teil-a-anwenderhandbuch/` | A – User manual (web application, no GIS knowledge) | 2–7, reserved 8–13 |
+| `manual/teil-b-betrieb-admin-qgis/` | B – Operations, administration, QGIS | 14, reserved 15–16 |
+| `manual/teil-c-entwickler-systemdokumentation/` | C – Developer and system documentation | 17 ff. |
 
-Die Nummernlücken sind bewusst – neue Kapitel füllen sie auf, statt bestehende
-Nummern zu verschieben. Kapitelnummer im H1 **und** im Dateinamen-Präfix müssen
-übereinstimmen (`06-rohrverwaltung.md` → `# 6. Rohrverwaltung`), die Sidebar wird
-aus Dateinamen-Reihenfolge + H1 generiert (`vitepress-sidebar`).
+The gaps in the numbering are deliberate – new chapters fill them instead of
+shifting existing numbers. The chapter number in the H1 **and** in the file name
+prefix have to match (`06-rohrverwaltung.md` → `# 6. Rohrverwaltung`); the
+sidebar is generated from file name order + H1 (`vitepress-sidebar`).
 
-## Befehle
+## Commands
 
 ```bash
 pnpm install
 pnpm dev              # http://localhost:5173
 pnpm build            # BASE_PATH="/Qonnectra-docs/" in CI
-pnpm lint:spelling    # cspell (de+en) – muss vor jedem Commit grün sein
-pnpm test:e2e:setup   # Login-Zustand nach auth-state.json schreiben
-pnpm test:e2e         # Playwright-Specs in tests/
+pnpm lint:spelling    # cspell (en, en-GB, de) – has to be green before every commit
+pnpm test:e2e:setup   # write the login state to auth-state.json
+pnpm test:e2e         # Playwright specs in tests/
 
-scripts/setup-local-qonnectra.sh            # lokale Qonnectra-Instanz bauen/starten
-scripts/setup-local-qonnectra.sh --reset    # Daten + Secrets verwerfen, neu aufbauen
-scripts/install-local-ca.sh                 # Dev-CA einmal pro Rechner importieren
+scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
+scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
+scripts/install-local-ca.sh                 # import the dev CA once per machine
 ```
 
-Neue deutsche Fachwörter, die cspell nicht kennt, alphabetisch in `.cspell.json`
-unter `words` einsortieren – nicht per Inline-Kommentar unterdrücken.
+New German technical terms cspell does not know go into `.cspell.json` under
+`words`, sorted alphabetically – not suppressed with an inline comment.
 
-## Schreibstil des Handbuchs
+## Writing style of the manual
 
-Verbindlich, abgeleitet aus den bestehenden Kapiteln. Neue Kapitel folgen dem
-exakt; im Zweifel `manual/teil-a-anwenderhandbuch/05-karte.md` und
-`07-rohrzuordnung.md` als Vorlage lesen.
+Binding, derived from the existing chapters. New chapters follow it exactly; when
+in doubt read `manual/teil-a-anwenderhandbuch/05-karte.md` and
+`07-rohrzuordnung.md` as templates. The manual is written in German, so the rules
+below quote German.
 
-**Ansprache und Ton**
-- Konsequent **Sie-Form**, Handlungsanweisungen im Imperativ: „Klicken Sie auf …“,
+**Form of address and tone**
+- Consistently **Sie-Form**, instructions in the imperative: „Klicken Sie auf …“,
   „Geben Sie einen Suchbegriff ein.“
-- Geschlechtsneutral über Partizip/Doppelnennung: „Nutzende“, „Anwenderinnen und
-  Anwender“, „Verwaltungsmitarbeitende“.
-- Sachlich, kein Marketing-Ton, keine Emojis, keine Ausrufezeichen.
-- Erklärt wird auch, was **nicht** geht und wo Nutzende hängenbleiben
+- Gender-neutral through participles/double naming: „Nutzende“, „Anwenderinnen
+  und Anwender“, „Verwaltungsmitarbeitende“.
+- Factual, no marketing tone, no emoji, no exclamation marks.
+- Explain what does **not** work and where users get stuck as well
   („Andernfalls gehen die Änderungen ohne Warnung verloren.“, „Wenn der Button
   nicht sichtbar ist, scrollen Sie im Feld nach unten.“).
 
-**Struktur**
-- Keine Frontmatter in Kapiteldateien.
-- Überschriften nummeriert: `# 6. Rohrverwaltung`, `## 6.1 Suchen und Filtern`,
-  `### 6.3.1 Reiter „Eigenschaften“`. `####` bleibt unnummeriert.
-- Jedes Kapitel beginnt mit einem Absatz: Zweck des Bereichs + wie man hinkommt
+**Structure**
+- No frontmatter in chapter files.
+- Numbered headings: `# 6. Rohrverwaltung`, `## 6.1 Suchen und Filtern`,
+  `### 6.3.1 Reiter „Eigenschaften“`. `####` stays unnumbered.
+- Every chapter starts with a paragraph: purpose of the area + how to get there
   („Sie erreichen sie über die linke Navigation durch Klicken auf den Menüpunkt
-  „Rohrverwaltung“.“), danach direkt ein Übersichts-Screenshot.
-- Aufzählungen für Optionen/Eigenschaften, **nummerierte** Listen nur für echte
-  Schritt-für-Schritt-Abläufe.
-- Hinweise als normaler Absatz mit Präfix `Hinweis:`, `Wichtig:` oder
-  `Wichtiger Hinweis:` – **keine** VitePress-Container (`::: tip`).
-- Querverweise als relative Links: `siehe Kapitel [Karte](./05-karte.md)`.
-- Platzhalter für noch offene Kapitel:
+  „Rohrverwaltung“.“), followed directly by an overview screenshot.
+- Bullet lists for options/properties, **numbered** lists only for genuine
+  step-by-step procedures.
+- Notes as a normal paragraph with the prefix `Hinweis:`, `Wichtig:` or
+  `Wichtiger Hinweis:` – **no** VitePress containers (`::: tip`).
+- Cross-references as relative links: `siehe Kapitel [Karte](./05-karte.md)`.
+- Placeholder for chapters still to be written:
   `_Die Dokumentation zu diesem Kapitel ist noch in Arbeit._`
 
-**Auszeichnung**
-- `**fett**` für Fachbegriffe und Konzepte beim ersten Auftreten
-  (**Rohrzuordnung**, **Transparenz**, **interaktive Legende**) und für Zustände
+**Markup**
+- `**bold**` for technical terms and concepts on first appearance
+  (**Rohrzuordnung**, **Transparenz**, **interaktive Legende**) and for states
   („Routing-Modus **eingeschaltet**“).
-- UI-Beschriftungen in typografischen Anführungszeichen: „Speichern“, „+ Rohr
-  hinzufügen“, Reiter „Anhänge“. Beschriftungen wörtlich aus der App übernehmen –
-  Referenz ist `local-app/frontend/messages/de.json`.
-- Abkürzungen mit Leerzeichen: „z. B.“, „ggf.“.
+- UI labels in typographic quotation marks: „Speichern“, „+ Rohr hinzufügen“,
+  Reiter „Anhänge“. Take labels verbatim from the app – the reference is
+  `local-app/frontend/messages/de.json`.
+- Abbreviations with a space: „z. B.“, „ggf.“.
 
-## Screenshots und Videos
+## Screenshots and videos
 
-**Technische Zielwerte**
+**Technical target values**
 
-| | Wert |
+| | Value |
 |---|---|
-| Viewport | 1792 × 1120, `deviceScaleFactor: 2` → Bild **3584 × 2240** |
-| Bildformat | `.jpg`, Qualität ~85, Zieldateigröße < 1,2 MB |
-| Videoformat | `.webm` (VP8), Ausschnitt der Oberfläche, ca. 1000 × 700 |
-| Modus | immer Hellmodus, Sprache **DE** |
-| Inhalt | nur der App-Viewport, kein Browser-Chrome; Bilder ohne Mauszeiger, Videos **mit** |
-| Daten | ausschließlich das Demoprojekt „Testprojekt“ – keine echten personenbezogenen Daten |
+| Viewport | 1792 × 1120, `deviceScaleFactor: 2` → image **3584 × 2240** |
+| Image format | `.jpg`, quality ~85, target file size < 1.2 MB |
+| Video format | `.webm` (VP8), crop of the interface, approx. 1000 × 700 |
+| Mode | always light mode, language **DE** |
+| Content | only the app viewport, no browser chrome; images without a mouse cursor, videos **with** one |
+| Data | exclusively the demo project „Testprojekt“ – no real personal data |
 
-> `playwright.config.ts` setzt diese Werte zentral. Kein `devices[...]`-Preset in
-> die Projekt-Konfiguration spreaden – die Presets bringen eigene `viewport`- und
-> `deviceScaleFactor`-Werte mit und überschreiben die Zielwerte still.
+> `playwright.config.ts` sets these values centrally. Do not spread a
+> `devices[...]` preset into the project configuration – the presets bring their
+> own `viewport` and `deviceScaleFactor` values and override the target values
+> silently.
 
-Videos sind bewusst **kein** Vollbild der Oberfläche. Das Handbuch rendert sie
-mit der Breite des Textbereichs (rund 690 px); bei 1792 CSS-Pixeln Aufnahmebreite
-blieben von einer 16-px-Beschriftung der App keine 7 px übrig. Ein Ausschnitt von
-rund 1000 CSS-Pixeln Breite entspricht den bestehenden Videos (`map_attachment.webm`
-zeigte einen Bereich von etwa 924 × 638 CSS-Pixeln) und bleibt lesbar. Maßgeblich
-ist allein die **Breite** – die Höhe ändert den Maßstab im Handbuch nicht.
-Anders als Screenshots werden Videos außerdem in CSS-Pixeln aufgenommen: Chromiums
-Screencast liefert keine Gerätepunkte, der `deviceScaleFactor` von 2 wirkt dort
-nicht.
+Videos are deliberately **not** a full shot of the interface. The manual renders
+them at the width of the text column (around 690 px); at a recording width of
+1792 CSS pixels, a 16 px label in the app would be left with less than 7 px. A
+crop of around 1000 CSS pixels wide matches the existing videos
+(`map_attachment.webm` showed an area of roughly 924 × 638 CSS pixels) and stays
+legible. Only the **width** matters – the height does not change the scale in the
+manual. Unlike screenshots, videos are also recorded in CSS pixels: Chromium's
+screencast delivers no device pixels, so the `deviceScaleFactor` of 2 has no
+effect there.
 
-**Ablage und Benennung**
-- Bilder: `public/images/manual/teil-a/<name>.jpg` (je Handbuchteil ein Ordner)
-- Videos: `public/videos/<name>.webm` (flach, ohne Teil-Unterordner)
-- Name = englisch, `snake_case`, Bereich zuerst, Detail danach:
+**Location and naming**
+- Images: `public/images/manual/teil-a/<name>.jpg` (one folder per manual part)
+- Videos: `public/videos/<name>.webm` (flat, no part subfolder)
+- Name = English, `snake_case`, area first, detail second:
   `login_`, `dashboard_`, `map_`, `conduit_`, `conduit_connection_`
-  → `dashboard_trasse_hover.jpg`, `map_legend_actions.jpg`, `conduit_search_columns.jpg`
-- Ausschnittvergrößerungen bekommen das Suffix `_detail`
+  → `dashboard_trench_hover.jpg`, `map_legend_actions.jpg`, `conduit_search_columns.jpg`
+- Detail crops get the suffix `_detail`
   (`login_start_detail.jpg`, `map_address_detail.jpg`).
 
-**Bildsprache – vier Muster, die konsistent wiederkehren**
+**Visual language – four patterns that recur consistently**
 
-1. **Übersichtsbild, unbearbeitet** – der ganze App-Viewport, ohne Markierung.
-   Steht am Kapitelanfang (`dashboard.jpg`, `map.jpg`, `conduit.jpg`).
-2. **Dim + Spotlight** – die gesamte Oberfläche wird abgedunkelt, nur der
-   beschriebene Bereich bleibt in voller Helligkeit und bekommt eine weiße,
-   abgerundete Kontur. Das Standardmittel für „Wo finde ich X?“
-   (`dashboard_project.jpg`, `conduit_excel.jpg`, `map_selected_object.jpg`).
-   Der Schleier ist **`rgba(0, 0, 0, 0.5)`** – schwarz bei 50 %, nicht grau.
-   An den Altbildern nachgemessen: jeder abgedunkelte Bildpunkt hat exakt den
-   halben Wert des unabgedunkelten Bildes (255 → 128, 220 → 110). Ein grauer
-   oder schwächerer Schleier wirkt neben den bestehenden Bildern deutlich zu
-   hell; `spotlight()` in `playwright/manual-shots.ts` setzt diesen Wert.
-   Freigestellt werden dürfen auch mehrere Stellen gleichzeitig, wenn sie
-   zusammengehören – `map_selected_object.jpg` zeigt das ausgewählte
-   Kartenobjekt und die Info-Box mit seinen Werten, alles dazwischen bleibt
-   abgedunkelt. Für Kartenobjekte ist die Aussparung eine an der Linie
-   ausgerichtete Ellipse, kein Rechteck.
-3. **Handgezeichnete Markierung in Marken-Grün** (`#11ba81`) – geschwungene
-   Ellipsen um Elemente, gebogene Pfeile und handschriftlich wirkende Labels.
-   Für Orientierungsbilder mit mehreren Beschriftungen gleichzeitig
-   (`login_navigation.jpg`).
-4. **Composite-Raster** – 2 × 2 Einzelbilder mit weißen Fugen, jeder Schritt unten
-   rechts mit einer großen grünen Ziffer nummeriert; die Ziffern entsprechen den
-   Schritten der nummerierten Liste im Text (`map_search_flow.jpg`,
+1. **Overview image, unedited** – the whole app viewport, without annotation.
+   Sits at the start of a chapter (`dashboard.jpg`, `map.jpg`, `conduit.jpg`).
+2. **Dim + spotlight** – the entire interface is dimmed, only the described area
+   stays at full brightness and gets a white, rounded outline. The standard
+   device for "where do I find X?" (`dashboard_project.jpg`, `conduit_excel.jpg`,
+   `map_selected_object.jpg`).
+   The scrim is **`rgba(0, 0, 0, 0.5)`** – black at 50 %, not grey. Measured on
+   the old images: every dimmed pixel has exactly half the value of the undimmed
+   image (255 → 128, 220 → 110). A grey or weaker scrim looks clearly too light
+   next to the existing images; `spotlight()` in `playwright/manual-shots.ts`
+   sets this value.
+   Several places may be exposed at once when they belong together –
+   `map_selected_object.jpg` shows the selected map object and the info box with
+   its values, everything in between stays dimmed. For map objects the cut-out is
+   an ellipse aligned to the line, not a rectangle.
+3. **Hand-drawn annotation in brand green** (`#11ba81`) – sweeping ellipses
+   around elements, curved arrows and handwritten-looking labels. For orientation
+   images with several labels at once (`login_navigation.jpg`).
+4. **Composite grid** – 2 × 2 individual images with white gutters, each step
+   numbered with a large green digit in the bottom right; the digits correspond
+   to the steps of the numbered list in the text (`map_search_flow.jpg`,
    `map_legend_actions.jpg`).
 
-Muster 2 und 3 werden kombiniert (abdunkeln + Ellipse + Pfeil). Videos sind
-kurze, ungeschnittene Interaktionsaufnahmen ohne Ton, Text oder Markierung – mit
-sichtbarem Mauszeiger, weil Zustände wie „Schaltflächen erscheinen beim Zeigen“
-sonst grundlos wirken (`mauszeigerAn()` in `playwright/manual-videos.ts` legt
-einen nachgebildeten Zeiger in die Seite; Playwright zeichnet den echten nicht
-mit). Animationen bleiben an, `animationenAus()` gilt nur für Standbilder.
+Patterns 2 and 3 are combined (dim + ellipse + arrow). Videos are short,
+uncut interaction recordings without sound, text or annotation – with a visible
+mouse cursor, because states like "buttons appear on hover" would otherwise look
+unmotivated (`showCursor()` in `playwright/manual-videos.ts` places a replica
+cursor into the page; Playwright does not record the real one). Animations stay
+on; `disableAnimations()` applies to still images only.
 
-**Einbindung in Markdown**
-- Bild steht **nach** dem erklärenden Absatz, nie davor.
-- Alt-Text ist eine deutsche Beschreibung, die Ansicht, Hervorhebung und Position
-  nennt:
+**Embedding in Markdown**
+- The image goes **after** the explaining paragraph, never before it.
+- The alt text is a German description naming the view, the highlight and the
+  position:
   `![Screenshot Karte mit Hervorhebung der Legende oben rechts](/images/manual/teil-a/map_legend.jpg)`
-- Bildklassen (siehe `.vitepress/theme/custom.css`): Standard 512 px mit grünem
-  1-px-Rahmen, `{.big}` = 800 px, `{.small}` = 300 px, `{.no-border}` ohne Rahmen.
-- Bildpaar (Vollbild + Detail) nebeneinander: zwei `![]()`-Zeilen direkt
-  untereinander, danach eine eigene Zeile mit `{.img-row}`.
-- Videos ohne Alt-Text über `markdown-it-html5-media`:
+- Image classes (see `.vitepress/theme/custom.css`): default 512 px with a green
+  1 px border, `{.big}` = 800 px, `{.small}` = 300 px, `{.no-border}` without a
+  border.
+- Image pair (full shot + detail) side by side: two `![]()` lines directly below
+  one another, then a line of its own with `{.img-row}`.
+- Videos without alt text through `markdown-it-html5-media`:
   `![](/videos/conduit_connection_mapFind.webm)`
-- Klick auf Bilder öffnet eine Lightbox (`vitepress-plugin-lightbox`) – Details
-  dürfen deshalb im 512-px-Rendering klein sein, müssen im Original aber lesbar sein.
+- Clicking an image opens a lightbox (`vitepress-plugin-lightbox`) – details may
+  therefore be small in the 512 px rendering, but have to be legible in the
+  original.
 
-## Lokale Qonnectra-Instanz für reproduzierbare Aufnahmen
+## Local Qonnectra instance for reproducible captures
 
-Ziel: Screenshots und Videos entstehen künftig als Playwright-Testfälle gegen die
-lokale Instanz, damit sie bei Änderungen der App neu erzeugt werden können.
+Goal: screenshots and videos are produced as Playwright test cases against the
+local instance, so that they can be regenerated when the app changes.
 
-- `scripts/setup-local-qonnectra.sh` klont die App nach `local-app/` und startet
-  sie über die **Produktions**-Compose. Idempotent, beliebig oft ausführbar.
-- Erreichbar unter `https://app.qonnectra.localhost` (Admin:
+- `scripts/setup-local-qonnectra.sh` clones the app into `local-app/` and starts
+  it through the **production** compose file. Idempotent, may be run any number
+  of times.
+- Reachable at `https://app.qonnectra.localhost` (admin:
   `https://admin.qonnectra.localhost/admin`, API: `https://api.qonnectra.localhost`).
-- Zwei Konten, Zugangsdaten in `local-app/deployment/.env`, beim ersten Lauf
-  zufällig erzeugt. **Nie in Doku, Tests, Skripte oder Commits schreiben** –
-  immer über `process.env` bzw. die `.env`-Datei einlesen.
-  - `APP_USER_USERNAME` / `APP_USER_PASSWORD` – Konto **ohne**
-    Administrationsrechte, Gruppe aus `APP_USER_GROUP` (Voreinstellung
-    `Editor`: alle Fachdaten bearbeitbar, kein Zugriff auf `/admin/*`).
-    **Der Standard für alle Aufnahmen** – Teil A beschreibt die Sicht normaler
-    Nutzender. Das Setup legt es bei jedem Lauf neu an bzw. aktualisiert es.
-  - `DJANGO_SUPERUSER_USERNAME` / `DJANGO_SUPERUSER_PASSWORD` – Django-Superuser
-    für die Administration. Nur für Bilder von `/admin/*` benutzen: er umgeht
-    jede Rechteprüfung und sieht zusätzlich den Menüpunkt „Logs“.
-- `PUBLIC_DOCUMENTATION_URL` in `.env` ist der Hilfe-Link, den die App in
-  Kopfzeile und Navigationsleiste zeigt; das Setup setzt ihn bei jedem Lauf auf
-  `https://qonnectra.de/` (überschreibbar via `QONNECTRA_DOCUMENTATION_URL`).
-  Ist die Variable leer, blendet die App den Link aus und er fehlt im Bild.
-- HTTPS läuft über eine lokale Dev-CA; einmalig `scripts/install-local-ca.sh`
-  ausführen, alternativ in Playwright `ignoreHTTPSErrors: true` setzen.
-- Demodaten: Projekt **„Testprojekt“** aus
-  `scripts/qonnectra-demo-data/testprojekt-export.json`, wird beim Setup
-  automatisch importiert. Nach dem Login oben links auswählen.
-- `local-app/` ist gitignored (Fremd-Checkout) – nie committen und nur über das
-  Setup-Skript verändern.
+- Two accounts, credentials in `local-app/deployment/.env`, generated randomly on
+  the first run. **Never write them into docs, tests, scripts or commits** –
+  always read them through `process.env` resp. the `.env` file.
+  - `APP_USER_USERNAME` / `APP_USER_PASSWORD` – account **without**
+    administration rights, group from `APP_USER_GROUP` (default `Editor`: all
+    domain data editable, no access to `/admin/*`).
+    **The default for all captures** – part A describes the view of ordinary
+    users. The setup creates resp. updates it on every run.
+  - `DJANGO_SUPERUSER_USERNAME` / `DJANGO_SUPERUSER_PASSWORD` – Django superuser
+    for administration. Only use it for images of `/admin/*`: it bypasses every
+    permission check and additionally sees the „Logs“ menu entry.
+- `PUBLIC_DOCUMENTATION_URL` in `.env` is the help link the app shows in the
+  header and the navigation bar; the setup sets it to `https://qonnectra.de/` on
+  every run (overridable via `QONNECTRA_DOCUMENTATION_URL`). If the variable is
+  empty, the app hides the link and it is missing from the image.
+- HTTPS runs through a local dev CA; run `scripts/install-local-ca.sh` once, or
+  alternatively set `ignoreHTTPSErrors: true` in Playwright.
+- Demo data: project **„Testprojekt“** from
+  `scripts/qonnectra-demo-data/testprojekt-export.json`, imported automatically
+  during setup. Select it in the top left after logging in.
+- `local-app/` is gitignored (foreign checkout) – never commit it and only change
+  it through the setup script.
 
-**Playwright-Setup im Doku-Repo**
+**Playwright setup in the docs repo**
 
-Alle Läufe gehen ausschließlich gegen die lokale Instanz. Es gibt keine
-konfigurierbare Zieladresse und kein `.env` im Repo-Root mehr – `GEODOCK_URL`
-wird nicht mehr gelesen.
+All runs go exclusively against the local instance. There is no configurable
+target address and no `.env` in the repo root any more – `GEODOCK_URL` is no
+longer read.
 
-- `playwright/local-app.ts` ist die einzige Quelle für Adresse und Zugangsdaten
-  und liest `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`,
-  `APP_USER_*`, `DJANGO_SUPERUSER_*`). Zugangsdaten nur über `localApp()`
-  beziehen, nie in Specs, Ausgaben oder Commits schreiben.
-- Angemeldet wird sich standardmäßig mit dem Konto **ohne**
-  Administrationsrechte. `QONNECTRA_LOGIN=admin pnpm test:e2e` schaltet auf den
-  Superuser um – nur für Bereiche, die normalen Nutzenden verborgen bleiben.
-  Bilder aus einem Admin-Lauf zeigen sonst eine Oberfläche, die es für die
-  Zielgruppe von Teil A nicht gibt.
-- `playwright/auth.setup.ts` läuft als Setup-Projekt automatisch vor jedem Spec:
-  prüft die Erreichbarkeit (mit Hinweis auf `scripts/setup-local-qonnectra.sh`,
-  falls der Stack steht), meldet sich per `POST /api/v1/auth/login/` an und
-  schreibt `auth-state.json`. `pnpm test:e2e:setup` führt nur diesen Schritt aus.
-- `auth-state.json` ist **nicht** wiederverwendbar und wird pro Lauf neu erzeugt:
-  das Access-Token lebt 15 Minuten, und das Backend rotiert Refresh-Tokens mit
-  Blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`).
-- Das Setup legt den Zustand fest, an dem die Bilder hängen: Cookie
-  `selected-project=2` („Testprojekt“; ein UI-Login würde `1` = „Default“
-  schreiben) sowie im `localStorage` `PARAGLIDE_LOCALE=de`, `mode=light`,
-  `basemapTheme`, `mapCenter` und `mapZoom`. Die Karte hat kein Auto-Fit – ohne
-  gesetzte `mapCenter`/`mapZoom` (EPSG:3857) startet sie bei Zoom 2 im Atlantik.
-- Ein Spec pro Handbuchkapitel: `tests/<NN>-<kapitel-slug>.spec.ts` mit Kommentar,
-  auf welches Kapitel es sich bezieht (siehe `tests/05-karte.spec.ts`). Videos
-  eines Kapitels liegen daneben in `tests/<NN>-<kapitel-slug>-video.spec.ts`;
-  eine eigene Datei ist Pflicht, weil `test.use({ video: … })` nur auf
-  Dateiebene erlaubt ist („forces a new worker“ in einer `test.describe`-Gruppe).
-- Ausgabe nach `tests/screenshots/<kapitel-slug>/<bildname>.png` über
-  `shotPath()` bzw. `tests/videos/<kapitel-slug>/<name>.webm` über
-  `videoPfad()`. `tests/screenshots/`, `tests/videos/`, `test-results/`,
-  `playwright-report/` und `auth-state.json` sind gitignored – das sind
-  Rohaufnahmen, nicht die Dateien des Handbuchs.
-- `pnpm screenshots:publish` (`scripts/publish-screenshots.sh`) übernimmt sie
-  nach `public/images/manual/…` bzw. `public/videos/…` und wandelt Bilder dabei
-  in JPEG (Qualität 85, Qualität wird gesenkt, bis die Datei unter 1,2 MB
-  liegt); Videos werden nur kopiert, Zuschnitt und Kodierung erledigt die Spec.
-  Das Ziel kommt aus dem Handbuch selbst: das Skript sucht in `manual/` die
-  Einbindung `/images/manual/<teil>/<name>.jpg` bzw. `/videos/<name>.webm`.
-  Aufnahmen ohne Einbindung werden übersprungen, damit nichts im falschen
-  Ordner landet. `--dry-run` zeigt vorher, was neu angelegt und was ersetzt
-  würde, `--videos` und `--bilder` schränken auf eine Art ein.
-- Nur Muster 1 und 2 gehen komplett automatisch durch. Bilder mit
-  handgezeichneten Markierungen (Muster 3) werden nach dem Übernehmen
-  nachbearbeitet – `--dry-run` vorher ansehen, sonst überschreibt der Lauf die
-  Handarbeit mit einer Rohaufnahme. Wer nur ein Video erneuert, nimmt
-  `--videos`.
-- Kapitel 3 braucht als einziges auch den abgemeldeten Zustand: die Bilder der
-  Anmeldeseite stehen in einem `test.describe`-Block mit
-  `test.use({ storageState: { cookies: [], origins: [] } })`, die Bilder der
-  Oberfläche daneben im normalen angemeldeten Zustand. Angemeldete Aufrufe von
-  `/login` leitet die App auf `/map` um.
-- `workers: 1` und `fullyParallel: false` sind Absicht: alle Specs teilen sich
-  eine Instanz samt Projektauswahl und Kartenposition.
-- Determinismus-Helfer in `playwright/manual-shots.ts`: `animationenAus()`
-  (Übergänge und Text-Cursor aus), `zeigerWeg()` (keine Hover-Zustände im Bild),
-  `spotlight()` für Muster 2 und `composite2x2()` für Muster 4. Das Raster wird
-  im Browser montiert, das Repo braucht dafür keine Bildbibliothek. Muster 3
-  (handgezeichnete Ellipsen/Pfeile) bleibt Nachbearbeitung.
-  `spotlight()` nimmt ein Ziel oder eine Liste aus Zielen und stellt jedes
-  davon frei; ein Ziel ist entweder ein Locator oder eine `SpotlightEllipse`
-  in CSS-Pixeln des Viewports. Die Ellipse ist für alles gedacht, was kein
-  Element hat: Trassen, Adressen und Netzknoten zeichnet die Karte ins Canvas.
-  Wo sie liegt, wird gemessen und nicht festgeschrieben –
-  `ausgewaehltesKartenobjekt()` in `tests/05-karte.spec.ts` sucht im Canvas die
-  Auswahlfarbe der App (`DEFAULT_SELECTED_COLOR` = `#fff700`) und richtet die
-  Ellipse an der Hauptachse der Fundpunkte aus. Nötig ist das, weil unter der
-  Kartenmitte mehrere Trassen zusammenlaufen und je Lauf eine andere getroffen
-  wird; Neigung und Länge der Linie wechseln damit mit. Ist ein Canvas durch
-  fremde Rasterkacheln für `getImageData` gesperrt, wird es übersprungen – die
-  Objekte liegen ohnehin in einem anderen.
-  `spotlight()` legt ein SVG mit Aussparung über die Seite und verändert das
-  Zielelement nicht. Der naheliegende Weg über `box-shadow: 0 0 0 9999px` am
-  Element selbst scheitert hier zweifach: der Schleier wird am nächsten
-  Vorfahren mit `overflow: hidden` abgeschnitten, und macht man die Vorfahren
-  durchlässig, verliert die Karte (OpenLayers) beim Reflow ihren Canvas-Inhalt.
-- Video-Helfer in `playwright/manual-videos.ts`: `mauszeigerAn()` legt einen
-  nachgebildeten Mauszeiger in die Seite, `zeigeAuf()`, `klicke()`, `ziehe()`
-  und `tippe()` führen ihn in Handgeschwindigkeit, `videoNachbearbeiten()`
-  schneidet Seitenaufbau und Bildrand weg. Fallstricke, die dort schon gelöst
-  sind und beim Nachbauen sofort wieder auftauchen:
-  - Der Zeiger darf **keine** eigene Compositor-Ebene bekommen (also
-    `left`/`top` statt `transform`, kein `will-change`). Sonst zeichnet
-    Chromium ihn weiter aktuell, während das Rastern des übrigen Inhalts
-    hinterherhinkt – beim Breiterziehen der Info-Box lief der Zeiger der Kante
-    um gut 180 px voraus.
-  - Der Zeiger muss auf `pointermove` **und** `mousemove` hören: Der Griff der
-    Info-Box ruft in seinem `pointerdown` `preventDefault()` auf, danach
-    liefert Chromium für diesen Zeiger keine `mouse`-Ereignisse mehr.
-  - Beim Ziehen rund 90 ms je Schritt lassen. An der Breite der Info-Box hängt
-    die Karte, OpenLayers zeichnet bei jeder Änderung neu (gemessen ~70 ms);
-    dichtere Ereignisse stauen sich sichtbar auf.
-  - Geschnitten wird mit dem ffmpeg, das `playwright install` ohnehin
-    mitbringt (`ffmpegPfad()`) – kein zusätzliches Werkzeug auf dem Rechner.
-    `-ss` muss **hinter** `-i` stehen; davor spult ffmpeg nur bis zum letzten
-    Schlüsselbild, und die sitzen in Playwrights Aufnahme weit auseinander.
-  - Legt eine Aufnahme Daten an (z. B. einen Anhang), räumt die Spec sie über
-    die API wieder weg – und zwar mit `superuserZugang()`. Die Gruppe „Editor“
-    des Aufnahmekontos hat auf alle Fachmodelle nur die Stufe „edit“ und darf
-    kein DELETE (`RoleBasedPermission`); die API antwortet mit 403.
-- Composite-Raster sind montiert und deshalb **nicht** 3584 × 2240, sondern
-  2656 px breit bei einer Höhe, die sich aus dem Kartenausschnitt der Kacheln
-  ergibt (zuletzt 2656 × 1854). Das Seitenverhältnis der Montage lässt sich
-  nicht auf beide Zielmaße gleichzeitig bringen; im Handbuch werden die Bilder
-  ohnehin auf 512 px gerendert.
-- Die Kartenkacheln erzeugt `scripts/setup-local-qonnectra.sh` einmalig per
-  Planetiler (Region `schleswig-holstein`, dort liegt das Testprojekt) und legt
-  sie unter `~/.local/share/qonnectra-local-tiles/` ab – außerhalb von
-  `local-app/`, damit `--reset` sie nicht wegwirft. Der `tileserver` bekommt sie
-  als harte Verknüpfung unter `local-app/deployment/tiles/germany.mbtiles`
-  (ein Bind-Mount nur für die Datei scheitert, weil Docker den Mountpoint im
-  read-only gemounteten `/data` nicht anlegen kann).
-  Kartenbilder zeigen damit die echte Vektor-Basiskarte im Hellmodus. Fehlt die
-  `.mbtiles` (Lauf mit `--skip-tiles`, kein Java), läuft der `tileserver` in
-  einer Restart-Schleife und die Karte fällt auf OSM-Rasterkacheln zurück.
+- `playwright/local-app.ts` is the single source for address and credentials and
+  reads `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`, `APP_USER_*`,
+  `DJANGO_SUPERUSER_*`). Only obtain credentials through `localApp()`, never
+  write them into specs, output or commits.
+- Login uses the account **without** administration rights by default.
+  `QONNECTRA_LOGIN=admin pnpm test:e2e` switches to the superuser – only for
+  areas that stay hidden from ordinary users. Images from an admin run otherwise
+  show an interface that does not exist for the audience of part A.
+- `playwright/auth.setup.ts` runs as a setup project automatically before every
+  spec: it checks reachability (with a pointer to
+  `scripts/setup-local-qonnectra.sh` if the stack is down), logs in through
+  `POST /api/v1/auth/login/` and writes `auth-state.json`. `pnpm test:e2e:setup`
+  runs only this step.
+- `auth-state.json` is **not** reusable and is regenerated per run: the access
+  token lives for 15 minutes, and the backend rotates refresh tokens with a
+  blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`).
+- The setup pins the state the images depend on: cookie `selected-project=2`
+  („Testprojekt“; a UI login would write `1` = „Default“) as well as
+  `PARAGLIDE_LOCALE=de`, `mode=light`, `basemapTheme`, `mapCenter` and `mapZoom`
+  in `localStorage`. The map has no auto-fit – without `mapCenter`/`mapZoom`
+  (EPSG:3857) it starts at zoom 2 in the Atlantic.
+- One spec per manual chapter: `tests/<NN>-<chapter-slug>.spec.ts` with a comment
+  naming the chapter it belongs to (see `tests/05-karte.spec.ts`). The chapter
+  slug stays German because it mirrors the manual's file name. Videos of a
+  chapter sit next to it in `tests/<NN>-<chapter-slug>-video.spec.ts`; a separate
+  file is mandatory, because `test.use({ video: … })` is only allowed at file
+  level ("forces a new worker" inside a `test.describe` group).
+- Output goes to `tests/screenshots/<chapter-slug>/<name>.png` through
+  `shotPath()` resp. `tests/videos/<chapter-slug>/<name>.webm` through
+  `videoPath()`. `tests/screenshots/`, `tests/videos/`, `test-results/`,
+  `playwright-report/` and `auth-state.json` are gitignored – those are raw
+  captures, not the files of the manual.
+- `pnpm screenshots:publish` (`scripts/publish-screenshots.sh`) publishes them to
+  `public/images/manual/…` resp. `public/videos/…` and converts images to JPEG in
+  the process (quality 85, lowered until the file is under 1.2 MB); videos are
+  only copied, cropping and encoding are done by the spec. The target comes from
+  the manual itself: the script looks for the reference
+  `/images/manual/<part>/<name>.jpg` resp. `/videos/<name>.webm` in `manual/`.
+  Captures without a reference are skipped, so that nothing ends up in the wrong
+  folder. `--dry-run` shows beforehand what would be created and what replaced,
+  `--videos` and `--images` restrict the run to one kind.
+- Only patterns 1 and 2 go through fully automatically. Images with hand-drawn
+  annotations (pattern 3) are post-processed after publishing – look at
+  `--dry-run` first, otherwise the run overwrites the handwork with a raw
+  capture. To renew only a video, use `--videos`.
+- Chapter 3 is the only one that also needs the logged-out state: the images of
+  the login page sit in a `test.describe` block with
+  `test.use({ storageState: { cookies: [], origins: [] } })`, the images of the
+  interface next to it in the normal logged-in state. The app redirects
+  logged-in calls of `/login` to `/map`.
+- `workers: 1` and `fullyParallel: false` are deliberate: all specs share one
+  instance including project selection and map position.
+- Determinism helpers in `playwright/manual-shots.ts`: `disableAnimations()`
+  (transitions and text caret off), `moveCursorAway()` (no hover states in the
+  image), `spotlight()` for pattern 2 and `composite2x2()` for pattern 4. The
+  grid is assembled in the browser, so the repo needs no image library. Pattern 3
+  (hand-drawn ellipses/arrows) stays post-processing.
+  `spotlight()` takes one target or a list of targets and exposes each of them; a
+  target is either a locator or a `SpotlightEllipse` in CSS pixels of the
+  viewport. The ellipse is meant for everything that has no element: trenches,
+  addresses and nodes are drawn into the canvas by the map. Where it sits is
+  measured, not hard-coded – `selectedMapFeature()` in `tests/05-karte.spec.ts`
+  searches the canvas for the selection colour of the app
+  (`DEFAULT_SELECTED_COLOR` = `#fff700`) and aligns the ellipse to the main axis
+  of the found points. That is necessary because several trenches converge below
+  the map centre and a different one is hit on each run; the inclination and
+  length of the line change with it. If a canvas is locked for `getImageData` by
+  foreign raster tiles, it is skipped – the objects live in a different one
+  anyway.
+  `spotlight()` places an SVG with a cut-out over the page and does not change the
+  target element. The obvious route via `box-shadow: 0 0 0 9999px` on the element
+  itself fails here twice over: the scrim is clipped at the nearest ancestor with
+  `overflow: hidden`, and making the ancestors transparent makes the map
+  (OpenLayers) lose its canvas content on reflow.
+- Video helpers in `playwright/manual-videos.ts`: `showCursor()` places a replica
+  mouse cursor into the page, `pointAt()`, `click()`, `drag()` and `typeText()`
+  move it at hand speed, `postProcessVideo()` cuts off the page load and the
+  frame edges. Pitfalls that are already solved there and reappear immediately
+  when rebuilding this:
+  - The cursor must **not** get its own compositor layer (so `left`/`top` instead
+    of `transform`, no `will-change`). Otherwise Chromium keeps painting it up to
+    date while rasterising the remaining content lags behind – while dragging the
+    info box wider, the cursor ran a good 180 px ahead of the edge.
+  - The cursor has to listen to `pointermove` **and** `mousemove`: the handle of
+    the info box calls `preventDefault()` in its `pointerdown`, after which
+    Chromium sends no more `mouse` events for that pointer.
+  - Leave around 90 ms per step while dragging. The map hangs off the width of
+    the info box, and OpenLayers repaints on every change (measured ~70 ms);
+    denser events visibly pile up.
+  - Cutting is done with the ffmpeg that `playwright install` ships anyway
+    (`ffmpegPath()`) – no extra tool on the machine. `-ss` has to come **after**
+    `-i`; before it, ffmpeg only seeks to the last keyframe, and those sit far
+    apart in Playwright's recording.
+  - If a capture creates data (e.g. an attachment), the spec removes it again
+    through the API – and with `superuserCredentials()`. The group „Editor“ of
+    the capture account only has level "edit" on all domain models and may not
+    DELETE (`RoleBasedPermission`); the API answers with 403.
+- Composite grids are assembled and therefore **not** 3584 × 2240, but 2656 px
+  wide at a height that follows from the map extent of the tiles (most recently
+  2656 × 1854). The aspect ratio of the assembly cannot be brought to both target
+  dimensions at once; in the manual the images are rendered at 512 px anyway.
+- The map tiles are generated once by `scripts/setup-local-qonnectra.sh` through
+  Planetiler (region `schleswig-holstein`, where the test project lies) and
+  stored under `~/.local/share/qonnectra-local-tiles/` – outside `local-app/`, so
+  that `--reset` does not throw them away. The `tileserver` gets them as a hard
+  link at `local-app/deployment/tiles/germany.mbtiles` (a bind mount for the file
+  alone fails, because Docker cannot create the mount point inside the read-only
+  mounted `/data`).
+  Map images therefore show the real vector base map in light mode. If the
+  `.mbtiles` is missing (run with `--skip-tiles`, no Java), the `tileserver` runs
+  in a restart loop and the map falls back to OSM raster tiles.
 
-- Antwortet die API mit **502**, obwohl der Backend-Container läuft: nach einem
-  Neustart des Backends hat `nginx` dessen alte Container-IP zwischengespeichert
-  (nginx-Log: „Host is unreachable“) und löst sie nicht neu auf. Behebt sich mit
-  `docker restart qonnectra_nginx_prod`. Das Setup-Projekt wartet eine Minute auf
-  5xx-Antworten, weil ein kalt gestarteter Stack kurz mit 502 antwortet.
-- Die Zahl der Canvas-Elemente in der Karte hängt vom Tileserver ab: mit
-  Vektorkacheln legt OpenLayers zwei an, im OSM-Rasterfallback eines. Deshalb
-  `page.locator('div.map canvas').first()` verwenden.
-- Kartenposition immer per `page.addInitScript()` setzen, nicht per
-  „laden, `localStorage` setzen, neu laden“. Die App schreibt `mapCenter` und
-  `mapZoom` bei jedem `moveend` zurück; landet das zwischen Setzen und Neuladen,
-  ist der Seed weg und die Karte startet in der Übersicht. Tests, die auf eine
-  bestimmte Stelle klicken, treffen dann nichts und die Info-Box öffnet nicht
-  (Symptom: `#drawer-title` nicht gefunden).
-- Der Basiskarten-Layer ist von der Objektauswahl unabhängig: `getClickedFeatures`
-  filtert per `layerFilter` auf Trasse, Adresse, Netzknoten und Gebiet
-  (`MapInteractionManager.svelte.ts`). Ob der Tileserver läuft, hat auf Klicks
-  also keinen Einfluss.
-- Ein Kartenobjekt per Klick auszuwählen ist nicht ohne Weiteres reproduzierbar:
-  Eine Trassenlinie ist nur wenige Pixel breit, und darunter liegt das
-  Projektgebiet, dessen Fläche das ganze Netz überdeckt. Dieselbe Stelle liefert
-  je nach Lauf verschiedene Trassen oder das Gebiet. Wiederholtes Klicken hilft
-  nicht (es ist kein Kachel-Rennen) – für einen deterministischen Treffer den
-  Layer „Gebiet" vor dem Klick ausblenden. Wieder einschalten geht danach nicht,
-  weil die geöffnete Info-Box die Legende verdeckt.
-- Die Fensterhöhe von 1120 px ist an der Navigationsleiste bemessen: mit allen
-  aufgeklappten Gruppen braucht sie 1093 px Inhalt (gemessen), bei den früheren
-  800 px lag die Gruppe „System" unter dem sichtbaren Bereich und musste erst
-  herangescrollt werden. Wächst die Leiste über 1120 px hinaus, den Viewport in
-  `playwright.config.ts` erhöhen und **nicht** Gruppen einklappen; das wäre ein
-  Zustand, den Nutzende erst selbst herstellen müssen. Scroll-Container der
-  Leiste ist ihr Raster, greifbar über
-  `div[class*="grid-rows-[auto_1fr_auto]"]` (`SideBar.svelte`).
+- If the API answers with **502** although the backend container is running:
+  after a restart of the backend, `nginx` has cached its old container IP
+  (nginx log: "Host is unreachable") and does not resolve it again. Fixed by
+  `docker restart qonnectra_nginx_prod`. The setup project waits a minute on 5xx
+  responses, because a cold-started stack answers with 502 for a while.
+- The number of canvas elements in the map depends on the tileserver: with vector
+  tiles OpenLayers creates two, in the OSM raster fallback one. So use
+  `page.locator('div.map canvas').first()`.
+- Always set the map position through `page.addInitScript()`, not through
+  "load, set `localStorage`, reload". The app writes `mapCenter` and `mapZoom`
+  back on every `moveend`; if that lands between setting and reloading, the seed
+  is gone and the map starts at the overview. Tests that click on a particular
+  spot then hit nothing and the info box does not open (symptom: `#drawer-title`
+  not found).
+- The base map layer is independent of object selection: `getClickedFeatures`
+  filters via `layerFilter` down to trench, address, node and area
+  (`MapInteractionManager.svelte.ts`). Whether the tileserver runs therefore has
+  no influence on clicks.
+- Selecting a map object by clicking is not reproducible without help: a trench
+  line is only a few pixels wide, and below it lies the project area whose
+  surface covers the entire network. The same spot yields different trenches or
+  the area depending on the run. Clicking repeatedly does not help (it is not a
+  tile race) – for a deterministic hit, hide the layer „Gebiet“ before the click.
+  Switching it back on afterwards is not possible, because the opened info box
+  covers the legend.
+- The window height of 1120 px is measured against the navigation bar: with all
+  groups expanded it needs 1093 px of content (measured); at the earlier 800 px
+  the group „System“ sat below the visible area and had to be scrolled into view
+  first. If the bar grows past 1120 px, raise the viewport in
+  `playwright.config.ts` and do **not** collapse groups; that would be a state
+  users have to produce themselves first. The scroll container of the bar is its
+  grid, reachable through `div[class*="grid-rows-[auto_1fr_auto]"]`
+  (`SideBar.svelte`).
 
-**Die App (Kontext für Selektoren und Routen)**
+**The app (context for selectors and routes)**
 
-SvelteKit + Skeleton. Die Navigationsleiste ist nach Gruppen sortiert; die
-Beschriftungen sind kurz und erst mit der Gruppe eindeutig (Gruppe „Rohr“ →
-„Verwaltung“ = Rohrverwaltung). Routen und Beschriftungen:
+SvelteKit + Skeleton. The navigation bar is sorted into groups; the labels are
+short and only unambiguous together with their group (group „Rohr“ →
+„Verwaltung“ = Rohrverwaltung). Routes and labels:
 
-| Gruppe | Route → Beschriftung |
+| Group | Route → Label |
 |---|---|
 | „Info“ | `/dashboard` „Dashboard“, `/map` „Karte“ |
 | „Funktionen“ | `/fault-simulation` „Störungsanalyse“, `/post-compaction` „Nachverdichtung“, `/pipeline-records` „Leitungsauskunft“, `/valuation` „Wertermittlung“ |
@@ -370,17 +406,17 @@ Beschriftungen sind kurz und erst mit der Gruppe eindeutig (Gruppe „Rohr“ �
 | „Gebäude“ | `/address` „Adressen“ |
 | „System“ | `/admin/logs` „Logs“, `/settings` „Einstellungen“ |
 
-Dazu `/login` ohne Navigationsleiste. Welche Einträge erscheinen, hängt an den
-Rechten (`canAccessRoute`); als Superuser sind alle sichtbar. Mit dem
-Standardkonto der Aufnahmen (Gruppe „Editor“) fehlt in der Gruppe „System“ der
-Eintrag „Logs“ – die Gruppe besteht dort nur aus „Einstellungen“. `/admin/*`
-ist der einzige gesperrte Pfad; alles ohne eigenen `RoutePermission`-Eintrag
-gilt als erlaubt.
-Navigationsdefinition: `local-app/frontend/src/lib/config/navLinks.ts`,
-UI-Texte: `local-app/frontend/messages/de.json`.
+Plus `/login` without a navigation bar. Which entries appear depends on the
+permissions (`canAccessRoute`); as superuser all are visible. With the default
+capture account (group „Editor“) the entry „Logs“ is missing from the group
+„System“ – the group consists only of „Einstellungen“ there. `/admin/*` is the
+only blocked path; everything without its own `RoutePermission` entry counts as
+allowed.
+Navigation definition: `local-app/frontend/src/lib/config/navLinks.ts`,
+UI texts: `local-app/frontend/messages/de.json`.
 
 ## Subagents
 
-- `handbuch-autor` – neue oder erweiterte Handbuchkapitel im obigen Stil
-- `screenshot-automat` – Playwright-Specs für Screenshots/Videos schreiben und ausführen
-- `handbuch-review` – Stil-, Konsistenz- und Rechtschreibprüfung vor dem Commit
+- `manual-author` – new or extended manual chapters in the style above
+- `screenshot-automation` – write and run Playwright specs for screenshots/videos
+- `manual-review` – style, consistency and spelling check before committing
