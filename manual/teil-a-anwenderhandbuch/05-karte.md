@@ -6,7 +6,7 @@ Die Karte ist eines der zentralen Werkzeuge in Qonnectra. Sie dient der visuelle
 
 ## 5.1 Bewegung in der Karte
 
-Sie können in der Karte auf verschiedene Arten navigieren: Zoomen Sie mit dem Mausrad oder dem Touchpad hinein und heraus. Verschieben Sie den Kartenausschnitt mit gedrückter linker Maustaste.
+Mit dem Mausrad oder dem Touchpad zoomen Sie in die Karte hinein und heraus, mit gedrückter linker Maustaste verschieben Sie den Kartenausschnitt.
 
 Wenn Sie bei geöffneter Karte ein anderes Projekt auswählen, springt die Karte nicht automatisch in dessen Gebiet. Um dorthin zu gelangen, klicken Sie in der Legende oben rechts beim Eintrag „Adresse“ auf das Lupensymbol „Auf Ausdehnung zoomen“. Damit navigiert die Ansicht in den Bereich, in dem für dieses Projekt Daten vorhanden sind.
 
@@ -32,7 +32,7 @@ Auf der rechten Seite befindet sich die **interaktive Legende** („Layer“-Men
 - die Einträge „Netzknoten“ und „Gebiet“ über den kleinen Pfeil links aufklappen und die einzelnen Typen getrennt schalten
 - die Hintergrundkarte über den Eintrag „OpenStreetMap“ ausblenden oder in den Dunkelmodus wechseln
 
-Nicht jeder Eintrag bietet alle Möglichkeiten: Beim Eintrag „Rohr“ steht ausschließlich „Leitungsbeschriftungen anzeigen“ zur Verfügung. Mit dem Pfeil links neben „Layer“ klappen Sie die gesamte Liste ein, wenn Sie mehr von der Karte sehen möchten.
+Nicht jeder Eintrag bietet alle Möglichkeiten: Beim Eintrag „Rohr“ steht ausschließlich „Leitungsbeschriftungen anzeigen“ zur Verfügung.
 
 ::: warning
 Beschriftungen werden erst ab einer ausreichenden Zoomstufe eingeblendet. Wenn sich nach dem Einschalten nichts sichtbar ändert, zoomen Sie weiter in die Karte hinein.
@@ -44,7 +44,7 @@ Beschriftungen werden erst ab einer ausreichenden Zoomstufe eingeblendet. Wenn s
 
 ## 5.3 Auswahl von Objekten
 
-Wenn Sie ein Objekt (z. B. eine Trasse oder einen Netzknoten) auf der Karte anklicken, öffnet sich auf der rechten Seite eine Detailanzeige. Diese **Info-Box** überlagert die Karte, ohne den Kartenausschnitt zu verändern. Ihre Reiter stehen untereinander am linken Rand der Box und hängen von der Objektart ab:
+Wenn Sie ein Objekt (z. B. eine Trasse oder einen Netzknoten) auf der Karte anklicken, öffnet sich auf der rechten Seite eine Detailanzeige. Diese **Info-Box** überlagert die Karte, ohne den Kartenausschnitt zu verändern. Welche Reiter sie enthält, hängt von der Objektart ab:
 
 - Trasse: „Eigenschaften“, „Rohrübersicht“, „Kabelübersicht“, „Aktionen“, „Anhänge“
 - Netzknoten und Adresse: „Eigenschaften“, „Aktionen“, „Anhänge“
@@ -52,13 +52,9 @@ Wenn Sie ein Objekt (z. B. eine Trasse oder einen Netzknoten) auf der Karte ankl
 
 Die Angaben im Reiter „Eigenschaften“ sind nicht bearbeitbar, sondern dienen als Informationsquelle. Der Reiter „Rohrübersicht“ zeigt die Rohre der Trasse, siehe Kapitel [Rohrverwaltung](./06-rohrverwaltung.md), „Kabelübersicht“ die darin liegenden Kabel. Im Reiter „Aktionen“ finden Sie weiterführende Ansichten zum ausgewählten Objekt, etwa „Grabenprofil anzeigen“ bei einer Trasse oder „Struktur anzeigen“ bei einem Netzknoten. Bearbeiten können Sie ausschließlich den Reiter „Anhänge“, siehe Abschnitt [Anhänge von Kartenobjekten](#_5-3-1-anhange-von-kartenobjekten).
 
-Ist die Info-Box zu schmal, ziehen Sie sie am linken Rand über den Griff „Größe der Seitenleiste ändern“ breiter. Schließen können Sie sie über das Kreuz „Seitenleiste schließen“ oben rechts in der Box. Ein Klick auf eine freie Stelle der Karte hebt die Auswahl ebenfalls auf – innerhalb eines Projektgebiets ist das allerdings kaum möglich, weil dessen Fläche die gesamte Umgebung überdeckt.
+Ist die Info-Box zu schmal, ziehen Sie sie am linken Rand über den Griff „Größe der Seitenleiste ändern“ breiter. Ein Klick auf eine freie Stelle der Karte hebt die Auswahl auf – innerhalb eines Projektgebiets ist das allerdings kaum möglich, weil dessen Fläche die gesamte Umgebung überdeckt; schließen Sie die Box dann über das Kreuz „Seitenleiste schließen“.
 
 ![Screenshot Karte mit Hervorhebung eines ausgewählten Objekts und der Anzeige der Details in einer Info-Box rechts](/images/manual/teil-a/map_selected_object.jpg)
-
-::: info
-Wenn Sie ein Objekt über die Suche auswählen, öffnet sich die Info-Box **nicht**. Die Karte springt dann nur an die passende Stelle; klicken Sie das Objekt anschließend in der Karte an, um die Details zu sehen.
-:::
 
 ### 5.3.1 Anhänge von Kartenobjekten
 
@@ -80,11 +76,13 @@ Dazu gehen Sie folgendermaßen vor:
 
 1. Geben Sie einen Begriff oder einen Teil davon in das Suchfeld ein.
 2. Drücken Sie Enter oder klicken Sie auf das Lupensymbol.
-3. Die Trefferliste öffnet sich direkt unterhalb des Suchfeldes; links oben steht die Anzahl der Treffer.
-4. Jeder Treffer ist mit seiner Objektart gekennzeichnet, etwa „Adresse“, „Netzknoten“ oder „Trasse“.
+3. Die Trefferliste öffnet sich unterhalb des Suchfeldes und nennt die Anzahl der Treffer.
+4. Jeder Treffer ist mit seiner Objektart gekennzeichnet.
 5. Ab zehn Treffern erscheint im Kopf der Liste das Feld „Filtern“, mit dem Sie die Liste weiter einschränken.
 6. Klicken Sie auf einen Treffer: Die Karte springt an die passende Stelle und das Objekt blinkt dreimal auf.
 
 ![Vier Screenshots des Suchablaufs in der Karte, nummeriert von 1 bis 6](/images/manual/teil-a/map_search_flow.jpg)
 
-Sollten Sie sich Details zu diesem Objekt anzeigen lassen wollen, klicken Sie auf das Objekt in der Karte (siehe [Auswahl von Objekten](#_5-3-auswahl-von-objekten)).
+::: info
+Ein Treffer öffnet die Info-Box **nicht**. Die Karte springt nur an die passende Stelle; klicken Sie das Objekt anschließend in der Karte an, um die Details zu sehen (siehe Abschnitt [Auswahl von Objekten](#_5-3-auswahl-von-objekten)).
+:::

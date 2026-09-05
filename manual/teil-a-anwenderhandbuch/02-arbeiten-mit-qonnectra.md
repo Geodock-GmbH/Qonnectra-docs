@@ -1,6 +1,6 @@
 # 2. Arbeiten mit Qonnectra
 
-Qonnectra ist kein Planungswerkzeug für neue Glasfasernetze. Es ist für die **Dokumentation** und **Verwaltung des passiven Netzbestands** ausgelegt, also für die Bestandteile eines Netzes, die keine aktive Technik wie Ports, Bandbreiten oder Betriebsdaten benötigen. Dieses Kapitel beschreibt, was das für die tägliche Arbeit bedeutet: worauf sich die angezeigten Daten beziehen, was Sie in der Webanwendung ändern können und in welcher Reihenfolge die folgenden Kapitel Sie dabei begleiten.
+Qonnectra ist kein Planungswerkzeug für neue Glasfasernetze. Es ist für die **Dokumentation** und **Verwaltung des passiven Netzbestands** ausgelegt, also für die Bestandteile eines Netzes, die keine aktive Technik wie Ports, Bandbreiten oder Betriebsdaten benötigen. Dieses Kapitel beschreibt, was das für die tägliche Arbeit bedeutet: worauf sich die angezeigten Daten beziehen und was Sie in der Webanwendung ändern können.
 
 ## 2.1 Ziele der Dokumentation
 
@@ -9,8 +9,6 @@ Die **Webanwendung** dient der strukturierten Einsicht, Dokumentation und Auswer
 - **Transparenz schaffen** über den dokumentierten Ausbauzustand,
 - **Wissen sichern**, etwa für Rückfragen von Ämtern, beteiligten Organisationen oder Förderinstitutionen,
 - **Komplexität reduzieren** durch eine klare, nicht überladene Benutzeroberfläche.
-
-Dabei ist Qonnectra flexibel genug, um sich unterschiedlichen Arbeitsweisen und Projektstrukturen anzupassen, ohne sich zu einer Betriebssoftware für aktive Technik zu entwickeln.
 
 ## 2.2 Das Projekt als Bezugsgröße
 
@@ -44,4 +42,4 @@ Für den Einstieg hat sich die folgende Reihenfolge bewährt:
 4. Sehen Sie sich einzelne Objekte in der Karte an und rufen Sie deren Eigenschaften und Anhänge ab, siehe Kapitel [Karte](./05-karte.md).
 5. Pflegen Sie Rohre in der Rohrverwaltung und ordnen Sie sie anschließend den Trassensegmenten zu, siehe Kapitel [Rohrverwaltung](./06-rohrverwaltung.md) und [Rohrzuordnung](./07-rohrzuordnung.md).
 
-Die Kapitel von Teil A folgen dieser Reihenfolge. Sie können sie nacheinander lesen oder gezielt einzeln nachschlagen – jedes Kapitel ist für sich verständlich.
+Die Kapitel von Teil A folgen dieser Reihenfolge.

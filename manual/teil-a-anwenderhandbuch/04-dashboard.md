@@ -12,7 +12,7 @@ Die Kennzahlen werden auf dem Server bis zu fünf Minuten zwischengespeichert. D
 
 ## 4.1 Projekt auswählen
 
-Bevor Kennzahlen sichtbar werden, muss ein Projekt ausgewählt sein. Die Projektauswahl oben links in der Kopfzeile ist eine Kombination aus Eingabefeld und Auswahlliste: Über den Pfeil am rechten Rand öffnen Sie die Liste aller für Sie freigegebenen Projekte, über eine Eingabe in das Feld schränken Sie die Liste auf passende Namen ein. Mit dem Klick auf einen Eintrag wechseln Sie das Projekt; alle Karten und Diagramme werden daraufhin neu geladen.
+Bevor Kennzahlen sichtbar werden, muss ein Projekt ausgewählt sein. Die Projektauswahl oben links in der Kopfzeile ist eine Kombination aus Eingabefeld und Auswahlliste: Über den Pfeil am rechten Rand öffnen Sie die Liste aller für Sie freigegebenen Projekte, über eine Eingabe in das Feld schränken Sie die Liste auf passende Namen ein. Mit dem Klick auf einen Eintrag wechseln Sie das Projekt.
 
 ![Screenshot Dashboard mit Hervorhebung der Projektauswahl oben links in der Kopfzeile](/images/manual/teil-a/dashboard_project.jpg)
 ![Screenshot Ausschnittvergrößerung der geöffneten Projektliste in der Kopfzeile mit dem hervorgehobenen Eintrag „Testprojekt“](/images/manual/teil-a/dashboard_project_detail.jpg)
@@ -23,17 +23,17 @@ Die Eingabe im Feld allein wählt nichts aus – erst der Klick auf einen Eintra
 :::
 
 ::: info
-Die Projektauswahl gilt für die gesamte Anwendung und bleibt beim Wechsel in eine andere Ansicht erhalten (siehe Kapitel [Einstieg und Anmeldung](./03-einstieg-und-anmeldung.md)). Sind für Ihr Benutzerkonto keine Projekte freigegeben, erscheint anstelle des Feldes der Hinweis „Keine Projekte verfügbar“.
+Sind für Ihr Benutzerkonto keine Projekte freigegeben, erscheint anstelle des Feldes der Hinweis „Keine Projekte verfügbar“.
 :::
 
 ## 4.2 Reiter im Dashboard
 
-Unterhalb der Kopfzeile stehen sechs Reiter (Tabs): „Übersicht“ mit den Kennzahlen aller Datenbereiche auf einen Blick sowie „Trasse“, „Rohre“, „Netzknoten“, „Adressen“ und „Gebiete“ mit den Auswertungen des jeweiligen Bereichs. Der aktive Reiter ist farbig hervorgehoben. Alle Auswertungen werden beim Öffnen des Dashboards gemeinsam geladen, der Wechsel zwischen den Reitern lädt also keine Daten nach.
+Unterhalb der Kopfzeile stehen sechs Reiter (Tabs): „Übersicht“ mit den Kennzahlen aller Datenbereiche auf einen Blick sowie „Trasse“, „Rohre“, „Netzknoten“, „Adressen“ und „Gebiete“ mit den Auswertungen des jeweiligen Bereichs. Alle Auswertungen werden beim Öffnen des Dashboards gemeinsam geladen, der Wechsel zwischen den Reitern lädt also keine Daten nach.
 
 ![Screenshot Dashboard mit Hervorhebung der Reiterleiste oberhalb der Inhaltsfläche](/images/manual/teil-a/dashboard_tabs.jpg)
 
 ::: info
-Bei einem schmalen Fenster sind nicht alle sechs Beschriftungen gleichzeitig zu sehen. Die Reiterleiste lässt sich dann waagerecht verschieben, zeigt dabei aber keinen Rollbalken. Auch die Inhaltsfläche darunter ist scrollbar – die unteren Karten und Diagramme werden erst nach dem Scrollen sichtbar.
+Bei einem schmalen Fenster sind nicht alle sechs Beschriftungen gleichzeitig zu sehen. Die Reiterleiste lässt sich dann waagerecht verschieben, zeigt dabei aber keinen Rollbalken.
 :::
 
 ::: info
@@ -42,7 +42,7 @@ Liegen für ein Diagramm keine Werte vor, steht an seiner Stelle „Keine Daten 
 
 ### 4.2.1 Übersicht
 
-Der Reiter „Übersicht“ enthält sechs Karten. Jede nennt oben eine oder zwei große Kennzahlen und darunter die Aufschlüsselung als Liste; der farbige Balken im Hintergrund einer Zeile zeigt deren Anteil am größten Wert der Liste.
+Der Reiter „Übersicht“ enthält sechs Karten. Jede nennt eine oder zwei Kennzahlen und darunter die Aufschlüsselung als Liste; der farbige Balken im Hintergrund einer Zeile zeigt deren Anteil am größten Wert der Liste.
 
 - „Trassenstatistik“ – Gesamtlänge aller Trassen, aufgeschlüsselt nach Verlegeart und Oberfläche
 - „Netzknotenstatistik“ – Anzahl aller Netzknoten, aufgeschlüsselt nach Knotentyp
@@ -54,10 +54,6 @@ Der Reiter „Übersicht“ enthält sechs Karten. Jede nennt oben eine oder zwe
 ![Screenshot Dashboard mit Hervorhebung der Karten im Reiter „Übersicht“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_overview.jpg)
 
 Adressen ohne Ortsangabe und Gebiete ohne Typ erscheinen in ihrer Liste unter „Unbekannt“.
-
-::: info
-Alle Karten begrenzen die Höhe ihrer Liste. Sind mehr Zeilen vorhanden als angezeigt werden, scrollen Sie innerhalb der Karte nach unten.
-:::
 
 #### Gewährleistung
 
@@ -77,7 +73,7 @@ Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projek
 
 ### 4.2.2 Trasse
 
-Im Reiter „Trasse“ finden Sie acht waagerechte Balkendiagramme zu den Trassen des Projekts:
+Im Reiter „Trasse“ finden Sie acht Diagramme zu den Trassen des Projekts:
 
 - „Gesamtlänge pro Oberfläche“
 - „Gesamtlänge pro Verlegeart“
@@ -99,7 +95,7 @@ Genaue Werte lesen Sie einzeln ab: Zeigen Sie mit der Maus auf einen Balken, ers
 Der Reiter „Rohre“ beginnt mit dem Kasten „Top 5 längste Rohre“, der Rang, Name, Typ und Länge der fünf längsten Rohre nennt; sind keine Rohre vorhanden, fehlt der Kasten. Darunter folgen die Diagramme:
 
 - „Länge nach Rohrtyp“
-- „Länge nach Status und Typ“ – gestapelte Balken; die Legende über dem Diagramm erklärt, welche Farbe zu welchem Rohrtyp gehört
+- „Länge nach Status und Typ“ – gestapelte Balken je Status, aufgeschlüsselt nach Rohrtyp
 - „Gesamtlänge pro Netzebene“ – Ringdiagramm
 - „Durchschnittliche Länge nach Typ“
 - „Anzahl Rohre nach Status“
@@ -113,7 +109,7 @@ Angelegt und bearbeitet werden Rohre im Bereich Rohrverwaltung, siehe Kapitel [R
 
 ### 4.2.4 Netzknoten
 
-Der Reiter „Netzknoten“ enthält sechs waagerechte Balkendiagramme: „Netzknoten nach Ort“, „Netzknoten nach Status“, „Netzknoten nach Netzebene“, „Netzknoten nach Typ“, „Netzknoten nach Eigentümer“ und „Neueste Netzknoten“.
+Der Reiter „Netzknoten“ enthält sechs Diagramme: „Netzknoten nach Ort“, „Netzknoten nach Status“, „Netzknoten nach Netzebene“, „Netzknoten nach Typ“, „Netzknoten nach Eigentümer“ und „Neueste Netzknoten“.
 
 ![Screenshot Dashboard mit Hervorhebung der Diagramme im Reiter „Netzknoten“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_node.jpg)
 
@@ -123,7 +119,7 @@ Der Reiter „Netzknoten“ enthält sechs waagerechte Balkendiagramme: „Netzk
 
 ### 4.2.5 Adressen
 
-Der Reiter „Adressen“ enthält vier Diagramme: „Adressen nach Ort“, „Adressen nach Ausbaustatus“ und „Wohneinheiten nach Ort“ als waagerechte Balken sowie „Wohneinheiten nach Typ“ als Ringdiagramm.
+Der Reiter „Adressen“ enthält vier Diagramme: „Adressen nach Ort“, „Adressen nach Ausbaustatus“, „Wohneinheiten nach Ort“ und „Wohneinheiten nach Typ“ als Ringdiagramm.
 
 ![Screenshot Dashboard mit Hervorhebung der Diagramme im Reiter „Adressen“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_address.jpg)
 
@@ -131,9 +127,9 @@ Der Reiter „Adressen“ enthält vier Diagramme: „Adressen nach Ort“, „A
 
 Der Reiter „Gebiete“ zeigt, wie viele Gebiete im Projekt hinterlegt sind und welcher Anteil des Bestands innerhalb dieser Gebiete liegt. In der ersten Reihe stehen die Karten „Anzahl Gebiete“, „Gesamtfläche“ und „Gebiete nach Typ“ als Ringdiagramm.
 
-Darunter folgen drei Karten zur **Abdeckung** – „Adress-Abdeckung“, „Netzknoten-Abdeckung“ und „Wohneinheiten-Abdeckung“. Jede nennt den Wert innerhalb der Gebiete und, durch einen Schrägstrich getrennt, den Gesamtwert des Projekts; darunter steht der auf ganze Zahlen gerundete Anteil in Prozent.
+Darunter folgen drei Karten zur **Abdeckung** – „Adress-Abdeckung“, „Netzknoten-Abdeckung“ und „Wohneinheiten-Abdeckung“. Jede nennt den Wert innerhalb der Gebiete, den Gesamtwert des Projekts und den auf ganze Zahlen gerundeten Anteil in Prozent.
 
-Den unteren Block bilden sechs waagerechte Balkendiagramme: „Adressen pro Gebiet“, „Adressen nach Gebietstyp“, „Netzknoten pro Gebiet“, „Netzknoten nach Gebietstyp“, „Trassenlänge pro Gebiet“ und „Wohneinheiten nach Gebietstyp“.
+Den unteren Block bilden sechs Diagramme: „Adressen pro Gebiet“, „Adressen nach Gebietstyp“, „Netzknoten pro Gebiet“, „Netzknoten nach Gebietstyp“, „Trassenlänge pro Gebiet“ und „Wohneinheiten nach Gebietstyp“.
 
 ![Screenshot Dashboard mit Hervorhebung der Karten und Diagramme im Reiter „Gebiete“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_area.jpg)
 

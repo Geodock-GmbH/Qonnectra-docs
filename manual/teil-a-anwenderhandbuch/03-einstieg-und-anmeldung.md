@@ -2,7 +2,7 @@
 
 ## 3.1 Zugang zur Anwendung
 
-Qonnectra wird über einen Webbrowser bedient; eine Installation auf Ihrem Rechner ist nicht nötig. Die Adresse zur Anmeldung erhalten Sie von Ihrer Organisation oder zuständigen Verwaltung. Auf der Anmeldeseite geben Sie unter der Überschrift „Anmelden“ Ihre Zugangsdaten in die Felder „Benutzername“ und „Passwort“ ein. Mit einem Klick auf „Login“ – oder mit der Eingabetaste – melden Sie sich an und gelangen zum Dashboard.
+Qonnectra wird über einen Webbrowser bedient; eine Installation auf Ihrem Rechner ist nicht nötig. Die Adresse zur Anmeldung erhalten Sie von Ihrer Organisation oder zuständigen Verwaltung. Melden Sie sich mit Benutzernamen und Passwort an; „Login“ oder die Eingabetaste bringt Sie zum Dashboard.
 
 ![Screenshot Anmeldeseite mit dem Anmeldeformular auf der rechten Seite](/images/manual/teil-a/login_start.jpg)
 ![Screenshot Ausschnittvergrößerung des Anmeldeformulars mit den Feldern „Benutzername“ und „Passwort“ und der Schaltfläche „Login“](/images/manual/teil-a/login_start_detail.jpg)
@@ -28,11 +28,11 @@ Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Bedienoberfläche is
 
 ### 3.2.1 Navigationsleiste
 
-Über die Navigationsleiste am linken Rand wechseln Sie zu allen verfügbaren Ansichten. Sie bleibt beim Arbeiten immer sichtbar, der aktive Eintrag ist farbig hervorgehoben. Die Einträge sind nach Themen gruppiert:
+Über die Navigationsleiste am linken Rand wechseln Sie zu allen verfügbaren Ansichten; sie bleibt beim Arbeiten immer sichtbar. Die Einträge sind nach Themen gruppiert:
 
-- „Info“ – „Dashboard“ (Startansicht mit Gesamtüberblick, siehe Kapitel [Dashboard](./04-dashboard.md)) und „Karte“ (Netzinfrastruktur auf der Karte, siehe Kapitel [Karte](./05-karte.md))
+- „Info“ – „Dashboard“ (Startansicht, siehe Kapitel [Dashboard](./04-dashboard.md)) und „Karte“ (siehe Kapitel [Karte](./05-karte.md))
 - „Funktionen“ – „Störungsanalyse“, „Nachverdichtung“, „Leitungsauskunft“ und „Wertermittlung“: Auswertungen und Verfahren, die auf den dokumentierten Daten aufbauen
-- „Rohr“ – „Verwaltung“ (Anlegen und Verwalten von Rohren, siehe Kapitel [Rohrverwaltung](./06-rohrverwaltung.md)), „Zuordnung“ (Zuordnung der Rohre zu den Trassen, siehe Kapitel [Rohrzuordnung](./07-rohrzuordnung.md)), „Verzweigung“ und „Mikrorohre“
+- „Rohr“ – „Verwaltung“ (siehe Kapitel [Rohrverwaltung](./06-rohrverwaltung.md)), „Zuordnung“ (siehe Kapitel [Rohrzuordnung](./07-rohrzuordnung.md)), „Verzweigung“ und „Mikrorohre“
 - „Kabel“ – „Netzschema“ und „Faserweg“
 - „Gebäude“ – „Adressen“
 - „System“ – „Logs“ und „Einstellungen“ (siehe Abschnitt 3.2.4)
@@ -42,7 +42,7 @@ Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Bedienoberfläche is
 Ein Klick auf einen Gruppennamen – etwa „Funktionen“ – klappt die Gruppe zu und wieder auf. Einträge, die Sie nicht benötigen, können Sie dauerhaft ausblenden:
 
 1. Klicken Sie oben rechts neben dem Schriftzug „Qonnectra“ auf das Symbol mit den Schiebereglern („Seitenleiste anpassen“).
-2. Klicken Sie neben einem Eintrag auf „Ausblenden“. Ausgeblendete Einträge bleiben in diesem Modus blass sichtbar und lassen sich über „Einblenden“ zurückholen; „Seitenleiste zurücksetzen“ stellt alle Einträge und Gruppen wieder her.
+2. Klicken Sie neben einem Eintrag auf „Ausblenden“. Über „Einblenden“ holen Sie ihn zurück, „Seitenleiste zurücksetzen“ stellt alle Einträge und Gruppen wieder her.
 3. Beenden Sie die Anpassung über dasselbe Symbol („Fertig“).
 
 ::: info
@@ -59,7 +59,7 @@ Oben rechts in der Kopfzeile finden Sie:
 - die Spracheinstellung: Deutsch („DE“) oder Englisch („EN“)
 - einen Verweis auf das Projekt bei GitHub, in dem Qonnectra entwickelt wird
 - „Hell-/Dunkelmodus umschalten“
-- „Abmelden“ – danach werden Sie automatisch zur Anmeldeseite zurückgeleitet
+- „Abmelden“
 
 ![Screenshot Dashboard mit Hervorhebung der Kopfzeile am oberen Rand](/images/manual/teil-a/login_header.jpg)
 
@@ -70,8 +70,6 @@ Wenn Ihre Installation eine Adresse für dieses Handbuch hinterlegt hat, erschei
 ### 3.2.3 Inhalt
 
 In der zentralen Inhaltsfläche werden alle projektbezogenen Informationen angezeigt: Statistiken, Listen, Karten usw. Welche Inhalte sichtbar sind, hängt vom gewählten Projekt (oben links in der Kopfzeile), dem gewählten Navigationseintrag (linke Navigationsleiste) und ggf. von dem gewählten Reiter (meist unterhalb der Kopfzeile) ab.
-
-Karten, Grafiken und Listen sind meist interaktiv: Beispielsweise können Sie in einem Diagramm mit der Maus über einen Datenpunkt fahren („hovern“), um Details anzuzeigen.
 
 ### 3.2.4 Einstellungen
 
