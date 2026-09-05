@@ -29,8 +29,6 @@ import {
 //   dashboard_area             content area of tab "Gebiete" (pattern 2)
 //   dashboard_warranty         card "Gewährleistung" with three deadlines (pattern 2)
 //
-// The videos of the chapter live in tests/04-dashboard-video.spec.ts.
-//
 // Publish to public/images/ with: pnpm screenshots:publish 04-dashboard
 const CHAPTER = '04-dashboard'
 

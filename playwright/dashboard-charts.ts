@@ -1,8 +1,7 @@
 // Tools for the Chart.js charts of the dashboard.
 //
-// Both kinds of capture in chapter "4. Dashboard" need them: the still images
-// in tests/04-dashboard.spec.ts (tooltip above the longest bar) and the video
-// in tests/04-dashboard-video.spec.ts (tooltip above several bars in a row).
+// The still images of chapter "4. Dashboard" need them: tests/04-dashboard.spec.ts
+// puts the tooltip above the longest bar.
 //
 // Why measure in the picture at all: Chart.js draws bars **and** tooltip into
 // the canvas (Chart.svelte). There is neither an element a locator could point
