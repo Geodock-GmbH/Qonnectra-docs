@@ -50,6 +50,15 @@ export default defineConfig({
       light: 'github-light',
       dark: 'github-dark'
     },
+
+    // Default titles of the note containers of the manual. Without them
+    // VitePress writes its English defaults ("INFO", "WARNING", "DANGER"); a
+    // chapter only spells out a title of its own where it deviates from these.
+    container: {
+      infoLabel: 'Hinweis',
+      warningLabel: 'Wichtig',
+      dangerLabel: 'Achtung'
+    },
     config: (md) => {
       md.use(lightbox, {})
       md.use(html5Media, {

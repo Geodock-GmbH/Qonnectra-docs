@@ -106,8 +106,13 @@ below quote German.
   „Rohrverwaltung“.“), followed directly by an overview screenshot.
 - Bullet lists for options/properties, **numbered** lists only for genuine
   step-by-step procedures.
-- Notes as a normal paragraph with the prefix `Hinweis:`, `Wichtig:` or
-  `Wichtiger Hinweis:` – **no** VitePress containers (`::: tip`).
+- Notes as VitePress containers, closed with `:::`, in three escalating levels:
+  `::: info` („Hinweis“, blue) for anything worth knowing, `::: warning`
+  („Wichtig“, yellow) for limits and pitfalls, `::: danger` („Achtung“, red) for
+  the cases where data is lost. The titles come from `markdown.container` in
+  `.vitepress/config.ts` – write one out only where it deviates. The styling of
+  the three sits in `.vitepress/theme/custom.css`, `::: details` on the landing
+  page keeps the VitePress look.
 - Cross-references as relative links: `siehe Kapitel [Karte](./05-karte.md)`.
 - Placeholder for chapters still to be written:
   `_Die Dokumentation zu diesem Kapitel ist noch in Arbeit._`

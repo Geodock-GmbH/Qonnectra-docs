@@ -32,8 +32,10 @@ that was named explicitly.
 - „z. B.“ / „ggf.“ with a space.
 - UI labels in typographic quotation marks „…“, not in `backticks` or straight
   quotes.
-- Notes as a paragraph with `Hinweis:` / `Wichtig:` / `Wichtiger Hinweis:`, no
-  `::: tip` containers.
+- Notes as `::: info` / `::: warning` / `::: danger` containers with a closing
+  `:::`, their titles come from `.vitepress/config.ts` and belong in the source
+  only where they deviate. `danger` is reserved for losing data. A note as a
+  bare paragraph with a `Hinweis:` prefix is a leftover of the old style.
 
 **Factual accuracy**
 - Every quoted UI label exists that way in

@@ -6,7 +6,9 @@ Das **Dashboard** ist die zentrale Übersichtsseite von Qonnectra. Es fasst den 
 
 Alle Auswertungen beziehen sich auf das Projekt, das oben links in der Kopfzeile ausgewählt ist, und sind ausschließlich zur Ansicht bestimmt: Werte lassen sich hier nicht bearbeiten, eine Exportfunktion gibt es nicht.
 
-Hinweis: Die Kennzahlen werden auf dem Server bis zu fünf Minuten zwischengespeichert. Daten, die Sie gerade in einer anderen Ansicht erfasst haben, erscheinen deshalb unter Umständen erst mit einigen Minuten Verzögerung – ein Neuladen der Seite beschleunigt das nicht.
+::: info
+Die Kennzahlen werden auf dem Server bis zu fünf Minuten zwischengespeichert. Daten, die Sie gerade in einer anderen Ansicht erfasst haben, erscheinen deshalb unter Umständen erst mit einigen Minuten Verzögerung – ein Neuladen der Seite beschleunigt das nicht.
+:::
 
 ## 4.1 Projekt auswählen
 
@@ -16,9 +18,13 @@ Bevor Kennzahlen sichtbar werden, muss ein Projekt ausgewählt sein. Die Projekt
 ![Screenshot Ausschnittvergrößerung der geöffneten Projektliste in der Kopfzeile mit dem hervorgehobenen Eintrag „Testprojekt“](/images/manual/teil-a/dashboard_project_detail.jpg)
 {.img-row}
 
-Wichtig: Die Eingabe im Feld allein wählt nichts aus – erst der Klick auf einen Eintrag der Liste wechselt das Projekt. Solange kein Projekt gewählt ist, bleiben alle Kennzahlen auf Null und die Diagramme zeigen „Keine Daten verfügbar“.
+::: warning
+Die Eingabe im Feld allein wählt nichts aus – erst der Klick auf einen Eintrag der Liste wechselt das Projekt. Solange kein Projekt gewählt ist, bleiben alle Kennzahlen auf Null und die Diagramme zeigen „Keine Daten verfügbar“.
+:::
 
-Hinweis: Die Projektauswahl gilt für die gesamte Anwendung und bleibt beim Wechsel in eine andere Ansicht erhalten (siehe Kapitel [Einstieg und Anmeldung](./03-einstieg-und-anmeldung.md)). Sind für Ihr Benutzerkonto keine Projekte freigegeben, erscheint anstelle des Feldes der Hinweis „Keine Projekte verfügbar“.
+::: info
+Die Projektauswahl gilt für die gesamte Anwendung und bleibt beim Wechsel in eine andere Ansicht erhalten (siehe Kapitel [Einstieg und Anmeldung](./03-einstieg-und-anmeldung.md)). Sind für Ihr Benutzerkonto keine Projekte freigegeben, erscheint anstelle des Feldes der Hinweis „Keine Projekte verfügbar“.
+:::
 
 ## 4.2 Reiter im Dashboard
 
@@ -26,9 +32,13 @@ Unterhalb der Kopfzeile stehen sechs Reiter (Tabs): „Übersicht“ mit den Ken
 
 ![Screenshot Dashboard mit Hervorhebung der Reiterleiste oberhalb der Inhaltsfläche](/images/manual/teil-a/dashboard_tabs.jpg)
 
-Hinweis: Bei einem schmalen Fenster sind nicht alle sechs Beschriftungen gleichzeitig zu sehen. Die Reiterleiste lässt sich dann waagerecht verschieben, zeigt dabei aber keinen Rollbalken. Auch die Inhaltsfläche darunter ist scrollbar – die unteren Karten und Diagramme werden erst nach dem Scrollen sichtbar.
+::: info
+Bei einem schmalen Fenster sind nicht alle sechs Beschriftungen gleichzeitig zu sehen. Die Reiterleiste lässt sich dann waagerecht verschieben, zeigt dabei aber keinen Rollbalken. Auch die Inhaltsfläche darunter ist scrollbar – die unteren Karten und Diagramme werden erst nach dem Scrollen sichtbar.
+:::
 
-Hinweis: Liegen für ein Diagramm keine Werte vor, steht an seiner Stelle „Keine Daten verfügbar“. Das ist kein Fehler: Fehlt eine Angabe im Projekt durchgängig – etwa die Netzebene der Rohre –, bleibt das zugehörige Diagramm leer, während die übrigen gefüllt sind.
+::: info
+Liegen für ein Diagramm keine Werte vor, steht an seiner Stelle „Keine Daten verfügbar“. Das ist kein Fehler: Fehlt eine Angabe im Projekt durchgängig – etwa die Netzebene der Rohre –, bleibt das zugehörige Diagramm leer, während die übrigen gefüllt sind.
+:::
 
 ### 4.2.1 Übersicht
 
@@ -45,7 +55,9 @@ Der Reiter „Übersicht“ enthält sechs Karten. Jede nennt oben eine oder zwe
 
 Adressen ohne Ortsangabe und Gebiete ohne Typ erscheinen in ihrer Liste unter „Unbekannt“.
 
-Hinweis: Alle Karten begrenzen die Höhe ihrer Liste. Sind mehr Zeilen vorhanden als angezeigt werden, scrollen Sie innerhalb der Karte nach unten.
+::: info
+Alle Karten begrenzen die Höhe ihrer Liste. Sind mehr Zeilen vorhanden als angezeigt werden, scrollen Sie innerhalb der Karte nach unten.
+:::
 
 #### Gewährleistung
 
@@ -59,7 +71,9 @@ Sind für das Projekt keine Fristen hinterlegt, erscheint stattdessen „Keine G
 
 ![Screenshot Dashboard mit Hervorhebung der Karte „Gewährleistung“ und ihren farbig hinterlegten Einträgen unten rechts in der Inhaltsfläche](/images/manual/teil-a/dashboard_warranty.jpg)
 
-Wichtig: Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projekts – sie zeigt höchstens fünf Netzknoten, bereits abgelaufene Fristen erscheinen nicht mehr. Die Frist eines einzelnen Netzknotens finden Sie in dessen Info-Box im Reiter „Eigenschaften“ (siehe Kapitel [Karte](./05-karte.md)).
+::: warning
+Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projekts – sie zeigt höchstens fünf Netzknoten, bereits abgelaufene Fristen erscheinen nicht mehr. Die Frist eines einzelnen Netzknotens finden Sie in dessen Info-Box im Reiter „Eigenschaften“ (siehe Kapitel [Karte](./05-karte.md)).
+:::
 
 ### 4.2.2 Trasse
 
@@ -103,7 +117,9 @@ Der Reiter „Netzknoten“ enthält sechs waagerechte Balkendiagramme: „Netzk
 
 ![Screenshot Dashboard mit Hervorhebung der Diagramme im Reiter „Netzknoten“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_node.jpg)
 
-Hinweis: „Neueste Netzknoten“ ist eine Aufzählung, keine Mengenauswertung. Das Diagramm listet die fünf zuletzt datierten Netzknoten mit Namen und Typ auf; alle Balken sind deshalb gleich lang. Netzknoten, bei denen die jeweilige Angabe fehlt, bleiben in allen Diagrammen unberücksichtigt – die Summe der Balken muss daher nicht der Gesamtzahl aus dem Reiter „Übersicht“ entsprechen.
+::: info
+„Neueste Netzknoten“ ist eine Aufzählung, keine Mengenauswertung. Das Diagramm listet die fünf zuletzt datierten Netzknoten mit Namen und Typ auf; alle Balken sind deshalb gleich lang. Netzknoten, bei denen die jeweilige Angabe fehlt, bleiben in allen Diagrammen unberücksichtigt – die Summe der Balken muss daher nicht der Gesamtzahl aus dem Reiter „Übersicht“ entsprechen.
+:::
 
 ### 4.2.5 Adressen
 
@@ -121,4 +137,6 @@ Den unteren Block bilden sechs waagerechte Balkendiagramme: „Adressen pro Gebi
 
 ![Screenshot Dashboard mit Hervorhebung der Karten und Diagramme im Reiter „Gebiete“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_area.jpg)
 
-Wichtig: Die Diagramme „Adressen pro Gebiet“, „Netzknoten pro Gebiet“ und „Trassenlänge pro Gebiet“ zeigen höchstens die zehn Gebiete mit den höchsten Werten. Bei mehr als zehn Gebieten ist die Auswertung also keine vollständige Liste.
+::: warning
+Die Diagramme „Adressen pro Gebiet“, „Netzknoten pro Gebiet“ und „Trassenlänge pro Gebiet“ zeigen höchstens die zehn Gebiete mit den höchsten Werten. Bei mehr als zehn Gebieten ist die Auswertung also keine vollständige Liste.
+:::

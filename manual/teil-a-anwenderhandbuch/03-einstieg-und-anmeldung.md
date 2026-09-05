@@ -8,7 +8,9 @@ Qonnectra wird über einen Webbrowser bedient; eine Installation auf Ihrem Rechn
 ![Screenshot Ausschnittvergrößerung des Anmeldeformulars mit den Feldern „Benutzername“ und „Passwort“ und der Schaltfläche „Login“](/images/manual/teil-a/login_start_detail.jpg)
 {.img-row}
 
-Hinweis: Stimmen Benutzername oder Passwort nicht, erscheint am unteren Bildschirmrand kurz die Meldung „Fehler beim Anmelden“ und Sie bleiben auf der Anmeldeseite. Prüfen Sie in diesem Fall die Groß- und Kleinschreibung.
+::: info
+Stimmen Benutzername oder Passwort nicht, erscheint am unteren Bildschirmrand kurz die Meldung „Fehler beim Anmelden“ und Sie bleiben auf der Anmeldeseite. Prüfen Sie in diesem Fall die Groß- und Kleinschreibung.
+:::
 
 ### 3.1.1 Noch keine Zugangsdaten?
 
@@ -43,7 +45,9 @@ Ein Klick auf einen Gruppennamen – etwa „Funktionen“ – klappt die Gruppe
 2. Klicken Sie neben einem Eintrag auf „Ausblenden“. Ausgeblendete Einträge bleiben in diesem Modus blass sichtbar und lassen sich über „Einblenden“ zurückholen; „Seitenleiste zurücksetzen“ stellt alle Einträge und Gruppen wieder her.
 3. Beenden Sie die Anpassung über dasselbe Symbol („Fertig“).
 
-Hinweis: Zugeklappte Gruppen und ausgeblendete Einträge merkt sich nur der Browser, in dem Sie sie eingestellt haben – an einem anderen Rechner sehen Sie wieder die vollständige Navigationsleiste. Welche Einträge überhaupt erscheinen, hängt zudem von Ihren Rechten ab: Fehlt ein hier genannter Eintrag, wenden Sie sich an Ihre Administration.
+::: info
+Zugeklappte Gruppen und ausgeblendete Einträge merkt sich nur der Browser, in dem Sie sie eingestellt haben – an einem anderen Rechner sehen Sie wieder die vollständige Navigationsleiste. Welche Einträge überhaupt erscheinen, hängt zudem von Ihren Rechten ab: Fehlt ein hier genannter Eintrag, wenden Sie sich an Ihre Administration.
+:::
 
 ### 3.2.2 Kopfzeile
 
@@ -59,7 +63,9 @@ Oben rechts in der Kopfzeile finden Sie:
 
 ![Screenshot Dashboard mit Hervorhebung der Kopfzeile am oberen Rand](/images/manual/teil-a/login_header.jpg)
 
-Hinweis: Wenn Ihre Installation eine Adresse für dieses Handbuch hinterlegt hat, erscheint zusätzlich ein Buchsymbol („Dokumentation“), das das Handbuch in einem neuen Tab öffnet.
+::: info
+Wenn Ihre Installation eine Adresse für dieses Handbuch hinterlegt hat, erscheint zusätzlich ein Buchsymbol („Dokumentation“), das das Handbuch in einem neuen Tab öffnet.
+:::
 
 ### 3.2.3 Inhalt
 
@@ -73,4 +79,6 @@ Ganz unten links, in der Gruppe „System“, finden Sie den Eintrag „Einstell
 
 ![Screenshot Dashboard mit Hervorhebung der Gruppe „System“ mit „Logs“ und „Einstellungen“ unten links](/images/manual/teil-a/login_settings.jpg)
 
-Hinweis: Wenn die Gruppe „System“ nicht zu sehen ist, scrollen Sie in der Navigationsleiste nach unten.
+::: info
+Wenn die Gruppe „System“ nicht zu sehen ist, scrollen Sie in der Navigationsleiste nach unten.
+:::

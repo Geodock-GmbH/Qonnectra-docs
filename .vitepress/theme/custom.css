@@ -105,11 +105,6 @@
   color: var(--vp-c-neutral-inverse);
 }
 
-/* box styling*/
-.vp-doc .info {
-  margin: 40px 0;
-}
-
 /* Custom components */
 
 .VPFeature li {
@@ -184,4 +179,67 @@
 /* Global button styling */
 .vp-doc a.VPButton {
   text-decoration: none;
+}
+
+/* Notes of the manual.
+
+   `::: info Hinweis`, `::: warning Wichtig` and `::: danger Achtung` blocks:
+   icon in a column of its own, title in the colour of the box. Only these three
+   kinds are restyled - `::: details` on the landing page keeps the VitePress
+   look. */
+.vp-doc .custom-block.info,
+.vp-doc .custom-block.warning,
+.vp-doc .custom-block.danger {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  column-gap: 12px;
+  margin: 24px 0;
+  padding: 14px 16px;
+  border-color: color-mix(in srgb, var(--note-accent) 30%, transparent);
+  color: var(--vp-c-text-1);
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* Icon in the first column, over the full height of the box */
+.vp-doc .custom-block.info::before,
+.vp-doc .custom-block.warning::before,
+.vp-doc .custom-block.danger::before {
+  content: '';
+  grid-row: 1 / -1;
+  width: 20px;
+  height: 20px;
+  margin-top: 3px;
+  background-color: var(--note-accent);
+  -webkit-mask: var(--note-icon) center / contain no-repeat;
+  mask: var(--note-icon) center / contain no-repeat;
+}
+
+.vp-doc .custom-block.info p,
+.vp-doc .custom-block.warning p,
+.vp-doc .custom-block.danger p {
+  grid-column: 2;
+  margin: 0;
+}
+
+.vp-doc .custom-block.info .custom-block-title,
+.vp-doc .custom-block.warning .custom-block-title,
+.vp-doc .custom-block.danger .custom-block-title {
+  color: var(--note-accent);
+}
+
+.vp-doc .custom-block.info {
+  --note-accent: var(--vp-c-indigo-1);
+  --note-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><circle cx='12' cy='12' r='10'/><path d='M12 16v-4'/><path d='M12 8h.01'/></svg>");
+  --vp-custom-block-info-bg: var(--vp-c-indigo-soft);
+}
+
+.vp-doc .custom-block.warning {
+  --note-accent: var(--vp-c-yellow-1);
+  --note-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3'/><path d='M12 9v4'/><path d='M12 17h.01'/></svg>");
+}
+
+.vp-doc .custom-block.danger {
+  --note-accent: var(--vp-c-red-1);
+  --note-icon: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M12 16h.01'/><path d='M12 8v4'/><path d='M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z'/></svg>");
 }

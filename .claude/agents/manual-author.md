@@ -39,8 +39,10 @@ comments, script output) is English.
   quotation marks: „Speichern“, Reiter „Anhänge“.
 - Bullet lists for options and properties; numbered lists only for genuine
   step-by-step procedures.
-- Notes as a normal paragraph with `Hinweis:`, `Wichtig:` or
-  `Wichtiger Hinweis:`. No VitePress containers (`::: tip`).
+- Notes as VitePress containers, closed with `:::`: `::: info` („Hinweis“) for
+  anything worth knowing, `::: warning` („Wichtig“) for limits and pitfalls,
+  `::: danger` („Achtung“) where data is lost. The titles are set centrally in
+  `.vitepress/config.ts`; write one out only where it deviates.
 - Cross-references relative: `siehe Kapitel [Karte](./05-karte.md)`.
 - „z. B.“ and „ggf.“ with a space.
 - Actively name pitfalls and limits: unsaved changes, buttons invisible in small

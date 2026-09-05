@@ -14,7 +14,9 @@ Wenn Sie bei geöffneter Karte ein anderes Projekt auswählen, springt die Karte
 ![Screenshot Karte nach dem Zoom auf die Ausdehnung des Layers Adresse](/images/manual/teil-a/map_address_detail_select.jpg)
 {.img-row}
 
-Hinweis: Qonnectra merkt sich den letzten Kartenausschnitt. Wenn Sie die Karte erneut öffnen, sehen Sie wieder die Stelle, an der Sie zuletzt gearbeitet haben.
+::: info
+Qonnectra merkt sich den letzten Kartenausschnitt. Wenn Sie die Karte erneut öffnen, sehen Sie wieder die Stelle, an der Sie zuletzt gearbeitet haben.
+:::
 
 ## 5.2 Anpassung der Darstellung
 
@@ -32,7 +34,9 @@ Auf der rechten Seite befindet sich die **interaktive Legende** („Layer“-Men
 
 Nicht jeder Eintrag bietet alle Möglichkeiten: Beim Eintrag „Rohr“ steht ausschließlich „Leitungsbeschriftungen anzeigen“ zur Verfügung. Mit dem Pfeil links neben „Layer“ klappen Sie die gesamte Liste ein, wenn Sie mehr von der Karte sehen möchten.
 
-Wichtig: Beschriftungen werden erst ab einer ausreichenden Zoomstufe eingeblendet. Wenn sich nach dem Einschalten nichts sichtbar ändert, zoomen Sie weiter in die Karte hinein.
+::: warning
+Beschriftungen werden erst ab einer ausreichenden Zoomstufe eingeblendet. Wenn sich nach dem Einschalten nichts sichtbar ändert, zoomen Sie weiter in die Karte hinein.
+:::
 
 ![Screenshot Karte mit Hervorhebung der Legende oben rechts](/images/manual/teil-a/map_legend.jpg)
 ![Vier Screenshots der Karte mit verschiedenen Einstellungen in der Legende](/images/manual/teil-a/map_legend_actions.jpg)
@@ -52,7 +56,9 @@ Ist die Info-Box zu schmal, ziehen Sie sie am linken Rand über den Griff „Gr�
 
 ![Screenshot Karte mit Hervorhebung eines ausgewählten Objekts und der Anzeige der Details in einer Info-Box rechts](/images/manual/teil-a/map_selected_object.jpg)
 
-Hinweis: Wenn Sie ein Objekt über die Suche auswählen, öffnet sich die Info-Box **nicht**. Die Karte springt dann nur an die passende Stelle; klicken Sie das Objekt anschließend in der Karte an, um die Details zu sehen.
+::: info
+Wenn Sie ein Objekt über die Suche auswählen, öffnet sich die Info-Box **nicht**. Die Karte springt dann nur an die passende Stelle; klicken Sie das Objekt anschließend in der Karte an, um die Details zu sehen.
+:::
 
 ### 5.3.1 Anhänge von Kartenobjekten
 
