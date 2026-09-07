@@ -16,7 +16,7 @@ Das Handbuch ist bewusst praxisorientiert aufgebaut. Es folgt der Struktur der A
 
 ## Zielgruppen und Aufbau des Handbuchs
 
-Qonnectra wird von Nutzenden (Usern) mit sehr unterschiedlichen fachlichen Hintergründen verwendet. Entsprechend ist auch dieses Handbuch in mehrere Teile gegliedert, die sich an verschiedene Zielgruppen richten.
+Qonnectra wird von Nutzenden mit sehr unterschiedlichen fachlichen Hintergründen verwendet. Entsprechend ist auch dieses Handbuch in mehrere Teile gegliedert, die sich an verschiedene Zielgruppen richten.
 
 Das Handbuch besteht aus drei Hauptteilen:
 
@@ -27,7 +27,7 @@ Das Handbuch besteht aus drei Hauptteilen:
   Dieser Teil richtet sich an Personen mit administrativen und fachlichen Aufgaben, z. B. für Benutzerverwaltung, Stammdatenpflege, Qualitätssicherung sowie die Nutzung von QGIS für geometrische Arbeiten und spezielle GIS-Aufgaben. Er beschreibt den sicheren Betrieb von Qonnectra sowie die verantwortungsvolle Nutzung von QGIS im Zusammenspiel mit der Webanwendung.
 
 - **Teil C – Entwicklungs- und Systemdokumentation**  
-  Dieser Teil richtet sich ausschließlich an fachlich-technische Rollen, darunter Personen in der Softwareentwicklung, im DevOps, in der GIS-Administration sowie in der Open-Source-Community.. Er beschreibt Setup, Architektur, Schnittstellen, Datenmodelle und Erweiterungsmöglichkeiten von Qonnectra.
+  Dieser Teil richtet sich ausschließlich an fachlich-technische Rollen, darunter Personen in der Softwareentwicklung, im DevOps, in der GIS-Administration sowie in der Open-Source-Community. Er beschreibt Setup, Architektur, Schnittstellen, Datenmodelle und Erweiterungsmöglichkeiten von Qonnectra.
 
 
 | Ebene | Zielgruppe | Werkzeuge/Technologien | Handbuch |

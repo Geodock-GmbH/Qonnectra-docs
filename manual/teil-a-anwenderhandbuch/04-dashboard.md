@@ -96,7 +96,7 @@ Den unteren Block bilden sechs Diagramme: „Adressen pro Gebiet“, „Adressen
 ![Screenshot Dashboard mit Hervorhebung der Karten und Diagramme im Reiter „Gebiete“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_area.jpg)
 
 ::: warning
-Die Diagramme „Adressen pro Gebiet“, „Netzknoten pro Gebiet“ und „Trassenlänge pro Gebiet“ zeigen höchstens die zehn Gebiete mit den höchsten Werten. Bei mehr als zehn Gebieten ist die Auswertung also keine vollständige Liste.
+Die Diagramme „Adressen pro Gebiet“, „Netzknoten pro Gebiet“ und „Trassenlänge pro Gebiet“ zeigen höchstens die zehn Gebiete mit den höchsten Werten. Bei mehr als zehn Gebieten ist die Auswertung also keine vollständige Liste. Gebiete, in denen es keine Adressen, keine Netzknoten bzw. keine Trassen gibt, fehlen darin ganz.
 :::
 
 ## 4.7 Gewährleistungsfristen im Blick behalten
@@ -117,8 +117,14 @@ Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projek
 
 ## 4.8 Nach Kennzeichen filtern und wie aktuell die Werte sind
 
+### 4.8.1 Nach Kennzeichen filtern
+
+_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
+
+### 4.8.2 Wie aktuell die Werte sind
+
+Das Dashboard liest seine Werte nicht bei jedem Aufruf neu aus der Datenbank.
+
 ::: info
 Die Kennzahlen werden auf dem Server bis zu fünf Minuten zwischengespeichert. Daten, die Sie gerade in einer anderen Ansicht erfasst haben, erscheinen deshalb unter Umständen erst mit einigen Minuten Verzögerung – ein Neuladen der Seite beschleunigt das nicht.
 :::
-
-_Die Dokumentation zum Filtern nach Kennzeichen ist noch in Arbeit._

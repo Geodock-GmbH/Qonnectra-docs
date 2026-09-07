@@ -98,7 +98,7 @@ Für die Datei gilt:
 - Bleibt die Spalte „Typ“ leer, entsteht das Rohr ohne Mikrorohre.
 
 ::: warning
-Der Import ist ein Alles-oder-nichts-Vorgang: Ist eine einzige Zeile fehlerhaft, wird keine einzige Zeile übernommen. Die Meldung nennt die betroffene Zeilennummer und den Grund. Zurückgewiesen werden unter anderem Zeilen ohne Namen und Namen, die es in Qonnectra bereits gibt – auch in einem anderen Projekt.
+Der Import ist ein Alles-oder-nichts-Vorgang: Ist eine einzige Zeile fehlerhaft, wird keine einzige Zeile übernommen. Die Meldung nennt die betroffene Zeilennummer und den Grund. Zurückgewiesen werden unter anderem Zeilen ohne Namen und Namen, die es in Qonnectra bereits gibt – auch in einem anderen Projekt. Die Meldungen zu Eigentümer, Baufirma und Hersteller erscheinen auf Englisch, auch wenn die Oberfläche auf Deutsch steht.
 :::
 
 ::: info

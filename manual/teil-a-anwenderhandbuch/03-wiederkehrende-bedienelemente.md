@@ -12,7 +12,11 @@ _Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
 
 ## 3.3 Das Kartenfenster
 
-Ein Kartenfenster zeigen die Karte selbst sowie die Rohrzuordnung, die Mikrorohre, die Störungsanalyse, die Leitungsauskunft und die Wertermittlung. Es verhält sich überall gleich.
+Ein Kartenfenster zeigen die Karte selbst sowie die Rohrzuordnung, die Mikrorohre, die Störungsanalyse, die Leitungsauskunft, die Wertermittlung und das Netzschema beim Verknüpfen eines Kabels mit Mikrorohren. In diesen Ansichten verhält es sich gleich; dieser Abschnitt beschreibt es.
+
+::: info
+Die Nachverdichtung und die Detailansicht einer Adresse enthalten ebenfalls eine Karte, dort aber in einer verkleinerten Form ohne Suche, Legende und Transparenzregler. Sie dient nur der Lagekontrolle.
+:::
 
 Mit dem Mausrad oder dem Touchpad zoomen Sie in die Karte hinein und heraus, mit gedrückter linker Maustaste verschieben Sie den Kartenausschnitt.
 
@@ -29,6 +33,12 @@ Auf der rechten Seite befindet sich die **interaktive Legende** („Layer“-Men
 - die Hintergrundkarte über den Eintrag „OpenStreetMap“ ausblenden oder in den Dunkelmodus wechseln
 
 Nicht jeder Eintrag bietet alle Möglichkeiten: Beim Eintrag „Rohr“ steht ausschließlich „Leitungsbeschriftungen anzeigen“ zur Verfügung.
+
+Der Eintrag „Trasse“ lässt sich zusätzlich aufklappen, sobald Sie unter „Einstellungen“ die „Trassen-Darstellung“ von „Einzelne Farbe“ auf „Nach Oberfläche“ oder „Nach Bauart“ umgestellt haben. Sie schalten dann die einzelnen Oberflächen oder Bauarten getrennt, siehe Kapitel [Einstellungen](./17-einstellungen.md).
+
+::: info
+Hat Ihre Administration für das Projekt externe Kartendienste (WMS) hinterlegt, stehen diese unterhalb der aufgeführten Einträge als eigene, aufklappbare Gruppe. Das Einrichten beschreibt Kapitel [QGIS-Server und Kartendienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md).
+:::
 
 ::: warning
 Beschriftungen werden erst ab einer ausreichenden Zoomstufe eingeblendet. Wenn sich nach dem Einschalten nichts sichtbar ändert, zoomen Sie weiter in die Karte hinein.
@@ -56,7 +66,7 @@ Dazu gehen Sie folgendermaßen vor:
 2. Drücken Sie Enter oder klicken Sie auf das Lupensymbol.
 3. Die Trefferliste öffnet sich unterhalb des Suchfeldes und nennt die Anzahl der Treffer.
 4. Jeder Treffer ist mit seiner Objektart gekennzeichnet.
-5. Ab zehn Treffern erscheint im Kopf der Liste das Feld „Filtern“, mit dem Sie die Liste weiter einschränken.
+5. Ab zehn Treffern erscheint im Kopf der Liste das Feld „Filtern...“, mit dem Sie die Liste weiter einschränken.
 6. Klicken Sie auf einen Treffer: Die Karte springt an die passende Stelle und das Objekt blinkt dreimal auf.
 
 ![Vier Screenshots des Suchablaufs in der Karte, nummeriert von 1 bis 6](/images/manual/teil-a/map_search_flow.jpg)
@@ -85,9 +95,9 @@ Die eingestellte Breite gilt für alle Ansichten mit einer Info-Box, nicht nur f
 
 Zu Kartenobjekten, Rohren und Adressen können Sie Dateien ablegen; der Reiter „Anhänge“ steht deshalb bei allen diesen Objektarten zur Verfügung. Zum Hinzufügen klicken Sie im Bereich „Dateien hochladen“ auf „Dateien auswählen“ oder ziehen die Datei auf die Fläche „Dateien auswählen oder hierher ziehen“. Die maximale Dateigröße beträgt 50 MB.
 
-Vorhandene Dateien stehen darunter im Bereich „Hochgeladene Dateien“, zusammengefasst in Ordnern, die nach ihrer Art benannt sind und die Anzahl enthalten, z. B. „documents (1)“. Klicken Sie auf einen Ordner, um ihn aufzuklappen – erst dann werden die einzelnen Dateien sichtbar. Zeigen Sie anschließend mit der Maus auf eine Datei, erscheinen rechts neben dem Dateinamen die Schaltflächen „Herunterladen“, „Umbenennen“ und „Datei löschen“; beim Löschen bestätigen Sie die Rückfrage.
+Vorhandene Dateien stehen darunter im Bereich „Hochgeladene Dateien“, zusammengefasst in Ordnern mit der Anzahl dahinter, z. B. „documents (1)“. Die Ordnernamen kommen aus der Ablagestruktur und sind deshalb englisch. Klicken Sie auf einen Ordner, um ihn aufzuklappen – erst dann werden die einzelnen Dateien sichtbar. Zeigen Sie anschließend mit der Maus auf eine Datei, erscheinen rechts neben dem Dateinamen die Schaltflächen „Herunterladen“, „Umbenennen“ und „Datei löschen“; beim Löschen bestätigen Sie die Rückfrage.
 
-Bei vielen Dateien hilft das Feld „Dateien suchen“ oberhalb der Liste. Sind die Schaltflächen nicht sichtbar, ist Ihr Fenster zu schmal: Scrollen Sie in der Info-Box nach rechts oder ziehen Sie die Box breiter.
+Bei vielen Dateien hilft das Feld „Dateien suchen...“ oberhalb der Liste. Sind die Schaltflächen nicht sichtbar, ist Ihr Fenster zu schmal: Scrollen Sie in der Info-Box nach rechts oder ziehen Sie die Box breiter.
 
 ![](/videos/map_attachment.webm)
 

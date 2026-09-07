@@ -16,7 +16,7 @@ Qonnectra merkt sich den letzten Kartenausschnitt. Wenn Sie die Karte erneut öf
 
 ## 5.2 Layer der Karte
 
-Die Legende führt die Objektarten des Netzbestands als eigene Layer: „Adresse“, „Netzknoten“, „Trasse“, „Rohr“ und „Gebiet“, dazu die Hintergrundkarte „OpenStreetMap“. „Netzknoten“ und „Gebiet“ lassen sich nach Typen aufklappen, sodass Sie etwa nur die Hausanschlüsse oder nur die Projektgebiete einblenden.
+Die Legende führt die Objektarten des Netzbestands als eigene Layer: „Adresse“, „Netzknoten“, „Trasse“, „Rohr“ und „Gebiet“, dazu die Hintergrundkarte „OpenStreetMap“. „Netzknoten“, „Gebiet“ und – je nach eingestellter Trassen-Darstellung – „Trasse“ lassen sich nach Typen aufklappen, sodass Sie etwa nur die Hausanschlüsse oder nur die Projektgebiete einblenden.
 
 Wie Sie die Layer schalten, beschreibt Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster). Die Farben und Formen der Layer stellen Sie unter „Einstellungen“ ein, siehe Kapitel [Einstellungen](./17-einstellungen.md).
 

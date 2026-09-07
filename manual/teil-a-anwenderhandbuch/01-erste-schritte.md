@@ -80,13 +80,13 @@ Die Eingabe im Feld allein wählt nichts aus – erst der Klick auf einen Eintra
 Sind für Ihr Benutzerkonto keine Projekte freigegeben, erscheint anstelle des Feldes der Hinweis „Keine Projekte verfügbar“.
 :::
 
-In den Kartenansichten steht neben der Projektauswahl zusätzlich die Schaltfläche „Alle Projekte anzeigen“, mit der Sie die Beschränkung auf das gewählte Projekt vorübergehend aufheben.
+In der Karte und in der Wertermittlung steht neben der Projektauswahl zusätzlich die Schaltfläche „Alle Projekte anzeigen“, mit der Sie die Beschränkung auf das gewählte Projekt vorübergehend aufheben; eingeschaltet heißt sie „Nur aktuelles Projekt anzeigen“. In den übrigen Ansichten mit einem Kartenfenster gibt es sie nicht.
 
 ## 1.4 Sprache, Hell- und Dunkelmodus, Versionsanzeige und Dokumentation
 
 Oben rechts in der Kopfzeile finden Sie:
 
-- die aktuelle Softwareversion, z. B. „v1.7.0“ – geben Sie diese Angabe mit an, wenn Sie einen Fehler bei Ihrem Systemadministrator melden
+- die aktuelle Softwareversion, z. B. „v1.7.0“ – geben Sie diese Angabe mit an, wenn Sie einen Fehler bei Ihrer Administration melden
 - die Spracheinstellung: Deutsch („DE“) oder Englisch („EN“)
 - einen Verweis auf das Projekt bei GitHub, in dem Qonnectra entwickelt wird
 - „Hell-/Dunkelmodus umschalten“
@@ -105,7 +105,7 @@ Ein Klick auf einen Gruppennamen – etwa „Funktionen“ – klappt die Gruppe
 3. Beenden Sie die Anpassung über dasselbe Symbol („Fertig“).
 
 ::: info
-Zugeklappte Gruppen und ausgeblendete Einträge merkt sich nur der Browser, in dem Sie sie eingestellt haben – an einem anderen Rechner sehen Sie wieder die vollständige Navigationsleiste.
+Zugeklappte Gruppen und ausgeblendete Einträge merkt sich zunächst nur der Browser, in dem Sie sie eingestellt haben – an einem anderen Rechner sehen Sie wieder die vollständige Navigationsleiste. Speichern Sie Ihre Einstellungen im Benutzerkonto, gehören sie zu den übertragenen Angaben, siehe Kapitel [Einstellungen](./17-einstellungen.md).
 :::
 
 Der Fußbereich „System“ lässt sich nicht ausblenden.

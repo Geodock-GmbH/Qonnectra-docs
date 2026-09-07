@@ -1,4 +1,4 @@
-# Teil A - Anwenderhandbuch
+# Teil A – Anwenderhandbuch
 
 Dieser Teil des Handbuchs richtet sich an Anwender*Innen, die Qonnectra im täglichen Betrieb nutzen. Dazu gehören insbesondere Mitarbeitende in Verwaltungen, Zweckverbänden, Stadtwerken sowie Entscheidungsträger*Innen und externe Stellen mit Leserechten.
 
