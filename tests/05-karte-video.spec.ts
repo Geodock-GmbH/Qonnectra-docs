@@ -132,7 +132,7 @@ async function cleanUpAttachments() {
 test.beforeEach(cleanUpAttachments)
 test.afterEach(cleanUpAttachments)
 
-test('5.3.1 Anhänge hinzufügen und bearbeiten', async ({ page, context }) => {
+test('3.7 Anhänge hinzufügen und bearbeiten', async ({ page, context }) => {
   test.setTimeout(180_000)
 
   // 1. Warm-up page. It measures the map area and fills the HTTP cache of the

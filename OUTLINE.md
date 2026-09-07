@@ -23,10 +23,10 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 ### 1. Erste Schritte
 
 - 1.1 Anmelden und abmelden
-- 1.2 Aufbau der Oberfläche: Kopfzeile, Navigationsleiste, Arbeitsbereich
+- 1.2 Aufbau der Oberfläche
 - 1.3 Projekt auswählen und wechseln
-- 1.4 Sprache, Hell- und Dunkelmodus, Versionsanzeige, Dokumentationslink
-- 1.5 Navigationsleiste anpassen: Einträge ein- und ausblenden, Gruppen einklappen
+- 1.4 Sprache, Hell- und Dunkelmodus, Versionsanzeige und Dokumentation
+- 1.5 Navigationsleiste anpassen
 - 1.6 Bedienung auf Tablet und Smartphone
 - 1.7 Warum manche Menüpunkte fehlen: Berechtigungen
 
@@ -44,12 +44,12 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 
 - 3.1 Tabellen: Suche, Spaltenfilter, Sortierung, Seitenwechsel
 - 3.2 Auswahllisten und Kombinationsfelder
-- 3.3 Das Kartenfenster: Layerbaum, Beschriftungen, Transparenz, Zoom auf Layer
+- 3.3 Das Kartenfenster
 - 3.4 Objekte in der Karte suchen
 - 3.5 Strecke und Fläche messen
-- 3.6 Der Infobereich mit den Reitern „Eigenschaften“, „Aktionen“ und „Anhänge“
+- 3.6 Der Infobereich mit seinen Reitern
 - 3.7 Anhänge hochladen, ansehen und löschen
-- 3.8 Exportformate im Überblick: Excel, CSV, PDF, GeoJSON
+- 3.8 Exportformate im Überblick
 
 ### 4. Dashboard
 
@@ -65,14 +65,14 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 ### 5. Karte
 
 - 5.1 Kartenausschnitt, Zoomstufe und gespeicherte Position
-- 5.2 Layer ein- und ausblenden, Hintergrundkarte wechseln
+- 5.2 Layer der Karte
 - 5.3 Objekte auswählen und Eigenschaften lesen
 - 5.4 Trasse: Reiter „Rohrübersicht“ und „Kabelübersicht“
 - 5.5 Grabenprofil einer Trasse
 - 5.6 Netzknoten: Slot-Konfiguration und Struktur öffnen
 - 5.7 Von der Karte in den Faserweg wechseln
 - 5.8 Anhänge an einem Kartenobjekt
-- 5.9 Grenzen der Darstellung: dicht liegende Objekte, überdeckende Gebiete
+- 5.9 Grenzen der Darstellung
 
 ### 6. Störungsanalyse
 
@@ -113,12 +113,13 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 - 10.4 Mikrorohre eines Rohrs
 - 10.5 Excel-Import: Vorlage, Ablauf, Fehlermeldungen
 - 10.6 Rohr löschen
+- 10.7 Anhänge an einem Rohr
 
 ### 11. Rohrzuordnung
 
 - 11.1 Rohr auswählen
 - 11.2 Trassen einzeln zuordnen und Zuordnung aufheben
-- 11.3 Routing-Modus: Weg zwischen zwei Trassen berechnen
+- 11.3 Routing-Modus
 - 11.4 Routing-Toleranz richtig wählen
 - 11.5 Trassenverbindungen anzeigen
 - 11.6 Nach Kennzeichen eingrenzen
@@ -361,29 +362,34 @@ English there anyway.
 
 ---
 
-## Transition from the previous numbering
+## Where the previous chapters went
 
-Where the existing chapters go. Until a file is renamed its old number stays
-valid – file name, H1, spec name and cross references are switched over
-together.
+The renumbering has been carried out; this is the record of it.
 
-| Previously | New |
+| Previously | Now |
 |---|---|
-| `manual/index.md` (chapter 1 „Einführung“) | start page „Über dieses Handbuch“, without a chapter number |
-| `02-arbeiten-mit-qonnectra.md` | absorbed by 2 „Grundbegriffe und Datenmodell“ and 3 „Wiederkehrende Bedienelemente“ |
+| `manual/index.md` (chapter 1 „Einführung und Einordnung“) | start page „Über dieses Handbuch“, headings without numbers |
+| `02-arbeiten-mit-qonnectra.md` | the part A start page `teil-a-anwenderhandbuch/index.md` („Ziele der Dokumentation“, „Ansehen und Bearbeiten“, „Ein typischer Arbeitsablauf“); „Das Projekt als Bezugsgröße“ to 1.3 |
 | `03-einstieg-und-anmeldung.md` | 1 „Erste Schritte“ |
-| `04-dashboard.md` | 4 „Dashboard“ (number unchanged) |
-| `05-karte.md` | 5 „Karte“ (number unchanged) |
+| `04-dashboard.md` | 4 „Dashboard“ (number unchanged); „Projekt auswählen“ to 1.3 |
+| `05-karte.md` | 5 „Karte“ (number unchanged); map window, map search, info box and attachments to 3.3, 3.4, 3.6 and 3.7 |
 | `06-rohrverwaltung.md` | 10 „Rohrverwaltung“ |
 | `07-rohrzuordnung.md` | 11 „Rohrzuordnung“ |
-| `teil-b/14-arbeiten-mit-qgis.md` | 25 „QGIS-Arbeitsplatz einrichten“, 26 „Netzdaten in QGIS bearbeiten“, 27 „QGIS-Server und Kartendienste“ |
-| `teil-c/17-technischer-gesamtueberblick.md` | 29 „Architekturüberblick“, the operations parts move to 35 „Bereitstellung und Infrastruktur“ |
+| `teil-b/14-arbeiten-mit-qgis.md` (placeholder) | 25 „QGIS-Arbeitsplatz einrichten“, alongside the new 26 and 27 |
+| `teil-c/17-technischer-gesamtueberblick.md` (placeholder) | 29 „Architekturüberblick“ |
 
-The specs in `tests/` carry the chapter number and the chapter slug and are
+The specs in `tests/` carry the chapter number and the chapter slug and were
 renamed with it (`03-einstieg-anmeldung.spec.ts` → `01-erste-schritte.spec.ts`,
-`06-rohrverwaltung.spec.ts` → `10-rohrverwaltung.spec.ts`,
-`07-rohrzuordnung.spec.ts` → `11-rohrzuordnung.spec.ts`). The image names under
-`public/images/manual/` do not depend on the chapter number and stay untouched.
+`06-rohrverwaltung*.spec.ts` → `10-rohrverwaltung*.spec.ts`,
+`07-rohrzuordnung*.spec.ts` → `11-rohrzuordnung*.spec.ts`). Their test titles
+mirror the new section numbers, which is why a few images of chapters 1 and 3
+are still produced by the specs of the chapter whose view they show – the image
+names under `public/images/manual/` do not depend on the chapter number and
+stayed untouched.
+
+Every chapter that has no text yet exists as a file with its H1 and the
+placeholder sentence, so the structure is visible in the sidebar. Sections that
+are still missing inside a written chapter carry the same sentence.
 
 ## Notes on putting this into practice
 

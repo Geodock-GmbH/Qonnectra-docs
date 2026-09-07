@@ -264,7 +264,7 @@ test('5.1 Legendeneintrag „Adresse" und Zoom auf den Layer', async ({ page }) 
   await page.screenshot({ path: shotPath(CHAPTER, 'map_address_detail_select') })
 })
 
-test('5.2 Transparenz-Regler', async ({ page }) => {
+test('3.3 Transparenz-Regler', async ({ page }) => {
   await openMap(page)
 
   const slider = page.getByLabel('Ändert die Transparenz der OpenStreetMap-Hintergrundkarte.')
@@ -273,7 +273,7 @@ test('5.2 Transparenz-Regler', async ({ page }) => {
   await spotlightOff()
 })
 
-test('5.2 Legende', async ({ page }) => {
+test('3.3 Legende', async ({ page }) => {
   await openMap(page)
 
   const spotlightOff = await spotlight(page, legend(page))
@@ -281,7 +281,7 @@ test('5.2 Legende', async ({ page }) => {
   await spotlightOff()
 })
 
-test('5.2 Aktionen in der Legende (Composite)', async ({ page }) => {
+test('3.3 Aktionen in der Legende (Composite)', async ({ page }) => {
   await openMap(page, VIEW.near)
 
   // 1. Initial state.
@@ -394,7 +394,7 @@ test('5.3 Ausgewähltes Objekt mit Info-Box', async ({ page }) => {
   await spotlightOff()
 })
 
-test('5.4 Suchfeld', async ({ page }) => {
+test('3.4 Suchfeld', async ({ page }) => {
   await openMap(page)
 
   const spotlightOff = await spotlight(page, page.locator('.search-panel'))
@@ -402,7 +402,7 @@ test('5.4 Suchfeld', async ({ page }) => {
   await spotlightOff()
 })
 
-test('5.4 Suchablauf (Composite)', async ({ page }) => {
+test('3.4 Suchablauf (Composite)', async ({ page }) => {
   await openMap(page)
 
   const searchField = page.getByTestId('search-input')

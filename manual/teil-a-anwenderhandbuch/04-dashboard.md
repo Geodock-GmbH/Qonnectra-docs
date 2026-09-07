@@ -4,29 +4,7 @@ Das **Dashboard** ist die zentrale Übersichtsseite von Qonnectra. Es fasst den 
 
 ![Screenshot Dashboard](/images/manual/teil-a/dashboard.jpg)
 
-Alle Auswertungen beziehen sich auf das Projekt, das oben links in der Kopfzeile ausgewählt ist, und sind ausschließlich zur Ansicht bestimmt: Werte lassen sich hier nicht bearbeiten, eine Exportfunktion gibt es nicht.
-
-::: info
-Die Kennzahlen werden auf dem Server bis zu fünf Minuten zwischengespeichert. Daten, die Sie gerade in einer anderen Ansicht erfasst haben, erscheinen deshalb unter Umständen erst mit einigen Minuten Verzögerung – ein Neuladen der Seite beschleunigt das nicht.
-:::
-
-## 4.1 Projekt auswählen
-
-Bevor Kennzahlen sichtbar werden, muss ein Projekt ausgewählt sein. Die Projektauswahl oben links in der Kopfzeile ist eine Kombination aus Eingabefeld und Auswahlliste: Über den Pfeil am rechten Rand öffnen Sie die Liste aller für Sie freigegebenen Projekte, über eine Eingabe in das Feld schränken Sie die Liste auf passende Namen ein. Mit dem Klick auf einen Eintrag wechseln Sie das Projekt.
-
-![Screenshot Dashboard mit Hervorhebung der Projektauswahl oben links in der Kopfzeile](/images/manual/teil-a/dashboard_project.jpg)
-![Screenshot Ausschnittvergrößerung der geöffneten Projektliste in der Kopfzeile mit dem hervorgehobenen Eintrag „Testprojekt“](/images/manual/teil-a/dashboard_project_detail.jpg)
-{.img-row}
-
-::: warning
-Die Eingabe im Feld allein wählt nichts aus – erst der Klick auf einen Eintrag der Liste wechselt das Projekt. Solange kein Projekt gewählt ist, bleiben alle Kennzahlen auf Null und die Diagramme zeigen „Keine Daten verfügbar“.
-:::
-
-::: info
-Sind für Ihr Benutzerkonto keine Projekte freigegeben, erscheint anstelle des Feldes der Hinweis „Keine Projekte verfügbar“.
-:::
-
-## 4.2 Reiter im Dashboard
+Alle Auswertungen beziehen sich auf das Projekt, das oben links in der Kopfzeile ausgewählt ist (siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln)), und sind ausschließlich zur Ansicht bestimmt: Werte lassen sich hier nicht bearbeiten, eine Exportfunktion gibt es nicht.
 
 Unterhalb der Kopfzeile stehen sechs Reiter (Tabs): „Übersicht“ mit den Kennzahlen aller Datenbereiche auf einen Blick sowie „Trasse“, „Rohre“, „Netzknoten“, „Adressen“ und „Gebiete“ mit den Auswertungen des jeweiligen Bereichs. Alle Auswertungen werden beim Öffnen des Dashboards gemeinsam geladen, der Wechsel zwischen den Reitern lädt also keine Daten nach.
 
@@ -40,7 +18,7 @@ Bei einem schmalen Fenster sind nicht alle sechs Beschriftungen gleichzeitig zu 
 Liegen für ein Diagramm keine Werte vor, steht an seiner Stelle „Keine Daten verfügbar“. Das ist kein Fehler: Fehlt eine Angabe im Projekt durchgängig – etwa die Netzebene der Rohre –, bleibt das zugehörige Diagramm leer, während die übrigen gefüllt sind.
 :::
 
-### 4.2.1 Übersicht
+## 4.1 Reiter „Übersicht“
 
 Der Reiter „Übersicht“ enthält sechs Karten. Jede nennt eine oder zwei Kennzahlen und darunter die Aufschlüsselung als Liste; der farbige Balken im Hintergrund einer Zeile zeigt deren Anteil am größten Wert der Liste.
 
@@ -49,29 +27,13 @@ Der Reiter „Übersicht“ enthält sechs Karten. Jede nennt eine oder zwei Ken
 - „Rohrstatistiken“ – Gesamtlänge aller Rohre, aufgeschlüsselt nach Rohrtyp
 - „Adress-Statistiken“ – Adressen und Wohneinheiten gesamt, aufgeschlüsselt nach Ort
 - „Gebietsstatistiken“ – Anzahl und Gesamtfläche der Gebiete, aufgeschlüsselt nach Gebietstyp
-- „Gewährleistung“ – die als nächstes ablaufenden Gewährleistungsfristen
+- „Gewährleistung“ – die als nächstes ablaufenden Gewährleistungsfristen, siehe Abschnitt [Gewährleistungsfristen im Blick behalten](#_4-7-gewahrleistungsfristen-im-blick-behalten)
 
 ![Screenshot Dashboard mit Hervorhebung der Karten im Reiter „Übersicht“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_overview.jpg)
 
 Adressen ohne Ortsangabe und Gebiete ohne Typ erscheinen in ihrer Liste unter „Unbekannt“.
 
-#### Gewährleistung
-
-Die Karte „Gewährleistung“ zeigt bis zu fünf Netzknoten, deren Gewährleistungsfrist als nächste abläuft, aufsteigend nach Datum sortiert. Je Eintrag stehen der Name des Netzknotens, die verbleibende Restlaufzeit und das Ablaufdatum. Die Einträge sind nach Dringlichkeit farbig hinterlegt:
-
-- rot: weniger als 30 Tage Restlaufzeit
-- gelb: weniger als 90 Tage Restlaufzeit
-- grün: 90 Tage Restlaufzeit oder mehr
-
-Sind für das Projekt keine Fristen hinterlegt, erscheint stattdessen „Keine Garantien laufen bald ab“.
-
-![Screenshot Dashboard mit Hervorhebung der Karte „Gewährleistung“ und ihren farbig hinterlegten Einträgen unten rechts in der Inhaltsfläche](/images/manual/teil-a/dashboard_warranty.jpg)
-
-::: warning
-Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projekts – sie zeigt höchstens fünf Netzknoten, bereits abgelaufene Fristen erscheinen nicht mehr. Die Frist eines einzelnen Netzknotens finden Sie in dessen Info-Box im Reiter „Eigenschaften“ (siehe Kapitel [Karte](./05-karte.md)).
-:::
-
-### 4.2.2 Trasse
+## 4.2 Reiter „Trasse“
 
 Im Reiter „Trasse“ finden Sie acht Diagramme zu den Trassen des Projekts:
 
@@ -90,7 +52,7 @@ Im Reiter „Trasse“ finden Sie acht Diagramme zu den Trassen des Projekts:
 
 Genaue Werte lesen Sie einzeln ab: Zeigen Sie mit der Maus auf einen Balken, erscheint ein Tooltip mit dem Wert und seiner Einheit. Das gilt ebenso für die Segmente der Ringdiagramme in den übrigen Reitern; dort nennt der Tooltip zusätzlich den Anteil in Prozent.
 
-### 4.2.3 Rohre
+## 4.3 Reiter „Rohre“
 
 Der Reiter „Rohre“ beginnt mit dem Kasten „Top 5 längste Rohre“, der Rang, Name, Typ und Länge der fünf längsten Rohre nennt; sind keine Rohre vorhanden, fehlt der Kasten. Darunter folgen die Diagramme:
 
@@ -105,9 +67,9 @@ Der Reiter „Rohre“ beginnt mit dem Kasten „Top 5 längste Rohre“, der Ra
 
 ![Screenshot Dashboard mit Hervorhebung der Auswertungen im Reiter „Rohre“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_conduit.jpg)
 
-Angelegt und bearbeitet werden Rohre im Bereich Rohrverwaltung, siehe Kapitel [Rohrverwaltung](./06-rohrverwaltung.md).
+Angelegt und bearbeitet werden Rohre im Bereich Rohrverwaltung, siehe Kapitel [Rohrverwaltung](./10-rohrverwaltung.md).
 
-### 4.2.4 Netzknoten
+## 4.4 Reiter „Netzknoten“
 
 Der Reiter „Netzknoten“ enthält sechs Diagramme: „Netzknoten nach Ort“, „Netzknoten nach Status“, „Netzknoten nach Netzebene“, „Netzknoten nach Typ“, „Netzknoten nach Eigentümer“ und „Neueste Netzknoten“.
 
@@ -117,13 +79,13 @@ Der Reiter „Netzknoten“ enthält sechs Diagramme: „Netzknoten nach Ort“,
 „Neueste Netzknoten“ ist eine Aufzählung, keine Mengenauswertung. Das Diagramm listet die fünf zuletzt datierten Netzknoten mit Namen und Typ auf; alle Balken sind deshalb gleich lang. Netzknoten, bei denen die jeweilige Angabe fehlt, bleiben in allen Diagrammen unberücksichtigt – die Summe der Balken muss daher nicht der Gesamtzahl aus dem Reiter „Übersicht“ entsprechen.
 :::
 
-### 4.2.5 Adressen
+## 4.5 Reiter „Adressen“
 
 Der Reiter „Adressen“ enthält vier Diagramme: „Adressen nach Ort“, „Adressen nach Ausbaustatus“, „Wohneinheiten nach Ort“ und „Wohneinheiten nach Typ“ als Ringdiagramm.
 
 ![Screenshot Dashboard mit Hervorhebung der Diagramme im Reiter „Adressen“ in der Inhaltsfläche](/images/manual/teil-a/dashboard_address.jpg)
 
-### 4.2.6 Gebiete
+## 4.6 Reiter „Gebiete“
 
 Der Reiter „Gebiete“ zeigt, wie viele Gebiete im Projekt hinterlegt sind und welcher Anteil des Bestands innerhalb dieser Gebiete liegt. In der ersten Reihe stehen die Karten „Anzahl Gebiete“, „Gesamtfläche“ und „Gebiete nach Typ“ als Ringdiagramm.
 
@@ -136,3 +98,27 @@ Den unteren Block bilden sechs Diagramme: „Adressen pro Gebiet“, „Adressen
 ::: warning
 Die Diagramme „Adressen pro Gebiet“, „Netzknoten pro Gebiet“ und „Trassenlänge pro Gebiet“ zeigen höchstens die zehn Gebiete mit den höchsten Werten. Bei mehr als zehn Gebieten ist die Auswertung also keine vollständige Liste.
 :::
+
+## 4.7 Gewährleistungsfristen im Blick behalten
+
+Die Karte „Gewährleistung“ im Reiter „Übersicht“ zeigt bis zu fünf Netzknoten, deren Gewährleistungsfrist als nächste abläuft, aufsteigend nach Datum sortiert. Je Eintrag stehen der Name des Netzknotens, die verbleibende Restlaufzeit und das Ablaufdatum. Die Einträge sind nach Dringlichkeit farbig hinterlegt:
+
+- rot: weniger als 30 Tage Restlaufzeit
+- gelb: weniger als 90 Tage Restlaufzeit
+- grün: 90 Tage Restlaufzeit oder mehr
+
+Sind für das Projekt keine Fristen hinterlegt, erscheint stattdessen „Keine Garantien laufen bald ab“.
+
+![Screenshot Dashboard mit Hervorhebung der Karte „Gewährleistung“ und ihren farbig hinterlegten Einträgen unten rechts in der Inhaltsfläche](/images/manual/teil-a/dashboard_warranty.jpg)
+
+::: warning
+Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projekts – sie zeigt höchstens fünf Netzknoten, bereits abgelaufene Fristen erscheinen nicht mehr. Die Frist eines einzelnen Netzknotens finden Sie in dessen Info-Box im Reiter „Eigenschaften“ (siehe Kapitel [Karte](./05-karte.md)).
+:::
+
+## 4.8 Nach Kennzeichen filtern und wie aktuell die Werte sind
+
+::: info
+Die Kennzahlen werden auf dem Server bis zu fünf Minuten zwischengespeichert. Daten, die Sie gerade in einer anderen Ansicht erfasst haben, erscheinen deshalb unter Umständen erst mit einigen Minuten Verzögerung – ein Neuladen der Seite beschleunigt das nicht.
+:::
+
+_Die Dokumentation zum Filtern nach Kennzeichen ist noch in Arbeit._

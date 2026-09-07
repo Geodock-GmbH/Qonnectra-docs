@@ -15,8 +15,8 @@ import {
   spotlight,
 } from '../playwright/manual-shots'
 
-// Screenshots for chapter "6. Rohrverwaltung" in the manual
-// (manual/teil-a-anwenderhandbuch/06-rohrverwaltung.md). Produces all images of
+// Screenshots for chapter "10. Rohrverwaltung" in the manual
+// (manual/teil-a-anwenderhandbuch/10-rohrverwaltung.md). Produces all images of
 // the chapter:
 //
 //   conduit                  plain overview shot (pattern 1)
@@ -30,11 +30,11 @@ import {
 //   conduit_excel            the two Excel buttons (pattern 2)
 //
 // The video of the chapter (conduit_add.webm) sits in
-// tests/06-rohrverwaltung-video.spec.ts - test.use({ video: ... }) is only
+// tests/10-rohrverwaltung-video.spec.ts - test.use({ video: ... }) is only
 // allowed at file level.
 //
-// Publish to public/images/ with: pnpm screenshots:publish 06-rohrverwaltung
-const CHAPTER = '06-rohrverwaltung'
+// Publish to public/images/ with: pnpm screenshots:publish 10-rohrverwaltung
+const CHAPTER = '10-rohrverwaltung'
 
 /**
  * Number of conduits in the test project. Checked on every load, because the
@@ -115,7 +115,7 @@ async function openConduits(page: Page, drawerWidth = 400) {
   await expect(
     page.locator('table tbody tr'),
     'The test project does not hold the expected number of conduits. Has a ' +
-      'run been aborted and left one behind? tests/06-rohrverwaltung-video.spec.ts ' +
+      'run been aborted and left one behind? tests/10-rohrverwaltung-video.spec.ts ' +
       'removes its conduit again through the API.',
   ).toHaveCount(CONDUIT_COUNT)
   await page.waitForLoadState('networkidle')
@@ -240,12 +240,12 @@ async function cleanUpAttachments(uuid: string) {
 // Images
 // ---------------------------------------------------------------------------
 
-test('6. Übersicht der Rohrverwaltung', async ({ page }) => {
+test('10. Übersicht der Rohrverwaltung', async ({ page }) => {
   await openConduits(page)
   await page.screenshot({ path: shotPath(CHAPTER, 'conduit') })
 })
 
-test('6.1 Aufbau der Tabelle', async ({ page }) => {
+test('10.1 Aufbau der Tabelle', async ({ page }) => {
   await openConduits(page)
 
   // Both places belong together: the headings are what you sort by, and the
@@ -258,7 +258,7 @@ test('6.1 Aufbau der Tabelle', async ({ page }) => {
   await spotlightOff()
 })
 
-test('6.2 Suchfeld oben', async ({ page }) => {
+test('10.1 Suchfeld oben', async ({ page }) => {
   await openConduits(page)
 
   // The search is carried out, not just shown: only then does the image show
@@ -275,7 +275,7 @@ test('6.2 Suchfeld oben', async ({ page }) => {
   await spotlightOff()
 })
 
-test('6.2 Suchfelder unter den Spaltenüberschriften', async ({ page }) => {
+test('10.1 Suchfelder unter den Spaltenüberschriften', async ({ page }) => {
   await openConduits(page)
 
   // Typed character by character, because the fields filter while typing. With
@@ -292,7 +292,7 @@ test('6.2 Suchfelder unter den Spaltenüberschriften', async ({ page }) => {
   await spotlightOff()
 })
 
-test('6.3 Rohr hinzufügen', async ({ page }) => {
+test('10.2 Rohr hinzufügen', async ({ page }) => {
   await openConduits(page)
 
   await page.getByTestId('add-conduit-button').click()
@@ -306,7 +306,7 @@ test('6.3 Rohr hinzufügen', async ({ page }) => {
   await page.screenshot({ path: shotPath(CHAPTER, 'conduit_add') })
 })
 
-test('6.4.1 Reiter „Eigenschaften"', async ({ page }) => {
+test('10.3 Reiter „Eigenschaften"', async ({ page }) => {
   await openConduits(page, DRAWER_WIDTH)
   const drawer = await openDrawer(page, CONDUIT)
 
@@ -317,7 +317,7 @@ test('6.4.1 Reiter „Eigenschaften"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('6.4.2 Reiter „Status"', async ({ page }) => {
+test('10.4 Reiter „Status"', async ({ page }) => {
   await openConduits(page, DRAWER_WIDTH)
   const drawer = await openDrawer(page, CONDUIT)
 
@@ -339,7 +339,7 @@ test('6.4.2 Reiter „Status"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('6.4.3 Reiter „Anhänge"', async ({ page }) => {
+test('10.7 Reiter „Anhänge"', async ({ page }) => {
   test.setTimeout(120_000)
 
   const uuid = await conduitUuid(CONDUIT)
@@ -388,7 +388,7 @@ test('6.4.3 Reiter „Anhänge"', async ({ page }) => {
   }
 })
 
-test('6.5 Excel-Vorlage und Datenimport', async ({ page }) => {
+test('10.5 Excel-Vorlage und Datenimport', async ({ page }) => {
   await openConduits(page)
 
   // Both buttons sit in one nav; a cut-out per button would put two outlines

@@ -178,7 +178,14 @@ sentences the chapter exists for.
   page keeps the VitePress look.
 - Cross-references as relative links: `siehe Kapitel [Karte](./05-karte.md)`.
 - Placeholder for chapters still to be written:
-  `_Die Dokumentation zu diesem Kapitel ist noch in Arbeit._`
+  `_Die Dokumentation zu diesem Kapitel ist noch in Arbeit._`, for a single
+  section of a chapter that is otherwise written: `_Die Dokumentation zu diesem
+  Abschnitt ist noch in Arbeit._`
+- A heading that is linked to from somewhere gets no typographic quotation
+  marks. VitePress carries the „ into the anchor
+  (`_3-6-…-reitern-„eigenschaften-…`), so the cross reference becomes
+  unreadable and is easy to get wrong. Headings that quote a UI label and that
+  nothing links to – „4.1 Reiter „Übersicht““ – stay as they are.
 
 **Markup**
 - `**bold**` for technical terms and concepts on first appearance
@@ -222,13 +229,18 @@ effect there.
 - Videos: `public/videos/<name>.webm` (flat, no part subfolder)
 - Name = English, `snake_case`, area first, detail second
   → `dashboard_trench_hover.jpg`, `map_legend_actions.jpg`, `conduit_search_columns.jpg`
-- One prefix per chapter, so that the images of a chapter sort together. Part A,
-  chapters 1–18: `login_`, `model_`, `ui_`, `dashboard_`, `map_`, `fault_`,
-  `compaction_`, `records_`, `valuation_`, `conduit_`, `conduit_connection_`,
-  `pipe_branch_`, `microduct_`, `schema_`, `trace_`, `address_`, `settings_`,
-  `error_`. Part B: `permission_`, `admin_`, `qgis_`, `ops_`. Part C: `dev_`.
-  `ui_` is the one for chapter 3, whose images show elements that recur
-  everywhere (table, layer tree, info box) – not the view of a single menu item.
+- The prefix follows the area of the app the image shows, which for the chapters
+  4–17 is the chapter's own area. Part A, chapters 1–18: `login_`, `model_`,
+  `ui_`, `dashboard_`, `map_`, `fault_`, `compaction_`, `records_`, `valuation_`,
+  `conduit_`, `conduit_connection_`, `pipe_branch_`, `microduct_`, `schema_`,
+  `trace_`, `address_`, `settings_`, `error_`. Part B: `permission_`, `admin_`,
+  `qgis_`, `ops_`. Part C: `dev_`.
+- The cross-cutting chapters 1–3 and 18 illustrate mechanisms, not menu items.
+  An image made for them uses their own prefix (`model_`, `ui_`, `error_`); an
+  image they borrow from a concrete view keeps that view's prefix – chapter 3
+  shows the layer tree with `map_legend.jpg` and the conduit table with
+  `conduit_table.jpg`. `screenshots:publish` looks for the reference anywhere in
+  `manual/`, so it does not care which chapter it sits in.
 - Detail crops get the suffix `_detail`
   (`login_start_detail.jpg`, `map_address_detail.jpg`).
 

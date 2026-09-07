@@ -338,7 +338,7 @@ test('4. Übersicht des Dashboards', async ({ page }) => {
   await page.screenshot({ path: shotPath(CHAPTER, 'dashboard'), animations: 'disabled' })
 })
 
-test('4.1 Projektauswahl in der Kopfzeile', async ({ page }) => {
+test('1.3 Projektauswahl in der Kopfzeile', async ({ page }) => {
   await openDashboard(page)
 
   // Cross-check: the image should show the test project, not "Default".
@@ -349,7 +349,7 @@ test('4.1 Projektauswahl in der Kopfzeile', async ({ page }) => {
   await spotlightOff()
 })
 
-test('4.1 Geöffnete Projektliste', async ({ page }) => {
+test('1.3 Geöffnete Projektliste', async ({ page }) => {
   await openDashboard(page)
 
   const picker = projectPicker(page)
@@ -378,7 +378,7 @@ test('4.1 Geöffnete Projektliste', async ({ page }) => {
   })
 })
 
-test('4.2 Reiterleiste', async ({ page }) => {
+test('4. Reiterleiste', async ({ page }) => {
   await openDashboard(page)
 
   await expect(page.getByRole('tab')).toHaveCount(6)
@@ -387,7 +387,7 @@ test('4.2 Reiterleiste', async ({ page }) => {
   await spotlightOff()
 })
 
-test('4.2.1 Karten im Reiter „Übersicht"', async ({ page }) => {
+test('4.1 Karten im Reiter „Übersicht"', async ({ page }) => {
   await openDashboard(page)
 
   const spotlightOff = await spotlight(page, contentArea(page))
@@ -395,7 +395,7 @@ test('4.2.1 Karten im Reiter „Übersicht"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('4.2.2 Diagramme im Reiter „Trasse"', async ({ page }) => {
+test('4.2 Diagramme im Reiter „Trasse"', async ({ page }) => {
   await openDashboard(page)
   await openTab(page, 'Trasse', 'Gesamtlänge pro Oberfläche')
 
@@ -404,7 +404,7 @@ test('4.2.2 Diagramme im Reiter „Trasse"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('4.2.2 Kurzhinweis auf einem Balken', async ({ page }) => {
+test('4.2 Kurzhinweis auf einem Balken', async ({ page }) => {
   await openDashboard(page)
   await openTab(page, 'Trasse', 'Gesamtlänge pro Oberfläche')
 
@@ -440,7 +440,7 @@ test('4.2.2 Kurzhinweis auf einem Balken', async ({ page }) => {
   })
 })
 
-test('4.2.3 Auswertungen im Reiter „Rohre"', async ({ page }) => {
+test('4.3 Auswertungen im Reiter „Rohre"', async ({ page }) => {
   await openDashboard(page)
   await openTab(page, 'Rohre', 'Top 5 längste Rohre')
 
@@ -449,7 +449,7 @@ test('4.2.3 Auswertungen im Reiter „Rohre"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('4.2.4 Diagramme im Reiter „Netzknoten"', async ({ page }) => {
+test('4.4 Diagramme im Reiter „Netzknoten"', async ({ page }) => {
   await openDashboard(page)
   await openTab(page, 'Netzknoten', 'Netzknoten nach Ort')
 
@@ -458,7 +458,7 @@ test('4.2.4 Diagramme im Reiter „Netzknoten"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('4.2.5 Diagramme im Reiter „Adressen"', async ({ page }) => {
+test('4.5 Diagramme im Reiter „Adressen"', async ({ page }) => {
   await openDashboard(page)
   await openTab(page, 'Adressen', 'Adressen nach Ort')
 
@@ -467,7 +467,7 @@ test('4.2.5 Diagramme im Reiter „Adressen"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('4.2.6 Karten und Diagramme im Reiter „Gebiete"', async ({ page }) => {
+test('4.6 Karten und Diagramme im Reiter „Gebiete"', async ({ page }) => {
   await openDashboard(page)
   await openTab(page, 'Gebiete', 'Gebiete nach Typ')
 
@@ -487,7 +487,7 @@ test.describe('Gewährleistung', () => {
   // every other chapter - would carry the seeded deadlines along.
   test.afterAll(revertDeadlines)
 
-  test('4.2.1 Karte „Gewährleistung" mit ablaufenden Fristen', async ({ page }) => {
+  test('4.7 Karte „Gewährleistung" mit ablaufenden Fristen', async ({ page }) => {
     // The page is loaded several times if necessary, see below.
     test.setTimeout(120_000)
 

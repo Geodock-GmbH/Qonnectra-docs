@@ -1,6 +1,6 @@
-# 1. Einführung und Einordnung
+# Über dieses Handbuch
 
-## 1.1 Ziel des Handbuchs
+## Ziel des Handbuchs
 
 Dieses Handbuch beschreibt die Nutzung, den Betrieb und die technische Grundlage von **Qonnectra**. Es richtet sich an alle Personen, die mit dem System arbeiten oder für dessen Betrieb, Pflege oder Weiterentwicklung verantwortlich sind.
 
@@ -14,7 +14,7 @@ Ziel des Handbuchs ist es,
 Das Handbuch ist bewusst praxisorientiert aufgebaut. Es folgt der Struktur der Anwendung und den typischen Arbeitsabläufen in Verwaltung, Betrieb und Fachplanung.
 
 
-## 1.2 Zielgruppen und Aufbau des Handbuchs
+## Zielgruppen und Aufbau des Handbuchs
 
 Qonnectra wird von Nutzenden (Usern) mit sehr unterschiedlichen fachlichen Hintergründen verwendet. Entsprechend ist auch dieses Handbuch in mehrere Teile gegliedert, die sich an verschiedene Zielgruppen richten.
 
@@ -39,7 +39,7 @@ Das Handbuch besteht aus drei Hauptteilen:
 Für den normalen Betrieb von Qonnectra ist **nicht erforderlich**, alle Teile des Handbuchs zu lesen. Jedes Kapitel ist so aufgebaut, dass klar erkennbar ist, für welche Zielgruppe es relevant ist.
 
 
-## 1.3 Was ist Qonnectra?
+## Was ist Qonnectra?
 
 Qonnectra ist eine **Open-Source-Webanwendung zur nachhaltigen Dokumentation passiver Netzinfrastruktur**.  
 Der Schwerpunkt liegt auf Glasfasernetzen, perspektivisch auch auf weiteren Netzinfrastrukturen.
@@ -55,7 +55,7 @@ Qonnectra bildet den **tatsächlichen Bestand (IST-Zustand)** eines Netzes ab un
 Ein zentrales Ziel von Qonnectra ist es, **Verwaltungen und verantwortliche Stellen für Netzinfrastruktur in die Lage zu versetzen**, ihre Netzinfrastruktur selbstständig, langfristig und datensouverän zu dokumentieren und zu betreiben – ohne Abhängigkeit von proprietärer Software oder spezialisierten Einzellösungen.
 
 
-## 1.4 Grundprinzip: Einfachheit und klare Trennung der Aufgaben
+## Grundprinzip: Einfachheit und klare Trennung der Aufgaben
 
 Qonnectra folgt einem klaren Prinzip:
 
@@ -72,7 +72,7 @@ Für geschulte Nutzende können Webanwendung und QGIS parallel eingesetzt werden
 Alle Nutzenden arbeiten dabei auf derselben Datenbasis.
 
 
-## 1.5 Was ist Qonnectra nicht?
+## Was ist Qonnectra nicht?
 
 Für das Verständnis des Systems ist ebenso wichtig, klar zu benennen, **was Qonnectra bewusst nicht ist**:
 
@@ -87,7 +87,7 @@ Für das Verständnis des Systems ist ebenso wichtig, klar zu benennen, **was Qo
 
 Diese bewusste Abgrenzung trägt dazu bei, das System übersichtlich, wartbar und langfristig nutzbar zu halten.
 
-## 1.6 Dokumentation als langfristige Aufgabe
+## Dokumentation als langfristige Aufgabe
 
 Qonnectra versteht Dokumentation nicht als einmalige Aufgabe, sondern als **kontinuierlichen Prozess**.  
 Das System ist darauf ausgelegt,

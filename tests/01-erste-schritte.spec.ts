@@ -8,8 +8,8 @@ import {
   spotlight,
 } from '../playwright/manual-shots'
 
-// Screenshots for chapter "3. Einstieg und Anmeldung" in the manual
-// (manual/teil-a-anwenderhandbuch/03-einstieg-und-anmeldung.md). Produces all
+// Screenshots for chapter "1. Erste Schritte" in the manual
+// (manual/teil-a-anwenderhandbuch/01-erste-schritte.md). Produces all
 // images of the chapter.
 //
 // Important: login_navigation is a pattern 3 image (hand-drawn labels in brand
@@ -17,9 +17,9 @@ import {
 // hand after publishing. So look at the dry run before publishing, otherwise
 // the raw capture overwrites the handwork:
 //
-//   pnpm screenshots:publish 03-einstieg-anmeldung --dry-run
-//   pnpm screenshots:publish 03-einstieg-anmeldung
-const CHAPTER = '03-einstieg-anmeldung'
+//   pnpm screenshots:publish 01-erste-schritte --dry-run
+//   pnpm screenshots:publish 01-erste-schritte
+const CHAPTER = '01-erste-schritte'
 
 test.describe('Abgemeldet', () => {
   // Only this chapter needs the *logged-out* state: the app redirects
@@ -31,7 +31,7 @@ test.describe('Abgemeldet', () => {
     return page.locator('form').locator('xpath=..')
   }
 
-  test('3.1 Login-Seite', async ({ page }) => {
+  test('1.1 Login-Seite', async ({ page }) => {
     await page.goto('/login')
     await page.getByRole('heading', { name: 'Anmelden' }).waitFor()
     await disableAnimations(page)
@@ -84,14 +84,14 @@ test.describe('Angemeldet', () => {
     await moveCursorAway(page)
   }
 
-  test('3.2 Übersicht der Oberfläche', async ({ page }) => {
+  test('1.2 Übersicht der Oberfläche', async ({ page }) => {
     await openDashboard(page)
     // Raw capture for the labelled orientation image (pattern 3), see the
     // comment at the top of this file.
     await page.screenshot({ path: shotPath(CHAPTER, 'login_navigation') })
   })
 
-  test('3.2.1 Navigationsleiste', async ({ page }) => {
+  test('1.2.1 Navigationsleiste', async ({ page }) => {
     await openDashboard(page)
 
     const spotlightOff = await spotlight(page, sidebar(page))
@@ -99,7 +99,7 @@ test.describe('Angemeldet', () => {
     await spotlightOff()
   })
 
-  test('3.2.2 Kopfzeile', async ({ page }) => {
+  test('1.2.2 Kopfzeile', async ({ page }) => {
     await openDashboard(page)
 
     const spotlightOff = await spotlight(page, header(page))
@@ -107,7 +107,7 @@ test.describe('Angemeldet', () => {
     await spotlightOff()
   })
 
-  test('3.2.4 Einstellungen am Fuß der Navigationsleiste', async ({ page }) => {
+  test('1.2.1 Fußbereich der Navigationsleiste', async ({ page }) => {
     await openDashboard(page)
 
     // With all groups expanded the navigation bar needs 1093 px (measured) and

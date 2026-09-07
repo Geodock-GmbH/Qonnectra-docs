@@ -1,5 +1,5 @@
-// Videos for chapter "7. Rohrzuordnung" in the manual
-// (manual/teil-a-anwenderhandbuch/07-rohrzuordnung.md):
+// Videos for chapter "11. Rohrzuordnung" in the manual
+// (manual/teil-a-anwenderhandbuch/11-rohrzuordnung.md):
 //
 //   conduit_connection_routing        7.2.1  routing mode, start and end point
 //   conduit_connection_map_selection  7.3.2  assign a segment by clicking the map
@@ -8,14 +8,14 @@
 // A file of its own, because `test.use({ video: ... })` is only allowed at file
 // level - inside a test.describe group Playwright rejects it ("forces a new
 // worker"). The still images of the chapter live in
-// tests/07-rohrzuordnung.spec.ts.
+// tests/11-rohrzuordnung.spec.ts.
 //
 // All three flows are movement, not state: the two clicks of the routing mode
 // only make sense in sequence, a click on the map is followed by a message that
 // fades again, and the jump to a segment is an animation. A still image of any
 // of them would be indistinguishable from "nothing happened".
 //
-// Publish to public/videos/ with: pnpm screenshots:publish 07-rohrzuordnung
+// Publish to public/videos/ with: pnpm screenshots:publish 11-rohrzuordnung
 import { expect, request, test, type APIRequestContext, type Page } from '@playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
@@ -27,7 +27,7 @@ import {
   videoPath,
 } from '../playwright/manual-videos'
 
-const CHAPTER = '07-rohrzuordnung'
+const CHAPTER = '11-rohrzuordnung'
 
 // Recording size = viewport from playwright.config.ts. Without it Playwright
 // scales the video down until it fits into 800 x 800, and the crop would be
@@ -108,7 +108,7 @@ const VIEW = {
     trench: { label: 'TR-BNCKM6A', coordinate: [1083448.2, 7308493.7] },
   },
 
-  /** The eleven segments of St-VL-02, as in tests/07-rohrzuordnung.spec.ts. */
+  /** The eleven segments of St-VL-02, as in tests/11-rohrzuordnung.spec.ts. */
   corridor: { center: [1083852, 7308499], zoom: 17.2 },
 }
 
@@ -322,7 +322,7 @@ async function saveVideo(page: Page, name: string, pageStart: number, demoStart:
 //   3. The list grows by three entries at once - the difference to the single
 //      click of section 7.3.2 that the whole section is about.
 
-test('7.2.1 Routing-Modus', async ({ page, context }) => {
+test('11.3 Routing-Modus', async ({ page, context }) => {
   test.setTimeout(180_000)
 
   await warmUp(page)
@@ -401,7 +401,7 @@ test('7.2.1 Routing-Modus', async ({ page, context }) => {
 // The confirmation message at the bottom edge of the window fades again after a
 // few seconds, which is the second reason this is not a still image.
 
-test('7.3.2 Rohr einem Trassensegment zuordnen', async ({ page, context }) => {
+test('11.2.1 Rohr einem Trassensegment zuordnen', async ({ page, context }) => {
   test.setTimeout(180_000)
 
   await warmUp(page)
@@ -458,7 +458,7 @@ test('7.3.2 Rohr einem Trassensegment zuordnen', async ({ page, context }) => {
 // times for 300 ms each before the highlight disappears for good. Both only
 // exist while they run.
 
-test('7.3.3 Zugeordnetes Trassensegment finden', async ({ page, context }) => {
+test('11.2.2 Zugeordnetes Trassensegment finden', async ({ page, context }) => {
   test.setTimeout(180_000)
 
   await warmUp(page)

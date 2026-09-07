@@ -1,13 +1,13 @@
-// Video for chapter "6. Rohrverwaltung" in the manual
-// (manual/teil-a-anwenderhandbuch/06-rohrverwaltung.md), section 6.3
+// Video for chapter "10. Rohrverwaltung" in the manual
+// (manual/teil-a-anwenderhandbuch/10-rohrverwaltung.md), section 6.3
 // "Rohr hinzufügen".
 //
 // A file of its own, because `test.use({ video: ... })` is only allowed at file
 // level - inside a test.describe group Playwright rejects it ("forces a new
 // worker"). The still images of the chapter live in
-// tests/06-rohrverwaltung.spec.ts.
+// tests/10-rohrverwaltung.spec.ts.
 //
-// Publish to public/videos/ with: pnpm screenshots:publish 06-rohrverwaltung
+// Publish to public/videos/ with: pnpm screenshots:publish 10-rohrverwaltung
 import { expect, request, test, type APIRequestContext, type Locator } from '@playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
@@ -20,7 +20,7 @@ import {
   videoPath,
 } from '../playwright/manual-videos'
 
-const CHAPTER = '06-rohrverwaltung'
+const CHAPTER = '10-rohrverwaltung'
 
 // ---------------------------------------------------------------------------
 // Video for section 6.3 "Rohr hinzufügen"
@@ -131,7 +131,7 @@ async function removeConduit() {
 test.beforeEach(removeConduit)
 test.afterEach(removeConduit)
 
-test('6.3 Rohr hinzufügen', async ({ page, context }) => {
+test('10.2 Rohr hinzufügen', async ({ page, context }) => {
   test.setTimeout(180_000)
 
   // 1. Warm-up page. It fills the HTTP cache of the context, so that the actual

@@ -4,85 +4,66 @@ Die Karte ist eines der zentralen Werkzeuge in Qonnectra. Sie dient der visuelle
 
 ![Screenshot Karte](/images/manual/teil-a/map.jpg)
 
-## 5.1 Bewegung in der Karte
+Bewegung, Legende, Transparenz und Suche funktionieren wie in Kapitel [Wiederkehrende Bedienelemente](./03-wiederkehrende-bedienelemente.md) beschrieben. Dieses Kapitel behandelt, was nur für die Kartenansicht gilt.
 
-Mit dem Mausrad oder dem Touchpad zoomen Sie in die Karte hinein und heraus, mit gedrückter linker Maustaste verschieben Sie den Kartenausschnitt.
+## 5.1 Kartenausschnitt, Zoomstufe und gespeicherte Position
 
-Wenn Sie bei geöffneter Karte ein anderes Projekt auswählen, springt die Karte nicht automatisch in dessen Gebiet. Um dorthin zu gelangen, klicken Sie in der Legende oben rechts beim Eintrag „Adresse“ auf das Lupensymbol „Auf Ausdehnung zoomen“. Damit navigiert die Ansicht in den Bereich, in dem für dieses Projekt Daten vorhanden sind.
-
-![Screenshot Karte mit Hervorhebung des Layers Adresse in der Legende rechts oben](/images/manual/teil-a/map_address_detail.jpg)
-![Screenshot Karte nach dem Zoom auf die Ausdehnung des Layers Adresse](/images/manual/teil-a/map_address_detail_select.jpg)
-{.img-row}
+Wenn Sie bei geöffneter Karte ein anderes Projekt auswählen, springt die Karte nicht automatisch in dessen Gebiet. Um dorthin zu gelangen, klicken Sie in der Legende oben rechts beim Eintrag „Adresse“ auf das Lupensymbol „Auf Ausdehnung zoomen“, siehe Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster).
 
 ::: info
 Qonnectra merkt sich den letzten Kartenausschnitt. Wenn Sie die Karte erneut öffnen, sehen Sie wieder die Stelle, an der Sie zuletzt gearbeitet haben.
 :::
 
-## 5.2 Anpassung der Darstellung
+## 5.2 Layer der Karte
 
-Links unten in der Kartenansicht finden Sie den Regler „Transparenz“, mit dem Sie die **Transparenz** der Hintergrundkarte anpassen können. Dies ist hilfreich, um Netzdaten besser sichtbar zu machen.
+Die Legende führt die Objektarten des Netzbestands als eigene Layer: „Adresse“, „Netzknoten“, „Trasse“, „Rohr“ und „Gebiet“, dazu die Hintergrundkarte „OpenStreetMap“. „Netzknoten“ und „Gebiet“ lassen sich nach Typen aufklappen, sodass Sie etwa nur die Hausanschlüsse oder nur die Projektgebiete einblenden.
 
-![Screenshot Karte mit Hervorhebung des Schiebereglers für die Transparenz der Karte](/images/manual/teil-a/map_opacity.jpg)
+Wie Sie die Layer schalten, beschreibt Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster). Die Farben und Formen der Layer stellen Sie unter „Einstellungen“ ein, siehe Kapitel [Einstellungen](./17-einstellungen.md).
 
-Auf der rechten Seite befindet sich die **interaktive Legende** („Layer“-Menü) mit den Einträgen „Adresse“, „Netzknoten“, „Trasse“, „Rohr“, „Gebiet“ und „OpenStreetMap“. Über die Symbole an den Einträgen können Sie:
+## 5.3 Objekte auswählen und Eigenschaften lesen
 
-- Objektarten (Layer) ein- oder ausblenden
-- Beschriftungen anzeigen oder verbergen
-- mit „Auf Ausdehnung zoomen“ die Ansicht auf alle Objekte eines Layers ausrichten
-- die Einträge „Netzknoten“ und „Gebiet“ über den kleinen Pfeil links aufklappen und die einzelnen Typen getrennt schalten
-- die Hintergrundkarte über den Eintrag „OpenStreetMap“ ausblenden oder in den Dunkelmodus wechseln
-
-Nicht jeder Eintrag bietet alle Möglichkeiten: Beim Eintrag „Rohr“ steht ausschließlich „Leitungsbeschriftungen anzeigen“ zur Verfügung.
-
-::: warning
-Beschriftungen werden erst ab einer ausreichenden Zoomstufe eingeblendet. Wenn sich nach dem Einschalten nichts sichtbar ändert, zoomen Sie weiter in die Karte hinein.
-:::
-
-![Screenshot Karte mit Hervorhebung der Legende oben rechts](/images/manual/teil-a/map_legend.jpg)
-![Vier Screenshots der Karte mit verschiedenen Einstellungen in der Legende](/images/manual/teil-a/map_legend_actions.jpg)
-{.img-row}
-
-## 5.3 Auswahl von Objekten
-
-Wenn Sie ein Objekt (z. B. eine Trasse oder einen Netzknoten) auf der Karte anklicken, öffnet sich auf der rechten Seite eine Detailanzeige. Diese **Info-Box** überlagert die Karte, ohne den Kartenausschnitt zu verändern. Welche Reiter sie enthält, hängt von der Objektart ab:
+Wenn Sie ein Objekt (z. B. eine Trasse oder einen Netzknoten) auf der Karte anklicken, öffnet sich auf der rechten Seite die **Info-Box**, siehe Abschnitt [Der Infobereich](./03-wiederkehrende-bedienelemente.md#_3-6-der-infobereich-mit-seinen-reitern). Welche Reiter sie enthält, hängt von der Objektart ab:
 
 - Trasse: „Eigenschaften“, „Rohrübersicht“, „Kabelübersicht“, „Aktionen“, „Anhänge“
 - Netzknoten und Adresse: „Eigenschaften“, „Aktionen“, „Anhänge“
 - Gebiet: „Eigenschaften“, „Anhänge“
 
-Die Angaben im Reiter „Eigenschaften“ sind nicht bearbeitbar, sondern dienen als Informationsquelle. Der Reiter „Rohrübersicht“ zeigt die Rohre der Trasse, siehe Kapitel [Rohrverwaltung](./06-rohrverwaltung.md), „Kabelübersicht“ die darin liegenden Kabel. Im Reiter „Aktionen“ finden Sie weiterführende Ansichten zum ausgewählten Objekt, etwa „Grabenprofil anzeigen“ bei einer Trasse oder „Struktur anzeigen“ bei einem Netzknoten. Bearbeiten können Sie ausschließlich den Reiter „Anhänge“, siehe Abschnitt [Anhänge von Kartenobjekten](#_5-3-1-anhange-von-kartenobjekten).
-
-Ist die Info-Box zu schmal, ziehen Sie sie am linken Rand über den Griff „Größe der Seitenleiste ändern“ breiter. Ein Klick auf eine freie Stelle der Karte hebt die Auswahl auf – innerhalb eines Projektgebiets ist das allerdings kaum möglich, weil dessen Fläche die gesamte Umgebung überdeckt; schließen Sie die Box dann über das Kreuz „Seitenleiste schließen“.
+Die Angaben im Reiter „Eigenschaften“ sind hier nicht bearbeitbar, sondern dienen als Informationsquelle. Bearbeiten können Sie in der Karte ausschließlich den Reiter „Anhänge“, siehe Abschnitt [Anhänge an einem Kartenobjekt](#_5-8-anhange-an-einem-kartenobjekt).
 
 ![Screenshot Karte mit Hervorhebung eines ausgewählten Objekts und der Anzeige der Details in einer Info-Box rechts](/images/manual/teil-a/map_selected_object.jpg)
 
-### 5.3.1 Anhänge von Kartenobjekten
+## 5.4 Trasse: Reiter „Rohrübersicht“ und „Kabelübersicht“
 
-Zu jedem Kartenobjekt können Sie Dateien ablegen; der Reiter „Anhänge“ steht deshalb bei allen Objektarten zur Verfügung. Zum Hinzufügen klicken Sie im Bereich „Dateien hochladen“ auf „Dateien auswählen“ oder ziehen die Datei auf die Fläche „Dateien auswählen oder hierher ziehen“. Die maximale Dateigröße beträgt 50 MB.
+Der Reiter „Rohrübersicht“ zeigt die Rohre der ausgewählten Trasse, siehe Kapitel [Rohrverwaltung](./10-rohrverwaltung.md), „Kabelübersicht“ die darin liegenden Kabel.
 
-Vorhandene Dateien stehen darunter im Bereich „Hochgeladene Dateien“, zusammengefasst in Ordnern, die nach ihrer Art benannt sind und die Anzahl enthalten, z. B. „documents (1)“. Klicken Sie auf einen Ordner, um ihn aufzuklappen – erst dann werden die einzelnen Dateien sichtbar. Zeigen Sie anschließend mit der Maus auf eine Datei, erscheinen rechts neben dem Dateinamen die Schaltflächen „Herunterladen“, „Umbenennen“ und „Datei löschen“; beim Löschen bestätigen Sie die Rückfrage.
+_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
 
-Bei vielen Dateien hilft das Feld „Dateien suchen“ oberhalb der Liste. Sind die Schaltflächen nicht sichtbar, ist Ihr Fenster zu schmal: Scrollen Sie in der Info-Box nach rechts oder ziehen Sie die Box breiter.
+## 5.5 Grabenprofil einer Trasse
 
-![](/videos/map_attachment.webm)
+Im Reiter „Aktionen“ einer Trasse öffnet „Grabenprofil anzeigen“ den Querschnitt des Grabens mit der Lage der Rohre.
 
-## 5.4 Suche
+_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
 
-Oben links befindet sich eine **Suchfunktion**. Hier können Sie gezielt nach Adressen, Netzknoten, Trassen, Rohren und Gebieten suchen.
+## 5.6 Netzknoten: Slot-Konfiguration und Struktur öffnen
 
-![Screenshot Karte mit Hervorhebung des Suchfeldes oben links](/images/manual/teil-a/map_search.jpg)
+Im Reiter „Aktionen“ eines Netzknotens führen „Slot-Konfiguration anzeigen“ und „Struktur anzeigen“ zu dessen innerem Aufbau.
 
-Dazu gehen Sie folgendermaßen vor:
+_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
 
-1. Geben Sie einen Begriff oder einen Teil davon in das Suchfeld ein.
-2. Drücken Sie Enter oder klicken Sie auf das Lupensymbol.
-3. Die Trefferliste öffnet sich unterhalb des Suchfeldes und nennt die Anzahl der Treffer.
-4. Jeder Treffer ist mit seiner Objektart gekennzeichnet.
-5. Ab zehn Treffern erscheint im Kopf der Liste das Feld „Filtern“, mit dem Sie die Liste weiter einschränken.
-6. Klicken Sie auf einen Treffer: Die Karte springt an die passende Stelle und das Objekt blinkt dreimal auf.
+## 5.7 Von der Karte in den Faserweg wechseln
 
-![Vier Screenshots des Suchablaufs in der Karte, nummeriert von 1 bis 6](/images/manual/teil-a/map_search_flow.jpg)
+Im Reiter „Aktionen“ eines Netzknotens oder einer Adresse springt „Folgen“ in die Ansicht „Faserweg“, siehe Kapitel [Faserweg](./15-faserweg.md).
 
-::: info
-Ein Treffer öffnet die Info-Box **nicht**. Die Karte springt nur an die passende Stelle; klicken Sie das Objekt anschließend in der Karte an, um die Details zu sehen (siehe Abschnitt [Auswahl von Objekten](#_5-3-auswahl-von-objekten)).
+_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
+
+## 5.8 Anhänge an einem Kartenobjekt
+
+Zu jedem Kartenobjekt können Sie Dateien ablegen. Hochladen, Herunterladen, Umbenennen und Löschen funktionieren wie in Abschnitt [Anhänge hochladen, ansehen und löschen](./03-wiederkehrende-bedienelemente.md#_3-7-anhange-hochladen-ansehen-und-loschen) beschrieben.
+
+## 5.9 Grenzen der Darstellung
+
+Ein Klick auf eine freie Stelle der Karte hebt die Auswahl auf – innerhalb eines Projektgebiets ist das allerdings kaum möglich, weil dessen Fläche die gesamte Umgebung überdeckt; schließen Sie die Info-Box dann über das Kreuz „Seitenleiste schließen“.
+
+::: warning
+Trassen sind nur wenige Pixel breit und laufen an Netzknoten zusammen. Treffen Sie beim Klicken nicht das gewünschte Objekt, zoomen Sie weiter hinein oder blenden Sie den Layer „Gebiet“ vorübergehend aus.
 :::

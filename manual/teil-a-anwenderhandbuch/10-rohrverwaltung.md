@@ -1,4 +1,4 @@
-# 6. Rohrverwaltung
+# 10. Rohrverwaltung
 
 Die **Rohrverwaltung** führt alle Rohre des ausgewählten Projekts in einer Tabelle auf. Hier legen Sie neue Rohre an, bearbeiten vorhandene, hinterlegen Anhänge und übernehmen größere Bestände aus einer Excel-Datei. Sie erreichen sie über die linke Navigation in der Gruppe „Rohr“ durch Klicken auf den Menüpunkt „Verwaltung“.
 
@@ -6,7 +6,7 @@ Die **Rohrverwaltung** führt alle Rohre des ausgewählten Projekts in einer Tab
 
 Welche Rohre die Tabelle enthält, hängt von dem Projekt ab, das oben links in der Kopfzeile ausgewählt ist.
 
-## 6.1 Aufbau der Tabelle
+## 10.1 Rohrliste durchsuchen und filtern
 
 Zu jedem Rohr zeigt die Tabelle die Spalten „Name“, „Rohrtyp“, „Schutzrohr“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Datum“ und „Kennzeichen“.
 
@@ -19,8 +19,6 @@ Eine Seite umfasst 50 Rohre; unter der Tabelle stehen die Gesamtzahl und die Sei
 ::: warning
 Die Sortierung ordnet nur die Rohre der angezeigten Seite. Bei mehr als einer Seite bleibt ein Rohr von einer anderen Seite also außen vor – auch wenn es alphabetisch an erster Stelle stünde.
 :::
-
-## 6.2 Suchen und Filtern
 
 Zum Eingrenzen der Tabelle stehen zwei Suchfunktionen zur Verfügung, die sich in ihrer Reichweite unterscheiden.
 
@@ -40,7 +38,7 @@ Unter jeder Spaltenüberschrift liegt ein eigenes Suchfeld. Diese Felder arbeite
 Die Spaltensuche durchsucht nur die angezeigte Seite. Ein Rohr, das auf einer anderen Seite steht, finden Sie damit nicht – dafür ist das Suchfeld oben zuständig. Die Gesamtzahl bleibt dabei unverändert, sie zählt weiterhin alle Rohre des Projekts.
 :::
 
-## 6.3 Rohr hinzufügen
+## 10.2 Rohr hinzufügen
 
 Klicken Sie auf „Rohr hinzufügen“. Es öffnet sich ein Dialog mit denselben Angaben, die auch die Tabelle zeigt. Ausgefüllt sein müssen „Name“, „Rohrtyp“ und „Kennzeichen“; solange eines dieser Felder leer ist, lässt sich der Dialog nicht speichern. Der Name muss innerhalb des Projekts eindeutig sein.
 
@@ -54,17 +52,13 @@ Nach dem Klick auf „Speichern“ bleibt der Dialog geöffnet und behält alle 
 Die Angaben des zuletzt angelegten Rohrs bleiben erhalten und stehen beim nächsten Öffnen des Dialogs wieder im Formular – auch nach einem Neustart des Browsers.
 :::
 
-Aus dem gewählten Rohrtyp entstehen dabei zugleich die Mikrorohre des Rohrs, siehe Abschnitt [Reiter „Status“](#_6-4-2-reiter-„status).
+Aus dem gewählten Rohrtyp entstehen dabei zugleich die Mikrorohre des Rohrs, siehe Abschnitt [Mikrorohre eines Rohrs](#_10-4-mikrorohre-eines-rohrs).
 
-## 6.4 Rohr bearbeiten
+## 10.3 Eigenschaften bearbeiten
 
-Klicken Sie ein Rohr in der Tabelle an, öffnet sich rechts eine Box mit dem Namen des Rohrs als Überschrift. Am linken Rand der Box stehen die drei Reiter „Eigenschaften“, „Status“ und „Anhänge“ untereinander.
+Klicken Sie ein Rohr in der Tabelle an, öffnet sich rechts eine Box mit dem Namen des Rohrs als Überschrift. Am linken Rand der Box stehen die drei Reiter „Eigenschaften“, „Status“ und „Anhänge“ untereinander. Die Box verhält sich wie in Abschnitt [Der Infobereich](./03-wiederkehrende-bedienelemente.md#_3-6-der-infobereich-mit-seinen-reitern) beschrieben.
 
-Die Box überdeckt den rechten Teil der Tabelle. Sie verhält sich wie die Info-Box der Karte (siehe Kapitel [Karte](./05-karte.md)); die dort eingestellte Breite gilt für beide Ansichten.
-
-### 6.4.1 Reiter „Eigenschaften“
-
-Hier ändern Sie die Angaben des ausgewählten Rohrs. Die Schaltflächen „Speichern“ und „Rohr löschen“ liegen am unteren Rand der Box und bleiben dort stehen; für die letzten Felder des Formulars scrollen Sie in der Box nach unten.
+Im Reiter „Eigenschaften“ ändern Sie die Angaben des ausgewählten Rohrs. Die Schaltflächen „Speichern“ und „Rohr löschen“ liegen am unteren Rand der Box und bleiben dort stehen; für die letzten Felder des Formulars scrollen Sie in der Box nach unten.
 
 ![Screenshot Rohrverwaltung mit Hervorhebung der Box zum Bearbeiten eines Rohrs im Reiter „Eigenschaften“](/images/manual/teil-a/conduit_properties.jpg)
 
@@ -76,15 +70,9 @@ Die Auswahlfelder – „Rohrtyp“, „Status“, „Netzebene“, „Eigentüm
 Speichern Sie Ihre Änderungen, bevor Sie ein anderes Rohr aus der Tabelle auswählen. Andernfalls gehen sie ohne Warnung verloren.
 :::
 
-Über „Rohr löschen“ entfernen Sie das Rohr; die Rückfrage bestätigen Sie mit „Löschen“. Ob Sie ein Rohr löschen dürfen, hängt von Ihren Rechten ab – fehlt die Berechtigung, erscheint eine Fehlermeldung.
+## 10.4 Mikrorohre eines Rohrs
 
-::: danger
-Mit dem Rohr verschwinden auch seine Mikrorohre und seine Zuordnungen zu Trassensegmenten (siehe Kapitel [Rohrzuordnung](./07-rohrzuordnung.md)). Rückgängig machen lässt sich das nicht.
-:::
-
-### 6.4.2 Reiter „Status“
-
-Der Reiter listet die **Mikrorohre** des Rohrs auf, mit den Spalten „#“, „Farbe“, „Adresse“ (des angeschlossenen Netzknotens), „Kabel“ und „Status“. Anzahl und Farben gibt der Rohrtyp vor; ändern lassen sie sich hier nicht.
+Der Reiter „Status“ listet die **Mikrorohre** des Rohrs auf, mit den Spalten „#“, „Farbe“, „Adresse“ (des angeschlossenen Netzknotens), „Kabel“ und „Status“. Anzahl und Farben gibt der Rohrtyp vor; ändern lassen sie sich hier nicht.
 
 ![Screenshot Rohrverwaltung mit Hervorhebung der Box im Reiter „Status“ mit der Liste der Mikrorohre](/images/manual/teil-a/conduit_status.jpg)
 
@@ -94,13 +82,7 @@ Der Status jedes Mikrorohrs steht auf „Intakt“, solange nichts anderes einge
 Ändern Sie den Rohrtyp nachträglich, bleibt die Liste der Mikrorohre unverändert – sie richtet sich nach dem Rohrtyp zum Zeitpunkt des Anlegens.
 :::
 
-### 6.4.3 Reiter „Anhänge“
-
-Zu jedem Rohr können Sie Dateien ablegen, etwa Bestandspläne oder Messprotokolle. Hochladen, Herunterladen, Umbenennen und Löschen funktionieren wie bei den Kartenobjekten, siehe Abschnitt [Anhänge von Kartenobjekten](./05-karte.md#_5-3-1-anhange-von-kartenobjekten).
-
-![Screenshot Rohrverwaltung mit Hervorhebung der Box im Reiter „Anhänge“ mit einer hochgeladenen Datei](/images/manual/teil-a/conduit_attachment.jpg)
-
-## 6.5 Excel-Vorlage und Datenimport
+## 10.5 Excel-Import: Vorlage, Ablauf, Fehlermeldungen
 
 Oben rechts finden Sie zwei Schaltflächen für die Arbeit mit Excel-Dateien. „Vorlage“ lädt eine Excel-Datei mit den Spalten „Name“, „Typ“, „Schutzrohr“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Datum“, „Projekt“ und „Kennzeichen“ herunter. „Excel Import“ öffnet die Dateiauswahl; sobald Sie eine Datei gewählt haben, startet der Import ohne weitere Rückfrage.
 
@@ -122,3 +104,17 @@ Der Import ist ein Alles-oder-nichts-Vorgang: Ist eine einzige Zeile fehlerhaft,
 ::: info
 Nach einem erfolgreichen Import nennt die Meldung die Anzahl der übernommenen Rohre; die Tabelle aktualisiert sich anschließend von selbst.
 :::
+
+## 10.6 Rohr löschen
+
+Über „Rohr löschen“ im Reiter „Eigenschaften“ entfernen Sie das Rohr; die Rückfrage bestätigen Sie mit „Löschen“. Ob Sie ein Rohr löschen dürfen, hängt von Ihren Rechten ab – fehlt die Berechtigung, erscheint eine Fehlermeldung.
+
+::: danger
+Mit dem Rohr verschwinden auch seine Mikrorohre und seine Zuordnungen zu Trassensegmenten (siehe Kapitel [Rohrzuordnung](./11-rohrzuordnung.md)). Rückgängig machen lässt sich das nicht.
+:::
+
+## 10.7 Anhänge an einem Rohr
+
+Zu jedem Rohr können Sie Dateien ablegen, etwa Bestandspläne oder Messprotokolle. Hochladen, Herunterladen, Umbenennen und Löschen funktionieren wie in Abschnitt [Anhänge hochladen, ansehen und löschen](./03-wiederkehrende-bedienelemente.md#_3-7-anhange-hochladen-ansehen-und-loschen) beschrieben.
+
+![Screenshot Rohrverwaltung mit Hervorhebung der Box im Reiter „Anhänge“ mit einer hochgeladenen Datei](/images/manual/teil-a/conduit_attachment.jpg)

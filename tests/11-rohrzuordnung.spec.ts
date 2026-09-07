@@ -8,8 +8,8 @@ import {
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
 
-// Screenshots for chapter "7. Rohrzuordnung" in the manual
-// (manual/teil-a-anwenderhandbuch/07-rohrzuordnung.md). Produces all images of
+// Screenshots for chapter "11. Rohrzuordnung" in the manual
+// (manual/teil-a-anwenderhandbuch/11-rohrzuordnung.md). Produces all images of
 // the chapter:
 //
 //   conduit_connection                  plain overview shot (pattern 1)
@@ -20,11 +20,11 @@ import {
 //   conduit_connection_conduit          opened conduit list (pattern 2)
 //   conduit_connection_list             list of assigned trenches (pattern 2)
 //
-// The videos of the chapter sit in tests/07-rohrzuordnung-video.spec.ts -
+// The videos of the chapter sit in tests/11-rohrzuordnung-video.spec.ts -
 // test.use({ video: ... }) is only allowed at file level.
 //
-// Publish to public/images/ with: pnpm screenshots:publish 07-rohrzuordnung
-const CHAPTER = '07-rohrzuordnung'
+// Publish to public/images/ with: pnpm screenshots:publish 11-rohrzuordnung
+const CHAPTER = '11-rohrzuordnung'
 
 /**
  * Flag "Sterup" (id 2). Every conduit of the test project carries it, while the
@@ -192,7 +192,7 @@ async function selectConduit(page: Page, conduit = CONDUIT) {
   await expect(
     page.getByText(`${conduit.trenchCount} Einträge`),
     `The conduit "${conduit.label}" does not hold the expected number of trench ` +
-      'segments. Has a video run been aborted? tests/07-rohrzuordnung-video.spec.ts ' +
+      'segments. Has a video run been aborted? tests/11-rohrzuordnung-video.spec.ts ' +
       'restores the demo state through the API.',
   ).toBeVisible()
 
@@ -245,7 +245,7 @@ async function mapEllipse(
 // Images
 // ---------------------------------------------------------------------------
 
-test('7. Übersicht der Rohrzuordnung', async ({ page }) => {
+test('11. Übersicht der Rohrzuordnung', async ({ page }) => {
   // Deliberately without a conduit: that is the state the page is reached in,
   // and the hint at the bottom edge of the map ("Wählen Sie ein Rohr rechts aus
   // dem Drop-Down.") is part of what section 7.1 describes.
@@ -255,7 +255,7 @@ test('7. Übersicht der Rohrzuordnung', async ({ page }) => {
   await page.screenshot({ path: shotPath(CHAPTER, 'conduit_connection') })
 })
 
-test('7.2 Arbeitsbereich rechts neben der Karte', async ({ page }) => {
+test('11.1 Arbeitsbereich rechts neben der Karte', async ({ page }) => {
   await openAssignment(page, { view: VIEW.corridor })
   await selectConduit(page)
 
@@ -264,7 +264,7 @@ test('7.2 Arbeitsbereich rechts neben der Karte', async ({ page }) => {
   await spotlightOff()
 })
 
-test('7.2.1 Umschalter „Routing-Modus"', async ({ page }) => {
+test('11.3 Umschalter „Routing-Modus"', async ({ page }) => {
   await openAssignment(page, { view: VIEW.corridor })
   await selectConduit(page)
 
@@ -273,7 +273,7 @@ test('7.2.1 Umschalter „Routing-Modus"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('7.2.2 Umschalter „Trassenverbindungen anzeigen"', async ({ page }) => {
+test('11.5 Umschalter „Trassenverbindungen anzeigen"', async ({ page }) => {
   await openAssignment(page, { view: VIEW.corridor, linkedTrenches: true })
   await selectConduit(page)
 
@@ -293,7 +293,7 @@ test('7.2.2 Umschalter „Trassenverbindungen anzeigen"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('7.3.1 Projekt und Kennzeichen', async ({ page }) => {
+test('11.6 Projekt und Kennzeichen', async ({ page }) => {
   await openAssignment(page, { view: VIEW.corridor })
   await selectConduit(page)
 
@@ -307,7 +307,7 @@ test('7.3.1 Projekt und Kennzeichen', async ({ page }) => {
   await spotlightOff()
 })
 
-test('7.3.1 Geöffnete Rohrauswahl', async ({ page }) => {
+test('11.1 Geöffnete Rohrauswahl', async ({ page }) => {
   await openAssignment(page, { view: VIEW.corridor })
 
   const field = page.getByPlaceholder('Rohr auswählen', { exact: true })
@@ -331,7 +331,7 @@ test('7.3.1 Geöffnete Rohrauswahl', async ({ page }) => {
   await spotlightOff()
 })
 
-test('7.3.3 Liste der zugeordneten Trassensegmente', async ({ page }) => {
+test('11.2.2 Liste der zugeordneten Trassensegmente', async ({ page }) => {
   await openAssignment(page, { view: VIEW.corridor })
   await selectConduit(page)
 
