@@ -36,7 +36,8 @@ export default defineConfig({
   // local-app/ is the cloned Qonnectra app checkout (see
   // scripts/setup-local-qonnectra.sh). Without this exclusion VitePress pulls
   // its Markdown files into the build and fails on the HTML inside them.
-  srcExclude: ['local-app/**', '**/node_modules/**'],
+  // OUTLINE.md is the working outline of the manual, not a page of the site.
+  srcExclude: ['local-app/**', '**/node_modules/**', 'OUTLINE.md'],
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }]
   ],

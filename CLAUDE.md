@@ -7,7 +7,9 @@ output, CLI flags, commit messages and this file. German survives in exactly
 three places, each for a reason:
 
 1. **The manual itself** – `manual/` prose, alt texts, chapter file names
-   (they are public URLs).
+   (they are public URLs) and the chapter and section titles in `OUTLINE.md`,
+   which go into the manual verbatim. Everything around them in `OUTLINE.md` is
+   English like the rest.
 2. **Literals quoted from the German app** – Playwright selectors
    (`getByRole('tab', { name: 'Trasse' })`), UI labels cited in comments, demo
    data values (`"Testprojekt"`, `"Hausanschluss"`).
@@ -18,22 +20,31 @@ Everything else is English. When in doubt, English.
 
 ## Glossary
 
-Derived from the already-English image names, so that code and `public/images/`
-agree:
+Derived from the image names and the identifiers of the app, so that code,
+`public/images/` and `local-app/` agree:
 
 | German | English | German | English |
 |---|---|---|---|
 | Trasse | trench | Aufnahme | capture |
 | Rohr | conduit | Ausschnitt | crop |
-| Netzknoten | node | Schleier | scrim |
-| Gebiet | area | Kontur | outline |
-| Adresse | address | Zeiger | cursor |
+| Mikrorohr | microduct | Schleier | scrim |
+| Netzknoten | node | Kontur | outline |
+| Gebiet | area | Zeiger | cursor |
+| Adresse | address | Vorlauf | lead-in |
+| Wohneinheit | residential unit | Verzögerung | delay |
+| Kabel | cable | übernommen | published |
+| Faser | fiber | übersprungen | skipped |
+| Bündel | bundle | Balken | bar |
+| Spleiß | splice | Legende | legend |
+| Kennzeichen | flag | Diagramm | chart |
 | Gewährleistung | warranty | Frist | deadline |
-| Anhang | attachment | Vorlauf | lead-in |
-| Reiter | tab | Verzögerung | delay |
-| Kapitel | chapter | übernommen | published |
-| Legende | legend | übersprungen | skipped |
-| Diagramm | chart | Balken | bar |
+| Anhang | attachment | Reiter | tab |
+| Kapitel | chapter | Grabenprofil | trench profile |
+| Störungsanalyse | fault simulation | Verzweigung | pipe branch |
+| Nachverdichtung | post compaction | Netzschema | network schema |
+| Leitungsauskunft | pipeline record | Faserweg | fiber trace |
+| Auskunftsbereich | inquiry area | Einstellungen | settings |
+| Wertermittlung | valuation | Rohrzuordnung | conduit connection |
 
 One word, two meanings: **Karte** is the map in `05-karte.spec.ts`
 (`openMap()`), but a dashboard card in `04-dashboard.spec.ts` (`card()`). Never
@@ -52,15 +63,46 @@ The manual is split into three parts (target audiences see `manual/index.md`):
 
 | Directory | Part | Chapters |
 |---|---|---|
-| `manual/index.md` | Introduction | 1 |
-| `manual/teil-a-anwenderhandbuch/` | A – User manual (web application, no GIS knowledge) | 2–7, reserved 8–13 |
-| `manual/teil-b-betrieb-admin-qgis/` | B – Operations, administration, QGIS | 14, reserved 15–16 |
-| `manual/teil-c-entwickler-systemdokumentation/` | C – Developer and system documentation | 17 ff. |
+| `manual/index.md` | Start page „Über dieses Handbuch“ – no chapter number | – |
+| `manual/teil-a-anwenderhandbuch/` | A – User manual (web application, no GIS knowledge) | 1–18 |
+| `manual/teil-b-betrieb-admin-qgis/` | B – Operations, administration, QGIS | 19–28 |
+| `manual/teil-c-entwickler-systemdokumentation/` | C – Developer and system documentation | 29–36 |
 
-The gaps in the numbering are deliberate – new chapters fill them instead of
-shifting existing numbers. The chapter number in the H1 **and** in the file name
-prefix have to match (`06-rohrverwaltung.md` → `# 6. Rohrverwaltung`); the
-sidebar is generated from file name order + H1 (`vitepress-sidebar`).
+## The chapter structure
+
+`OUTLINE.md` in the repo root is the binding outline: three levels (part,
+chapter, section), derived from the app of version 1.7.0. It also holds the
+mapping from the old numbering to the new one and is excluded from the VitePress
+build (`srcExclude`). **Which sections a chapter has is decided there, not while
+writing** – a chapter that needs a section the outline does not have gets the
+outline updated in the same commit.
+
+| Part | Chapters |
+|---|---|
+| A | 1 Erste Schritte · 2 Grundbegriffe und Datenmodell · 3 Wiederkehrende Bedienelemente · 4 Dashboard · 5 Karte · 6 Störungsanalyse · 7 Nachverdichtung · 8 Leitungsauskunft · 9 Wertermittlung · 10 Rohrverwaltung · 11 Rohrzuordnung · 12 Rohrverzweigung · 13 Mikrorohre · 14 Netzschema · 15 Faserweg · 16 Adressen · 17 Einstellungen · 18 Wenn etwas nicht funktioniert |
+| B | 19 Rollen und Rechte · 20 Der Administrationsbereich · 21 Projekte und Stammdaten pflegen · 22 Projektbezogene Konfiguration · 23 Dateien und Anhänge verwalten · 24 Daten importieren und exportieren · 25 QGIS-Arbeitsplatz einrichten · 26 Netzdaten in QGIS bearbeiten · 27 QGIS-Server und Kartendienste · 28 Betrieb der Instanz |
+| C | 29 Architekturüberblick · 30 Entwicklungsumgebung · 31 Datenmodell des Backends · 32 REST-API · 33 Frontend · 34 Qualitätssicherung · 35 Bereitstellung und Infrastruktur · 36 Erweitern und mitwirken |
+
+Chapters 4–17 follow the left navigation bar of the app from top to bottom
+(groups „Info“, „Funktionen“, „Rohr“, „Kabel“, „Gebäude“, footer „System“), so
+that manual and interface can be read side by side. Chapters 1–3 come first
+because the rest builds on them: table handling, the layer tree, the info box
+with its tabs, attachments and the export formats are explained once in chapter
+3 and only linked afterwards. Chapter 18 collects the error cases that would
+otherwise be repeated in every chapter.
+
+Numbering runs contiguously inside a part; the free numbers sit at the part
+boundaries. A chapter inserted in the middle of a part therefore renumbers the
+following ones – file name prefix, H1, spec name, screenshot folder and cross
+references, `OUTLINE.md` first. The chapter number in the H1 **and** in the
+file name prefix have to match (`10-rohrverwaltung.md` →
+`# 10. Rohrverwaltung`); the sidebar is generated from file name order + H1
+(`vitepress-sidebar`).
+
+Two chapters of part A depend on administration work and link into part B: the
+„Wertermittlung“ needs cost rates, the „Rohrverzweigung“ needs configured
+`PipeBranchSettings` – without them the app only shows a hint. Both are set in
+chapter 22.
 
 ## Commands
 
@@ -84,7 +126,7 @@ New German technical terms cspell does not know go into `.cspell.json` under
 
 Binding, derived from the existing chapters. New chapters follow it exactly; when
 in doubt read `manual/teil-a-anwenderhandbuch/05-karte.md` and
-`07-rohrzuordnung.md` as templates. The manual is written in German, so the rules
+`11-rohrzuordnung.md` as templates. The manual is written in German, so the rules
 below quote German.
 
 **Precision over completeness** – the manual is written for people who have the
@@ -119,8 +161,9 @@ sentences the chapter exists for.
 
 **Structure**
 - No frontmatter in chapter files.
-- Numbered headings: `# 6. Rohrverwaltung`, `## 6.1 Suchen und Filtern`,
-  `### 6.3.1 Reiter „Eigenschaften“`. `####` stays unnumbered.
+- Numbered headings: `# 10. Rohrverwaltung`, `## 10.1 Suchen und Filtern`,
+  `### 10.3.1 Reiter „Eigenschaften“`. `####` stays unnumbered. `#` and `##` come
+  from `OUTLINE.md`; `###` and deeper are the chapter's own business.
 - Every chapter starts with a paragraph: purpose of the area + how to get there
   („Sie erreichen sie über die linke Navigation durch Klicken auf den Menüpunkt
   „Rohrverwaltung“.“), followed directly by an overview screenshot.
@@ -177,9 +220,15 @@ effect there.
 **Location and naming**
 - Images: `public/images/manual/teil-a/<name>.jpg` (one folder per manual part)
 - Videos: `public/videos/<name>.webm` (flat, no part subfolder)
-- Name = English, `snake_case`, area first, detail second:
-  `login_`, `dashboard_`, `map_`, `conduit_`, `conduit_connection_`
+- Name = English, `snake_case`, area first, detail second
   → `dashboard_trench_hover.jpg`, `map_legend_actions.jpg`, `conduit_search_columns.jpg`
+- One prefix per chapter, so that the images of a chapter sort together. Part A,
+  chapters 1–18: `login_`, `model_`, `ui_`, `dashboard_`, `map_`, `fault_`,
+  `compaction_`, `records_`, `valuation_`, `conduit_`, `conduit_connection_`,
+  `pipe_branch_`, `microduct_`, `schema_`, `trace_`, `address_`, `settings_`,
+  `error_`. Part B: `permission_`, `admin_`, `qgis_`, `ops_`. Part C: `dev_`.
+  `ui_` is the one for chapter 3, whose images show elements that recur
+  everywhere (table, layer tree, info box) – not the view of a single menu item.
 - Detail crops get the suffix `_detail`
   (`login_start_detail.jpg`, `map_address_detail.jpg`).
 
@@ -279,10 +328,12 @@ longer read.
   reads `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`, `APP_USER_*`,
   `DJANGO_SUPERUSER_*`). Only obtain credentials through `localApp()`, never
   write them into specs, output or commits.
-- Login uses the account **without** administration rights by default.
-  `QONNECTRA_LOGIN=admin pnpm test:e2e` switches to the superuser – only for
-  areas that stay hidden from ordinary users. Images from an admin run otherwise
-  show an interface that does not exist for the audience of part A.
+- Login uses the account **without** administration rights by default – that is
+  the right one for the whole of part A. `QONNECTRA_LOGIN=admin pnpm test:e2e`
+  switches to the superuser and is needed for the chapters 19–24 of part B,
+  which show `/admin/*`. Images from an admin run otherwise show an interface
+  that does not exist for the audience of part A (extra menu entry „Logs“, every
+  permission check bypassed).
 - `playwright/auth.setup.ts` runs as a setup project automatically before every
   spec: it checks reachability (with a pointer to
   `scripts/setup-local-qonnectra.sh` if the stack is down), logs in through
@@ -320,8 +371,8 @@ longer read.
   annotations (pattern 3) are post-processed after publishing – look at
   `--dry-run` first, otherwise the run overwrites the handwork with a raw
   capture. To renew only a video, use `--videos`.
-- Chapter 3 is the only one that also needs the logged-out state: the images of
-  the login page sit in a `test.describe` block with
+- Chapter 1 („Erste Schritte“) is the only one that also needs the logged-out
+  state: the images of the login page sit in a `test.describe` block with
   `test.use({ storageState: { cookies: [], origins: [] } })`, the images of the
   interface next to it in the normal logged-in state. The app redirects
   logged-in calls of `/login` to `/map`.
@@ -423,25 +474,38 @@ longer read.
 
 **The app (context for selectors and routes)**
 
-SvelteKit + Skeleton. The navigation bar is sorted into groups; the labels are
-short and only unambiguous together with their group (group „Rohr“ →
-„Verwaltung“ = Rohrverwaltung). Routes and labels:
+SvelteKit + Skeleton, currently version **1.7.0** (the app shows it in the
+header). The navigation bar is sorted into groups; the labels are short and only
+unambiguous together with their group (group „Rohr“ → „Verwaltung“ =
+Rohrverwaltung). This order is the order of the chapters 4–17. Routes and
+labels:
 
-| Group | Route → Label |
-|---|---|
-| „Info“ | `/dashboard` „Dashboard“, `/map` „Karte“ |
-| „Funktionen“ | `/fault-simulation` „Störungsanalyse“, `/post-compaction` „Nachverdichtung“, `/pipeline-records` „Leitungsauskunft“, `/valuation` „Wertermittlung“ |
-| „Rohr“ | `/conduit` „Verwaltung“, `/trench` „Zuordnung“, `/pipe-branch` „Verzweigung“, `/house-connections` „Mikrorohre“ |
-| „Kabel“ | `/network-schema` „Netzschema“, `/trace` „Faserweg“ |
-| „Gebäude“ | `/address` „Adressen“ |
-| „System“ | `/admin/logs` „Logs“, `/settings` „Einstellungen“ |
+| Group (`id`) | Route → Label | Chapter |
+|---|---|---|
+| „Info“ (`main`) | `/dashboard` „Dashboard“, `/map` „Karte“ | 4, 5 |
+| „Funktionen“ (`procedure`) | `/fault-simulation` „Störungsanalyse“, `/post-compaction` „Nachverdichtung“, `/pipeline-records` „Leitungsauskunft“, `/valuation` „Wertermittlung“ | 6–9 |
+| „Rohr“ (`infrastructure`) | `/conduit` „Verwaltung“, `/trench` „Zuordnung“, `/pipe-branch` „Verzweigung“, `/house-connections` „Mikrorohre“ | 10–13 |
+| „Kabel“ (`cable`) | `/network-schema` „Netzschema“, `/trace` „Faserweg“ | 14, 15 |
+| „Gebäude“ (`address`) | `/address` „Adressen“ | 16 |
 
-Plus `/login` without a navigation bar. Which entries appear depends on the
-permissions (`canAccessRoute`); as superuser all are visible. With the default
-capture account (group „Editor“) the entry „Logs“ is missing from the group
-„System“ – the group consists only of „Einstellungen“ there. `/admin/*` is the
-only blocked path; everything without its own `RoutePermission` entry counts as
-allowed.
+Below them sits a footer under the heading „System“ – not a group of its own but
+`footerLinks`: `/admin/logs` „Logs“, `/settings` „Einstellungen“ and the
+external link „Dokumentation“ from `PUBLIC_DOCUMENTATION_URL`. The footer is
+never hidden by the customize controls. Plus `/login` without a navigation bar.
+
+Which entries appear depends on the permissions (`canAccessRoute`); as superuser
+all are visible. With the default capture account (group „Editor“) „Logs“ is
+missing from the footer, which then consists of „Einstellungen“ and
+„Dokumentation“. `/admin/*` is the only blocked path; everything without its own
+`RoutePermission` entry counts as allowed.
+
+Nutzende can customize the bar themselves: the icon next to the logo („Seitenleiste
+anpassen“) switches on per-entry hide toggles, groups can be collapsed, and both
+are persisted per `id` in `sidebarPreferences`. Captures show the default state –
+everything visible, all groups expanded. Below 768 px the bar is replaced by
+`MobileNav`, where the group „Info“ (`pinnedToBar`) sits in the bottom bar and
+the rest in a „Mehr“ menu; that is the state chapter 1.6 describes.
+
 Navigation definition: `local-app/frontend/src/lib/config/navLinks.ts`,
 UI texts: `local-app/frontend/messages/de.json`.
 
