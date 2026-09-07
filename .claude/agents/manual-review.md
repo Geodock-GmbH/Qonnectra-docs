@@ -27,7 +27,10 @@ that was named explicitly.
 
 **Language and tone**
 - Consistently Sie-Form, no Du-Form, no „man“ instead of addressing the reader.
-- Gender-neutral wording.
+- Gender-neutral wording; no double naming („Anwenderinnen und Anwender“), no
+  generic masculine.
+- Every Gendersternchen escaped („Anwender\*Innen“). A bare `*` inside a word
+  silently turns text italic – `pnpm lint:gender` finds them.
 - No marketing tone, no emoji, no exclamation marks.
 - „z. B.“ / „ggf.“ with a space.
 - UI labels in typographic quotation marks „…“, not in `backticks` or straight

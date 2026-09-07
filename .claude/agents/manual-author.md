@@ -51,7 +51,10 @@ section longer.
 
 - German, consistent **Sie-Form**, instructions in the imperative: „Klicken Sie
   auf den Menüpunkt „Karte“.“
-- Gender-neutral: „Nutzende“, „Anwenderinnen und Anwender“.
+- Gender-neutral through a genuinely neutral form („Nutzende“, „Anwendende“,
+  „die Projektleitung“); where none exists, the Gendersternchen with an escaped
+  asterisk: „Anwender\*Innen“. A bare `*` inside a word turns text italic. No
+  double naming, never the generic masculine.
 - Factual and concise. No marketing tone, no emoji, no exclamation marks.
 - Headings: `# 6. Titel`, `## 6.1 Titel`, `### 6.1.1 Titel`; `####` unnumbered.
   No frontmatter.

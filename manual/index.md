@@ -6,7 +6,7 @@ Dieses Handbuch beschreibt die Nutzung, den Betrieb und die technische Grundlage
 
 Ziel des Handbuchs ist es,
 
-- Anwender*Innen einen sicheren und verständlichen Einstieg in die Arbeit mit Qonnectra zu ermöglichen,
+- Anwender\*Innen einen sicheren und verständlichen Einstieg in die Arbeit mit Qonnectra zu ermöglichen,
 - den täglichen Umgang mit der Anwendung zu unterstützen,
 - Zuständigkeiten und Rollen klar zu machen,
 - sowie technische Hintergründe für Betrieb und Entwicklung nachvollziehbar zu dokumentieren.

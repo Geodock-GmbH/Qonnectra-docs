@@ -1,6 +1,6 @@
 # Teil C – Entwicklungs- und Systemdokumentation
 
-Dieser Teil des Handbuchs richtet sich ausschließlich an technische Rollen, insbesondere an Entwickler*Innen, DevOps, GIS-Administrator*Innen sowie Mitglieder der Open-Source-Community.
+Dieser Teil des Handbuchs richtet sich ausschließlich an technische Rollen, insbesondere an Entwickler\*Innen, DevOps, GIS-Administrator\*Innen sowie Mitglieder der Open-Source-Community.
 
 Teil C beschreibt die **technische Architektur von Qonnectra**, den Systemaufbau, die Installation, das Datenmodell sowie Möglichkeiten zur Erweiterung und Weiterentwicklung des Systems.
 

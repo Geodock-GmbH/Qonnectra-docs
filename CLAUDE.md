@@ -155,10 +155,16 @@ sentences the chapter exists for.
 - Gender-neutral through a genuinely neutral form wherever one exists –
   participles and neutral nouns: „Nutzende“, „Verwaltungsmitarbeitende“,
   „Anwendende“, „die Projektleitung“. Where none does, use the Gendersternchen,
-  asterisk plus **upper-case** ending: „Anwender*Innen“, „Administrator*Innen“,
-  „Sachbearbeiter*In“. Double naming („Anwenderinnen und Anwender“) does not
-  count as a neutral form – use the asterisk there. Never leave a term in the
-  generic masculine.
+  asterisk plus **upper-case** ending, **always written with a backslash**:
+  „Anwender\*Innen“, „Administrator\*Innen“, „Sachbearbeiter\*In“. Double naming
+  („Anwenderinnen und Anwender“) does not count as a neutral form – use the
+  asterisk there. Never leave a term in the generic masculine.
+  The backslash is not optional: Markdown reads a bare `*` inside a word as
+  emphasis, so two Gendersternchen in one paragraph italicise everything between
+  them, and a single one pairs with the next `**` that comes along. Escape every
+  one of them – body text, headings and image alt texts alike – not only where it
+  currently breaks, because the next edited sentence moves that boundary.
+  `pnpm lint:gender` checks it.
 - Factual, no marketing tone, no emoji, no exclamation marks.
 - Explain what does **not** work and where users get stuck as well
   („Andernfalls gehen die Änderungen ohne Warnung verloren.“, „Wenn der Button
@@ -196,6 +202,8 @@ sentences the chapter exists for.
 - `**bold**` for technical terms and concepts on first appearance
   (**Rohrzuordnung**, **Transparenz**, **interaktive Legende**) and for states
   („Routing-Modus **eingeschaltet**“).
+- `\*` for the Gendersternchen – never a bare `*` inside a word, see the gender
+  rule above.
 - UI labels in typographic quotation marks: „Speichern“, „+ Rohr hinzufügen“,
   Reiter „Anhänge“. Take labels verbatim from the app – the reference is
   `local-app/frontend/messages/de.json`.
