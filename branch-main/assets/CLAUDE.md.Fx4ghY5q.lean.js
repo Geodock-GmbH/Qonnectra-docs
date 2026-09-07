@@ -1,0 +1,1 @@
+import{_ as t,c as o,o as a,ah as n}from"./chunks/framework.BrEeImfJ.js";const u=JSON.parse('{"title":"CLAUDE.md","description":"","frontmatter":{},"headers":[],"relativePath":"CLAUDE.md","filePath":"CLAUDE.md"}'),s={name:"CLAUDE.md"};function i(r,e,d,c,l,h){return a(),o("div",null,[...e[0]||(e[0]=[n("",64)])])}const g=t(s,[["render",i]]);export{u as __pageData,g as default};
