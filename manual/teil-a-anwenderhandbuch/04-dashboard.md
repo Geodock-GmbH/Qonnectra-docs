@@ -11,7 +11,7 @@ Unterhalb der Kopfzeile stehen sechs Reiter (Tabs): „Übersicht“ mit den Ken
 ![Screenshot Dashboard mit Hervorhebung der Reiterleiste oberhalb der Inhaltsfläche](/images/manual/teil-a/dashboard_tabs.jpg)
 
 ::: info
-Bei einem schmalen Fenster sind nicht alle sechs Beschriftungen gleichzeitig zu sehen. Die Reiterleiste lässt sich dann waagerecht verschieben, zeigt dabei aber keinen Rollbalken.
+Bei einem schmalen Fenster sind nicht alle sechs Beschriftungen gleichzeitig zu sehen. Die Reiterleiste lässt sich dann waagerecht verschieben, zeigt dabei aber keinen Scrollbalken.
 :::
 
 ::: info

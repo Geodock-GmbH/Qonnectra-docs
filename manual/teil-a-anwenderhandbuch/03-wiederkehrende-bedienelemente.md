@@ -12,7 +12,9 @@ _Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
 
 ## 3.3 Das Kartenfenster
 
-Ein Kartenfenster zeigen die Karte selbst sowie die Rohrzuordnung, die Mikrorohre, die Störungsanalyse, die Leitungsauskunft, die Wertermittlung und das Netzschema beim Verknüpfen eines Kabels mit Mikrorohren. In diesen Ansichten verhält es sich gleich; dieser Abschnitt beschreibt es.
+Ein Kartenfenster gibt es in der Karte selbst sowie in der Rohrzuordnung, den Mikrorohren, der Störungsanalyse, der Leitungsauskunft und der Wertermittlung. In diesen Ansichten verhält es sich gleich; dieser Abschnitt beschreibt es.
+
+Das Netzschema selbst ist ein Diagramm und enthält keine Karte. Ein Kartenfenster erscheint dort erst im Fenster „Kabel-Mikrorohr Verknüpfung“: Klicken Sie ein Kabel an und öffnen Sie es im Infobereich über den Reiter „Aktionen“ mit „Mit Mikrorohr verbinden“, siehe Kapitel [Netzschema](./14-netzschema.md).
 
 ::: info
 Die Nachverdichtung und die Detailansicht einer Adresse enthalten ebenfalls eine Karte, dort aber in einer verkleinerten Form ohne Suche, Legende und Transparenzregler. Sie dient nur der Lagekontrolle.
