@@ -1,7 +1,9 @@
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, request, test, type APIRequestContext, type Locator, type Page } from '@playwright/test'
 
+import { localApp, superuserCredentials } from '../playwright/local-app'
 import {
   composite2x2,
+  crop16by10,
   disableAnimations,
   moveCursorAway,
   shotPath,
@@ -462,5 +464,395 @@ test('3.4 Suchablauf (Composite)', async ({ page }) => {
 
   await composite2x2(page, [tile1, tile2, tile3, tile4], shotPath(CHAPTER, 'map_search_flow'), {
     labels: ['1, 2', '3, 4', '5', '6'],
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Sections 5.5 and 5.6: the floating panels of a trench and a node
+// ---------------------------------------------------------------------------
+//
+// Both are opened from the tab "Aktionen" of the info box and lie as their own
+// window over the map. They are read-only from the map (`readonly={true}` in
+// MapDrawerTabs.svelte); creating and changing happens in the network schema.
+
+/**
+ * Trench with three conduits - the trench profile of section 5.5 should show
+ * more than a single circle. Centre in EPSG:3857 is the middle of its longest
+ * segment, so that a click on the map centre hits the line.
+ */
+const TRENCH_PROFILE = {
+  name: 'TR-W55WVN3',
+  view: { center: [1083567.4, 7308614.4], zoom: 19 },
+}
+
+/**
+ * Node with by far the most cables of the test project (24) - the cable list on
+ * the right-hand edge of the structure panel is thereby not empty. Centre in
+ * EPSG:3857 is the node itself.
+ */
+const NODE = {
+  name: 'St-V02',
+  view: { center: [1083576.9, 7308651.3], zoom: 19 },
+}
+
+/**
+ * Slot configuration the images of section 5.6 are made with.
+ *
+ * The demo project brings **no** slot configurations, containers or structures
+ * with it (checked against the API: all three endpoints are empty) - the panels
+ * would only show "Keine Slot-Konfigurationen gefunden". The configuration is
+ * therefore created through the API before the capture and removed again
+ * afterwards, the same way tests/05-karte-video.spec.ts handles the attachment.
+ *
+ * Component types are looked up by name and not by id: they come from the
+ * attribute tables of the instance, whose ids change with a re-import.
+ */
+const SLOT_CONFIGS = [
+  { side: 'A', totalSlots: 24 },
+  { side: 'B', totalSlots: 12 },
+]
+const SLOT_COMPONENTS = [
+  { componentType: 'Spleisskassette', slotStart: 1, slotEnd: 1 },
+  { componentType: 'Spleisskassette', slotStart: 2, slotEnd: 2 },
+  { componentType: 'Spleisskassette', slotStart: 3, slotEnd: 3 },
+  { componentType: 'Splitter 1:8', slotStart: 5, slotEnd: 6 },
+  { componentType: '4HE (12xLC-APC)', slotStart: 9, slotEnd: 12 },
+]
+
+/**
+ * API context of the Django superuser. Needed for the clean-up: the capture
+ * account belongs to the group "Editor", which may create but not delete
+ * (`RoleBasedPermission`, answers DELETE with 403).
+ */
+async function superuserApi() {
+  const { apiUrl } = localApp()
+  const { username, password } = superuserCredentials()
+
+  const api = await request.newContext({ baseURL: apiUrl, ignoreHTTPSErrors: true })
+  const login = await api.post('/api/v1/auth/login/', { data: { username, password } })
+  expect(
+    login.ok(),
+    'Superuser login failed - check DJANGO_SUPERUSER_* in local-app/deployment/.env.',
+  ).toBe(true)
+  return api
+}
+
+/**
+ * UUID of the node named NODE.name.
+ *
+ * Filtered by `?name=`, not read from the full list: the endpoint caps
+ * `page_size` at 100 and the test project has 118 nodes. It answers paginated
+ * **and** as GeoJSON - the features sit in `results.features`, the UUID in
+ * `id` of the feature.
+ */
+async function nodeUuid(api: APIRequestContext): Promise<string> {
+  const response = await api.get(`/api/v1/node/?name=${encodeURIComponent(NODE.name)}`)
+  const body = await response.json()
+  const features: Array<{ id: string; properties?: { name?: string } }> =
+    body.results?.features ?? []
+
+  const match = features.find((feature) => feature.properties?.name === NODE.name)
+  expect(match, `The node "${NODE.name}" is missing in the test project.`).toBeTruthy()
+  return match!.id
+}
+
+/** Removes all slot configurations of the node (and with them their structures). */
+async function removeSlotConfigurations(api: APIRequestContext, uuid: string) {
+  const response = await api.get('/api/v1/node-slot-configuration/?page_size=200')
+  const body = await response.json()
+  const rows = Array.isArray(body) ? body : (body.results ?? [])
+
+  for (const row of rows) {
+    if ((row.uuid_node?.id ?? row.uuid_node) !== uuid) continue
+    await api.delete(`/api/v1/node-slot-configuration/${row.uuid}/`)
+  }
+}
+
+/** Creates the configuration of SLOT_CONFIGS / SLOT_COMPONENTS at the node. */
+async function createSlotConfiguration(api: APIRequestContext, uuid: string) {
+  const typesResponse = await api.get('/api/v1/attributes_component_type/')
+  const typesBody = await typesResponse.json()
+  const types: Array<{ id: number; component_type: string }> = Array.isArray(typesBody)
+    ? typesBody
+    : (typesBody.results ?? [])
+
+  const created: Record<string, string> = {}
+  for (const config of SLOT_CONFIGS) {
+    const response = await api.post('/api/v1/node-slot-configuration/', {
+      data: { uuid_node_id: uuid, side: config.side, total_slots: config.totalSlots },
+    })
+    expect(response.ok(), `Slot configuration "${config.side}" could not be created.`).toBe(true)
+    created[config.side] = (await response.json()).uuid
+  }
+
+  for (const component of SLOT_COMPONENTS) {
+    const type = types.find((entry) => entry.component_type === component.componentType)
+    expect(
+      type,
+      `The component type "${component.componentType}" is missing in the instance - has the ` +
+        'attribute table changed?',
+    ).toBeTruthy()
+
+    const response = await api.post('/api/v1/node-structure/', {
+      data: {
+        uuid_node_id: uuid,
+        slot_configuration_id: created[SLOT_CONFIGS[0].side],
+        component_type_id: type!.id,
+        slot_start: component.slotStart,
+        slot_end: component.slotEnd,
+      },
+    })
+    expect(response.ok(), `The component "${component.componentType}" could not be placed.`).toBe(
+      true,
+    )
+  }
+}
+
+/**
+ * Selects an object at the map centre and waits for its info box.
+ *
+ * The layer "Gebiet" is hidden beforehand: its surface covers the entire
+ * network, and without that a near miss selects the area instead of the object
+ * (see the test for section 5.3). A small cross around the centre is tried,
+ * because a trench line is only a few pixels wide.
+ */
+async function selectAtCentre(page: Page, expected: string) {
+  await legendRow(page, 'Gebiet').getByRole('button', { name: 'Layer ausblenden' }).click()
+  await moveCursorAway(page)
+  await page.waitForTimeout(1000)
+
+  const map = page.locator('div.map')
+  const box = (await map.boundingBox())!
+  const title = page.locator('#drawer-title')
+
+  for (const [dx, dy] of [
+    [0, 0],
+    [0, -4],
+    [0, 4],
+    [-4, 0],
+    [4, 0],
+    [0, -8],
+    [0, 8],
+  ]) {
+    await map.click({ position: { x: box.width / 2 + dx, y: box.height / 2 + dy } })
+    if ((await title.isVisible()) && (await title.textContent()) === expected) break
+  }
+
+  await expect(
+    title,
+    `"${expected}" was not hit at the map centre - does the view still sit on the object?`,
+  ).toHaveText(expected)
+
+  await moveCursorAway(page)
+  await page.waitForTimeout(500)
+}
+
+/**
+ * The floating window with the given title (FloatingPanel.svelte).
+ *
+ * Deliberately the part `content` and not an ancestor of the title: Zag puts
+ * `data-scope="floating-panel"` on almost every part of the window, and the
+ * nearest ancestor of the title is the 57 px high header - a crop to that
+ * would show the title bar and nothing else.
+ */
+function floatingPanel(page: Page, title: string): Locator {
+  return page
+    .locator('[data-scope="floating-panel"][data-part="content"]')
+    .filter({ hasText: title })
+}
+
+test('5.5 Grabenprofil einer Trasse', async ({ page }) => {
+  test.setTimeout(90_000)
+  await openMap(page, TRENCH_PROFILE.view)
+  await selectAtCentre(page, TRENCH_PROFILE.name)
+
+  const infobox = page.locator('[data-drawer]')
+  await infobox.getByRole('tab', { name: 'Aktionen', exact: true }).click()
+  await infobox.getByRole('button', { name: 'Grabenprofil anzeigen' }).click()
+
+  const panel = floatingPanel(page, 'Grabenprofil')
+  await expect(panel).toBeVisible()
+  // The drawing is built from the conduits of the trench; without them the
+  // window would only show "Keine Leerrohre in diesem Graben gefunden".
+  await expect(panel.locator('.trench-profile-node')).toHaveCount(3)
+
+  // Align the drawing to its content. The panel does that itself 300 ms after
+  // mounting (TrenchProfileFitView.svelte) - but the conduits are loaded
+  // asynchronously, and if they arrive later the automatic fit runs on an empty
+  // drawing: the view then stays at the smallest zoom level and the window looks
+  // empty (that is how the first take of this image came out). The button does
+  // exactly what section 5.5 describes.
+  await panel.getByRole('button', { name: 'Fit View' }).click()
+  await moveCursorAway(page)
+  await page.waitForTimeout(1500)
+
+  // Cropped to the window: at 900 x 600 in a window of 1792 x 1120 the labels
+  // would be barely readable in the 512 px rendering of the manual.
+  await page.screenshot({
+    path: shotPath(CHAPTER, 'map_trench_profile'),
+    clip: await crop16by10(page, panel),
+  })
+})
+
+test.describe('Netzknoten mit Slot-Konfiguration', () => {
+  let api: APIRequestContext
+  let uuid: string
+
+  test.beforeAll(async () => {
+    api = await superuserApi()
+    uuid = await nodeUuid(api)
+    // Also runs before creating: an aborted run would otherwise leave the
+    // configuration behind and the next one would create it a second time.
+    await removeSlotConfigurations(api, uuid)
+    await createSlotConfiguration(api, uuid)
+  })
+
+  test.afterAll(async () => {
+    await removeSlotConfigurations(api, uuid)
+    await api.dispose()
+  })
+
+  test('5.6 Slot-Konfiguration eines Netzknotens', async ({ page }) => {
+    test.setTimeout(90_000)
+    await openMap(page, NODE.view)
+    await selectAtCentre(page, NODE.name)
+
+    const infobox = page.locator('[data-drawer]')
+    await infobox.getByRole('tab', { name: 'Aktionen', exact: true }).click()
+    await infobox.getByRole('button', { name: 'Slot-Konfiguration anzeigen' }).click()
+
+    const panel = floatingPanel(page, 'Netzknoten-Konfiguration')
+    await expect(panel).toBeVisible()
+    await expect(panel.getByText('Gesamtslots: 24')).toBeVisible()
+    await moveCursorAway(page)
+    await page.waitForTimeout(1000)
+
+    await page.screenshot({
+      path: shotPath(CHAPTER, 'map_node_slots'),
+      clip: await crop16by10(page, panel),
+    })
+  })
+
+  test('5.6 Struktur eines Netzknotens', async ({ page }) => {
+    test.setTimeout(90_000)
+    await openMap(page, NODE.view)
+    await selectAtCentre(page, NODE.name)
+
+    const infobox = page.locator('[data-drawer]')
+    await infobox.getByRole('tab', { name: 'Aktionen', exact: true }).click()
+    await infobox.getByRole('button', { name: 'Struktur anzeigen' }).click()
+
+    const panel = floatingPanel(page, 'Netzknotenstruktur')
+    await expect(panel).toBeVisible()
+    // The grid only fills once a side has been chosen and its structures are in.
+    await expect(panel.getByText('Spleisskassette').first()).toBeVisible()
+    await moveCursorAway(page)
+    await page.waitForTimeout(1000)
+
+    await page.screenshot({
+      path: shotPath(CHAPTER, 'map_node_structure'),
+      clip: await crop16by10(page, panel),
+    })
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Section 5.4: the tabs "Rohrübersicht" and "Kabelübersicht" of a trench
+// ---------------------------------------------------------------------------
+
+/**
+ * Width the info box is opened at for the images of section 5.4, in CSS pixels.
+ *
+ * At its default of 400 px the microduct table ("#", "Farbe", "Adresse",
+ * "Kabel", "Status") is squeezed into five unreadable columns. Widening it is
+ * the step section 3.6 describes anyway; the value is seeded through
+ * `localStorage`, so that the images show the widened state from the first
+ * frame and no drag has to be faked.
+ */
+const TRENCH_TABS_DRAWER_WIDTH = 760
+
+/**
+ * Crop around the info box: a strip of map to its left, the rest to the right
+ * edge, expanded to 16 : 10.
+ *
+ * A screenshot of the info box alone would be portrait and would end up as a
+ * stripe in the middle of the 16-to-10 frame of the manual; the full window
+ * would render the box at 42 % of the image width and make the tables
+ * unreadable at 512 px.
+ */
+async function drawerClip(page: Page) {
+  /** Strip of map to the left of the info box that stays in the picture. */
+  const MAP_STRIP = 200
+
+  const box = (await page.locator('[data-drawer]').boundingBox())!
+  const x = Math.max(0, Math.round(box.x - MAP_STRIP))
+  const width = (page.viewportSize()?.width ?? 1792) - x
+  const height = Math.round(width / 1.6)
+
+  return { x, y: Math.round(box.y), width, height }
+}
+
+/** Opens the trench of TRENCH_PROFILE with a widened info box. */
+async function openTrenchTabs(page: Page) {
+  await page.addInitScript((width) => {
+    localStorage.setItem('drawerWidth', String(width))
+  }, TRENCH_TABS_DRAWER_WIDTH)
+
+  await openMap(page, TRENCH_PROFILE.view)
+  await selectAtCentre(page, TRENCH_PROFILE.name)
+  return page.locator('[data-drawer]')
+}
+
+test('5.4 Reiter „Rohrübersicht“', async ({ page }) => {
+  test.setTimeout(90_000)
+  const infobox = await openTrenchTabs(page)
+
+  await infobox.getByRole('tab', { name: 'Rohrübersicht', exact: true }).click()
+
+  // One conduit per row; the microducts are only loaded when the row is
+  // expanded. Without expanding, the image would show three closed rows and
+  // nothing of what the section describes.
+  const firstConduit = infobox.getByRole('button', { name: /^St-V02-01/ })
+  await expect(firstConduit).toBeVisible()
+  await firstConduit.click()
+  await expect(infobox.getByRole('table').first()).toBeVisible()
+
+  await moveCursorAway(page)
+  await page.waitForTimeout(800)
+
+  await page.screenshot({
+    path: shotPath(CHAPTER, 'map_trench_conduits'),
+    clip: await drawerClip(page),
+  })
+})
+
+test('5.4 Reiter „Kabelübersicht“', async ({ page }) => {
+  test.setTimeout(90_000)
+  const infobox = await openTrenchTabs(page)
+
+  await infobox.getByRole('tab', { name: 'Kabelübersicht', exact: true }).click()
+
+  // Two levels: the cable holds the bundles, the bundle holds the fibers. Both
+  // are expanded, because the section describes exactly this nesting.
+  //
+  // Not anchored with `/Fasern$/`: the buttons "Folgen" and "Trassen auf Karte
+  // hervorheben" sit **inside** the accordion trigger, so their labels end up
+  // in its accessible name ("... 6 Fasern Folgen Trassen auf Karte
+  // hervorheben").
+  const firstCable = infobox.getByRole('button', { name: /Fasern/ }).first()
+  await expect(firstCable).toBeVisible()
+  await firstCable.click()
+
+  const firstBundle = infobox.getByRole('button', { name: /^Bündel/ }).first()
+  await expect(firstBundle).toBeVisible()
+  await firstBundle.click()
+  await expect(infobox.getByRole('table').first()).toBeVisible()
+
+  await moveCursorAway(page)
+  await page.waitForTimeout(800)
+
+  await page.screenshot({
+    path: shotPath(CHAPTER, 'map_trench_cables'),
+    clip: await drawerClip(page),
   })
 })

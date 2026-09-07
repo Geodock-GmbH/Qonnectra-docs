@@ -227,6 +227,14 @@ sentences the chapter exists for.
 > own `viewport` and `deviceScaleFactor` values and override the target values
 > silently.
 
+The one exception to the viewport is section 1.6 („Bedienung auf Tablet und
+Smartphone“): its images have to show the state below the `md` breakpoint of
+768 px and are therefore taken at **390 × 844** (`test.use({ viewport })` in the
+describe block „Mobil“ of `tests/01-erste-schritte.spec.ts`). They are portrait
+and are embedded with `{.small}`, never as an `.img-row` – that renders its
+images in a 16-to-10 frame, in which a portrait screenshot shrinks to a stripe
+in the middle.
+
 Videos are deliberately **not** a full shot of the interface. The manual renders
 them at the width of the text column (around 690 px); at a recording width of
 1792 CSS pixels, a 16 px label in the app would be left with less than 7 px. A

@@ -124,3 +124,67 @@ test.describe('Angemeldet', () => {
     await spotlightOff()
   })
 })
+
+test.describe('Mobil', () => {
+  // Section 1.6 describes the state below the md breakpoint (768 px): the
+  // navigation bar on the left is replaced by a bar at the bottom edge
+  // (MobileNav.svelte), and the header drops everything below sm (640 px).
+  //
+  // The only place in the manual where the target values of CLAUDE.md
+  // (1792 x 1120) deliberately do not apply - a phone screen cannot be
+  // photographed in a desktop window. 390 x 844 is a common phone size and lies
+  // below both breakpoints. deviceScaleFactor stays at 2, so the image is
+  // 780 x 1688 and legible.
+  //
+  // The images are portrait and are therefore embedded with {.small}, not as an
+  // .img-row: that renders its images in a 16-to-10 frame, in which a portrait
+  // screenshot would shrink to a stripe in the middle.
+  test.use({ viewport: { width: 390, height: 844 } })
+
+  /** Bar at the bottom edge with "Dashboard", "Karte" and "Mehr". */
+  function mobileBar(page: Page): Locator {
+    return page.getByRole('button', { name: 'Weitere Seiten' }).locator('xpath=../..')
+  }
+
+  /** Opens the dashboard and waits until the cards are in. */
+  async function openMobileDashboard(page: Page) {
+    await page.goto('/dashboard')
+    await expect(page).toHaveURL(/\/dashboard\/2(\/|$)/)
+    await expect(page.getByRole('heading', { name: 'Trassenstatistik' })).toBeVisible()
+    await page.waitForLoadState('networkidle')
+
+    await disableAnimations(page)
+    await moveCursorAway(page)
+  }
+
+  test('1.6 Leiste am unteren Bildschirmrand', async ({ page }) => {
+    await openMobileDashboard(page)
+
+    // Cross-check that the window is really below the breakpoint: the desktop
+    // navigation bar carries `hidden md:block`, so it must not be in the shot.
+    await expect(
+      page.locator('div[class*="grid-rows-[auto_1fr_auto]"]'),
+      'The navigation bar on the left is still visible - is the viewport really ' +
+        'below the md breakpoint of 768 px?',
+    ).toBeHidden()
+
+    const spotlightOff = await spotlight(page, mobileBar(page))
+    await page.screenshot({ path: shotPath(CHAPTER, 'login_mobile_bar') })
+    await spotlightOff()
+  })
+
+  test('1.6 Menü „Mehr“', async ({ page }) => {
+    await openMobileDashboard(page)
+
+    await page.getByRole('button', { name: 'Weitere Seiten' }).click()
+    await expect(page.getByRole('heading', { name: 'Weitere Seiten' })).toBeVisible()
+    // The menu slides in over 200 ms; disableAnimations() has already switched
+    // that off, but the group headings only render once the permissions are in.
+    await expect(page.getByRole('heading', { name: 'System' })).toBeVisible()
+    await moveCursorAway(page)
+
+    // No spotlight: the menu brings its own backdrop (bg-black/50), a second
+    // scrim on top would dim the page twice.
+    await page.screenshot({ path: shotPath(CHAPTER, 'login_mobile_more') })
+  })
+})
