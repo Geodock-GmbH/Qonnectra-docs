@@ -1,10 +1,10 @@
 # 3. Wiederkehrende Bedienelemente
 
-Einige Bedienelemente von Qonnectra tauchen in mehreren Ansichten unverändert auf: das Kartenfenster mit seiner Legende, die Objektsuche, der Infobereich am rechten Rand und die Anhänge. Dieses Kapitel beschreibt sie einmal; die Kapitel zu den einzelnen Menüpunkten verweisen darauf und nennen nur noch, was dort davon abweicht.
+Einige Bedienelemente von Qonnectra tauchen in mehreren Ansichten unverändert auf: das Kartenfenster mit seiner Legende, die Objektsuche, die Info-Box am rechten Rand und die Anhänge. Dieses Kapitel beschreibt sie einmal; die Kapitel zu den einzelnen Menüpunkten verweisen darauf und nennen nur noch, was dort davon abweicht.
 
 ## 3.1 Tabellen: Suche, Spaltenfilter, Sortierung, Seitenwechsel
 
-Die Rohrverwaltung, die Adressen und die Leitungsauskunft führen ihren Bestand in einer Tabelle auf. Diese drei Tabellen sind gleich aufgebaut und werden gleich bedient. Ein Klick auf eine Zeile öffnet den zugehörigen Datensatz: in der Rohrverwaltung im Infobereich am rechten Rand, bei den Adressen und der Leitungsauskunft auf einer eigenen Seite.
+Die Rohrverwaltung, die Adressen und die Leitungsauskunft führen ihren Bestand in einer Tabelle auf. Diese drei Tabellen sind gleich aufgebaut und werden gleich bedient. Ein Klick auf eine Zeile öffnet den zugehörigen Datensatz: in der Rohrverwaltung in der Info-Box am rechten Rand, bei den Adressen und der Leitungsauskunft auf einer eigenen Seite.
 
 **Sortieren**
 
@@ -52,10 +52,12 @@ Sind für ein Feld überhaupt keine Werte hinterlegt, erscheint anstelle des Fel
 
 Ein Kartenfenster gibt es in der Karte selbst sowie in der Rohrzuordnung, den Mikrorohren, der Störungsanalyse, der Leitungsauskunft und der Wertermittlung. In diesen Ansichten verhält es sich gleich; dieser Abschnitt beschreibt es.
 
-Das Netzschema selbst ist ein Diagramm und enthält keine Karte. Ein Kartenfenster erscheint dort erst im Fenster „Kabel-Mikrorohr Verknüpfung“: Klicken Sie ein Kabel an und öffnen Sie es im Infobereich über den Reiter „Aktionen“ mit „Mit Mikrorohr verbinden“, siehe Kapitel [Netzschema](./14-netzschema.md).
+Das Netzschema selbst ist ein Diagramm und enthält keine Karte. Ein Kartenfenster erscheint dort erst im Fenster „Kabel-Mikrorohr Verknüpfung“: Klicken Sie ein Kabel an und öffnen Sie es in der Info-Box über den Reiter „Aktionen“ mit „Mit Mikrorohr verbinden“, siehe Kapitel [Netzschema](./14-netzschema.md).
 
 ::: info
 Die Nachverdichtung und die Detailansicht einer Adresse enthalten ebenfalls eine Karte, dort aber in einer verkleinerten Form ohne Suche, Legende und Transparenzregler. Sie dient nur der Lagekontrolle.
+
+Der Faserweg zeigt neben seinem Ergebnis eine eigene Karte, die nicht das hier beschriebene Kartenfenster ist: Sie zeichnet ausschließlich den ermittelten Weg, und Suche, Legende, Transparenzregler und Messen fehlen. Ein Klick wählt darin ein Element des Wegs aus. Beschrieben wird sie in Kapitel [Faserweg](./15-faserweg.md).
 :::
 
 Mit dem Mausrad oder dem Touchpad zoomen Sie in die Karte hinein und heraus, mit gedrückter linker Maustaste verschieben Sie den Kartenausschnitt.
@@ -94,6 +96,14 @@ Mit „Auf Ausdehnung zoomen“ beim Eintrag „Adresse“ gelangen Sie in den B
 ![Screenshot Karte nach dem Zoom auf die Ausdehnung des Layers Adresse](/images/manual/teil-a/map_address_detail_select.jpg)
 {.img-row}
 
+**Objekte anklicken**
+
+Ein Klick in die Karte wählt das Objekt darunter aus. Zwei Eigenheiten des Netzbestands machen das schwerer, als es klingt: Trassen sind nur wenige Pixel breit und laufen an Netzknoten zusammen, und die Fläche eines Projektgebiets liegt unter dem gesamten Netz. Innerhalb eines Gebiets trifft ein Klick deshalb leicht dessen Fläche, die daraufhin die ganze Karte in der Auswahlfarbe überdeckt.
+
+::: warning
+Treffen Sie nicht das gewünschte Objekt, zoomen Sie weiter in die Karte hinein oder blenden Sie den Layer „Gebiet“ in der Legende vorübergehend aus. In den verkleinerten Karten der Nachverdichtung und der Adressdetails ist das nicht möglich, weil sie keine Legende haben.
+:::
+
 ## 3.4 Objekte in der Karte suchen
 
 Oben links im Kartenfenster befindet sich eine **Suchfunktion**. Hier können Sie gezielt nach Adressen, Netzknoten, Trassen, Rohren und Gebieten suchen.
@@ -112,7 +122,7 @@ Dazu gehen Sie folgendermaßen vor:
 ![Vier Screenshots des Suchablaufs in der Karte, nummeriert von 1 bis 6](/images/manual/teil-a/map_search_flow.jpg)
 
 ::: info
-Ein Treffer öffnet den Infobereich **nicht**. Die Karte springt nur an die passende Stelle; klicken Sie das Objekt anschließend in der Karte an, um die Details zu sehen, siehe Kapitel [Karte](./05-karte.md).
+Ein Treffer öffnet die Info-Box **nicht**. Die Karte springt nur an die passende Stelle; klicken Sie das Objekt anschließend in der Karte an, um die Details zu sehen, siehe Kapitel [Karte](./05-karte.md).
 :::
 
 ## 3.5 Strecke und Fläche messen
@@ -131,20 +141,24 @@ Zum Aufräumen klicken Sie erneut mit der rechten Maustaste und wählen „Messu
 ![](/videos/map_measure.webm)
 
 ::: warning
-Ein Klick während einer Messung setzt nicht nur einen Messpunkt, sondern wählt zugleich das Objekt darunter aus und öffnet die Info-Box. Innerhalb eines Projektgebiets trifft er dessen Fläche, die daraufhin die ganze Karte in der Auswahlfarbe überdeckt. Blenden Sie den Layer „Gebiet“ aus, bevor Sie im Projektgebiet messen.
+Ein Klick während einer Messung setzt nicht nur einen Messpunkt, sondern wählt zugleich das Objekt darunter aus und öffnet die Info-Box – mit den Folgen, die Abschnitt [Das Kartenfenster](#_3-3-das-kartenfenster) unter „Objekte anklicken“ beschreibt. Blenden Sie den Layer „Gebiet“ aus, bevor Sie in einem Projektgebiet messen.
 :::
 
 ::: info
 Es gibt immer nur eine Messung: Eine neue ersetzt die vorherige. Messergebnisse werden nicht gespeichert und sind in keinem Export enthalten.
 :::
 
-## 3.6 Der Infobereich mit seinen Reitern
+## 3.6 Die Info-Box mit ihren Reitern
 
-Wenn Sie ein Objekt auswählen, öffnet sich am rechten Rand eine Detailanzeige. Diese **Info-Box** überlagert die Ansicht, ohne den Kartenausschnitt oder die Tabelle darunter zu verändern. Welche Reiter sie enthält, hängt von der Objektart ab; „Eigenschaften“ und „Anhänge“ gibt es immer.
+Wenn Sie ein Objekt auswählen, öffnet sich am rechten Rand die **Info-Box**. Sie überlagert die Ansicht, ohne den Kartenausschnitt oder die Tabelle darunter zu verändern. Welche Reiter sie enthält, hängt von der Objektart ab; „Eigenschaften“ und „Anhänge“ gibt es immer.
 
 Die Angaben im Reiter „Eigenschaften“ sind je nach Ansicht nur zur Information oder bearbeitbar – in der Karte lesen Sie sie, in der Rohrverwaltung ändern Sie sie. Im Reiter „Aktionen“ finden Sie weiterführende Ansichten zum ausgewählten Objekt. Der Reiter „Anhänge“ ist überall bearbeitbar, siehe Abschnitt [Anhänge hochladen, ansehen und löschen](#_3-7-anhange-hochladen-ansehen-und-loschen).
 
 Ist die Info-Box zu schmal, ziehen Sie sie am linken Rand über den Griff „Größe der Seitenleiste ändern“ breiter. Über das Kreuz „Seitenleiste schließen“ schließen Sie sie.
+
+::: info
+Die Anwendung nennt die Info-Box in diesen beiden Beschriftungen „Seitenleiste“ – dasselbe Wort, das sie in „Seitenleiste anpassen“ für die Navigationsleiste am linken Rand verwendet (siehe Abschnitt [Navigationsleiste anpassen](./01-erste-schritte.md#_1-5-navigationsleiste-anpassen)). Gemeint sind zwei verschiedene Dinge; dieses Handbuch nennt die Anzeige am rechten Rand durchgehend Info-Box.
+:::
 
 ::: info
 Die eingestellte Breite gilt für alle Ansichten mit einer Info-Box, nicht nur für die, in der Sie sie geändert haben.
@@ -156,7 +170,7 @@ Zu Kartenobjekten, Rohren und Adressen können Sie Dateien ablegen; der Reiter �
 
 Vorhandene Dateien stehen darunter im Bereich „Hochgeladene Dateien“, zusammengefasst in Ordnern mit der Anzahl dahinter, z. B. „documents (1)“. Die Ordnernamen kommen aus der Ablagestruktur und sind deshalb englisch. Klicken Sie auf einen Ordner, um ihn aufzuklappen – erst dann werden die einzelnen Dateien sichtbar. Zeigen Sie anschließend mit der Maus auf eine Datei, erscheinen rechts neben dem Dateinamen die Schaltflächen „Herunterladen“, „Umbenennen“ und „Datei löschen“; beim Löschen bestätigen Sie die Rückfrage.
 
-Bei vielen Dateien hilft das Feld „Dateien suchen...“ oberhalb der Liste. Sind die Schaltflächen nicht sichtbar, ist Ihr Fenster zu schmal: Scrollen Sie in der Info-Box nach rechts oder ziehen Sie die Box breiter.
+Bei vielen Dateien hilft das Feld „Dateien suchen...“ oberhalb der Liste. Sind die Schaltflächen nicht sichtbar, ist Ihr Fenster zu schmal: Scrollen Sie in der Info-Box nach rechts oder ziehen Sie sie breiter.
 
 ![](/videos/map_attachment.webm)
 
@@ -169,7 +183,7 @@ Qonnectra hat keinen Menüpunkt „Export“. Daten verlassen die Anwendung dort
 | Excel (`.xlsx`) | Rohrverwaltung, „Vorlage“ | leere Importvorlage für Rohre, siehe Abschnitt [Excel-Import](./10-rohrverwaltung.md#_10-5-excel-import-vorlage-ablauf-fehlermeldungen) |
 | Excel (`.xlsx`) | Netzknoten, „Slot-Konfiguration anzeigen“ | Einbauplätze und Komponenten eines Netzknotens, siehe Abschnitt [Netzknoten](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen) |
 | CSV | Störungsanalyse, „CSV exportieren“ | Schadensbericht mit den betroffenen Objekten, siehe Kapitel [Störungsanalyse](./06-stoerungsanalyse.md) |
-| PDF | Adressdetails und Nachverdichtung, „PDF herunterladen“ | Datenblatt zu einer Adresse, wahlweise mit den Wohneinheiten, siehe Kapitel [Adressen](./16-adressen.md) |
+| PDF | Adressdetails und Nachverdichtung, „PDF herunterladen“ | Datenblatt zu einer Adresse, wahlweise mit den Wohneinheiten, siehe Kapitel [Adressen](./16-adressen.md) und [Nachverdichtung](./07-nachverdichtung.md) |
 | GeoJSON | Faserweg, „GeoJSON herunterladen“ | Geometrien des ermittelten Faserwegs, siehe Kapitel [Faserweg](./15-faserweg.md) |
 | ZIP | Leitungsauskunft, „Exportieren“ | je Objektart eine GeoJSON-Datei, eine QGIS-Layerdatei (`.qlr`) und die Anhänge der enthaltenen Objekte, siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md) |
 

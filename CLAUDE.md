@@ -50,6 +50,15 @@ One word, two meanings: **Karte** is the map in `05-karte.spec.ts`
 (`openMap()`), but a dashboard card in `04-dashboard.spec.ts` (`card()`). Never
 translate it globally.
 
+The same trap in the other direction, and this one is the app's: **„Seitenleiste“**
+is what it calls the navigation bar („Seitenleiste anpassen“,
+`action_customize_sidebar`) *and* the detail panel on the right („Seitenleiste
+schließen“, `tooltip_close_drawer`). The manual therefore never uses the word for
+the panel – that is the **Info-Box** throughout, in body text, headings and alt
+texts alike (section 3.6). Quote the two tooltips verbatim where the reader has to
+find them, but say Info-Box around them. Not „Infobereich“, not „Detailanzeige“,
+not a bare „Box“.
+
 ## What this repo is
 
 VitePress site for **Qonnectra** (open-source network documentation for
@@ -176,8 +185,10 @@ sentences the chapter exists for.
   `### 10.3.1 Reiter „Eigenschaften“`. `####` stays unnumbered. `#` and `##` come
   from `OUTLINE.md`; `###` and deeper are the chapter's own business.
 - Every chapter starts with a paragraph: purpose of the area + how to get there
-  („Sie erreichen sie über die linke Navigation durch Klicken auf den Menüpunkt
-  „Rohrverwaltung“.“), followed directly by an overview screenshot.
+  („Sie erreichen sie über die linke Navigationsleiste durch Klicken auf den
+  Menüpunkt „Rohrverwaltung“.“), followed directly by an overview screenshot.
+  **Navigationsleiste**, not „linke Navigation“ – chapter 1.2.1 introduces the
+  term and the chapters 4–17 all repeat this sentence.
 - Bullet lists for options/properties, **numbered** lists only for genuine
   step-by-step procedures.
 - Notes as VitePress containers, closed with `:::`, in three escalating levels:

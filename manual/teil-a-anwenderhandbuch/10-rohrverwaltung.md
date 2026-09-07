@@ -1,10 +1,10 @@
 # 10. Rohrverwaltung
 
-Die **Rohrverwaltung** führt alle Rohre des ausgewählten Projekts in einer Tabelle auf. Hier legen Sie neue Rohre an, bearbeiten vorhandene, hinterlegen Anhänge und übernehmen größere Bestände aus einer Excel-Datei. Sie erreichen sie über die linke Navigation in der Gruppe „Rohr“ durch Klicken auf den Menüpunkt „Verwaltung“.
+Die **Rohrverwaltung** führt alle Rohre des ausgewählten Projekts in einer Tabelle auf. Hier legen Sie neue Rohre an, bearbeiten vorhandene, hinterlegen Anhänge und übernehmen größere Bestände aus einer Excel-Datei. Sie erreichen sie über die linke Navigationsleiste in der Gruppe „Rohr“ durch Klicken auf den Menüpunkt „Verwaltung“.
 
 ![Screenshot Rohrverwaltung mit der Tabelle aller Rohre](/images/manual/teil-a/conduit.jpg)
 
-Welche Rohre die Tabelle enthält, hängt von dem Projekt ab, das oben links in der Kopfzeile ausgewählt ist.
+Welche Rohre die Tabelle enthält, hängt von dem Projekt ab, das oben links in der Kopfzeile ausgewählt ist, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln).
 
 ## 10.1 Rohrliste durchsuchen und filtern
 
@@ -32,11 +32,11 @@ Aus dem gewählten Rohrtyp entstehen dabei zugleich die Mikrorohre des Rohrs, si
 
 ## 10.3 Eigenschaften bearbeiten
 
-Klicken Sie ein Rohr in der Tabelle an, öffnet sich rechts eine Box mit dem Namen des Rohrs als Überschrift. Am linken Rand der Box stehen die drei Reiter „Eigenschaften“, „Status“ und „Anhänge“ untereinander. Die Box verhält sich wie in Abschnitt [Der Infobereich](./03-wiederkehrende-bedienelemente.md#_3-6-der-infobereich-mit-seinen-reitern) beschrieben.
+Klicken Sie ein Rohr in der Tabelle an, öffnet sich rechts die Info-Box mit dem Namen des Rohrs als Überschrift. An ihrem linken Rand stehen die drei Reiter „Eigenschaften“, „Status“ und „Anhänge“ untereinander. Sie verhält sich wie in Abschnitt [Die Info-Box](./03-wiederkehrende-bedienelemente.md#_3-6-die-info-box-mit-ihren-reitern) beschrieben.
 
-Im Reiter „Eigenschaften“ ändern Sie die Angaben des ausgewählten Rohrs. Die Schaltflächen „Speichern“ und „Rohr löschen“ liegen am unteren Rand der Box und bleiben dort stehen; für die letzten Felder des Formulars scrollen Sie in der Box nach unten.
+Im Reiter „Eigenschaften“ ändern Sie die Angaben des ausgewählten Rohrs. Die Schaltflächen „Speichern“ und „Rohr löschen“ liegen am unteren Rand der Info-Box und bleiben dort stehen; für die letzten Felder des Formulars scrollen Sie in ihr nach unten.
 
-![Screenshot Rohrverwaltung mit Hervorhebung der Box zum Bearbeiten eines Rohrs im Reiter „Eigenschaften“](/images/manual/teil-a/conduit_properties.jpg)
+![Screenshot Rohrverwaltung mit Hervorhebung der Info-Box zum Bearbeiten eines Rohrs im Reiter „Eigenschaften“](/images/manual/teil-a/conduit_properties.jpg)
 
 ::: info
 Die Auswahlfelder – „Rohrtyp“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“ und „Kennzeichen“ – sind beim Öffnen leer, auch wenn das Rohr dort Werte hat. Die aktuellen Werte lesen Sie in der Tabelle ab. Ein leeres Auswahlfeld löscht beim Speichern nichts: Überschrieben wird nur, was Sie tatsächlich auswählen.
@@ -50,7 +50,7 @@ Speichern Sie Ihre Änderungen, bevor Sie ein anderes Rohr aus der Tabelle ausw�
 
 Der Reiter „Status“ listet die **Mikrorohre** des Rohrs auf, mit den Spalten „#“, „Farbe“, „Adresse“ (des angeschlossenen Netzknotens), „Kabel“ und „Status“. Anzahl und Farben gibt der Rohrtyp vor; ändern lassen sie sich hier nicht.
 
-![Screenshot Rohrverwaltung mit Hervorhebung der Box im Reiter „Status“ mit der Liste der Mikrorohre](/images/manual/teil-a/conduit_status.jpg)
+![Screenshot Rohrverwaltung mit Hervorhebung der Info-Box im Reiter „Status“ mit der Liste der Mikrorohre](/images/manual/teil-a/conduit_status.jpg)
 
 Der Status jedes Mikrorohrs steht auf „Intakt“, solange nichts anderes eingetragen ist. Über das Auswahlfeld in der Zeile vermerken Sie eine Störung, etwa „Defekt“. Diese Änderung wird sofort übernommen, es gibt dafür keinen „Speichern“-Button.
 
@@ -73,6 +73,14 @@ Für die Datei gilt:
 - Die Werte in „Typ“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Projekt“ und „Kennzeichen“ müssen in Qonnectra bereits vorhanden sein und genauso geschrieben werden wie dort.
 - Bleibt die Spalte „Typ“ leer, entsteht das Rohr ohne Mikrorohre.
 
+::: info
+Der Import prüft andere Pflichtangaben als der Dialog „Rohr hinzufügen“, der Name, Rohrtyp und Kennzeichen verlangt (siehe Abschnitt [Rohr hinzufügen](#_10-2-rohr-hinzufugen)). Zeilenweise geprüft wird hier nur der Name; „Typ“ dürfen Sie bewusst leer lassen, wenn das Rohr keine Mikrorohre haben soll.
+:::
+
+::: warning
+„Projekt“ und „Kennzeichen“ dürfen dagegen in keiner Zeile leer bleiben, obwohl der Import sie nicht zeilenweise prüft: Die Zeile kommt durch die Prüfung, das Speichern scheitert anschließend für die **gesamte** Datei. Die Meldung lautet dann „Fehler beim Speichern in die Datenbank“ und nennt keine Zeilennummer – anders als die übrigen Fehler. Prüfen Sie in diesem Fall die beiden Spalten auf leere Zellen.
+:::
+
 ::: warning
 Der Import ist ein Alles-oder-nichts-Vorgang: Ist eine einzige Zeile fehlerhaft, wird keine einzige Zeile übernommen. Die Meldung nennt die betroffene Zeilennummer und den Grund. Zurückgewiesen werden unter anderem Zeilen ohne Namen und Namen, die es in Qonnectra bereits gibt – auch in einem anderen Projekt. Die Meldungen zu Eigentümer, Baufirma und Hersteller erscheinen auf Englisch, auch wenn die Oberfläche auf Deutsch steht.
 :::
@@ -93,4 +101,4 @@ Mit dem Rohr verschwinden auch seine Mikrorohre und seine Zuordnungen zu Trassen
 
 Zu jedem Rohr können Sie Dateien ablegen, etwa Bestandspläne oder Messprotokolle. Hochladen, Herunterladen, Umbenennen und Löschen funktionieren wie in Abschnitt [Anhänge hochladen, ansehen und löschen](./03-wiederkehrende-bedienelemente.md#_3-7-anhange-hochladen-ansehen-und-loschen) beschrieben.
 
-![Screenshot Rohrverwaltung mit Hervorhebung der Box im Reiter „Anhänge“ mit einer hochgeladenen Datei](/images/manual/teil-a/conduit_attachment.jpg)
+![Screenshot Rohrverwaltung mit Hervorhebung der Info-Box im Reiter „Anhänge“ mit einer hochgeladenen Datei](/images/manual/teil-a/conduit_attachment.jpg)

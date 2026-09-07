@@ -1,6 +1,6 @@
 # 4. Dashboard
 
-Das **Dashboard** ist die zentrale Übersichtsseite von Qonnectra. Es fasst den dokumentierten Netzbestand eines Projekts in Kennzahlen und Diagrammen zusammen, damit Sie den Ausbauzustand ohne Umweg über Listen oder die Karte erfassen können. Nach der Anmeldung ist das Dashboard die Startansicht; später erreichen Sie es über die linke Navigation durch Klicken auf den Menüpunkt „Dashboard“ in der Gruppe „Info“.
+Das **Dashboard** ist die zentrale Übersichtsseite von Qonnectra. Es fasst den dokumentierten Netzbestand eines Projekts in Kennzahlen und Diagrammen zusammen, damit Sie den Ausbauzustand ohne Umweg über Listen oder die Karte erfassen können. Nach der Anmeldung ist das Dashboard die Startansicht; später erreichen Sie es über die linke Navigationsleiste durch Klicken auf den Menüpunkt „Dashboard“ in der Gruppe „Info“.
 
 ![Screenshot Dashboard](/images/manual/teil-a/dashboard.jpg)
 

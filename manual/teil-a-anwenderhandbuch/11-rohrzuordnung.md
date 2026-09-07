@@ -1,6 +1,6 @@
 # 11. Rohrzuordnung
 
-Die **Rohrzuordnung** ordnet Rohre den **Trassensegmenten** zu, in denen sie liegen. Sie erreichen sie über die linke Navigation in der Gruppe „Rohr“ durch Klicken auf den Menüpunkt „Zuordnung“.
+Die **Rohrzuordnung** ordnet Rohre den **Trassensegmenten** zu, in denen sie liegen. Sie erreichen sie über die linke Navigationsleiste in der Gruppe „Rohr“ durch Klicken auf den Menüpunkt „Zuordnung“.
 
 ![Screenshot Rohrzuordnung mit der Karte links und dem Arbeitsbereich rechts](/images/manual/teil-a/conduit_connection.jpg)
 
@@ -22,7 +22,7 @@ Rechts neben der Karte liegt der Arbeitsbereich, von oben nach unten: die Umscha
 
 ![Screenshot Rohrzuordnung mit Hervorhebung des Arbeitsbereichs rechts neben der Karte](/images/manual/teil-a/conduit_connection_edit_area.jpg)
 
-Zur Auswahl stehen die Rohre des Projekts, das oben links in der Kopfzeile ausgewählt ist – eingegrenzt auf das Kennzeichen im gleichnamigen Feld, siehe Abschnitt [Nach Kennzeichen eingrenzen](#_11-6-nach-kennzeichen-eingrenzen).
+Zur Auswahl stehen die Rohre des Projekts, das oben links in der Kopfzeile ausgewählt ist (siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln)) – eingegrenzt auf das Kennzeichen im gleichnamigen Feld, siehe Abschnitt [Nach Kennzeichen eingrenzen](#_11-6-nach-kennzeichen-eingrenzen).
 
 Die Rohre stehen in der Liste mit ihrem Rohrtyp in Klammern, etwa „St-VL-02 (7x16/12)“ – anders als in der Rohrverwaltung, die Name und Rohrtyp in getrennten Spalten führt.
 
@@ -35,6 +35,8 @@ Mit der Auswahl füllt sich die Liste darunter mit den Trassensegmenten, die dem
 ### 11.2.1 Trassensegmente zuordnen
 
 Klicken Sie in der Karte auf das Trassensegment, in dem das ausgewählte Rohr liegt. Achten Sie darauf, dass der Layer „Trasse“ in der Legende eingeschaltet ist und dass der Routing-Modus so steht, wie Sie ihn brauchen, siehe Abschnitt [Routing-Modus](#_11-3-routing-modus).
+
+Ein Trassensegment genau zu treffen, ist der schwierigste Teil dieser Arbeit; welche Hilfen es dafür gibt, beschreibt Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster) unter „Objekte anklicken“.
 
 Nach der Zuordnung erscheint kurz die Meldung „Trassenverbindung gespeichert“, und das Segment steht in der Liste.
 

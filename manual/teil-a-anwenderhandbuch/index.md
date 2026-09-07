@@ -16,20 +16,26 @@ Die **Webanwendung** dient der strukturierten Einsicht, Dokumentation und Auswer
 
 ## Ansehen und Bearbeiten
 
-Der größte Teil der Anwendung ist zur Ansicht bestimmt: Das Dashboard wertet den Bestand aus, die Karte zeigt die Objekte mit ihren Eigenschaften – geändert wird an beiden Stellen nichts. Anlegen und bearbeiten können Sie
+Reine Ansichten sind das Dashboard, das den Bestand auswertet, sowie die Störungsanalyse, die Wertermittlung und der Faserweg, die auf den Daten rechnen, ohne sie zu ändern. In der Karte lesen Sie die Eigenschaften der Objekte; bearbeiten können Sie dort ausschließlich ihre Anhänge. Anlegen und bearbeiten können Sie
 
-- Rohre und ihre Eigenschaften in der **Rohrverwaltung**, siehe Kapitel [Rohrverwaltung](./10-rohrverwaltung.md),
+- Rohre und ihre Eigenschaften in der **Rohrverwaltung**, dort auch den Status der Mikrorohre, siehe Kapitel [Rohrverwaltung](./10-rohrverwaltung.md),
 - die Zuordnung von Rohren zu Trassensegmenten in der **Rohrzuordnung**, siehe Kapitel [Rohrzuordnung](./11-rohrzuordnung.md),
-- Anhänge (Dateien) an Kartenobjekten und an Rohren, siehe Abschnitt [Anhänge hochladen, ansehen und löschen](./03-wiederkehrende-bedienelemente.md#_3-7-anhange-hochladen-ansehen-und-loschen).
+- die Verbindungen der Mikrorohre in der **Rohrverzweigung**, siehe Kapitel [Rohrverzweigung](./12-rohrverzweigung.md),
+- die Netzknoten an den Mikrorohren eines Hausanschlusses, siehe Kapitel [Mikrorohre](./13-mikrorohre.md),
+- Netzknoten, Kabel und deren Aufbau im **Netzschema**, siehe Kapitel [Netzschema](./14-netzschema.md),
+- Adressen und ihre Wohneinheiten, siehe Kapitel [Adressen](./16-adressen.md),
+- den Ausbaustatus einer Adresse in der **Nachverdichtung**, siehe Kapitel [Nachverdichtung](./07-nachverdichtung.md),
+- Auskünfte und ihre Auskunftsbereiche in der **Leitungsauskunft**, siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md),
+- Anhänge (Dateien) an Kartenobjekten, an Rohren und an Adressen, siehe Abschnitt [Anhänge hochladen, ansehen und löschen](./03-wiederkehrende-bedienelemente.md#_3-7-anhange-hochladen-ansehen-und-loschen).
 
-Die **Geometrie** – der Verlauf einer Trasse, die Lage eines Netzknotens oder der Zuschnitt eines Gebiets – wird nicht in der Webanwendung bearbeitet, sondern in QGIS. Beide greifen auf dieselbe Datenbasis zu; das Vorgehen beschreibt Teil B des Handbuchs.
+Die **Geometrie** – der Verlauf einer Trasse, die Lage eines Netzknotens oder der Zuschnitt eines Gebiets – wird nicht in der Webanwendung bearbeitet, sondern in QGIS. Beide greifen auf dieselbe Datenbasis zu; das Vorgehen beschreibt Kapitel [Netzdaten in QGIS bearbeiten](../teil-b-betrieb-admin-qgis/26-netzdaten-in-qgis-bearbeiten.md) in Teil B.
 
 ## Ein typischer Arbeitsablauf
 
 Für den Einstieg hat sich die folgende Reihenfolge bewährt:
 
 1. Melden Sie sich an und machen Sie sich mit dem Aufbau der Oberfläche vertraut, siehe Kapitel [Erste Schritte](./01-erste-schritte.md).
-2. Wählen Sie oben links in der Kopfzeile das Projekt aus, mit dem Sie arbeiten möchten.
+2. Wählen Sie oben links in der Kopfzeile das Projekt aus, mit dem Sie arbeiten möchten, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln).
 3. Verschaffen Sie sich im Dashboard einen Überblick über den Ausbauzustand, siehe Kapitel [Dashboard](./04-dashboard.md).
 4. Sehen Sie sich einzelne Objekte in der Karte an und rufen Sie deren Eigenschaften und Anhänge ab, siehe Kapitel [Karte](./05-karte.md).
 5. Pflegen Sie Rohre in der Rohrverwaltung und ordnen Sie sie anschließend den Trassensegmenten zu, siehe Kapitel [Rohrverwaltung](./10-rohrverwaltung.md) und [Rohrzuordnung](./11-rohrzuordnung.md).

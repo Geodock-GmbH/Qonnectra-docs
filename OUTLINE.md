@@ -47,7 +47,7 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 - 3.3 Das Kartenfenster
 - 3.4 Objekte in der Karte suchen
 - 3.5 Strecke und Fläche messen
-- 3.6 Der Infobereich mit seinen Reitern
+- 3.6 Die Info-Box mit ihren Reitern
 - 3.7 Anhänge hochladen, ansehen und löschen
 - 3.8 Exportformate im Überblick
 
@@ -67,7 +67,7 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 - 5.1 Kartenausschnitt, Zoomstufe und gespeicherte Position
 - 5.2 Layer der Karte
 - 5.3 Objekte auswählen und Eigenschaften lesen
-- 5.4 Trasse: Reiter „Rohrübersicht“ und „Kabelübersicht“
+- 5.4 Rohrübersicht und Kabelübersicht einer Trasse
 - 5.5 Grabenprofil einer Trasse
 - 5.6 Netzknoten: Slot-Konfiguration und Struktur öffnen
 - 5.7 Von der Karte in den Faserweg wechseln
@@ -402,3 +402,19 @@ are still missing inside a written chapter carry the same sentence.
   afterwards.
 - Chapter 18 collects the error cases that would otherwise be repeated in every
   chapter.
+
+## Who owns what: decisions taken before the chapters were written
+
+Six places where two chapters could each plausibly describe the same thing. The
+split is decided here so that the chapter written second does not repeat the
+first. Each entry names the owner – the chapter that carries the description –
+and what the other side is left with.
+
+| Overlap | Owner | The other side |
+|---|---|---|
+| 5.4 and 5.6 ↔ 14.6–14.8: cable/bundle/fiber lists, „Netzknoten-Konfiguration“ and „Netzknotenstruktur“ (slot grid, ports, cable rail) | **5.4 / 5.6** – that is where the reader meets the windows first, and it is written | 14.6–14.8 describe only *editing* the structure and link back. Do not restate the window layout. |
+| 10.5 ↔ 24.1: Excel import of conduits | **10.5** – template, procedure, error messages, the empty-„Projekt“/„Kennzeichen“ trap | 24.1 keeps the administration view only: which master data has to exist beforehand, and first/bulk population of a project. Links to 10.5. |
+| 10.4, 5.5 ↔ chapter 13: microducts appear in three views | **10.4** for the list on a conduit, **5.5** for the cross-section in the trench, **13** for documenting a house connection | Each of the three names its own view and links to the other two. None repeats the microduct colour/status mechanics – those belong in 2.1. |
+| 1.2.1, 1.5, 3.3, 11.4 ↔ chapter 17: settings that other chapters trigger | **17** explains what the values mean and what they do | 1.2.1, 1.5, 3.3 and 11.4 name only the occasion („der Eintrag „Trasse“ lässt sich aufklappen, sobald …“) and link to 17. |
+| 4.8.1 ↔ 2.6: what a Kennzeichen is | **2.6** – it is a term of the data model, not a dashboard feature | 4.8.1 keeps only the negative statement that the dashboard has no flag filter, and links to 2.6. Move the definition when chapter 2 is written. |
+| Error messages spread over all chapters ↔ chapter 18 | **the chapter where the error occurs** – a message is most useful next to the action that causes it | 18 stays a collection page: it groups the recurring cases (session expired, missing rights, empty map or chart) and links *back* into the chapters. It does not become the only place an error is mentioned. |

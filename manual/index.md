@@ -36,7 +36,7 @@ Das Handbuch besteht aus drei Hauptteilen:
 | **2. Betrieb und Fachanwendung** | Administration, GIS-Fachkräfte | Qonnectra Webanwendung + QGIS | **Teil B** |
 | **3. System- und Entwicklungsebene** | Entwicklung, DevOps, Systemadministration | Qonnectra Backend, Datenbank, API, Git usw. | **Teil C** |
 
-Für den normalen Betrieb von Qonnectra ist **nicht erforderlich**, alle Teile des Handbuchs zu lesen. Jedes Kapitel ist so aufgebaut, dass klar erkennbar ist, für welche Zielgruppe es relevant ist.
+Für den normalen Betrieb von Qonnectra ist **nicht erforderlich**, alle Teile des Handbuchs zu lesen. Die Zielgruppe ist jeweils auf der Ebene des Teils festgelegt: Jeder der drei Teile beginnt mit einer Seite, die nennt, an wen er sich richtet und welche Vorkenntnisse er voraussetzt. Innerhalb eines Teils gilt diese Angabe für alle Kapitel.
 
 
 ## Was ist Qonnectra?
@@ -80,7 +80,7 @@ Für das Verständnis des Systems ist ebenso wichtig, klar zu benennen, **was Qo
   Es dokumentiert ausschließlich den bestehenden, passiven Netzbestand.
 
 - Qonnectra ist **keine Netzbetriebssoftware für aktive Technik**.  
-  Aktive Komponenten wie Ports, Bandbreiten oder aktive Schaltungen werden nicht verwaltet.
+  Aktive Komponenten wie Bandbreiten, Schaltungen oder die Ports von Vermittlungstechnik werden nicht verwaltet. Die Ports der passiven Komponenten eines Netzknotens – etwa die eines Splitters oder einer Spleißkassette – gehören dagegen zur Dokumentation.
 
 - Qonnectra ist **kein Prognose- oder Szenariotool**.  
   Zukunftsplanungen oder hypothetische Ausbauzustände stehen nicht im Fokus.
