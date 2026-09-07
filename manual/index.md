@@ -26,7 +26,7 @@ Das Handbuch besteht aus drei Hauptteilen:
 - **Teil B – Betrieb, Administration und QGIS-Nutzung**  
   Dieser Teil richtet sich an Personen mit administrativen und fachlichen Aufgaben, z. B. für Benutzerverwaltung, Stammdatenpflege, Qualitätssicherung sowie die Nutzung von QGIS für geometrische Arbeiten und spezielle GIS-Aufgaben. Er beschreibt den sicheren Betrieb von Qonnectra sowie die verantwortungsvolle Nutzung von QGIS im Zusammenspiel mit der Webanwendung.
 
-- **Teil C – Entwickler- und Systemdokumentation**  
+- **Teil C – Entwicklungs- und Systemdokumentation**  
   Dieser Teil richtet sich ausschließlich an fachlich-technische Rollen, darunter Personen in der Softwareentwicklung, im DevOps, in der GIS-Administration sowie in der Open-Source-Community.. Er beschreibt Setup, Architektur, Schnittstellen, Datenmodelle und Erweiterungsmöglichkeiten von Qonnectra.
 
 

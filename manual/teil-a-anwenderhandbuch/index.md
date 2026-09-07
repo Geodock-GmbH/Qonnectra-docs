@@ -1,6 +1,6 @@
 # Teil A - Anwenderhandbuch
 
-Dieser Teil des Handbuchs richtet sich an Anwenderinnen und Anwender, die Qonnectra im täglichen Betrieb nutzen. Dazu gehören insbesondere Mitarbeitende in Verwaltungen, Zweckverbänden, Stadtwerken sowie Entscheidungsträger und externe Stellen mit Leserechten.
+Dieser Teil des Handbuchs richtet sich an Anwender*Innen, die Qonnectra im täglichen Betrieb nutzen. Dazu gehören insbesondere Mitarbeitende in Verwaltungen, Zweckverbänden, Stadtwerken sowie Entscheidungsträger*Innen und externe Stellen mit Leserechten.
 
 In Teil A wird ausschließlich die Arbeit mit der **Webanwendung** beschrieben. Es sind **keine GIS-Kenntnisse erforderlich**. Alle hier dargestellten Funktionen können sicher über den Webbrowser genutzt werden.
 

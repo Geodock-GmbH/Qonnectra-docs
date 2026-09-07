@@ -1,6 +1,6 @@
 # Teil B - Betrieb, Administration und QGIS-Nutzung
 
-Dieser Teil des Handbuchs richtet sich an Personen mit erweiterten fachlichen oder administrativen Aufgaben. Dazu zählen unter anderem Systemverantwortliche, Administratoren sowie GIS-geschulte Mitarbeitende.
+Dieser Teil des Handbuchs richtet sich an Personen mit erweiterten fachlichen oder administrativen Aufgaben. Dazu zählen unter anderem Systemverantwortliche, Administrator*Innen sowie GIS-geschulte Mitarbeitende.
 
 Teil B beschreibt den Betrieb von Qonnectra, die Pflege zentraler Stammdaten, Maßnahmen zur Sicherstellung der Datenqualität sowie die Nutzung von QGIS im Zusammenspiel mit der Webanwendung.
 

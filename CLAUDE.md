@@ -66,7 +66,7 @@ The manual is split into three parts (target audiences see `manual/index.md`):
 | `manual/index.md` | Start page „Über dieses Handbuch“ – no chapter number | – |
 | `manual/teil-a-anwenderhandbuch/` | A – User manual (web application, no GIS knowledge) | 1–18 |
 | `manual/teil-b-betrieb-admin-qgis/` | B – Operations, administration, QGIS | 19–28 |
-| `manual/teil-c-entwickler-systemdokumentation/` | C – Developer and system documentation | 29–36 |
+| `manual/teil-c-entwicklungs-systemdokumentation/` | C – Development and system documentation | 29–36 |
 
 ## The chapter structure
 
@@ -152,8 +152,13 @@ sentences the chapter exists for.
 **Form of address and tone**
 - Consistently **Sie-Form**, instructions in the imperative: „Klicken Sie auf …“,
   „Geben Sie einen Suchbegriff ein.“
-- Gender-neutral through participles/double naming: „Nutzende“, „Anwenderinnen
-  und Anwender“, „Verwaltungsmitarbeitende“.
+- Gender-neutral through a genuinely neutral form wherever one exists –
+  participles and neutral nouns: „Nutzende“, „Verwaltungsmitarbeitende“,
+  „Anwendende“, „die Projektleitung“. Where none does, use the Gendersternchen,
+  asterisk plus **upper-case** ending: „Anwender*Innen“, „Administrator*Innen“,
+  „Sachbearbeiter*In“. Double naming („Anwenderinnen und Anwender“) does not
+  count as a neutral form – use the asterisk there. Never leave a term in the
+  generic masculine.
 - Factual, no marketing tone, no emoji, no exclamation marks.
 - Explain what does **not** work and where users get stuck as well
   („Andernfalls gehen die Änderungen ohne Warnung verloren.“, „Wenn der Button

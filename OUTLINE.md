@@ -283,7 +283,7 @@ QGIS. Assumes part A.
 
 ---
 
-## Part C – Entwickler- und Systemdokumentation
+## Part C – Entwicklungs- und Systemdokumentation
 
 Audience: development and system integration. Code samples and identifiers are
 English there anyway.
