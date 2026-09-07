@@ -4,11 +4,49 @@ Einige Bedienelemente von Qonnectra tauchen in mehreren Ansichten unverändert a
 
 ## 3.1 Tabellen: Suche, Spaltenfilter, Sortierung, Seitenwechsel
 
-_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
+Die Rohrverwaltung, die Adressen und die Leitungsauskunft führen ihren Bestand in einer Tabelle auf. Diese drei Tabellen sind gleich aufgebaut und werden gleich bedient. Ein Klick auf eine Zeile öffnet den zugehörigen Datensatz: in der Rohrverwaltung im Infobereich am rechten Rand, bei den Adressen und der Leitungsauskunft auf einer eigenen Seite.
+
+**Sortieren**
+
+Ein Klick auf eine Spaltenüberschrift sortiert die Tabelle nach dieser Spalte: der erste Klick aufsteigend, der zweite absteigend, der dritte hebt die Sortierung wieder auf. Das Symbol rechts neben der Überschrift zeigt, wonach gerade sortiert wird.
+
+**Suchfeld über der Tabelle**
+
+Das Suchfeld über der Tabelle durchsucht den gesamten Bestand des Projekts. Geben Sie einen Suchbegriff ein und drücken Sie Enter oder klicken Sie auf das Lupensymbol. Die Tabelle beginnt danach wieder bei Seite 1 und enthält nur noch die passenden Datensätze; die Gesamtzahl unter der Tabelle passt sich an. Um wieder alle Datensätze zu sehen, leeren Sie das Feld und lösen die Suche erneut aus.
+
+![Screenshot Rohrverwaltung mit Hervorhebung des Suchfeldes oben; die Tabelle darunter zeigt nur noch die drei Treffer](/images/manual/teil-a/conduit_search.jpg)
+
+**Suchfelder unter den Spaltenüberschriften**
+
+Unter jeder Spaltenüberschrift liegt ein eigenes Suchfeld. Diese Felder arbeiten bereits beim Tippen, ohne Enter, und lassen sich miteinander kombinieren: Ein Datensatz bleibt nur stehen, wenn er zu allen ausgefüllten Feldern passt. Zum Aufheben leeren Sie die Felder wieder.
+
+![Screenshot Rohrverwaltung mit Hervorhebung der Suchfelder unter den Spaltenüberschriften](/images/manual/teil-a/conduit_search_columns.jpg)
+
+**Seitenwechsel**
+
+Eine Seite umfasst 50 Datensätze. Unter der Tabelle stehen links die Gesamtzahl, z. B. „123 Ergebnisse“, und rechts die Seitenauswahl mit den Pfeilen für die vorherige und die nächste Seite. Bleibt kein Datensatz übrig, erscheint anstelle der Zeilen „Keine Ergebnisse gefunden“.
+
+::: warning
+Sortierung und Spaltenfilter wirken nur auf die angezeigte Seite. Bei mehr als einer Seite bleibt ein Datensatz von einer anderen Seite außen vor – auch wenn er alphabetisch an erster Stelle stünde. Für den gesamten Bestand ist das Suchfeld über der Tabelle zuständig; nur dadurch ändert sich auch die Gesamtzahl.
+:::
+
+Welche Spalten eine Tabelle hat, nennt das Kapitel zu der jeweiligen Ansicht.
 
 ## 3.2 Auswahllisten und Kombinationsfelder
 
-_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
+Werte, die aus einer festen Liste stammen – Rohrtyp, Status, Netzebene, Firmen, Kennzeichen –, wählen Sie in einem **Kombinationsfeld**: einem Eingabefeld mit einem Pfeil am rechten Rand. Über den Pfeil öffnen Sie die vollständige Liste, über eine Eingabe in das Feld schränken Sie sie ein. Das bekannteste davon ist die Projektauswahl in der Kopfzeile, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln).
+
+Ihre Eingabe muss nicht am Anfang eines Eintrags stehen, und die Suche verzeiht Tippfehler: Auch eine ungefähre Schreibweise führt in der Regel noch zum passenden Eintrag.
+
+::: warning
+Findet Ihre Eingabe keinen Eintrag, bleibt die Liste nicht leer, sondern zeigt wieder alle Einträge. Eine volle Liste bedeutet also nicht, dass Ihre Eingabe gepasst hat.
+:::
+
+::: info
+Die Eingabe allein wählt nichts aus – erst der Klick auf einen Eintrag übernimmt den Wert in das Feld.
+:::
+
+Sind für ein Feld überhaupt keine Werte hinterlegt, erscheint anstelle des Feldes der Hinweis „Keine Daten verfügbar“. Die Auswahlwerte sind Stammdaten und werden im Administrationsbereich gepflegt, siehe Kapitel [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md).
 
 ## 3.3 Das Kartenfenster
 
@@ -79,7 +117,26 @@ Ein Treffer öffnet den Infobereich **nicht**. Die Karte springt nur an die pass
 
 ## 3.5 Strecke und Fläche messen
 
-_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
+In jedem Kartenfenster können Sie Entfernungen und Flächen abgreifen, ohne etwas an den Daten zu ändern. Klicken Sie mit der rechten Maustaste in die Karte; das Kontextmenü bietet „Strecke messen“ und „Fläche messen“.
+
+1. Wählen Sie „Strecke messen“ oder „Fläche messen“. Der Mauszeiger wird zum Fadenkreuz.
+2. Klicken Sie nacheinander die Punkte der Strecke oder die Eckpunkte der Fläche an.
+3. Während des Zeichnens nennt eine Beschriftung an der Zeichnung fortlaufend den aktuellen Wert.
+4. Ein Doppelklick beendet die Zeichnung; der Wert bleibt daran stehen.
+
+Strecken unter 100 m stehen in Metern, längere in Kilometern; Flächen unter 10.000 m² in Quadratmetern, größere in Quadratkilometern – jeweils auf zwei Nachkommastellen gerundet.
+
+Zum Aufräumen klicken Sie erneut mit der rechten Maustaste und wählen „Messung beenden“. Das entfernt die Zeichnung und schaltet zurück in die normale Bedienung.
+
+![](/videos/map_measure.webm)
+
+::: warning
+Ein Klick während einer Messung setzt nicht nur einen Messpunkt, sondern wählt zugleich das Objekt darunter aus und öffnet die Info-Box. Innerhalb eines Projektgebiets trifft er dessen Fläche, die daraufhin die ganze Karte in der Auswahlfarbe überdeckt. Blenden Sie den Layer „Gebiet“ aus, bevor Sie im Projektgebiet messen.
+:::
+
+::: info
+Es gibt immer nur eine Messung: Eine neue ersetzt die vorherige. Messergebnisse werden nicht gespeichert und sind in keinem Export enthalten.
+:::
 
 ## 3.6 Der Infobereich mit seinen Reitern
 
@@ -105,4 +162,23 @@ Bei vielen Dateien hilft das Feld „Dateien suchen...“ oberhalb der Liste. Si
 
 ## 3.8 Exportformate im Überblick
 
-_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
+Qonnectra hat keinen Menüpunkt „Export“. Daten verlassen die Anwendung dort, wo sie auch angezeigt werden, jeweils in dem Format, das zum Inhalt passt:
+
+| Format | Wo | Inhalt |
+|---|---|---|
+| Excel (`.xlsx`) | Rohrverwaltung, „Vorlage“ | leere Importvorlage für Rohre, siehe Abschnitt [Excel-Import](./10-rohrverwaltung.md#_10-5-excel-import-vorlage-ablauf-fehlermeldungen) |
+| Excel (`.xlsx`) | Netzknoten, „Slot-Konfiguration anzeigen“ | Einbauplätze und Komponenten eines Netzknotens, siehe Abschnitt [Netzknoten](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen) |
+| CSV | Störungsanalyse, „CSV exportieren“ | Schadensbericht mit den betroffenen Objekten, siehe Kapitel [Störungsanalyse](./06-stoerungsanalyse.md) |
+| PDF | Adressdetails und Nachverdichtung, „PDF herunterladen“ | Datenblatt zu einer Adresse, wahlweise mit den Wohneinheiten, siehe Kapitel [Adressen](./16-adressen.md) |
+| GeoJSON | Faserweg, „GeoJSON herunterladen“ | Geometrien des ermittelten Faserwegs, siehe Kapitel [Faserweg](./15-faserweg.md) |
+| ZIP | Leitungsauskunft, „Exportieren“ | je Objektart eine GeoJSON-Datei, eine QGIS-Layerdatei (`.qlr`) und die Anhänge der enthaltenen Objekte, siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md) |
+
+Einzelne Dateien laden Sie über den Reiter „Anhänge“ herunter, siehe Abschnitt [Anhänge hochladen, ansehen und löschen](#_3-7-anhange-hochladen-ansehen-und-loschen).
+
+::: warning
+Die CSV-Datei der Störungsanalyse ist kommagetrennt. Ein Doppelklick öffnet sie zwar in Excel, in deutscher Einstellung steht dann aber die ganze Zeile in einer Spalte. Öffnen Sie die Datei stattdessen über „Daten“ → „Aus Text/CSV“ und wählen Sie das Komma als Trennzeichen.
+:::
+
+::: info
+Ganze Datenbestände tauscht die Administration über den Administrationsbereich und QGIS aus, siehe Kapitel [Daten importieren und exportieren](../teil-b-betrieb-admin-qgis/24-daten-import-und-export.md).
+:::

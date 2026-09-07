@@ -112,7 +112,25 @@ Der Fußbereich „System“ lässt sich nicht ausblenden.
 
 ## 1.6 Bedienung auf Tablet und Smartphone
 
-_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
+Qonnectra lässt sich auch auf einem Tablet oder Smartphone bedienen. Unterhalb einer Fensterbreite von etwa 768 Pixeln entfällt die Navigationsleiste am linken Rand; an ihre Stelle tritt eine Leiste am unteren Bildschirmrand mit „Dashboard“, „Karte“ und „Mehr“.
+
+![Screenshot des Dashboards auf einem Smartphone mit Hervorhebung der Leiste am unteren Bildschirmrand](/images/manual/teil-a/login_mobile_bar.jpg){.small}
+
+„Mehr“ öffnet ein Menü mit allen übrigen Menüpunkten, gegliedert nach denselben Gruppen wie die Navigationsleiste am Rechner. Darunter stehen der Bereich „System“ mit „Einstellungen“ und, sofern hinterlegt, „Dokumentation“ sowie die Umschaltung zwischen „DE“ und „EN“. Ein Tippen neben das Menü schließt es wieder.
+
+![Screenshot des geöffneten Menüs „Weitere Seiten“ auf einem Smartphone mit den Gruppen „Funktionen“, „Rohr“ und „Kabel“](/images/manual/teil-a/login_mobile_more.jpg){.small}
+
+::: info
+Ausgeblendete Einträge und zugeklappte Gruppen aus Abschnitt [Navigationsleiste anpassen](#_1-5-navigationsleiste-anpassen) wirken sich hier nicht aus: Das Menü „Mehr“ enthält immer alle Menüpunkte, für die Ihr Konto berechtigt ist.
+:::
+
+Die Kopfzeile wird unterhalb von etwa 640 Pixeln auf das Nötigste gekürzt: Projektauswahl, „Hell-/Dunkelmodus umschalten“ und „Abmelden“ bleiben stehen, die Versionsanzeige, die Sprachumschaltung, die „Dokumentation“ und der Verweis auf GitHub entfallen. Sprache und Dokumentation erreichen Sie stattdessen über „Mehr“.
+
+Tabellen erscheinen auf schmalen Bildschirmen nicht als Tabelle, sondern als Liste von Karten – eine Karte je Datensatz mit den Werten untereinander. Anstelle der Suchfelder unter den Spaltenüberschriften steht dann ein einzelnes Suchfeld über der Liste, siehe Abschnitt [Tabellen](./03-wiederkehrende-bedienelemente.md#_3-1-tabellen-suche-spaltenfilter-sortierung-seitenwechsel).
+
+::: info
+Zum Nachschlagen unterwegs reicht ein Smartphone. Karte, Netzschema und Netzknotenstruktur brauchen dagegen Platz – zum Erfassen und Bearbeiten ist ein Bildschirm ab Tabletgröße im Querformat die bessere Wahl.
+:::
 
 ## 1.7 Warum manche Menüpunkte fehlen: Berechtigungen
 

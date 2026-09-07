@@ -8,35 +8,11 @@ Welche Rohre die Tabelle enthält, hängt von dem Projekt ab, das oben links in 
 
 ## 10.1 Rohrliste durchsuchen und filtern
 
-Zu jedem Rohr zeigt die Tabelle die Spalten „Name“, „Rohrtyp“, „Schutzrohr“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Datum“ und „Kennzeichen“.
+Zu jedem Rohr zeigt die Tabelle die Spalten „Name“, „Rohrtyp“, „Schutzrohr“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Datum“ und „Kennzeichen“. Das Suchfeld für den gesamten Bestand steht oben neben „Rohr hinzufügen“.
 
-Ein Klick auf eine Spaltenüberschrift sortiert die Tabelle nach dieser Spalte: der erste Klick aufsteigend, der zweite absteigend, der dritte hebt die Sortierung wieder auf.
-
-Eine Seite umfasst 50 Rohre; unter der Tabelle stehen die Gesamtzahl und die Seitenauswahl.
+Sortierung, Suche, Spaltenfilter und Seitenwechsel funktionieren wie in Abschnitt [Tabellen](./03-wiederkehrende-bedienelemente.md#_3-1-tabellen-suche-spaltenfilter-sortierung-seitenwechsel) beschrieben.
 
 ![Screenshot Rohrverwaltung mit Hervorhebung der Spaltenüberschriften und der Seitenauswahl unten rechts](/images/manual/teil-a/conduit_table.jpg)
-
-::: warning
-Die Sortierung ordnet nur die Rohre der angezeigten Seite. Bei mehr als einer Seite bleibt ein Rohr von einer anderen Seite also außen vor – auch wenn es alphabetisch an erster Stelle stünde.
-:::
-
-Zum Eingrenzen der Tabelle stehen zwei Suchfunktionen zur Verfügung, die sich in ihrer Reichweite unterscheiden.
-
-**Suchfeld oben**
-
-Das Suchfeld neben „Rohr hinzufügen“ durchsucht alle Rohre des Projekts. Geben Sie einen Suchbegriff ein und drücken Sie Enter oder klicken Sie auf das Lupensymbol. Die Tabelle enthält danach nur noch die passenden Rohre, und die Gesamtzahl passt sich an. Um wieder alle Rohre zu sehen, leeren Sie das Feld und lösen die Suche erneut aus.
-
-![Screenshot Rohrverwaltung mit Hervorhebung des Suchfeldes oben; die Tabelle darunter zeigt nur noch die drei Treffer](/images/manual/teil-a/conduit_search.jpg)
-
-**Suchfelder unter den Spaltenüberschriften**
-
-Unter jeder Spaltenüberschrift liegt ein eigenes Suchfeld. Diese Felder arbeiten bereits beim Tippen, ohne Enter, und lassen sich miteinander kombinieren: Ein Rohr bleibt nur stehen, wenn es zu allen ausgefüllten Feldern passt. Zum Aufheben leeren Sie die Felder wieder.
-
-![Screenshot Rohrverwaltung mit Hervorhebung der Suchfelder unter den Spaltenüberschriften](/images/manual/teil-a/conduit_search_columns.jpg)
-
-::: warning
-Die Spaltensuche durchsucht nur die angezeigte Seite. Ein Rohr, das auf einer anderen Seite steht, finden Sie damit nicht – dafür ist das Suchfeld oben zuständig. Die Gesamtzahl bleibt dabei unverändert, sie zählt weiterhin alle Rohre des Projekts.
-:::
 
 ## 10.2 Rohr hinzufügen
 

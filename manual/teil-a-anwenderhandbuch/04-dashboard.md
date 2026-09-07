@@ -119,7 +119,13 @@ Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projek
 
 ### 4.8.1 Nach Kennzeichen filtern
 
-_Die Dokumentation zu diesem Abschnitt ist noch in Arbeit._
+Das **Kennzeichen** ist das projektweite Ordnungsmerkmal von Qonnectra: Jede Trasse, jedes Rohr, jeder Netzknoten und jede Adresse trägt eines, und in mehreren Ansichten grenzen Sie den Bestand darüber ein.
+
+Das Dashboard gehört nicht dazu. Seine Kennzahlen, Diagramme und Karten beziehen sich immer auf den gesamten Bestand des ausgewählten Projekts; einen Filter nach Kennzeichen gibt es hier nicht.
+
+::: info
+Brauchen Sie die Auswertung eines einzelnen Kennzeichens, grenzen Sie in der jeweiligen Ansicht ein: in der Rohrzuordnung über die Auswahl „Kennzeichen“ (siehe Abschnitt [Nach Kennzeichen eingrenzen](./11-rohrzuordnung.md#_11-6-nach-kennzeichen-eingrenzen)), in der Rohrverwaltung und bei den Adressen über das Suchfeld unter der Spalte „Kennzeichen“ (siehe Abschnitt [Tabellen](./03-wiederkehrende-bedienelemente.md#_3-1-tabellen-suche-spaltenfilter-sortierung-seitenwechsel)).
+:::
 
 ### 4.8.2 Wie aktuell die Werte sind
 
