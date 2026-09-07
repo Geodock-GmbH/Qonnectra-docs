@@ -1,82 +1,108 @@
 # 7. Rohrzuordnung
 
-Die **Rohrzuordnung** dient ausschließlich der Zuordnung von Rohren zu bestehenden **Trassenabschnitten (Trassensegmenten)**. Ziel ist es, zu dokumentieren, welche Rohre auf welchen Trassenverläufen liegen. Die Rohrzuordnung ist damit ein zentrales Werkzeug zur strukturellen Verknüpfung von Netzbestandteilen – nicht zur allgemeinen Kartennavigation.
+Die **Rohrzuordnung** ordnet Rohre den **Trassensegmenten** zu, in denen sie liegen. Sie erreichen sie über die linke Navigation in der Gruppe „Rohr“ durch Klicken auf den Menüpunkt „Zuordnung“.
 
-![Screenshot Rohrzuordnung Übersicht](/images/manual/teil-a/conduit_connection.jpg)
+![Screenshot Rohrzuordnung mit der Karte links und dem Arbeitsbereich rechts](/images/manual/teil-a/conduit_connection.jpg)
+
+Der Bildschirm ist zweigeteilt: links die Karte, rechts der Arbeitsbereich.
 
 ## 7.1 Grundprinzip
 
-Solange kein Rohr ausgewählt ist, kann nichts in der Karte selektiert werden. Die Karte zeigt Elemente wie Trassen, Rohrabzweige, Hausanschlüsse und Adresspunkte an, diese sind jedoch nur zur Orientierung sichtbar. Die Karte dient hier ausschließlich der Zuordnung von Rohren zu Trassen.
+Die Zuordnung geschieht in der Karte: Sie wählen rechts ein Rohr aus und klicken links das Trassensegment an, in dem es liegt. Ein **Trassensegment** ist ein einzelnes Objekt des Layers „Trasse“ und trägt eine eigene Trassen-ID.
 
-## 7.2 Kartennavigation und Modi
+Anklickbar sind ausschließlich die Segmente dieses Layers. Adressen, Netzknoten und Gebiete zeichnet die Karte zwar mit, sie dienen hier aber nur der Orientierung – eine Info-Box wie in der Karte (siehe Kapitel [Karte](./05-karte.md)) öffnet sich nicht.
 
-Die Kartenfunktionen entsprechen vollständig denen in der allgemeinen Karte (siehe Kapitel [Karte](./05-karte.md)):
+Solange kein Rohr ausgewählt ist, bleiben Klicks in die Karte ohne Wirkung; ein Hinweis am unteren Rand der Karte fordert zur Auswahl auf. Klicken Sie trotzdem hinein, erscheint die Meldung „Kein Rohr ausgewählt“.
 
-- Suchen über das Suchfeld (oben links)
-- Transparenz anpassen (unten links)
-- Ein- und Ausblenden von Layern über die interaktive Legende (oben rechts)
+::: warning
+Es gibt keinen „Speichern“-Button. Jede Zuordnung ist mit dem Klick gespeichert und lässt sich nur durch Löschen wieder aufheben, siehe Abschnitt [Löschen einer Zuordnung](#_7-3-4-loschen-einer-zuordnung).
+:::
 
-Rechts neben der Karte befindet sich der Bearbeitungsbereich mit verschiedenen Auswahlmöglichkeiten und einer Liste der zugeordneten Trassensegmente zu einem ausgewählten Rohr. 
+## 7.2 Kartennavigation und Arbeitsbereich
 
-![Screenshot Rohrzuordnung mit Hervorhebung des Bearbeitungsbereichs rechts](/images/manual/teil-a/conduit_connection_editArea.jpg)
+Die Karte verhält sich wie unter dem Menüpunkt „Karte“, siehe Kapitel [Karte](./05-karte.md).
+
+Rechts daneben liegt der Arbeitsbereich, von oben nach unten: die Umschalter „Routing-Modus“ und „Trassenverbindungen anzeigen“, die Felder „Kennzeichen“ und „Rohr“ und darunter die Liste der zugeordneten Trassensegmente.
+
+![Screenshot Rohrzuordnung mit Hervorhebung des Arbeitsbereichs rechts neben der Karte](/images/manual/teil-a/conduit_connection_edit_area.jpg)
 
 ### 7.2.1 Routing-Modus
 
-Der Routing-Modus bestimmt, wie die Zuordnung von Rohr zu Trasse beim Klicken auf Trassensegmente in der Karte vollzogen wird.
+Der **Routing-Modus** bestimmt, wie viele Trassensegmente ein Klick in die Karte zuordnet.
 
-![Screenshot Rohrverwaltung Arbeitsbereich mit Hervorhebung der Schaltfläche für den Routing-Modus](/images/manual/teil-a/conduit_connection_routing.jpg)
+- Routing-Modus **ausgeschaltet**: Jeder Klick ordnet genau das angeklickte Trassensegment zu.
+- Routing-Modus **eingeschaltet**: Der erste Klick setzt den Start-, der zweite den Endpunkt. Qonnectra berechnet den kürzesten Weg zwischen beiden und ordnet alle Trassensegmente auf diesem Weg auf einmal zu.
 
-- Routing-Modus **ausgeschaltet** (Regler links und grau): Einzelne Trassenabschnitte können per Klick ausgewählt und dem Rohr hinzugefügt werden. Hierbei wird immer nur ein Trassensegment der Liste hinzugefügt.
+![Screenshot Rohrzuordnung mit Hervorhebung des Umschalters „Routing-Modus“ oben im Arbeitsbereich](/images/manual/teil-a/conduit_connection_routing.jpg)
 
-- Routing-Modus **eingeschaltet** (Regler rechts und farbig): Wählen Sie zuerst ein Trassensegment als Start- und dann eins als Endpunkt aus (2 Klicks in der Karte). Das System berechnet automatisch den besten Pfad zwischen beiden Punkten und ordnet die entsprechenden Trassensegmente dem Rohr zu. Hierbei werden mehrere Segmente der Liste auf der rechten Seite hinzugefügt.
+![](/videos/conduit_connection_routing.webm)
+
+Ein dritter Klick verwirft die berechnete Route und setzt einen neuen Startpunkt; dasselbe bewirkt das Aus- und Wiedereinschalten des Routing-Modus. Verworfen wird dabei nur die Auswahl in der Karte – was bereits zugeordnet ist, bleibt in der Liste.
+
+::: warning
+Start- und Endpunkt müssen im Trassennetz miteinander verbunden sein. Findet Qonnectra keinen Weg, meldet es „Fehler beim Berechnen der Route“, und es wird nichts zugeordnet. Wie groß der Abstand zwischen zwei Segmenten dabei sein darf, legt die „Routing-Toleranz“ unter „Einstellungen“ im Abschnitt „Rohrzuordnung“ fest.
+:::
 
 ### 7.2.2 Trassenverbindungen anzeigen
 
-Beim Umschalter "Trassenverbindungen anzeigen" haben Sie die Möglichkeit bei einer Rohrauswahl, eine visuelle Rückmeldung über bereits bestehende Zuordnungen zu Segmenten in der Karte zu erhalten. 
+Der Umschalter „Trassenverbindungen anzeigen“ hebt die Trassensegmente, die dem ausgewählten Rohr bereits zugeordnet sind, in der Karte farbig hervor. So sehen Sie, welchen Weg das Rohr im Netz nimmt und an welcher Stelle noch eine Zuordnung fehlt.
 
-![Screenshot Rohrverwaltung Arbeitsbereich mit Hervorhebung der Schaltfläche Trassenverbindungen anzeigen](/images/manual/teil-a/conduit_connection_showTrench.jpg)
+![Screenshot Rohrzuordnung mit Hervorhebung des Umschalters „Trassenverbindungen anzeigen“ oben im Arbeitsbereich und der hervorgehobenen Trassensegmente in der Kartenmitte](/images/manual/teil-a/conduit_connection_linked_trenches.jpg)
 
-- Trassenverbindungen anzeigen **ausgeschaltet** (Regler links und grau): Es erfolgt keine visuelle Hervorhebung in der Karte.
-
-- Trassenverbindungen **eingeschaltet** (Regler rechts und farbig): Beim Auswählen eines Rohrs werden alle zugehörigen Trassenabschnitte in der Karte farblich hervorgehoben.
-
-![](/videos/conduit_connection_showTrench.webm)
+Ohne ausgewähltes Rohr bleibt der Umschalter wirkungslos.
 
 ## 7.3 Zuordnung von Rohren zu Trassensegmenten
 
-Mit Auswahl eines Rohrs wird automatisch der Bearbeitungsmodus aktiviert, in dem Zuordnungen direkt übernommen werden – ohne Speichern-Button. Änderungen werden sofort gespeichert und können nicht rückgängig gemacht werden.
+Die Arbeit besteht aus zwei Schritten: erst das Rohr auswählen, dann die Trassensegmente in der Karte anklicken, in denen es liegt.
 
 ### 7.3.1 Auswahl von Rohren
 
-Die verfügbaren Rohre richten sich nach dem oben ausgewählten Projekt (oben links in der Kopfzeile) und dem eingestellten Kennzeichen (direkt über der Rohrauswahl). 
+Zur Auswahl stehen die Rohre des Projekts, das oben links in der Kopfzeile ausgewählt ist – eingegrenzt auf das Kennzeichen im gleichnamigen Feld.
 
-![Screenshot mit Hervorhebung Projektauswahl und Kennzeichenauswahl](/images/manual/teil-a/conduit_connection_conduitSelection.jpg)
+![Screenshot Rohrzuordnung mit Hervorhebung der Projektauswahl in der Kopfzeile und des Feldes „Kennzeichen“ im Arbeitsbereich](/images/manual/teil-a/conduit_connection_project_flag.jpg)
 
-Zur Auswahl eines Kennzeichens klicken Sie auf den "Pfeil-nach-unten" neben dem Eingabefeld oder tippen Sie in das Eingabefeld. Danach öffnet sich eine Liste, aus der Sie das entsprechende Kennzeichen wählen können.
+Die Rohre stehen in der Liste mit ihrem Rohrtyp in Klammern, etwa „St-VL-02 (7x16/12)“ – anders als in der Rohrverwaltung, die Name und Rohrtyp in getrennten Spalten führt.
 
-Die Rohrauswahl im Feld darunter funktioniert ebenso. Zur Auswahl eines Rohrs klicken Sie auf den "Pfeil-nach-unten" neben dem Eingabefeld oder tippen Sie in das Eingabefeld. Danach öffnet sich eine Liste, aus der Sie das entsprechende Rohr wählen können.
+![Screenshot Rohrzuordnung mit Hervorhebung des Feldes „Rohr“ und der geöffneten Rohrliste im Arbeitsbereich](/images/manual/teil-a/conduit_connection_conduit.jpg)
 
-![Screenshot Bearbeitungsbereich mit Hervorhebung Eingabefeld Rohr](/images/manual/teil-a/conduit_connection_conduit.jpg)
+::: info
+Wechseln Sie das Kennzeichen, wird die Rohrauswahl zurückgesetzt. Gibt es zu Projekt und Kennzeichen kein Rohr, meldet das Feld „Keine Rohre gefunden“.
+:::
 
-Ist das ausgewählte Rohr bereits Trassensegmenten auf der Karte zugeordnet, erscheint anschließend darunter eine Liste mit Einträgen zu Trassensegmenten (Bezeichnung: Trassen-ID). 
+Mit der Auswahl füllt sich die Liste darunter mit den Trassensegmenten, die dem Rohr bereits zugeordnet sind.
 
-### 7.3.2 Rohre Trassensegementen zuordnen
+### 7.3.2 Trassensegmente zuordnen
 
-Die Rohre werden den Trassensegmenten anhand der Auswahl in der Karte hinzugefügt. Hierzu klicken Sie auf ein Trassensegment in der Karte. Beachten Sie, ob die Trassen in der Karte eingeschaltet sind (Layer in der Legende über das Auge-Symbol einschalten). Bitte beachten Sie auch, ob der Routing-Modus an (zwei Klicks auf der Karte für Start- und Endpunkt) oder aus (ein Klick für ein Trassensegment) geschaltet ist. Zum besseren Verständnis finden Sie die Erklärung zum Routing-Modus weiter oben in diesem Abschnitt.
+Klicken Sie in der Karte auf das Trassensegment, in dem das ausgewählte Rohr liegt. Achten Sie darauf, dass der Layer „Trasse“ in der Legende eingeschaltet ist und dass der Routing-Modus so steht, wie Sie ihn brauchen, siehe Abschnitt [Routing-Modus](#_7-2-1-routing-modus).
 
-Wenn die Zuordnung erfolgreich war, erscheint am unteren Bildschirmrand eine kurze Bestätigungsnachricht. Gleichzeitig wird das Trassensegment in der Liste unterhalb des ausgewählten Rohrs angezeigt.
+Nach der Zuordnung erscheint kurz die Meldung „Trassenverbindung gespeichert“, und das Segment steht in der Liste.
 
-![](/videos/conduit_connection_mapSelection.webm)
+![](/videos/conduit_connection_map_selection.webm)
 
-Sollte "Trassenverbindungen anzeigen" (weiter oben) aktiviert sein, wird das hinzugefügte Trassensegment dauerhaft farblich hervorgehoben.
+::: info
+Ein Trassensegment kann mehrere Rohre führen; dasselbe Segment taucht deshalb bei mehreren Rohren in der Liste auf. Klicken Sie ein Segment an, das dem Rohr schon zugeordnet ist, meldet Qonnectra „Keine neuen Trassenverbindungen“ und ändert nichts.
+:::
 
 ### 7.3.3 Zugeordnete Trassensegmente finden
 
-Wenn Sie in der Liste auf eine Trassen-ID klicken, wird die Karte zu diesem Segment gezoomt und dieses kurz blinkend hervorgehoben. Bitte beachten Sie, dass die Liste aus mehreren Seiten bestehen kann. Am unteren Ende der Liste finden Sie eine Möglichkeit zum Umblättern. 
+Die Liste führt die Trassen-IDs der zugeordneten Segmente auf. Ein Klick auf die Spaltenüberschrift „Trassen-ID“ kehrt die Sortierung um, das Suchfeld darüber grenzt die Liste ein; beides bezieht sich auf alle Einträge, nicht nur auf die angezeigte Seite. Eine Seite umfasst zehn Einträge; darunter stehen die Gesamtzahl und die Seitenauswahl.
 
-![](/videos/conduit_connection_mapFind.webm)
+![Screenshot Rohrzuordnung mit Hervorhebung der Liste der zugeordneten Trassensegmente samt Suchfeld und Seitenauswahl im Arbeitsbereich](/images/manual/teil-a/conduit_connection_list.jpg)
+
+Ein Klick auf eine Zeile zoomt die Karte auf das Segment und hebt es kurz blinkend hervor.
+
+![](/videos/conduit_connection_map_find.webm)
+
+Um Liste und Karte abzugleichen, schalten Sie in der Legende die Beschriftungen des Layers „Trasse“ ein: Die Karte zeigt dann die Trassen-IDs an, die in der Liste stehen.
 
 ### 7.3.4 Löschen einer Zuordnung
 
-Falls einer Trasse versehentlich ein Rohr zugeordnet wurde, kann diese Zuordnung über das Papierkorb-Symbol neben der Trassen-ID in der Liste wieder gelöscht werden. Um die Zuordnung kontrolliert vorzunehmen, hilft es, über die Legende rechts die Labels (Beschriftungen) der Trassensegmente zu aktivieren. Diese zeigen die Trassen-IDs an, die Sie mit der Liste abgleichen können.
+Über das Papierkorb-Symbol am rechten Rand einer Zeile heben Sie eine Zuordnung wieder auf. Gelöscht wird dabei nur die Verbindung zwischen Rohr und Trassensegment – beide selbst bleiben erhalten.
 
+::: danger
+Das Löschen erfolgt ohne Rückfrage: Der Eintrag verschwindet mit dem Klick, und rückgängig machen lässt sich das nicht.
+:::
+
+::: warning
+Das Löschen setzt die Zugriffsstufe „Vollzugriff“ voraus; die Berechtigung zum Bearbeiten genügt dafür nicht. Fehlt sie, erscheint „Fehler beim Löschen der Trassenverbindung“, und die Zuordnung bleibt bestehen. Wenden Sie sich in diesem Fall an Ihre Administration.
+:::

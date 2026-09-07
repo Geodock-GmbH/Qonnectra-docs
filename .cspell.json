@@ -67,11 +67,13 @@
     "Szenariotool",
     "TDDDG",
     "Topologien",
-    "Trassensegementen",
     "Verlegeart",
     "Verwaltungsmitarbeitende",
     "Websitebesucher",
     "Websitebetreiber"
+  ],
+  "ignoreRegExpList": [
+    "/\\bTR-[A-Z0-9]{5,}\\b/g"
   ],
   "ignorePaths": [
     ".git/**/*",

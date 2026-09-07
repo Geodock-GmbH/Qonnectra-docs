@@ -231,7 +231,7 @@ opened menu – the chapter gets no video of it in addition.
 - Image pair (full shot + detail) side by side: two `![]()` lines directly below
   one another, then a line of its own with `{.img-row}`.
 - Videos without alt text through `markdown-it-html5-media`:
-  `![](/videos/conduit_connection_mapFind.webm)`
+  `![](/videos/conduit_connection_map_find.webm)`
 - Clicking an image opens a lightbox (`vitepress-plugin-lightbox`) – details may
   therefore be small in the 512 px rendering, but have to be legible in the
   original.
