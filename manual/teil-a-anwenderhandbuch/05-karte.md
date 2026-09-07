@@ -1,72 +1,131 @@
 # 5. Karte
 
-Die Karte ist eines der zentralen Werkzeuge in Qonnectra. Sie dient der visuellen Darstellung des Netzbestands, der Orientierung im Raum und dem schnellen Aufruf von Informationen zu einzelnen Netzobjekten. Um zur Karte zu gelangen, klicken Sie in der linken Navigation auf den Menüpunkt „Karte“.
+Die Karte ist eines der zentralen Werkzeuge in Qonnectra. Sie dient der visuellen Darstellung des Netzbestands, der Orientierung im Raum und dem schnellen Aufruf von Informationen zu einzelnen Netzobjekten. Sie erreichen die Karte über die linke Navigationsleiste durch Klicken auf den Menüpunkt „Karte“.
 
 ![Screenshot Karte](/images/manual/teil-a/map.jpg)
 
-## 5.1 Bewegung in der Karte
+Bewegung, Legende, Transparenz und Suche funktionieren wie in Kapitel [Wiederkehrende Bedienelemente](./03-wiederkehrende-bedienelemente.md) beschrieben. Dieses Kapitel behandelt, was nur für die Kartenansicht gilt.
 
-Sie können in der Karte auf verschiedene Arten navigieren. 
-Mit dem Mausrad oder Touchpad hinein- und herauszoomen. Mit der gedrückten linken Maustaste den Kartenausschnitt verschieben.
+## 5.1 Kartenausschnitt, Zoomstufe und gespeicherte Position
 
-Sollten Sie während der Kartenansicht ein anderes Projekt auswählen, springt die Karte nicht automatisch zu dem Gebiet. Um dorthin zu gelangen, können Sie beispielsweise in der Legende oben rechts in der Karte beim Eintrag "Adresse" auf das Lupensymbol klicken. Damit navigiert die Ansicht in den Bereich, in dem für dieses Projekt Daten vorhanden sind.
+Qonnectra merkt sich den letzten Kartenausschnitt. Wenn Sie die Karte erneut öffnen, sehen Sie wieder die Stelle, an der Sie zuletzt gearbeitet haben.
 
-![Screenshot Karte mit Hervorhebung des Layers Adresse in der Legende rechts oben](/images/manual/teil-a/map_adress_detail.jpg)
-![Screenshot Karte mit Zoom zu Layer Adresse in der Legende](/images/manual/teil-a/map_adress_detail_select.jpg)
-{.img-row}
+::: warning
+Das gilt auch über einen Projektwechsel hinweg: Wählen Sie bei geöffneter Karte ein anderes Projekt, bleibt der Ausschnitt stehen und die Karte springt **nicht** in das Gebiet des neuen Projekts. Sie sehen dann unter Umständen eine leere Karte, obwohl das Projekt Daten hat. Holen Sie sich die Daten mit „Auf Ausdehnung zoomen“ beim Legendeneintrag „Adresse“ ins Bild, siehe Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster).
+:::
 
-## 5.2 Anpassung der Darstellung
+## 5.2 Layer der Karte
 
-Links unten in der Kartenansicht finden Sie einen Regler, mit dem Sie die **Transparenz** der Hintergrundkarte anpassen können. Dies ist hilfreich, um Netzdaten besser sichtbar zu machen.
+Welche Layer die Legende führt, welche sich nach Typen aufklappen lassen und wie Sie sie schalten, beschreibt Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster) – in der Kartenansicht gilt das unverändert.
 
-![Screenshot Karte mit Hervorhebung des Schiebereglers für die Transparenz der Karte](/images/manual/teil-a/map_opacity.jpg)
+Kartenspezifisch ist nur die Darstellung selbst: Die Farben und Formen der Layer stellen Sie unter „Einstellungen“ ein, siehe Kapitel [Einstellungen](./17-einstellungen.md). Davon hängt auch ab, ob sich der Eintrag „Trasse“ aufklappen lässt.
 
-Auf der rechten Seite befindet sich die **interaktive Legende** („Layer“-Menü). Hier können Sie:
+## 5.3 Objekte auswählen und Eigenschaften lesen
 
-- Bestimmte Objektarten (Layer) ein- oder ausblenden (z. B. Trassen, Netzknoten, Rohre)
-- Beschriftungen (Labels) anzeigen oder verbergen
-- Über Icons bestimmte Layer zentrieren
-- Einzelne Layergruppen ein- oder ausklappen
-- Die Hintergrundkarte anpassen: in den Dunkelmodus wechseln oder komplett ausblenden
+Wenn Sie ein Objekt (z. B. eine Trasse oder einen Netzknoten) auf der Karte anklicken, öffnet sich auf der rechten Seite die **Info-Box**, siehe Abschnitt [Die Info-Box](./03-wiederkehrende-bedienelemente.md#_3-6-die-info-box-mit-ihren-reitern). Welche Reiter sie enthält, hängt von der Objektart ab:
 
-![Screenshot Karte mit Hervorhebung der Legende oben rechts](/images/manual/teil-a/map_legend.jpg)
-![Vier Screenshots Legende und Kartenausschnitt und verschiedenen Auswahlmöglichkeiten](/images/manual/teil-a/map_legend_actions.jpg)
-{.img-row}
+- Trasse: „Eigenschaften“, „Rohrübersicht“, „Kabelübersicht“, „Aktionen“, „Anhänge“
+- Netzknoten und Adresse: „Eigenschaften“, „Aktionen“, „Anhänge“
+- Gebiet: „Eigenschaften“, „Anhänge“
 
-## 5.3 Auswahl von Objekten
+Die Angaben im Reiter „Eigenschaften“ sind hier nicht bearbeitbar, sondern dienen als Informationsquelle. Bearbeiten können Sie in der Karte ausschließlich den Reiter „Anhänge“, siehe Abschnitt [Anhänge an einem Kartenobjekt](#_5-8-anhange-an-einem-kartenobjekt).
 
-Wenn Sie ein Objekt (z. B. eine Trasse oder einen Netzknoten) auf der Karte anklicken, öffnet sich auf der rechten Seite eine Detailanzeige.
+![Screenshot Karte mit Hervorhebung eines ausgewählten Objekts und der Anzeige der Details in der Info-Box rechts](/images/manual/teil-a/map_selected_object.jpg)
 
-Diese Info-Box enthält mehrere Reiter, je nachdem, welches Element sie ausgewählt haben (z. B. Eigenschaften, Rohrübersicht, Anhänge). Die Daten sind nicht bearbeitbar, sondern dienen als Informationsquelle. Einzig im Reiter "Anhänge" (falls für das entsprechende Objekt angezeigt) können Bearbeitungen vorgenommen werden. Entnehmen Sie die Informationen dazu dem Abschnitt "Anhänge von Kartenobjekten" (weiter unten).
+## 5.4 Rohrübersicht und Kabelübersicht einer Trasse
 
-Sobald Sie ein anderes Objekt auswählen, ändern sich die Einträge in der Info-Box entsprechend dem selektierten Element.
+Der Reiter „Rohrübersicht“ zeigt die Rohre der ausgewählten Trasse, siehe Kapitel [Rohrverwaltung](./10-rohrverwaltung.md), „Kabelübersicht“ die darin liegenden Kabel.
 
-Sie können die Auswahl aufheben und somit die Info-Box schließen, indem Sie in einen Bereich in der Karte klicken, der kein Element enthält. Sollten Sie große Elemente ausgewählt haben (z. B, Gebiete), zoomen Sie zum Abwählen aus der Karte und klicken Sie in einen Bereich, außerhalb des Elements.
+**Rohrübersicht**
 
-![Screenshot Karte mit Hervorhebung eines ausgewählten Objekts und der Anzeige der Details in einer Info-Box rechts](/images/manual/teil-a/map_selected_object.jpg)
+Jedes Rohr steht als eigene Zeile mit seinem Namen und dem Rohrtyp in Klammern. Ein Klick auf die Zeile klappt sie auf und lädt die Mikrorohre des Rohrs; die Liste ist dieselbe wie im Reiter „Status“ der Rohrverwaltung, hier aber nicht bearbeitbar, siehe Abschnitt [Mikrorohre eines Rohrs](./10-rohrverwaltung.md#_10-4-mikrorohre-eines-rohrs). Mehrere Zeilen lassen sich gleichzeitig geöffnet halten. Liegt in der Trasse kein Rohr, steht dort „Keine Rohre gefunden“.
 
-### 5.3.1 Anhänge von Kartenobjekten
+![Screenshot der Info-Box einer Trasse im Reiter „Rohrübersicht“ mit einem aufgeklappten Rohr und der Liste seiner Mikrorohre](/images/manual/teil-a/map_trench_conduits.jpg){.big}
 
-Bei einigen Objekten wird Ihnen in der Info-Box der Reiter "Anhänge" angezeigt. Hier können Sie Anhänge (Dateien) hinzufügen, einsehen (herunterladen), umbenennen oder löschen. Gehen Sie dazu in den entsprechenden Reiter und klicken Sie entweder auf Dateien auswählen (zum Hinzufügen einer neuen Datei) oder auf Dokumente (zum Einsehen der vorhandenen Dateien). Wenn Sie über ein vorhandenes Dokument hovern, erscheinen die Optionen "Downloaden", "Umbenennen" und "Löschen" rechts neben dem Dateinamen. 
+Die Schaltfläche „Trassen auf Karte hervorheben“ in der Zeile eines Rohrs markiert alle Trassen, durch die dieses Rohr verläuft. So verfolgen Sie seinen Verlauf über die ausgewählte Trasse hinaus.
 
-Sollte dies nicht sichtbar sein, ist eventuell Ihr Fenster zu klein. Sie können in der Info-Box nach links und rechts scrollen, oder durch klicken, halten und nach-links-ziehen auf den linken Rand der Info-Box diese vergrößern.
+**Kabelübersicht**
 
-![](/videos/map_attachment.webm)
+Die Kabelübersicht ist ebenso aufgebaut: je Kabel eine Zeile mit Namen, Kabeltyp und der Zahl der Fasern. Aufgeklappt stehen darin die **Bündel** des Kabels, jedes mit seiner Farbe, seiner Nummer und der Zahl seiner Fasern; sind Fasern als defekt vermerkt, steht ihre Anzahl am rechten Rand des Bündels. Ein Klick auf ein Bündel zeigt dessen Fasern mit „#“, „Farbe“ und „Status“.
 
-## 5.4 Suche
+![Screenshot der Info-Box einer Trasse im Reiter „Kabelübersicht“ mit einem aufgeklappten Kabel und den Fasern des ersten Bündels](/images/manual/teil-a/map_trench_cables.jpg){.big}
 
-Oben links befindet sich eine **Suchfunktion**. Hier können Sie gezielt nach Objekten suchen. Dazu gehen Sie folgendermaßen vor:
+Jede Kabelzeile trägt zwei Schaltflächen: „Trassen auf Karte hervorheben“ wie bei den Rohren und „Folgen“, das den Faserweg dieses Kabels öffnet, siehe Abschnitt [Von der Karte in den Faserweg wechseln](#_5-7-von-der-karte-in-den-faserweg-wechseln). Dieselbe Schaltfläche „Folgen“ gibt es an jeder einzelnen Faser. Liegt in der Trasse kein Kabel, steht dort „Keine Kabel in dieser Trasse“.
 
-![Screenshot Karte mit Hervorhebung des Suchfeldes oben links](/images/manual/teil-a/map_search.jpg)
+::: info
+Den Status einer Faser ändern Sie im Netzschema, siehe Kapitel [Netzschema](./14-netzschema.md).
+:::
 
-1. Geben Sie einen Begriff oder einen Teil davon in das Suchfeld ein.
-2. Drücken Sie Enter oder klicken Sie auf das grüne Lupen-Symbol.
-3. Ein zweites Feld wird unterhalb des Suchfeldes angezeigt. Hier haben Sie die Möglichkeit, die Suche zu verfeinern oder sich alle Treffer anzuzeigen, die Ihren gesuchten Begriff (auch teilweise) enthalten.
-4. Um die Suchergebnisse (Liste der Treffer) anzuzeigen, klicken Sie auf den kleinen Pfeil rechts neben dem zweiten Eingabefeld.
-5. Um die Auswahl zu verfeinern, können Sie in dem zweiten Feld einen weiteren Suchbegriff eingeben.
-6. Sobald Sie ein Objekt auswählen, springt die Karte an die passende Stelle und das Objekt blinkt dreimal auf.
+## 5.5 Grabenprofil einer Trasse
 
-![Screenshots Suchfeld in Karte mit Userflow und Nummerierung](/images/manual/teil-a/map_search_flow.jpg)
+Im Reiter „Aktionen“ einer Trasse öffnet „Grabenprofil anzeigen“ den Querschnitt des Grabens mit der Lage der Rohre.
 
-Sollten Sie sich Details zu diesem Objekt anzeigen lassen wollen, klicken Sie auf das Objekt in der Karte (siehe auch weiter oben "Auswahl von Objekten").
+Das **Grabenprofil** erscheint in einem eigenen Fenster über der Karte. Es zeigt den Graben im Schnitt mit seinen Bodenschichten und darin je Rohr einen Kreis. Im Kreis stehen die Mikrorohre des Rohrs in ihren Farben, zweifarbige geteilt dargestellt; Mikrorohre mit einem hinterlegten Status sind blasser und mit einem ✕ gekennzeichnet. Unter jedem Kreis steht der Name des Rohrs, ein Zeigen mit der Maus nennt zusätzlich den Rohrtyp.
 
+![Screenshot des Fensters „Grabenprofil“ über der Karte mit drei Rohren im Querschnitt](/images/manual/teil-a/map_trench_profile.jpg){.big}
+
+Über die Schaltflächen links unten im Fenster zoomen Sie in die Zeichnung hinein und heraus und richten sie wieder auf ihren Inhalt aus. Das Fenster selbst verschieben Sie an seiner Titelzeile, an der rechten unteren Ecke ändern Sie seine Größe; die Schaltflächen in der Titelzeile verkleinern, maximieren und schließen es.
+
+::: info
+Das Profil ist eine schematische Darstellung, keine maßstäbliche Bauzeichnung: Die Rohre werden gleichmäßig angeordnet, ihre Lage im Bild entspricht nicht ihrer Lage im Graben. Verschieben lassen sie sich hier nicht.
+:::
+
+Enthält die Trasse keine Rohre, steht im Fenster „Keine Leerrohre in diesem Graben gefunden“.
+
+## 5.6 Netzknoten: Slot-Konfiguration und Struktur öffnen
+
+Im Reiter „Aktionen“ eines Netzknotens führen „Slot-Konfiguration anzeigen“ und „Struktur anzeigen“ zu dessen innerem Aufbau. Beide öffnen ein eigenes Fenster über der Karte, das sich wie das Grabenprofil verschieben und in der Größe ändern lässt.
+
+::: warning
+Beide Fenster öffnen mittig und sind gleich groß, und „Netzknotenstruktur“ liegt immer über „Netzknoten-Konfiguration“ – unabhängig davon, welches Sie zuerst geöffnet haben. Sobald die Struktur offen ist, verdeckt sie die Konfiguration vollständig; diese ist nicht geschlossen, sondern nur nicht zu sehen. Ziehen Sie das obere Fenster an seiner Titelzeile beiseite, dann liegen beide nebeneinander; ein Klick auf ein Fenster holt es nach vorn.
+
+Erst dann sehen Sie auch, was „Struktur anzeigen“ in der Konfiguration bewirkt: Es schaltet das bereits geöffnete Strukturfenster auf die gewählte Seite um, holt es aber nicht nach vorn.
+:::
+
+**Slot-Konfiguration**
+
+Das Fenster „Netzknoten-Konfiguration“ listet die Einbauplätze des Netzknotens auf, je Seite eine Konfiguration; sind für das Projekt Container eingerichtet, sind die Konfigurationen darin gruppiert. Zu jeder Konfiguration stehen die Seite sowie „Gesamtslots“, „Belegt“ und „Frei“ – so sehen Sie, wie viel Platz im Netzknoten noch ist. Die Schaltfläche „Struktur anzeigen“ an einer Konfiguration führt direkt in deren Belegung. Das Download-Symbol oben rechts speichert den Aufbau des Netzknotens als Excel-Datei, siehe Abschnitt [Exportformate im Überblick](./03-wiederkehrende-bedienelemente.md#_3-8-exportformate-im-uberblick).
+
+![Screenshot des Fensters „Netzknoten-Konfiguration“ mit den beiden Konfigurationen A und B des Netzknotens](/images/manual/teil-a/map_node_slots.jpg){.big}
+
+Sind für den Netzknoten keine Einbauplätze hinterlegt, steht dort „Keine Slot-Konfigurationen gefunden“.
+
+**Struktur**
+
+Das Fenster „Netzknotenstruktur“ zeigt die Belegung einer Seite. Es ist zweigeteilt: links das **Slot-Grid**, rechts die Leiste „Kabel“.
+
+![Screenshot des Fensters „Netzknotenstruktur“ mit dem Slot-Grid links und der Kabelleiste rechts](/images/manual/teil-a/map_node_structure.jpg){.big}
+
+Über dem Slot-Grid wählen Sie unter „Seite auswählen“, welche Konfiguration Sie sehen; daneben steht die Zahl der Gesamtslots. Das Grid selbst hat drei Spalten: „TPU“ mit der Nummer des Einbauplatzes, „Komponente“ mit dem dort eingebauten Bauteil und „Clip“ mit dessen Clip-Nummer. Eine Komponente, die mehrere Slots belegt – ein Splitter etwa zwei –, steht als ein Block über deren Zeilen; freie Slots zeigen einen Strich.
+
+Ein Klick auf eine Komponente öffnet deren Ports mit den Spalten „Port“, „Faser A“ und „Faser B“, also den beiderseits aufgelegten Fasern. „Zurück“ führt wieder zum Grid. Sind für die Komponente keine Ports hinterlegt, steht dort „Keine Ports für diese Komponente konfiguriert“.
+
+Die Leiste „Kabel“ am rechten Rand führt alle Kabel des Netzknotens auf, je Eintrag den Namen und die Zahl der Fasern; ein Pfeil dahinter zeigt, ob das Kabel am Netzknoten beginnt oder endet. Ein Klick auf ein Kabel klappt seine Bündel auf, ein Klick auf ein Bündel dessen Fasern. Zu jeder Faser stehen ihre Farbe und ihre durchlaufende Nummer, und wenn sie auf einer Komponente aufliegt, deren Bezeichnung. Defekte Fasern sind durchgestrichen; ein Zeigen mit der Maus nennt den Status. Sind dem Netzknoten Adressen zugeordnet, folgt unter den Kabeln der Abschnitt „Adressen“ mit deren Wohneinheiten.
+
+Am linken Rand der Leiste ziehen Sie sie über den Griff „Größe der Seitenleiste ändern“ breiter oder schmaler; die runde Schaltfläche „Einklappen“ an ihrer oberen linken Ecke klappt sie zu einem schmalen Streifen zusammen, „Erweitern“ holt sie zurück. Hat der Netzknoten keine Kabel, steht dort „Keine Kabel an diesem Netzknoten“.
+
+::: info
+Aus der Karte heraus sind beide Fenster reine Anzeigen. Angelegt und verändert wird der Aufbau eines Netzknotens im Netzschema, siehe Kapitel [Netzschema](./14-netzschema.md).
+:::
+
+## 5.7 Von der Karte in den Faserweg wechseln
+
+Im Reiter „Aktionen“ eines Netzknotens oder einer Adresse springt „Folgen“ in die Ansicht „Faserweg“, siehe Kapitel [Faserweg](./15-faserweg.md).
+
+Der Faserweg wird dabei sofort für das ausgewählte Objekt ermittelt: von einem Netzknoten aus für alle Fasern, die durch ihn laufen, von einer Adresse aus für die Fasern der dort angeschlossenen Netzknoten und Wohneinheiten. Dieselbe Schaltfläche „Folgen“ finden Sie im Reiter „Kabelübersicht“ an jedem Kabel und an jeder einzelnen Faser, siehe Abschnitt [Rohrübersicht und Kabelübersicht einer Trasse](#_5-4-rohrubersicht-und-kabelubersicht-einer-trasse).
+
+„Folgen“ verlässt die Karte. Über die Zurück-Funktion des Browsers oder den Menüpunkt „Karte“ kehren Sie zurück; der Kartenausschnitt bleibt erhalten, die Info-Box öffnet sich nicht erneut.
+
+::: info
+Lässt sich zu dem gewählten Objekt kein Faserweg ermitteln, etwa weil noch kein Kabel angeschlossen ist, zeigt die Ansicht „Faserweg“ statt eines Ergebnisses eine Fehlermeldung mit der Kennung des Objekts.
+:::
+
+## 5.8 Anhänge an einem Kartenobjekt
+
+Zu jedem Kartenobjekt können Sie Dateien ablegen. Hochladen, Herunterladen, Umbenennen und Löschen funktionieren wie in Abschnitt [Anhänge hochladen, ansehen und löschen](./03-wiederkehrende-bedienelemente.md#_3-7-anhange-hochladen-ansehen-und-loschen) beschrieben.
+
+## 5.9 Grenzen der Darstellung
+
+Ein Klick auf eine freie Stelle der Karte hebt die Auswahl auf – innerhalb eines Projektgebiets ist das allerdings kaum möglich, weil dessen Fläche die gesamte Umgebung überdeckt; schließen Sie die Info-Box dann über das Kreuz „Seitenleiste schließen“.
+
+Warum ein Klick oft nicht das gewünschte Objekt trifft und was dagegen hilft, beschreibt Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster) unter „Objekte anklicken“.
