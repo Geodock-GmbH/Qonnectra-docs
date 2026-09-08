@@ -46,7 +46,7 @@ Findet Ihre Eingabe keinen Eintrag, bleibt die Liste nicht leer, sondern zeigt w
 Die Eingabe allein wählt nichts aus – erst der Klick auf einen Eintrag übernimmt den Wert in das Feld.
 :::
 
-Sind für ein Feld überhaupt keine Werte hinterlegt, erscheint anstelle des Feldes der Hinweis „Keine Daten verfügbar“. Die Auswahlwerte sind Stammdaten und werden im Administrationsbereich gepflegt, siehe Kapitel [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md).
+Sind für ein Feld überhaupt keine Werte hinterlegt, erscheint anstelle des Feldes der Hinweis „Keine Daten verfügbar“. Die Auswahlwerte sind Stammdaten, siehe Abschnitt [Stammdaten](./02-grundbegriffe-und-datenmodell.md#_2-7-stammdaten-status-phase-netzebene-firmen); gepflegt werden sie im Administrationsbereich, siehe Kapitel [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md).
 
 ## 3.3 Das Kartenfenster
 

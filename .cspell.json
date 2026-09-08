@@ -36,7 +36,9 @@
     "Infrastrukturakteure",
     "initdb",
     "IONOS",
+    "Kartenlayer",
     "kommagetrennt",
+    "Komponententyp",
     "kundeneigener",
     "Layerdatei",
     "Layergruppe",
@@ -45,6 +47,7 @@
     "libnss",
     "libpsl",
     "libvpx",
+    "LTMC",
     "Lupensymbol",
     "Matroska",
     "mbtiles",
@@ -54,6 +57,7 @@
     "Nieharde",
     "noout",
     "nssdb",
+    "Patchfeld",
     "pexels",
     "pixabay",
     "planneo",
@@ -63,6 +67,7 @@
     "Schauenburgerstraße",
     "Scrollbalken",
     "Spleisskassette",
+    "Spleiß",
     "Spleißkassette",
     "srgb",
     "srid",
@@ -76,7 +81,8 @@
     "Verlegeart",
     "Verwaltungsmitarbeitende",
     "Websitebesucher",
-    "Websitebetreiber"
+    "Websitebetreiber",
+    "Westerstraße"
   ],
   "ignoreRegExpList": [
     "/\\bTR-[A-Z0-9]{5,}\\b/g"

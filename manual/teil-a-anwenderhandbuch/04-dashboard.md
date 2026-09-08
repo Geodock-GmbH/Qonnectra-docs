@@ -119,7 +119,7 @@ Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projek
 
 ### 4.8.1 Nach Kennzeichen filtern
 
-Das **Kennzeichen** ist das projektweite Ordnungsmerkmal von Qonnectra: Jede Trasse, jedes Rohr, jeder Netzknoten und jede Adresse trägt eines, und in mehreren Ansichten grenzen Sie den Bestand darüber ein.
+Das Kennzeichen ist das projektweite Ordnungsmerkmal von Qonnectra, das jede Trasse, jedes Rohr, jeden Netzknoten, jedes Kabel, jede Adresse und jedes Gebiet trägt, siehe Abschnitt [Kennzeichen als projektweiter Filter](./02-grundbegriffe-und-datenmodell.md#_2-6-kennzeichen-als-projektweiter-filter).
 
 Das Dashboard gehört nicht dazu. Seine Kennzahlen, Diagramme und Karten beziehen sich immer auf den gesamten Bestand des ausgewählten Projekts; einen Filter nach Kennzeichen gibt es hier nicht.
 
