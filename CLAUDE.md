@@ -126,6 +126,8 @@ pnpm test:e2e         # Playwright specs in tests/
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
 scripts/install-local-ca.sh                 # import the dev CA once per machine
+scripts/qonnectra-demo-data/fetch_geodock_export.py --out scripts/qonnectra-demo-data/testprojekt-export.json
+                                            # pull the demo data from app.geodock.de again
 ```
 
 New German technical terms cspell does not know go into `.cspell.json` under
@@ -231,7 +233,7 @@ sentences the chapter exists for.
 | Video format | `.webm` (VP8), crop of the interface, approx. 1000 × 700 |
 | Mode | always light mode, language **DE** |
 | Content | only the app viewport, no browser chrome; images without a mouse cursor, videos **with** one |
-| Data | exclusively the demo project „Testprojekt“ – no real personal data |
+| Data | exclusively the demo project „Testprojekt“ – no personal data, see below |
 
 > `playwright.config.ts` sets these values centrally. Do not spread a
 > `devices[...]` preset into the project configuration – the presets bring their
@@ -255,6 +257,48 @@ legible. Only the **width** matters – the height does not change the scale in 
 manual. Unlike screenshots, videos are also recorded in CSS pixels: Chromium's
 screencast delivers no device pixels, so the `deviceScaleFactor` of 2 has no
 effect there.
+
+**Personal data in images**
+
+Every image and every video is checked for personal data **before publishing**,
+and again whenever a spec starts filling fields itself. A published image goes
+into a public repository and onto a public website; it cannot be recalled. The
+places in the app that can show personal data:
+
+| Where | What |
+|---|---|
+| Leitungsauskunft | „Organisation“, „Name“, „Telefon“, „Mobil“ |
+| Wohneinheit | „Name des Bewohners“, „Erfassungsdatum Bewohner“ |
+| Nachverdichtung | „Kommentar“ in the export dialog, and the PDF built from it |
+| Anhänge | file names of uploaded documents and photos |
+| `/settings` | „Benutzername“ and the e-mail address of the logged-in account (chapter 17) |
+| `/admin/*` | the user accounts of the instance including e-mail (chapters 19–24) |
+
+The last two are the reason a run with `QONNECTRA_LOGIN=admin` needs a second
+look: the account it shows belongs to whoever set the instance up.
+
+- Never make up plausible data. An invented name with a real dialling code
+  („M. Petersen“, „04631 123456“) is indistinguishable from a real contact in
+  the image, and nothing in the manual tells readers otherwise. That it was
+  invented is worth nothing to the person whose name it happens to be.
+- Use recognisable placeholders: **„Max Mustermann“**, **„Erika Mustermann“**,
+  **„Musterbau GmbH“**, **„Stadtwerke Musterstadt“**, and phone numbers of the
+  form **`0123 456789`** – an ascending run of digits behind the unassigned
+  prefix 0123. Anyone looking at the image can see at a glance that it is a
+  placeholder.
+- Leaving the field empty is the second-best option: it shows the layout but not
+  what belongs in the field.
+- Everything a spec creates for a capture uses these placeholders, in the seeded
+  records as well as in forms filled in for an image – also where the crop does
+  not show the field, because the record sits in the database for the length of
+  the run.
+- The demo data of „Testprojekt“ is the one exception and stays as it is:
+  addresses and residential units come from the export and are checked once at
+  the source (`scripts/qonnectra-demo-data/`). Whether the demo data itself is
+  fit to be published is decided there, not per image.
+- Images with hand-drawn annotation (pattern 3) are checked again after the
+  post-processing, and an image that already sits in `public/` is replaced
+  rather than patched – the old file stays in the git history.
 
 **Location and naming**
 - Images: `public/images/manual/teil-a/<name>.jpg` (one folder per manual part)
@@ -358,7 +402,17 @@ local instance, so that they can be regenerated when the app changes.
   alternatively set `ignoreHTTPSErrors: true` in Playwright.
 - Demo data: project **„Testprojekt“** from
   `scripts/qonnectra-demo-data/testprojekt-export.json`, imported automatically
-  during setup. Select it in the top left after logging in.
+  during setup. Select it in the top left after logging in. It always gets the
+  primary key **2** – the Playwright setup pins `selected-project=2`, so a
+  re-import must not hand out a new id (`PROJECT_ID` in
+  `import_geodock_export.py`).
+- The export is pulled with `scripts/qonnectra-demo-data/fetch_geodock_export.py`
+  against app.geodock.de; credentials go into `scripts/qonnectra-demo-data/.env`
+  (gitignored, template `.env.example`). Four endpoints stay closed to that
+  account (`wms-sources`, `node-slot-divider`, `node-slot-clip-number`,
+  `node-trench-selection`) – what that costs is in the README next to the
+  script. Attachments come in as metadata only; the files themselves stay on
+  api.geodock.de.
 - `local-app/` is gitignored (foreign checkout) – never commit it and only change
   it through the setup script.
 

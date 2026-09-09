@@ -15,7 +15,11 @@
     }
   ],
   "words": [
+    "6XCTUWG",
+    "Adminbereich",
     "Anfrageformular",
+    "angehakt",
+    "anhaken",
     "Ausschnittvergrößerung",
     "Browserzeile",
     "dbaeumer",
@@ -36,7 +40,9 @@
     "Infrastrukturakteure",
     "initdb",
     "IONOS",
+    "Kartenlayer",
     "kommagetrennt",
+    "Komponententyp",
     "kundeneigener",
     "Layerdatei",
     "Layergruppe",
@@ -45,6 +51,7 @@
     "libnss",
     "libpsl",
     "libvpx",
+    "LTMC",
     "Lupensymbol",
     "Matroska",
     "mbtiles",
@@ -54,6 +61,8 @@
     "Nieharde",
     "noout",
     "nssdb",
+    "Oster",
+    "Patchfeld",
     "pexels",
     "pixabay",
     "planneo",
@@ -62,7 +71,9 @@
     "Schauenburgerstr",
     "Schauenburgerstraße",
     "Scrollbalken",
+    "Scrollbereich",
     "Spleisskassette",
+    "Spleiß",
     "Spleißkassette",
     "srgb",
     "srid",
@@ -76,7 +87,10 @@
     "Verlegeart",
     "Verwaltungsmitarbeitende",
     "Websitebesucher",
-    "Websitebetreiber"
+    "Websitebetreiber",
+    "Westerstraße",
+    "Zukunftsabhängige",
+    "Überg"
   ],
   "ignoreRegExpList": [
     "/\\bTR-[A-Z0-9]{5,}\\b/g"

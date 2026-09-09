@@ -12,14 +12,21 @@ with a UUID primary key (trench, conduit, node, address, cable, fiber,
 microduct, ...) are created with the ORIGINAL UUID from production, so that
 relations between the objects work without an additional ID mapping.
 
-Deliberately not imported (not part of the current scope of the manual):
-Container/ContainerType, FiberSplice, NodeStructure and the patch panel/slot
-models (node-structure, node-slot-*), pipeline requests, valuation.
+Not imported, because the export account may not read the endpoints
+(HTTP 403, see EXPECTED_FORBIDDEN in fetch_geodock_export.py):
+WMSSource/WMSLayer (the layer list comes through, its source does not, and
+without the URL of the WMS server the layers are useless), NodeSlotDivider,
+NodeSlotClipNumber and NodeTrenchSelection.
+
+Attachments (FeatureFiles) are imported as metadata: file name, type and the
+path on api.geodock.de. The files themselves stay there - they are real
+documents of a real installation and have no place in this repository.
 """
 
 import json
 from datetime import date, datetime
 
+from django.contrib.contenttypes.models import ContentType
 from django.contrib.gis.geos import LineString, Point, Polygon
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
@@ -28,6 +35,8 @@ from apps.api.models import (
     Address,
     Area,
     AttributesAreaType,
+    AttributesComponentStructure,
+    AttributesComponentType,
     AttributesCableType,
     AttributesCompany,
     AttributesConduitType,
@@ -45,20 +54,40 @@ from apps.api.models import (
     Cable,
     CableLabel,
     Conduit,
+    Container,
+    ContainerType,
+    FeatureFiles,
     Fiber,
+    FiberSplice,
     Flags,
     Microduct,
     MicroductCableConnection,
     MicroductConnection,
     NetworkSchemaSettings,
     Node,
+    NodeSlotConfiguration,
+    NodeStructure,
+    PipelineInquiryArea,
+    PipelineRecord,
     Projects,
+    RequestReason,
     ResidentialUnit,
     Trench,
     TrenchConduitConnection,
+    TypeOfWork,
+    ValuationCostRate,
 )
 
 PROJECT_NAME = "Testprojekt"
+
+# The primary key the project gets locally, pinned deliberately: the Playwright
+# setup writes the cookie selected-project=2 (playwright/auth.setup.ts) and the
+# manual's URLs contain the id. Without pinning, a re-import with --force would
+# hand out the next free id after the delete - the project would still be there
+# and every capture run would nevertheless land in "Default".
+# 2 is the value a fresh instance produces anyway: "Default" is created first
+# during setup and takes 1.
+PROJECT_ID = 2
 
 # NetworkSchemaSettings.excluded_node_types has no API endpoint and could
 # therefore not be derived from the export. Reconstructed manually by comparing
@@ -158,6 +187,26 @@ class Command(BaseCommand):
         )
 
     def _cleanup(self, project):
+        # Attachments hang off their object through a generic foreign key and
+        # know no project, so they are collected over the objects themselves.
+        for model in (Trench, Conduit, Node, Address, Area, Cable):
+            content_type = ContentType.objects.get_for_model(model)
+            FeatureFiles.objects.filter(
+                content_type=content_type,
+                object_id__in=model.objects.filter(project=project).values("uuid"),
+            ).delete()
+        FeatureFiles.objects.filter(
+            content_type=ContentType.objects.get_for_model(Microduct),
+            object_id__in=Microduct.objects.filter(
+                uuid_conduit__project=project
+            ).values("uuid"),
+        ).delete()
+        PipelineRecord.objects.filter(project=project).delete()
+        ValuationCostRate.objects.filter(project=project).delete()
+        FiberSplice.objects.filter(node_structure__uuid_node__project=project).delete()
+        NodeStructure.objects.filter(uuid_node__project=project).delete()
+        NodeSlotConfiguration.objects.filter(uuid_node__project=project).delete()
+        Container.objects.filter(uuid_node__project=project).delete()
         Fiber.objects.filter(project=project).delete()
         MicroductCableConnection.objects.filter(uuid_cable__project=project).delete()
         CableLabel.objects.filter(cable__project=project).delete()
@@ -190,6 +239,8 @@ class Command(BaseCommand):
             "trench", "conduit", "trench_conduit_connection", "microduct",
             "microduct_connection", "microduct_cable_connection", "node",
             "address", "residential-unit", "cable", "cable_label", "fiber", "area",
+            "container", "node-slot-configuration", "node-structure",
+            "fiber-splice", "feature-files", "pipeline-records",
         ):
             data[key] = dedupe_by_uuid(data[key])
 
@@ -254,7 +305,19 @@ class Command(BaseCommand):
         def attr(map_, value):
             return map_.get(value["id"]) if value else None
 
+        occupant = (
+            Projects.objects.filter(pk=PROJECT_ID)
+            .exclude(project=PROJECT_NAME)
+            .first()
+        )
+        if occupant:
+            raise CommandError(
+                f'Id {PROJECT_ID} is taken by the project "{occupant.project}". '
+                "The import pins the id because the Playwright setup relies on it "
+                "(see PROJECT_ID)."
+            )
         project = Projects.objects.create(
+            pk=PROJECT_ID,
             project=PROJECT_NAME,
             description="1:1-Import des Testprojekts von app.geodock.de.",
             active=True,
@@ -295,6 +358,13 @@ class Command(BaseCommand):
             addresses.append(
                 Address(
                     uuid=row["uuid"],
+                    # Taken over deliberately: a database trigger generates
+                    # id_address whenever it comes in as NULL, so every
+                    # re-import would hand out new address IDs. The manual
+                    # shows them in screenshots, and the specs of chapters 7
+                    # and 16 search for them.
+                    id_address=row["id_address"],
+                    id_address_2=row["id_address_2"],
                     zip_code=row["zip_code"],
                     city=row["city"],
                     district=row["district"],
@@ -315,6 +385,8 @@ class Command(BaseCommand):
             residential_units.append(
                 ResidentialUnit(
                     uuid=row["uuid"],
+                    # Same as for id_address above.
+                    id_residential_unit=row["id_residential_unit"],
                     uuid_address_id=uuid_of(row["uuid_address"]),
                     residential_unit_type=attr(ru_types, row["residential_unit_type"]),
                     floor=row["floor"],
@@ -527,6 +599,249 @@ class Command(BaseCommand):
         ]
         Area.objects.bulk_create(areas, batch_size=200)
         self.stdout.write(f"  Areas: {len(areas)}")
+
+        # --- Containers and slot configuration ------------------------------
+        # The patch panel modelling of a node: a container (rack, cabinet,
+        # HAK) holds slot configurations ("sides"), and a NodeStructure sits in
+        # a slot range of one of them. FiberSplice hangs off that structure,
+        # which is why nothing below works without this block.
+        container_types = {}
+        for row in data["container-type"]:
+            obj, _ = ContainerType.objects.get_or_create(
+                name=row["name"],
+                defaults={
+                    "description": row["description"],
+                    "icon": row["icon"],
+                    "color": row["color"],
+                    "display_order": row["display_order"],
+                    "is_active": row["is_active"],
+                },
+            )
+            container_types[row["id"]] = obj
+
+        containers = []
+        for row in data["container"]:
+            containers.append(
+                Container(
+                    uuid=row["uuid"],
+                    # The container serializer does not expose its node; the
+                    # relation comes from the query the export was fetched
+                    # with (see _fetched_with in fetch_geodock_export.py).
+                    uuid_node_id=row["_fetched_with"]["node"],
+                    container_type=container_types[row["container_type"]["id"]],
+                    parent_container_id=uuid_of(row["parent_container"]),
+                    name=row["name"],
+                    sort_order=row["sort_order"],
+                    is_expanded=row["is_expanded"],
+                )
+            )
+        Container.objects.bulk_create(containers, batch_size=200)
+        self.stdout.write(f"  Containers: {len(containers)}")
+
+        slot_configurations = []
+        for row in data["node-slot-configuration"]:
+            slot_configurations.append(
+                NodeSlotConfiguration(
+                    uuid=row["uuid"],
+                    uuid_node_id=uuid_of(row["uuid_node"]),
+                    container_id=uuid_of(row["container"]),
+                    side=row["side"],
+                    total_slots=row["total_slots"],
+                    sort_order=row["sort_order"],
+                )
+            )
+        NodeSlotConfiguration.objects.bulk_create(slot_configurations, batch_size=200)
+        self.stdout.write(f"  Slot configurations: {len(slot_configurations)}")
+
+        # --- Component types and their port structure -----------------------
+        component_types = {}
+        for row in data["attributes_component_type"]:
+            obj, _ = AttributesComponentType.objects.get_or_create(
+                component_type=row["component_type"],
+                defaults={
+                    "occupied_slots": row["occupied_slots"],
+                    "manufacturer": attr(companies, row["manufacturer"]),
+                },
+            )
+            component_types[row["id"]] = obj
+
+        # AttributesComponentStructure has an integer primary key and no name
+        # of its own; the natural key is (component type, direction, port).
+        component_structures = {}
+        for row in data["attributes_component_structure"]:
+            component_type = component_types.get(row["component_type"])
+            if component_type is None:
+                continue
+            obj, _ = AttributesComponentStructure.objects.get_or_create(
+                component_type=component_type,
+                in_or_out=row["in_or_out"],
+                port=row["port"],
+                defaults={"port_alias": row["port_alias"]},
+            )
+            component_structures[row["id"]] = obj
+        self.stdout.write(
+            f"  Component types: {len(component_types)}, "
+            f"port structures: {len(component_structures)}"
+        )
+
+        node_structures = []
+        for row in data["node-structure"]:
+            node_structures.append(
+                NodeStructure(
+                    uuid=row["uuid"],
+                    uuid_node_id=uuid_of(row["uuid_node"]),
+                    slot_configuration_id=uuid_of(row["slot_configuration"]),
+                    component_type=component_types[row["component_type"]["id"]],
+                    component_structure=(
+                        component_structures.get(row["component_structure"]["id"])
+                        if row["component_structure"]
+                        else None
+                    ),
+                    slot_start=row["slot_start"],
+                    slot_end=row["slot_end"],
+                    clip_number=row["clip_number"],
+                    purpose=row["purpose"],
+                    label=row["label"],
+                )
+            )
+        NodeStructure.objects.bulk_create(node_structures, batch_size=200)
+        self.stdout.write(f"  Node structures: {len(node_structures)}")
+
+        # --- Fiber splices --------------------------------------------------
+        # The piece that was missing until now: without them every fiber trace
+        # ends at the cable, the fault simulation reports "no affected
+        # addresses" and the section "Faserverbindungen" of the post
+        # compaction PDF stays empty.
+        splices = []
+        for row in data["fiber-splice"]:
+            splices.append(
+                FiberSplice(
+                    uuid=row["uuid"],
+                    node_structure_id=uuid_of(row["node_structure"]),
+                    port_number=row["port_number"],
+                    fiber_a_id=uuid_of(row["fiber_a"]),
+                    cable_a_id=uuid_of(row["cable_a"]),
+                    fiber_b_id=uuid_of(row["fiber_b"]),
+                    cable_b_id=uuid_of(row["cable_b"]),
+                    merge_group_a=row["merge_group_a"],
+                    merge_group_b=row["merge_group_b"],
+                    shared_fiber_a_id=uuid_of(row["shared_fiber_a"]),
+                    shared_cable_a_id=uuid_of(row["shared_cable_a"]),
+                    shared_fiber_b_id=uuid_of(row["shared_fiber_b"]),
+                    shared_cable_b_id=uuid_of(row["shared_cable_b"]),
+                    residential_unit_a_id=uuid_of(row["residential_unit_a"]),
+                    residential_unit_b_id=uuid_of(row["residential_unit_b"]),
+                )
+            )
+        FiberSplice.objects.bulk_create(splices, batch_size=200)
+        with_unit = sum(1 for row in data["fiber-splice"] if row["residential_unit_b"])
+        self.stdout.write(
+            f"  Fiber splices: {len(splices)} ({with_unit} of them onto a "
+            "residential unit)"
+        )
+
+        # --- Valuation cost rates -------------------------------------------
+        # Without them the "Wertermittlung" only shows a hint that no cost
+        # rates are configured (manual chapters 9 and 22).
+        rates = 0
+        for row in data["valuation-rates"]:
+            rate = ValuationCostRate.objects.create(
+                project=project,
+                name=row["name"],
+                amount=row["amount"],
+                unit=row["unit"],
+                is_house_connection=row["is_house_connection"],
+            )
+            rate.node_types.set(
+                [
+                    node_types[old_id]
+                    for old_id in row["node_type_ids"]
+                    if old_id in node_types
+                ]
+            )
+            rates += 1
+        self.stdout.write(f"  Valuation cost rates: {rates}")
+
+        # --- Pipeline records -----------------------------------------------
+        types_of_work = {
+            row["id"]: TypeOfWork.objects.get_or_create(name=row["name"])[0]
+            for row in data["type-of-work"]
+        }
+        request_reasons = {
+            row["id"]: RequestReason.objects.get_or_create(name=row["name"])[0]
+            for row in data["request-reasons"]
+        }
+        # The record serializer resolves both to their name, not to an id.
+        by_work_name = {obj.name: obj for obj in types_of_work.values()}
+        by_reason_name = {obj.name: obj for obj in request_reasons.values()}
+
+        records = {}
+        for row in data["pipeline-records"]:
+            records[row["uuid"]] = PipelineRecord.objects.create(
+                uuid=row["uuid"],
+                project=project,
+                type_of_work=by_work_name.get(row["type_of_work"]),
+                request_reason=by_reason_name.get(row["request_reason"]),
+                organisation=row["organisation"],
+                name=row["name"],
+                tel=row["tel"],
+                mobile=row["mobile"],
+            )
+        inquiry_areas = [
+            PipelineInquiryArea(
+                pipeline_record=records[row["pipeline_record_uuid"]],
+                name=row["name"],
+                geom=polygon(row["geometry"]),
+            )
+            for row in data["pipeline-inquiry-areas"]
+            if row["pipeline_record_uuid"] in records
+        ]
+        PipelineInquiryArea.objects.bulk_create(inquiry_areas, batch_size=200)
+        self.stdout.write(
+            f"  Pipeline records: {len(records)}, inquiry areas: {len(inquiry_areas)}"
+        )
+
+        # --- Attachments (metadata only) ------------------------------------
+        # The export gives the production ContentType id, which says nothing
+        # locally. Which model an attachment belongs to is therefore derived
+        # from the object it hangs off - its UUID is in exactly one of the
+        # imported resources.
+        owners = {
+            "trench": Trench,
+            "conduit": Conduit,
+            "node": Node,
+            "address": Address,
+            "area": Area,
+            "cable": Cable,
+            "microduct": Microduct,
+        }
+        content_type_of_uuid = {}
+        for key, model in owners.items():
+            content_type = ContentType.objects.get_for_model(model)
+            for row in data[key]:
+                content_type_of_uuid[row["uuid"]] = content_type
+
+        feature_files = []
+        for row in data["feature-files"]:
+            content_type = content_type_of_uuid.get(row["object_id"])
+            if content_type is None:
+                continue
+            feature_files.append(
+                FeatureFiles(
+                    uuid=row["uuid"],
+                    content_type=content_type,
+                    object_id=row["object_id"],
+                    file_path=row["file_path"],
+                    file_name=row["file_name"],
+                    file_type=row["file_type"],
+                    description=row["description"],
+                )
+            )
+        FeatureFiles.objects.bulk_create(feature_files, batch_size=200)
+        self.stdout.write(
+            f"  Attachments (metadata): {len(feature_files)} "
+            f"of {len(data['feature-files'])}"
+        )
 
         # --- Network schema settings (see the comment above) ----------------
         schema_settings = NetworkSchemaSettings.objects.create(project=project)

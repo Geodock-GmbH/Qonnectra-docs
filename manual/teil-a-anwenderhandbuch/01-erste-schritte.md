@@ -44,7 +44,7 @@ Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Bedienoberfläche is
 
 Am Fuß der Leiste steht unter der Überschrift „System“ der Eintrag „Einstellungen“ (siehe Kapitel [Einstellungen](./17-einstellungen.md)) und, wenn Ihre Installation eine Adresse für dieses Handbuch hinterlegt hat, „Dokumentation“. Mit den entsprechenden Rechten erscheint dort zusätzlich „Logs“ mit den Systemprotokollen; deren Auswertung beschreibt Kapitel [Betrieb der Instanz](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md).
 
-![Screenshot Dashboard mit Hervorhebung des Fußbereichs „System“ mit „Logs“ und „Einstellungen“ unten links](/images/manual/teil-a/login_settings.jpg)
+![Screenshot Dashboard mit Hervorhebung des Fußbereichs „System“ mit „Einstellungen“ und „Dokumentation“ unten links](/images/manual/teil-a/login_settings.jpg)
 
 ::: info
 Wenn der Fußbereich „System“ nicht zu sehen ist, scrollen Sie in der Navigationsleiste nach unten.

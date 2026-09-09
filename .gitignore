@@ -1,11 +1,14 @@
 node_modules/
 dist/
+__pycache__/
 .DS_Store
 .pnpm-store
 *.log
 .vitepress/cache
 .vitepress/dist
 
+# Credentials - among them scripts/qonnectra-demo-data/.env for the
+# production export (see the README there)
 .env
 
 # geklontes Qonnectra-App-Repo (siehe local-app/README.md)

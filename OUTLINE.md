@@ -85,8 +85,9 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 ### 7. Nachverdichtung
 
 - 7.1 Adresse suchen
-- 7.2 Bemerkung erfassen
-- 7.3 PDF erzeugen und Inhalt des Dokuments
+- 7.2 Angaben zur Adresse und Kartenausschnitt
+- 7.3 Ausbaustatus ändern und Bemerkung erfassen
+- 7.4 PDF erzeugen und Inhalt des Dokuments
 
 ### 8. Leitungsauskunft
 

@@ -46,7 +46,7 @@ Findet Ihre Eingabe keinen Eintrag, bleibt die Liste nicht leer, sondern zeigt w
 Die Eingabe allein wählt nichts aus – erst der Klick auf einen Eintrag übernimmt den Wert in das Feld.
 :::
 
-Sind für ein Feld überhaupt keine Werte hinterlegt, erscheint anstelle des Feldes der Hinweis „Keine Daten verfügbar“. Die Auswahlwerte sind Stammdaten und werden im Administrationsbereich gepflegt, siehe Kapitel [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md).
+Sind für ein Feld überhaupt keine Werte hinterlegt, erscheint anstelle des Feldes der Hinweis „Keine Daten verfügbar“. Die Auswahlwerte sind Stammdaten, siehe Abschnitt [Stammdaten](./02-grundbegriffe-und-datenmodell.md#_2-7-stammdaten-status-phase-netzebene-firmen); gepflegt werden sie im Administrationsbereich, siehe Kapitel [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md).
 
 ## 3.3 Das Kartenfenster
 
@@ -102,6 +102,10 @@ Ein Klick in die Karte wählt das Objekt darunter aus. Zwei Eigenheiten des Netz
 
 ::: warning
 Treffen Sie nicht das gewünschte Objekt, zoomen Sie weiter in die Karte hinein oder blenden Sie den Layer „Gebiet“ in der Legende vorübergehend aus. In den verkleinerten Karten der Nachverdichtung und der Adressdetails ist das nicht möglich, weil sie keine Legende haben.
+:::
+
+::: info
+Zwei Ansichten verwenden den Klick für etwas anderes und öffnen deshalb keine Info-Box: In der Leitungsauskunft zeichnen und ändern Sie damit die Auskunftsbereiche, siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md), in der Wertermittlung wählen Sie damit ein Gebiet an oder ab, siehe Kapitel [Wertermittlung](./09-wertermittlung.md).
 :::
 
 ## 3.4 Objekte in der Karte suchen
@@ -183,7 +187,7 @@ Qonnectra hat keinen Menüpunkt „Export“. Daten verlassen die Anwendung dort
 | Excel (`.xlsx`) | Rohrverwaltung, „Vorlage“ | leere Importvorlage für Rohre, siehe Abschnitt [Excel-Import](./10-rohrverwaltung.md#_10-5-excel-import-vorlage-ablauf-fehlermeldungen) |
 | Excel (`.xlsx`) | Netzknoten, „Slot-Konfiguration anzeigen“ | Einbauplätze und Komponenten eines Netzknotens, siehe Abschnitt [Netzknoten](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen) |
 | CSV | Störungsanalyse, „CSV exportieren“ | Schadensbericht mit den betroffenen Objekten, siehe Kapitel [Störungsanalyse](./06-stoerungsanalyse.md) |
-| PDF | Adressdetails und Nachverdichtung, „PDF herunterladen“ | Datenblatt zu einer Adresse, wahlweise mit den Wohneinheiten, siehe Kapitel [Adressen](./16-adressen.md) und [Nachverdichtung](./07-nachverdichtung.md) |
+| PDF | Adressdetails, „PDF herunterladen“; Nachverdichtung, „Start“ → „Exportieren“ | Datenblatt zu einer Adresse, wahlweise mit den Wohneinheiten, siehe Kapitel [Adressen](./16-adressen.md) und [Nachverdichtung](./07-nachverdichtung.md) |
 | GeoJSON | Faserweg, „GeoJSON herunterladen“ | Geometrien des ermittelten Faserwegs, siehe Kapitel [Faserweg](./15-faserweg.md) |
 | ZIP | Leitungsauskunft, „Exportieren“ | je Objektart eine GeoJSON-Datei, eine QGIS-Layerdatei (`.qlr`) und die Anhänge der enthaltenen Objekte, siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md) |
 
