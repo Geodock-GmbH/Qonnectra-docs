@@ -88,7 +88,7 @@ Die Adresse ist damit das Bindeglied zwischen Gebäude und Netz. Was auf der Net
 ![Screenshot der Adressdetailansicht mit Hervorhebung der Abschnitte „Mikrorohrverbindungen“ und „Wohneinheiten“](/images/manual/teil-a/model_address_units.jpg){.big}
 
 ::: info
-Die Wohneinheiten sind die Bezugsgröße für den Ausbaufortschritt. Sie werden im Dashboard nach Ort und Typ ausgewertet (siehe Kapitel [Dashboard](./04-dashboard.md)) und lässt sich in der Nachverdichtung je Adresse als PDF ausgeben, siehe Kapitel [Nachverdichtung](./07-nachverdichtung.md).
+Die Wohneinheiten sind die Bezugsgröße für den Ausbaufortschritt. Sie werden im Dashboard nach Ort und Typ ausgewertet (siehe Kapitel [Dashboard](./04-dashboard.md)) und lassen sich in der Nachverdichtung je Adresse als PDF ausgeben, siehe Kapitel [Nachverdichtung](./07-nachverdichtung.md).
 :::
 
 ## 2.5 Gebiet und Gebietstyp

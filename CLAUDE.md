@@ -126,6 +126,8 @@ pnpm test:e2e         # Playwright specs in tests/
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
 scripts/install-local-ca.sh                 # import the dev CA once per machine
+scripts/qonnectra-demo-data/fetch_geodock_export.py --out scripts/qonnectra-demo-data/testprojekt-export.json
+                                            # pull the demo data from app.geodock.de again
 ```
 
 New German technical terms cspell does not know go into `.cspell.json` under
@@ -358,7 +360,17 @@ local instance, so that they can be regenerated when the app changes.
   alternatively set `ignoreHTTPSErrors: true` in Playwright.
 - Demo data: project **„Testprojekt“** from
   `scripts/qonnectra-demo-data/testprojekt-export.json`, imported automatically
-  during setup. Select it in the top left after logging in.
+  during setup. Select it in the top left after logging in. It always gets the
+  primary key **2** – the Playwright setup pins `selected-project=2`, so a
+  re-import must not hand out a new id (`PROJECT_ID` in
+  `import_geodock_export.py`).
+- The export is pulled with `scripts/qonnectra-demo-data/fetch_geodock_export.py`
+  against app.geodock.de; credentials go into `scripts/qonnectra-demo-data/.env`
+  (gitignored, template `.env.example`). Four endpoints stay closed to that
+  account (`wms-sources`, `node-slot-divider`, `node-slot-clip-number`,
+  `node-trench-selection`) – what that costs is in the README next to the
+  script. Attachments come in as metadata only; the files themselves stay on
+  api.geodock.de.
 - `local-app/` is gitignored (foreign checkout) – never commit it and only change
   it through the setup script.
 

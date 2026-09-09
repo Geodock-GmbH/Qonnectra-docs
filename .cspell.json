@@ -15,6 +15,7 @@
     }
   ],
   "words": [
+    "6XCTUWG",
     "Anfrageformular",
     "Ausschnittvergrößerung",
     "Browserzeile",
@@ -57,6 +58,7 @@
     "Nieharde",
     "noout",
     "nssdb",
+    "Oster",
     "Patchfeld",
     "pexels",
     "pixabay",
@@ -66,6 +68,7 @@
     "Schauenburgerstr",
     "Schauenburgerstraße",
     "Scrollbalken",
+    "Scrollbereich",
     "Spleisskassette",
     "Spleiß",
     "Spleißkassette",
@@ -82,7 +85,8 @@
     "Verwaltungsmitarbeitende",
     "Websitebesucher",
     "Websitebetreiber",
-    "Westerstraße"
+    "Westerstraße",
+    "Überg"
   ],
   "ignoreRegExpList": [
     "/\\bTR-[A-Z0-9]{5,}\\b/g"
