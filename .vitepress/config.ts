@@ -44,6 +44,16 @@ export default defineConfig({
 
   base,
 
+  // Vite does not read PORT by default, it always starts at 5173 and only
+  // counts upwards if that port happens to be taken. Honouring PORT lets a
+  // caller pin the dev server to a port it has picked itself - needed when a
+  // second instance of the site runs alongside this one.
+  vite: {
+    server: {
+      port: Number(process.env?.PORT) || undefined
+    }
+  },
+
   // Markdown configuration
   markdown: {
     lineNumbers: true,
