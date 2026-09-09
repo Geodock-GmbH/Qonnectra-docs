@@ -104,6 +104,10 @@ Ein Klick in die Karte wählt das Objekt darunter aus. Zwei Eigenheiten des Netz
 Treffen Sie nicht das gewünschte Objekt, zoomen Sie weiter in die Karte hinein oder blenden Sie den Layer „Gebiet“ in der Legende vorübergehend aus. In den verkleinerten Karten der Nachverdichtung und der Adressdetails ist das nicht möglich, weil sie keine Legende haben.
 :::
 
+::: info
+Zwei Ansichten verwenden den Klick für etwas anderes und öffnen deshalb keine Info-Box: In der Leitungsauskunft zeichnen und ändern Sie damit die Auskunftsbereiche, siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md), in der Wertermittlung wählen Sie damit ein Gebiet an oder ab, siehe Kapitel [Wertermittlung](./09-wertermittlung.md).
+:::
+
 ## 3.4 Objekte in der Karte suchen
 
 Oben links im Kartenfenster befindet sich eine **Suchfunktion**. Hier können Sie gezielt nach Adressen, Netzknoten, Trassen, Rohren und Gebieten suchen.
