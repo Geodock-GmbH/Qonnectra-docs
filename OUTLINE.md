@@ -128,7 +128,7 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 ### 12. Rohrverzweigung
 
 - 12.1 Rohrverzweigung auswählen
-- 12.2 Grabenauswahl bearbeiten, Lasso-Werkzeug
+- 12.2 Grabenauswahl bearbeiten
 - 12.3 Mikrorohre verbinden und Auto-Verbindung
 - 12.4 Arbeitsfläche: Anordnen, Zoomen, Sperren
 - 12.5 Voraussetzung: konfigurierte Rohrabzweig-Einstellungen
