@@ -1,0 +1,1 @@
+import{_ as t,c as o,o as a,ah as n}from"./chunks/framework.CAZQ2vdu.js";const g=JSON.parse('{"title":"CLAUDE.md","description":"","frontmatter":{},"headers":[],"relativePath":"CLAUDE.md","filePath":"CLAUDE.md"}'),s={name:"CLAUDE.md"};function i(r,e,d,c,l,h){return a(),o("div",null,[...e[0]||(e[0]=[n("",69)])])}const u=t(s,[["render",i]]);export{g as __pageData,u as default};
