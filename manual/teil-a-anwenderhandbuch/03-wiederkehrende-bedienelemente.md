@@ -78,8 +78,8 @@ Nicht jeder Eintrag bietet alle Möglichkeiten: Beim Eintrag „Rohr“ steht au
 
 Der Eintrag „Trasse“ lässt sich zusätzlich aufklappen, sobald Sie unter „Einstellungen“ die „Trassen-Darstellung“ von „Einzelne Farbe“ auf „Nach Oberfläche“ oder „Nach Bauart“ umgestellt haben. Sie schalten dann die einzelnen Oberflächen oder Bauarten getrennt, siehe Kapitel [Einstellungen](./17-einstellungen.md).
 
-::: info
-Hat Ihre Administration für das Projekt externe Kartendienste (WMS) hinterlegt, stehen diese unterhalb der aufgeführten Einträge als eigene, aufklappbare Gruppe. Das Einrichten beschreibt Kapitel [QGIS-Server und Kartendienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md).
+::: warning
+Hat Ihre Administration für das Projekt externe Kartendienste (WMS) hinterlegt, stehen diese unterhalb der aufgeführten Einträge als eigene, aufklappbare Gruppe. Sichtbar wird die Gruppe aber nur, wenn Ihr Konto die Kartendienste lesen darf, und dieses Recht ist in keiner der mitgelieferten Rollen enthalten, auch nicht in „Admin“. Fehlt es, bleibt die Gruppe ohne Meldung aus, und die Karte zeigt ausschließlich die Layer von Qonnectra selbst; die Hintergrundkarte ist davon nicht betroffen. Ihre Administration kann das Recht nachtragen, siehe Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md); das Einrichten der Dienste selbst beschreibt Kapitel [QGIS-Server und Kartendienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md).
 :::
 
 ::: warning

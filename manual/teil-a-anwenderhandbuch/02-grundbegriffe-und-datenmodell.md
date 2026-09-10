@@ -59,8 +59,8 @@ Netzknoten können einander untergeordnet sein: Das Feld „Übergeordneter Netz
 Der innere Aufbau eines Netzknotens ist in vier Stufen von außen nach innen beschrieben:
 
 - **Container** – eine Gruppe von Slot-Konfigurationen, etwa ein Rack oder eine Gehäusetür. Container sind optional und können ineinander liegen; ihre Typen richtet die Administration ein, siehe Kapitel [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md).
-- **Slot-Konfiguration** – je Einbauseite eines Netzknotens eine Konfiguration mit einem Namen („A“, „B“) und einer Anzahl von Gesamtslots. Ein **Slot** ist ein einzelner Einbauplatz.
-- **Komponente** – das Bauteil, das in den Slots sitzt: eine Spleißkassette, ein Splitter, ein Patchfeld. Der Komponententyp gibt vor, wie viele Slots das Bauteil belegt – eine Spleißkassette einen, ein „Splitter 1:8“ zwei, ein „4HE (12xLC-APC)“ vier. Dazu kann eine Clip-Nummer hinterlegt sein.
+- **Slot-Konfiguration** – je Einbauseite eines Netzknotens eine Konfiguration mit einem Namen („A“, „B“) und einer Anzahl von Gesamtslots. Ein **Slot** ist ein einzelner Einbauplatz; die **Clip-Nummer**, mit der das Slot-Grid ihn beschriftet, hängt an ihm und nicht an der Komponente, die dort sitzt.
+- **Komponente** – das Bauteil, das in den Slots sitzt: eine Spleißkassette, ein Splitter, ein Patchfeld. Der Komponententyp gibt vor, wie viele Slots das Bauteil belegt – eine Spleißkassette einen, ein „Splitter 1:8“ zwei, ein „4HE (12xLC-APC)“ vier.
 - **Port** – ein Anschluss an der Komponente. Wie viele Ports eine Komponente hat, gibt ebenfalls der Komponententyp vor. Jeder Port verbindet eine Faser auf der Seite A mit einer Faser auf der Seite B – das ist der Spleiß aus Abschnitt [Kabel, Bündel, Faser und Spleiß](#_2-2-kabel-bundel-faser-und-spleiß). Ports ohne Spleiß bleiben leer.
 
 ![Screenshot des maximierten Fensters „Netzknotenstruktur“ mit der Komponente „Spleisskassette“ und ihren zwölf Ports: sechs mit je einer Faser auf Seite A und B, sechs leer](/images/manual/teil-a/model_node_ports.jpg){.big}

@@ -96,7 +96,7 @@ Das Fenster „Netzknotenstruktur“ zeigt die Belegung einer Seite. Es ist zwei
 
 ![Screenshot des Fensters „Netzknotenstruktur“ mit dem Slot-Grid links und der Kabelleiste rechts](/images/manual/teil-a/map_node_structure.jpg){.big}
 
-Über dem Slot-Grid wählen Sie unter „Seite auswählen“, welche Konfiguration Sie sehen; daneben steht die Zahl der Gesamtslots. Das Grid selbst hat drei Spalten: „TPU“ mit der Nummer des Einbauplatzes, „Komponente“ mit dem dort eingebauten Bauteil und „Clip“ mit dessen Clip-Nummer. Eine Komponente, die mehrere Slots belegt – ein Splitter etwa zwei –, steht als ein Block über deren Zeilen; freie Slots zeigen einen Strich.
+Über dem Slot-Grid wählen Sie unter „Seite auswählen“, welche Konfiguration Sie sehen; daneben steht die Zahl der Gesamtslots. Das Grid selbst hat drei Spalten: „TPU“ mit der Nummer des Einbauplatzes, „Komponente“ mit dem dort eingebauten Bauteil und „Clip“ mit der Clip-Nummer, unter der die Komponente im Netzknoten beschriftet ist. Solange keine hinterlegt ist, wiederholt „Clip“ die Nummer aus „TPU“. Eine Komponente, die mehrere Slots belegt – ein Splitter etwa zwei –, steht als ein Block über deren Zeilen; freie Slots zeigen einen Strich.
 
 Ein Klick auf eine Komponente öffnet deren Ports mit den Spalten „Port“, „Faser A“ und „Faser B“, also den beiderseits aufgelegten Fasern. „Zurück“ führt wieder zum Grid. Sind für die Komponente keine Ports hinterlegt, steht dort „Keine Ports für diese Komponente konfiguriert“.
 
