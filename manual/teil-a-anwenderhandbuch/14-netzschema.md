@@ -262,8 +262,6 @@ Jeder Eintrag der Leiste „Komponententypen“ nennt den Typ und die Zahl der S
 
 Eine eingebaute Komponente ziehen Sie am Griff auf eine andere Stelle des Grids; der Papierkorb an ihrem rechten Rand entfernt sie.
 
-Zwei Beschriftungen des Grids lassen sich anpassen: Ein Klick auf die Zahl in der Spalte „Clip“ macht sie zum Eingabefeld – dort tragen Sie die Clip-Nummer ein, unter der die Komponente im Netzknoten beschriftet ist. Ein Doppelklick auf die Zeilennummer in der Spalte „TPU“ zieht unter der Zeile eine **Trennlinie**, mit der Sie Blöcke im Grid voneinander abgrenzen; ein zweiter Doppelklick nimmt sie wieder weg.
-
 ::: warning
 Passt die Komponente nicht mehr in die restlichen Slots, meldet Qonnectra „Nicht genug Slots verfügbar“, bei belegten Slots „Slots sind bereits belegt“ – eingebaut wird dann nichts.
 :::
@@ -274,10 +272,6 @@ Der Papierkorb an einer Komponente löscht auch die Spleiße, die auf ihren Port
 
 ::: warning
 Auch hier setzt das Löschen die Zugriffsstufe „Vollzugriff“ voraus. Fehlt sie, meldet Qonnectra „Fehler beim Löschen der Struktur“, und die Komponente bleibt eingebaut.
-:::
-
-::: warning
-Clip-Nummer und Trennlinie setzen Rechte voraus, die keine der mitgelieferten Rollen enthält, siehe Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md). Ohne sie meldet Qonnectra „Fehler beim Speichern der Clip-Nummer“ beziehungsweise „Fehler beim Erstellen der Trennlinie“, und in der Spalte „Clip“ steht weiterhin die Nummer des Slots. Beides ist reine Beschriftung – die Belegung des Netzknotens ist davon nicht betroffen.
 :::
 
 ## 14.8 Spleiße und Ports

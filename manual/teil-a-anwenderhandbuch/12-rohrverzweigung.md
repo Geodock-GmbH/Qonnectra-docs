@@ -37,7 +37,7 @@ Das Fenster spricht von „Trassen“, die Schaltfläche daneben von der „Grab
 :::
 
 ::: warning
-Qonnectra meldet „Trassenauswahl erfolgreich gespeichert“, merkt sich die Auswahl aber nicht. Kehren Sie später zu demselben Netzknoten zurück, ist wieder nur ausgewählt, was dort bereits Verbindungen hat; die übrigen Rohre stellen Sie erneut zusammen. Verloren geht dabei nichts – die gespeicherten Mikrorohrverbindungen bleiben erhalten. Das Speichern der Auswahl setzt Rechte voraus, die keine der mitgelieferten Rollen enthält, siehe Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md).
+Qonnectra meldet „Trassenauswahl erfolgreich gespeichert“, merkt sich die Auswahl aber nicht. Kehren Sie später zu demselben Netzknoten zurück, ist wieder nur ausgewählt, was dort bereits Verbindungen hat; die übrigen Rohre stellen Sie erneut zusammen. Verloren geht dabei nichts – die gespeicherten Mikrorohrverbindungen bleiben erhalten. Grund ist ein fehlendes Recht: Das Speichern der Trassenauswahl ist in keiner der mitgelieferten Rollen enthalten, auch nicht in „Admin“. Ihre Administration kann es nachtragen, siehe Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md); bis dahin bleibt die Erfolgsmeldung ohne Wirkung.
 :::
 
 ## 12.3 Mikrorohre verbinden und Auto-Verbindung
