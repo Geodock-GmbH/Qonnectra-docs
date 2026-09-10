@@ -152,6 +152,12 @@ app in front of them.
   repeats the title („„Trasse“ – Auswertungen zu den Trassen“).
 - Explain a mechanism once, in the section it belongs to – not again in every
   section it also occurs in.
+- Never point the reader at the demo project. „Testprojekt“ and its data exist
+  for the captures, not for the manual: „Im Testprojekt sind das sechs von 118
+  Netzknoten“ says nothing about the reader's own installation, and a count from
+  it goes stale with the next import. Write what holds in general („meist nur
+  den Begriff „Defekt““, „ein Netzknoten mit einigen hundert Fasern“) and leave
+  the concrete example to the screenshot. The same goes for alt texts.
 - Rule of thumb: a sentence that would be equally true of any other web
   application does not belong in the manual.
 

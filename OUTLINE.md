@@ -143,9 +143,9 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 ### 14. Netzschema
 
 - 14.1 Aufbau des Schemas: Netzknoten und Kabel
-- 14.2 Netzknoten anlegen, verbinden und löschen
+- 14.2 Netzknoten verschieben, verbinden und löschen
 - 14.3 Kabeleigenschaften, Kabeltyp und Kabellänge neu berechnen
-- 14.4 Kabelbeschriftung und Fangpunkte
+- 14.4 Bearbeitungsmodus: Kabelverlauf, Beschriftung und Fangpunkte
 - 14.5 Kabel mit Mikrorohren verknüpfen
 - 14.6 Fasern und Bündel eines Kabels
 - 14.7 Netzknoten öffnen: Slot-Konfiguration, Struktur, Container

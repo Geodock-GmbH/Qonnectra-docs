@@ -99,6 +99,15 @@ PROJECT_ID = 2
 # hidden there.
 NETWORK_SCHEMA_EXCLUDED_NODE_TYPES = ["Hausanschluss", "Rohrabzweig", "Bauerschwernis"]
 
+# NetworkSchemaSettings.child_view_enabled_node_types, reconstructed the same
+# way: it decides which nodes offer the button "Subnetz öffnen" in the network
+# schema (chapter 14.9 of the manual). Without it the 23 house connections that
+# hang below St-V02 - together with their cables, which the export carries with
+# a parent_node_context - could not be reached in the app at all. The types are
+# the ones that actually have children in the demo data: "NVt 48" (St-V02) and
+# "POP" (PoP-St, whose children are the four distribution nodes).
+NETWORK_SCHEMA_CHILD_VIEW_NODE_TYPES = ["NVt 48", "POP"]
+
 # PipeBranchSettings.allowed_node_types has no API endpoint either and is
 # reconstructed the same way. It decides which nodes the pipe branch offers for
 # selection; without the settings the app shows every node of the project and a
@@ -859,9 +868,17 @@ class Command(BaseCommand):
             node_type__in=NETWORK_SCHEMA_EXCLUDED_NODE_TYPES
         )
         schema_settings.excluded_node_types.set(excluded_types)
+        child_view_types = AttributesNodeType.objects.filter(
+            node_type__in=NETWORK_SCHEMA_CHILD_VIEW_NODE_TYPES
+        )
+        schema_settings.child_view_enabled_node_types.set(child_view_types)
         self.stdout.write(
             "  Network schema exclusions: "
             + ", ".join(sorted(t.node_type for t in excluded_types))
+        )
+        self.stdout.write(
+            "  Network schema child view: "
+            + ", ".join(sorted(t.node_type for t in child_view_types))
         )
 
         # --- Pipe branch settings (see the comment above) --------------------
