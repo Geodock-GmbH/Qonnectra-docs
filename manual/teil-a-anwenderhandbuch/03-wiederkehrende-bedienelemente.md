@@ -1,6 +1,6 @@
 # 3. Wiederkehrende Bedienelemente
 
-Einige Bedienelemente von Qonnectra tauchen in mehreren Ansichten unverändert auf: das Kartenfenster mit seiner Legende, die Objektsuche, die Info-Box am rechten Rand und die Anhänge. Dieses Kapitel beschreibt sie einmal; die Kapitel zu den einzelnen Menüpunkten verweisen darauf und nennen nur noch, was dort davon abweicht.
+Einige Bedienelemente von Qonnectra tauchen in mehreren Ansichten unverändert auf: die Tabellen mit ihren Suchfeldern, die Auswahllisten, das Kartenfenster mit seiner Legende, die Objektsuche, das Messen, die Info-Box am rechten Rand, die Anhänge und die Formate, in denen Daten die Anwendung verlassen. Dieses Kapitel beschreibt sie einmal; die Kapitel zu den einzelnen Menüpunkten verweisen darauf und nennen nur noch, was dort davon abweicht.
 
 ## 3.1 Tabellen: Suche, Spaltenfilter, Sortierung, Seitenwechsel
 
@@ -78,8 +78,8 @@ Nicht jeder Eintrag bietet alle Möglichkeiten: Beim Eintrag „Rohr“ steht au
 
 Der Eintrag „Trasse“ lässt sich zusätzlich aufklappen, sobald Sie unter „Einstellungen“ die „Trassen-Darstellung“ von „Einzelne Farbe“ auf „Nach Oberfläche“ oder „Nach Bauart“ umgestellt haben. Sie schalten dann die einzelnen Oberflächen oder Bauarten getrennt, siehe Kapitel [Einstellungen](./17-einstellungen.md).
 
-::: info
-Hat Ihre Administration für das Projekt externe Kartendienste (WMS) hinterlegt, stehen diese unterhalb der aufgeführten Einträge als eigene, aufklappbare Gruppe. Das Einrichten beschreibt Kapitel [QGIS-Server und Kartendienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md).
+::: warning
+Hat Ihre Administration für das Projekt externe Kartendienste (WMS) hinterlegt, stehen diese unterhalb der aufgeführten Einträge als eigene, aufklappbare Gruppe. Sichtbar wird die Gruppe aber nur, wenn Ihr Konto die Kartendienste lesen darf, und dieses Recht ist in keiner der mitgelieferten Rollen enthalten, auch nicht in „Admin“. Fehlt es, bleibt die Gruppe ohne Meldung aus, und die Karte zeigt ausschließlich die Layer von Qonnectra selbst; die Hintergrundkarte ist davon nicht betroffen. Ihre Administration kann das Recht nachtragen, siehe Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md); das Einrichten der Dienste selbst beschreibt Kapitel [QGIS-Server und Kartendienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md).
 :::
 
 ::: warning
@@ -154,9 +154,9 @@ Es gibt immer nur eine Messung: Eine neue ersetzt die vorherige. Messergebnisse 
 
 ## 3.6 Die Info-Box mit ihren Reitern
 
-Wenn Sie ein Objekt auswählen, öffnet sich am rechten Rand die **Info-Box**. Sie überlagert die Ansicht, ohne den Kartenausschnitt oder die Tabelle darunter zu verändern. Welche Reiter sie enthält, hängt von der Objektart ab; „Eigenschaften“ und „Anhänge“ gibt es immer.
+Wenn Sie ein Objekt auswählen, öffnet sich am rechten Rand die **Info-Box**. Sie überlagert die Ansicht, ohne den Kartenausschnitt oder die Tabelle darunter zu verändern. Welche Reiter sie enthält, hängt von der Objektart und der Ansicht ab: meist „Eigenschaften“ und „Anhänge“, in den Mikrorohren dagegen allein „Übersicht“, siehe Kapitel [Mikrorohre](./13-mikrorohre.md).
 
-Die Angaben im Reiter „Eigenschaften“ sind je nach Ansicht nur zur Information oder bearbeitbar – in der Karte lesen Sie sie, in der Rohrverwaltung ändern Sie sie. Im Reiter „Aktionen“ finden Sie weiterführende Ansichten zum ausgewählten Objekt. Der Reiter „Anhänge“ ist überall bearbeitbar, siehe Abschnitt [Anhänge hochladen, ansehen und löschen](#_3-7-anhange-hochladen-ansehen-und-loschen).
+Die Angaben im Reiter „Eigenschaften“ sind je nach Ansicht nur zur Information oder bearbeitbar – in der Karte lesen Sie sie, in der Rohrverwaltung ändern Sie sie. Im Reiter „Aktionen“ finden Sie weiterführende Ansichten zum ausgewählten Objekt. Der Reiter „Anhänge“ ist überall dort bearbeitbar, wo es ihn gibt, siehe Abschnitt [Anhänge hochladen, ansehen und löschen](#_3-7-anhange-hochladen-ansehen-und-loschen).
 
 Ist die Info-Box zu schmal, ziehen Sie sie am linken Rand über den Griff „Größe der Seitenleiste ändern“ breiter. Über das Kreuz „Seitenleiste schließen“ schließen Sie sie.
 
@@ -185,7 +185,7 @@ Qonnectra hat keinen Menüpunkt „Export“. Daten verlassen die Anwendung dort
 | Format | Wo | Inhalt |
 |---|---|---|
 | Excel (`.xlsx`) | Rohrverwaltung, „Vorlage“ | leere Importvorlage für Rohre, siehe Abschnitt [Excel-Import](./10-rohrverwaltung.md#_10-5-excel-import-vorlage-ablauf-fehlermeldungen) |
-| Excel (`.xlsx`) | Netzknoten, „Slot-Konfiguration anzeigen“ | Einbauplätze und Komponenten eines Netzknotens, siehe Abschnitt [Netzknoten](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen) |
+| Excel (`.xlsx`) | Netzknoten, Fenster „Netzknoten-Konfiguration“ – in der Karte und im Netzschema | Einbauplätze und Komponenten eines Netzknotens, siehe Abschnitt [Netzknoten](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen) |
 | CSV | Störungsanalyse, „CSV exportieren“ | Schadensbericht mit den betroffenen Objekten, siehe Kapitel [Störungsanalyse](./06-stoerungsanalyse.md) |
 | PDF | Adressdetails, „PDF herunterladen“; Nachverdichtung, „Start“ → „Exportieren“ | Datenblatt zu einer Adresse, wahlweise mit den Wohneinheiten, siehe Kapitel [Adressen](./16-adressen.md) und [Nachverdichtung](./07-nachverdichtung.md) |
 | GeoJSON | Faserweg, „GeoJSON herunterladen“ | Geometrien des ermittelten Faserwegs, siehe Kapitel [Faserweg](./15-faserweg.md) |

@@ -17,7 +17,7 @@ Die Tabelle listet die Auskünfte mit den Spalten „Projekt“, „Art der Arbe
 ![Screenshot Leitungsauskunft mit Hervorhebung des Suchfeldes über der Tabelle und der Filterfelder unter den Spaltenüberschriften](/images/manual/teil-a/records_search.jpg)
 
 ::: warning
-Diese Tabelle ist die einzige Ansicht in Qonnectra, die **nicht** auf das gewählte Projekt beschränkt ist: Sie enthält die Auskünfte aller Projekte. Achten Sie deshalb auf die Spalte „Projekt“, und grenzen Sie die Tabelle über deren Filterfeld ein, wenn Sie nur die Anfragen eines Projekts sehen wollen.
+Diese Tabelle ist die einzige Bestandsliste in Qonnectra, die **nicht** auf das gewählte Projekt beschränkt ist: Sie enthält die Auskünfte aller Projekte, und es gibt keine Schaltfläche, mit der Sie das umstellen könnten. Achten Sie deshalb auf die Spalte „Projekt“, und grenzen Sie die Tabelle über deren Filterfeld ein, wenn Sie nur die Anfragen eines Projekts sehen wollen.
 :::
 
 Das Suchfeld über der Tabelle durchsucht „Organisation“, „Name“, „Art der Arbeit“, „Grund der Anfrage“ und den Projektnamen. Gesucht wird nach einem enthaltenen Textstück und ohne Rücksicht auf Groß- und Kleinschreibung; anders als die Adresssuche der Nachverdichtung verzeiht diese Suche keine Tippfehler.

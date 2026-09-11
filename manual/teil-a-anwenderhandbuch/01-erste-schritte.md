@@ -35,10 +35,10 @@ Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Bedienoberfläche is
 Über die Navigationsleiste am linken Rand wechseln Sie zu allen verfügbaren Ansichten; sie bleibt beim Arbeiten immer sichtbar. Die Einträge sind nach Themen gruppiert:
 
 - „Info“ – „Dashboard“ (Startansicht, siehe Kapitel [Dashboard](./04-dashboard.md)) und „Karte“ (siehe Kapitel [Karte](./05-karte.md))
-- „Funktionen“ – „Störungsanalyse“, „Nachverdichtung“, „Leitungsauskunft“ und „Wertermittlung“: Auswertungen und Verfahren, die auf den dokumentierten Daten aufbauen
-- „Rohr“ – „Verwaltung“ (siehe Kapitel [Rohrverwaltung](./10-rohrverwaltung.md)), „Zuordnung“ (siehe Kapitel [Rohrzuordnung](./11-rohrzuordnung.md)), „Verzweigung“ und „Mikrorohre“
-- „Kabel“ – „Netzschema“ und „Faserweg“
-- „Gebäude“ – „Adressen“
+- „Funktionen“ – Auswertungen und Verfahren, die auf den dokumentierten Daten aufbauen: „Störungsanalyse“ (siehe Kapitel [Störungsanalyse](./06-stoerungsanalyse.md)), „Nachverdichtung“ (siehe Kapitel [Nachverdichtung](./07-nachverdichtung.md)), „Leitungsauskunft“ (siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md)) und „Wertermittlung“ (siehe Kapitel [Wertermittlung](./09-wertermittlung.md))
+- „Rohr“ – „Verwaltung“ (siehe Kapitel [Rohrverwaltung](./10-rohrverwaltung.md)), „Zuordnung“ (siehe Kapitel [Rohrzuordnung](./11-rohrzuordnung.md)), „Verzweigung“ (siehe Kapitel [Rohrverzweigung](./12-rohrverzweigung.md)) und „Mikrorohre“ (siehe Kapitel [Mikrorohre](./13-mikrorohre.md))
+- „Kabel“ – „Netzschema“ (siehe Kapitel [Netzschema](./14-netzschema.md)) und „Faserweg“ (siehe Kapitel [Faserweg](./15-faserweg.md))
+- „Gebäude“ – „Adressen“ (siehe Kapitel [Adressen](./16-adressen.md))
 
 ![Screenshot Dashboard mit Hervorhebung der Navigationsleiste am linken Rand](/images/manual/teil-a/login_sidebar.jpg)
 
@@ -66,7 +66,7 @@ In der zentralen Inhaltsfläche werden alle projektbezogenen Informationen angez
 
 Alle Daten in Qonnectra gehören zu einem **Projekt**. Welches Projekt gilt, wählen Sie oben links in der Kopfzeile; die Auswahl gilt für die gesamte Anwendung und bleibt beim Wechsel in eine andere Ansicht erhalten. Kennzahlen, Karteninhalte und Listen zeigen deshalb immer nur den Bestand des ausgewählten Projekts.
 
-Die Projektauswahl ist eine Kombination aus Eingabefeld und Auswahlliste: Über den Pfeil am rechten Rand öffnen Sie die Liste aller für Sie freigegebenen Projekte, über eine Eingabe in das Feld schränken Sie die Liste auf passende Namen ein. Mit dem Klick auf einen Eintrag wechseln Sie das Projekt; alle angezeigten Inhalte aktualisieren sich daraufhin automatisch.
+Die Projektauswahl ist ein **Kombinationsfeld** und wird bedient wie alle anderen auch, siehe Abschnitt [Auswahllisten und Kombinationsfelder](./03-wiederkehrende-bedienelemente.md#_3-2-auswahllisten-und-kombinationsfelder): Der Pfeil am rechten Rand öffnet die Liste aller für Sie freigegebenen Projekte. Mit dem Klick auf einen Eintrag wechseln Sie das Projekt; alle angezeigten Inhalte aktualisieren sich daraufhin automatisch.
 
 ![Screenshot Dashboard mit Hervorhebung der Projektauswahl oben links in der Kopfzeile](/images/manual/teil-a/dashboard_project.jpg)
 ![Screenshot Ausschnittvergrößerung der geöffneten Projektliste in der Kopfzeile mit dem hervorgehobenen Eintrag „Testprojekt“](/images/manual/teil-a/dashboard_project_detail.jpg)

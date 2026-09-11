@@ -55,7 +55,7 @@ Der Reiter „Status“ listet die **Mikrorohre** des Rohrs auf, mit den Spalten
 Der Status jedes Mikrorohrs steht auf „Intakt“, solange nichts anderes eingetragen ist. Über das Auswahlfeld in der Zeile vermerken Sie eine Störung, etwa „Defekt“. Diese Änderung wird sofort übernommen, es gibt dafür keinen „Speichern“-Button.
 
 ::: warning
-Ändern Sie den Rohrtyp nachträglich, bleibt die Liste der Mikrorohre unverändert – sie richtet sich nach dem Rohrtyp zum Zeitpunkt des Anlegens.
+Ändern Sie den Rohrtyp nachträglich, bleibt diese Liste unverändert, siehe Abschnitt [Trasse, Rohr und Mikrorohr](./02-grundbegriffe-und-datenmodell.md#_2-1-trasse-rohr-und-mikrorohr).
 :::
 
 ## 10.5 Excel-Import: Vorlage, Ablauf, Fehlermeldungen

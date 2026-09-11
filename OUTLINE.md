@@ -128,7 +128,7 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 ### 12. Rohrverzweigung
 
 - 12.1 Rohrverzweigung auswählen
-- 12.2 Grabenauswahl bearbeiten, Lasso-Werkzeug
+- 12.2 Grabenauswahl bearbeiten
 - 12.3 Mikrorohre verbinden und Auto-Verbindung
 - 12.4 Arbeitsfläche: Anordnen, Zoomen, Sperren
 - 12.5 Voraussetzung: konfigurierte Rohrabzweig-Einstellungen
@@ -143,9 +143,9 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 ### 14. Netzschema
 
 - 14.1 Aufbau des Schemas: Netzknoten und Kabel
-- 14.2 Netzknoten anlegen, verbinden und löschen
+- 14.2 Netzknoten verschieben, verbinden und löschen
 - 14.3 Kabeleigenschaften, Kabeltyp und Kabellänge neu berechnen
-- 14.4 Kabelbeschriftung und Fangpunkte
+- 14.4 Bearbeitungsmodus: Kabelverlauf, Beschriftung und Fangpunkte
 - 14.5 Kabel mit Mikrorohren verknüpfen
 - 14.6 Fasern und Bündel eines Kabels
 - 14.7 Netzknoten öffnen: Slot-Konfiguration, Struktur, Container
@@ -204,6 +204,7 @@ QGIS. Assumes part A.
 - 19.3 Routenrechte: Zugriff je Menüpunkt
 - 19.4 Superuser gegenüber Gruppenmitgliedschaft
 - 19.5 Typische Rollenprofile: Betrachten, Bearbeiten, Verwalten
+- 19.6 Rechte, die keine mitgelieferte Rolle enthält
 
 ### 20. Der Administrationsbereich
 
@@ -403,6 +404,24 @@ are still missing inside a written chapter carry the same sentence.
   afterwards.
 - Chapter 18 collects the error cases that would otherwise be repeated in every
   chapter.
+- Four models have a `RoleBasedPermission` but no seeded `ModelPermission` row
+  (`nodetrenchselection`, `nodeslotclipnumber`, `nodeslotdivider`, `wmssource`),
+  so every account except a Django superuser gets 403 on them – reading
+  included. Section 19.6 is where that is explained, together with the way out:
+  `model_name` is a free text field, so the administration can add the missing
+  row per group. Chapter 27.4 needs the same fact for `wmssource`, which is the
+  reason WMS sources are maintained in the administration area and not through
+  the API; `wmslayer` is seeded normally.
+- Part A treats those four by how visible they are. 12.2 keeps the trench
+  selection, because the button and its (lying) success message are in front of
+  the reader, and links to 19.6. 3.3 and 7.2 keep the WMS group of the legend for
+  the opposite reason: the group is missing without any message, so the note is
+  what tells the reader that the layers are not simply absent from the project.
+  Clip number and divider in the slot grid are deliberately absent from 14.7 –
+  they hang off an unannounced click resp. double-click, are pure labelling and
+  do nothing for any shipped role. When chapter 18 is written, „Fehler beim
+  Speichern der Clip-Nummer“ and „Fehler beim Erstellen der Trennlinie“ belong
+  in 18.1/18.3 as messages, without advertising the feature again.
 
 ## Who owns what: decisions taken before the chapters were written
 

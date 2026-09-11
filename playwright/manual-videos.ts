@@ -114,11 +114,18 @@ export async function showCursor(page: Page): Promise<void> {
       cursor.style.top = `${y - ay}px`
     }
 
-    // Both mousemove and pointermove: the handle of the info box calls
-    // preventDefault() in its pointerdown handler, and after that Chromium sends
-    // no more mouse events for this pointer. Without pointermove the cursor
-    // would stand still while dragging, with the info box moving underneath it.
-    for (const eventType of ['mousemove', 'pointermove']) {
+    // Four event types, because no single one covers every drag of the app:
+    //
+    // - `mousemove` is the normal case.
+    // - `pointermove`: the handle of the info box calls preventDefault() in its
+    //   pointerdown handler, and after that Chromium sends no more mouse events
+    //   for this pointer. Without pointermove the cursor would stand still while
+    //   dragging, with the info box moving underneath it.
+    // - `drag` and `dragover`: during a native HTML5 drag - the fibers and
+    //   component types of the network schema use one - Chromium sends neither
+    //   mouse nor pointer events. Without these two the cursor would freeze at
+    //   the point where the drag started and jump to the target on release.
+    for (const eventType of ['mousemove', 'pointermove', 'drag', 'dragover']) {
       window.addEventListener(eventType, (e) => move((e as MouseEvent).clientX, (e as MouseEvent).clientY), true)
     }
     // Squash briefly on click so that the click is visible in the video.
