@@ -36,8 +36,34 @@ Das Handbuch besteht aus drei Hauptteilen:
 | **2. Betrieb und Fachanwendung** | Administration, GIS-Fachkräfte | Qonnectra Webanwendung + QGIS | **Teil B** |
 | **3. System- und Entwicklungsebene** | Entwicklung, DevOps, Systemadministration | Qonnectra Backend, Datenbank, API, Git usw. | **Teil C** |
 
-Für den normalen Betrieb von Qonnectra ist **nicht erforderlich**, alle Teile des Handbuchs zu lesen. Die Zielgruppe ist jeweils auf der Ebene des Teils festgelegt: Jeder der drei Teile beginnt mit einer Seite, die nennt, an wen er sich richtet und welche Vorkenntnisse er voraussetzt. Innerhalb eines Teils gilt diese Angabe für alle Kapitel.
+Für den normalen Betrieb von Qonnectra ist es **nicht erforderlich**, alle Teile des Handbuchs zu lesen. Die Zielgruppe ist jeweils auf der Ebene des Teils festgelegt: Jeder der drei Teile beginnt mit einer Seite, die nennt, an wen er sich richtet und welche Vorkenntnisse er voraussetzt. Innerhalb eines Teils gilt diese Angabe für alle Kapitel.
 
+
+## Konventionen in diesem Handbuch
+
+Damit die Kapitel schnell zu lesen sind, gelten durchgehend dieselben Regeln:
+
+- **Beschriftungen der Anwendung** stehen in Anführungszeichen und wortgleich so, wie die Oberfläche sie zeigt: „Speichern“, „+ Rohr hinzufügen“, Reiter „Anhänge“. Meldungen der Anwendung sind ebenso zitiert.
+- **Fachbegriffe** stehen bei ihrer ersten Erklärung fett – **Rohrzuordnung**, **Transparenz**, **Kennzeichen**. Erklärt wird ein Begriff genau einmal; alle weiteren Stellen verweisen darauf.
+- **Nummerierte Listen** sind Arbeitsschritte in genau dieser Reihenfolge. Aufzählungen mit Punkten nennen Möglichkeiten oder Eigenschaften.
+- **Bilder** sitzen hinter dem Absatz, den sie zeigen. Ein Klick vergrößert sie – Einzelheiten, die in der Seite klein wirken, sind darin lesbar.
+- **Querverweise** nennen das Ziel im Klartext („siehe Kapitel Karte“) und führen direkt dorthin.
+
+Dazu kommen drei Arten von hervorgehobenen Kästen, die in dieser Reihenfolge dringlicher werden:
+
+::: info
+Wissenswertes zum Verständnis: wie ein Wert zustande kommt, was eine Meldung bedeutet, wo eine Angabe sonst noch auftaucht.
+:::
+
+::: warning
+Grenzen und Fallstricke: eine Auswertung, die nur die zehn größten Werte zeigt, ein Feld, das leer aussieht, obwohl ein Wert gespeichert ist, eine Aktion, die ohne das nötige Recht scheitert.
+:::
+
+::: danger
+Fälle, in denen Daten verloren gehen oder unbeabsichtigt geändert werden. Lesen Sie diese Kästen, bevor Sie die beschriebene Aktion ausführen.
+:::
+
+Eine Besonderheit betrifft die Anzeige am rechten Rand, in der die Eigenschaften eines ausgewählten Objekts stehen: Die Anwendung nennt sie „Seitenleiste“ – dasselbe Wort, das sie auch für die Navigationsleiste am linken Rand verwendet. Dieses Handbuch nennt die Anzeige am rechten Rand deshalb durchgehend **Info-Box** und behält „Navigationsleiste“ für die Leiste links.
 
 ## Was ist Qonnectra?
 

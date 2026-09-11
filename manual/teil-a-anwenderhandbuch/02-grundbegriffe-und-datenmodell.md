@@ -2,7 +2,7 @@
 
 Qonnectra beschreibt ein Glasfasernetz nicht als Zeichnung, sondern als Sammlung von Objekten, die ineinanderstecken: Im Graben liegen Rohre, in den Rohren Mikrorohre, in den Mikrorohren Kabel, in den Kabeln Bündel und Fasern. Dieses Kapitel erklärt diese Objekte und ihre Beziehungen einmal zusammenhängend. Die Kapitel 4 bis 17 setzen die Begriffe voraus und beschreiben nur noch, wo Sie sie erfassen und auswerten.
 
-Alle Objekte gehören zu genau einem **Projekt**, das Sie oben links in der Kopfzeile auswählen, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln). Eine Auswertung über mehrere Projekte hinweg gibt es nur in der Karte und in der Wertermittlung.
+Alle Objekte gehören zu genau einem **Projekt**, das Sie oben links in der Kopfzeile auswählen, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln). Jede Auswertung rechnet über genau dieses eine Projekt. Über seine Grenze hinaus sehen Sie nur an drei Stellen: Die Karte zeichnet mit „Alle Projekte anzeigen“ auch den Bestand der übrigen Projekte, der Faserweg findet und verfolgt Objekte projektübergreifend (siehe Abschnitt [Über alle Projekte suchen](./15-faserweg.md#_15-7-uber-alle-projekte-suchen)), und die Leitungsauskunft führt ihre Datensätze von vornherein projektübergreifend (siehe Abschnitt [Auskünfte suchen und filtern](./08-leitungsauskunft.md#_8-1-auskunfte-suchen-und-filtern)).
 
 Vier Objektarten haben eine Lage im Raum und erscheinen deshalb in der Karte: die **Trasse** als Linie, der **Netzknoten** und die **Adresse** als Punkt und das **Gebiet** als Fläche. Alles andere hängt an diesen vier.
 
@@ -121,7 +121,7 @@ Das Kennzeichen ist kein Projekt. Objekte mit unterschiedlichen Kennzeichen geh�
 :::
 
 ::: info
-Das Dashboard kennt keinen Filter nach Kennzeichen; seine Kennzahlen beziehen sich immer auf den gesamten Bestand des Projekts, siehe Abschnitt [Nach Kennzeichen filtern](./04-dashboard.md#_4-8-1-nach-kennzeichen-filtern).
+Das Dashboard gehört nicht dazu, siehe Abschnitt [Nach Kennzeichen filtern](./04-dashboard.md#_4-8-1-nach-kennzeichen-filtern).
 :::
 
 ## 2.7 Stammdaten: Status, Phase, Netzebene, Firmen

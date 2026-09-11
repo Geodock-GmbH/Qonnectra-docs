@@ -1,6 +1,6 @@
 # 5. Karte
 
-Die Karte ist eines der zentralen Werkzeuge in Qonnectra. Sie dient der visuellen Darstellung des Netzbestands, der Orientierung im Raum und dem schnellen Aufruf von Informationen zu einzelnen Netzobjekten. Sie erreichen die Karte über die linke Navigationsleiste durch Klicken auf den Menüpunkt „Karte“.
+Die **Karte** zeigt den Netzbestand eines Projekts in seiner Lage im Raum: Trassen, Netzknoten, Adressen und Gebiete. Zu jedem dieser Objekte rufen Sie hier die Eigenschaften, die Rohre und Kabel darin sowie die Anhänge ab. Sie erreichen sie über die linke Navigationsleiste in der Gruppe „Info“ durch Klicken auf den Menüpunkt „Karte“.
 
 ![Screenshot Karte](/images/manual/teil-a/map.jpg)
 
@@ -13,6 +13,8 @@ Qonnectra merkt sich den letzten Kartenausschnitt. Wenn Sie die Karte erneut öf
 ::: warning
 Das gilt auch über einen Projektwechsel hinweg: Wählen Sie bei geöffneter Karte ein anderes Projekt, bleibt der Ausschnitt stehen und die Karte springt **nicht** in das Gebiet des neuen Projekts. Sie sehen dann unter Umständen eine leere Karte, obwohl das Projekt Daten hat. Holen Sie sich die Daten mit „Auf Ausdehnung zoomen“ beim Legendeneintrag „Adresse“ ins Bild, siehe Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster).
 :::
+
+Die Beschränkung auf das gewählte Projekt heben Sie in der Karte über die Schaltfläche „Alle Projekte anzeigen“ neben der Projektauswahl vorübergehend auf; die Karte zeichnet dann den Bestand aller Projekte, für die Sie berechtigt sind, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln).
 
 ## 5.2 Layer der Karte
 
@@ -84,7 +86,7 @@ Erst dann sehen Sie auch, was „Struktur anzeigen“ in der Konfiguration bewir
 
 **Slot-Konfiguration**
 
-Das Fenster „Netzknoten-Konfiguration“ listet die Einbauplätze des Netzknotens auf, je Seite eine Konfiguration; sind für das Projekt Container eingerichtet, sind die Konfigurationen darin gruppiert. Zu jeder Konfiguration stehen die Seite sowie „Gesamtslots“, „Belegt“ und „Frei“ – so sehen Sie, wie viel Platz im Netzknoten noch ist. Die Schaltfläche „Struktur anzeigen“ an einer Konfiguration führt direkt in deren Belegung. Das Download-Symbol oben rechts speichert den Aufbau des Netzknotens als Excel-Datei, siehe Abschnitt [Exportformate im Überblick](./03-wiederkehrende-bedienelemente.md#_3-8-exportformate-im-uberblick).
+Das Fenster „Netzknoten-Konfiguration“ listet die Einbauplätze des Netzknotens auf, je Seite eine Konfiguration; sind für das Projekt Container eingerichtet, sind die Konfigurationen darin gruppiert. Zu jeder Konfiguration stehen die Seite sowie „Gesamtslots“, „Belegt“ und „Frei“ – so sehen Sie, wie viel Platz im Netzknoten noch ist. Das Auge („Struktur anzeigen“) an einer Konfiguration führt direkt in deren Belegung. Das Download-Symbol oben rechts speichert den Aufbau des Netzknotens als Excel-Datei, siehe Abschnitt [Exportformate im Überblick](./03-wiederkehrende-bedienelemente.md#_3-8-exportformate-im-uberblick).
 
 ![Screenshot des Fensters „Netzknoten-Konfiguration“ mit den beiden Konfigurationen A und B des Netzknotens](/images/manual/teil-a/map_node_slots.jpg){.big}
 
@@ -126,6 +128,6 @@ Zu jedem Kartenobjekt können Sie Dateien ablegen. Hochladen, Herunterladen, Umb
 
 ## 5.9 Grenzen der Darstellung
 
-Ein Klick auf eine freie Stelle der Karte hebt die Auswahl auf – innerhalb eines Projektgebiets ist das allerdings kaum möglich, weil dessen Fläche die gesamte Umgebung überdeckt; schließen Sie die Info-Box dann über das Kreuz „Seitenleiste schließen“.
+Ein Klick auf eine freie Stelle der Karte hebt die Auswahl auf – innerhalb eines Projektgebiets ist das allerdings kaum möglich; schließen Sie die Info-Box dann über das Kreuz „Seitenleiste schließen“.
 
 Warum ein Klick oft nicht das gewünschte Objekt trifft und was dagegen hilft, beschreibt Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster) unter „Objekte anklicken“.

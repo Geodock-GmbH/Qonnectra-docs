@@ -1,6 +1,6 @@
 # 4. Dashboard
 
-Das **Dashboard** ist die zentrale Übersichtsseite von Qonnectra. Es fasst den dokumentierten Netzbestand eines Projekts in Kennzahlen und Diagrammen zusammen, damit Sie den Ausbauzustand ohne Umweg über Listen oder die Karte erfassen können. Nach der Anmeldung ist das Dashboard die Startansicht; später erreichen Sie es über die linke Navigationsleiste durch Klicken auf den Menüpunkt „Dashboard“ in der Gruppe „Info“.
+Das **Dashboard** ist die zentrale Übersichtsseite von Qonnectra. Es fasst den dokumentierten Netzbestand eines Projekts in Kennzahlen und Diagrammen zusammen, damit Sie den Ausbauzustand ohne Umweg über Listen oder die Karte erfassen können. Nach der Anmeldung ist das Dashboard die Startansicht; später erreichen Sie es über die linke Navigationsleiste in der Gruppe „Info“ durch Klicken auf den Menüpunkt „Dashboard“.
 
 ![Screenshot Dashboard](/images/manual/teil-a/dashboard.jpg)
 
@@ -119,12 +119,10 @@ Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projek
 
 ### 4.8.1 Nach Kennzeichen filtern
 
-Das Kennzeichen ist das projektweite Ordnungsmerkmal von Qonnectra, das jede Trasse, jedes Rohr, jeden Netzknoten, jedes Kabel, jede Adresse und jedes Gebiet trägt, siehe Abschnitt [Kennzeichen als projektweiter Filter](./02-grundbegriffe-und-datenmodell.md#_2-6-kennzeichen-als-projektweiter-filter).
-
-Das Dashboard gehört nicht dazu. Seine Kennzahlen, Diagramme und Karten beziehen sich immer auf den gesamten Bestand des ausgewählten Projekts; einen Filter nach Kennzeichen gibt es hier nicht.
+Einen Filter nach Kennzeichen gibt es im Dashboard nicht: Seine Kennzahlen, Diagramme und Karten beziehen sich immer auf den gesamten Bestand des ausgewählten Projekts.
 
 ::: info
-Brauchen Sie die Auswertung eines einzelnen Kennzeichens, grenzen Sie in der jeweiligen Ansicht ein: in der Rohrzuordnung über die Auswahl „Kennzeichen“ (siehe Abschnitt [Nach Kennzeichen eingrenzen](./11-rohrzuordnung.md#_11-6-nach-kennzeichen-eingrenzen)), in der Rohrverwaltung und bei den Adressen über das Suchfeld unter der Spalte „Kennzeichen“ (siehe Abschnitt [Tabellen](./03-wiederkehrende-bedienelemente.md#_3-1-tabellen-suche-spaltenfilter-sortierung-seitenwechsel)).
+Brauchen Sie die Auswertung eines einzelnen Kennzeichens, grenzen Sie in der jeweiligen Ansicht ein. Welche das anbieten, nennt Abschnitt [Kennzeichen als projektweiter Filter](./02-grundbegriffe-und-datenmodell.md#_2-6-kennzeichen-als-projektweiter-filter).
 :::
 
 ### 4.8.2 Wie aktuell die Werte sind
