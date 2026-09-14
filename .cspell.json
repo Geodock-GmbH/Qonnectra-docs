@@ -23,6 +23,7 @@
     "ausgegraut",
     "Ausschnittvergrößerung",
     "Auswirkungsübersicht",
+    "Browserdaten",
     "Browserzeile",
     "dbaeumer",
     "dedupe",
@@ -32,8 +33,10 @@
     "Elgendorfer",
     "EPSG",
     "esbenp",
+    "Featurefarbe",
     "gehostet",
     "gezoomt",
+    "Grundstückseigentümervertrag",
     "gunicorn",
     "Hosters",
     "hovern",
@@ -88,6 +91,8 @@
     "Tabletgröße",
     "TDDDG",
     "Topologien",
+    "Trefferzeile",
+    "Verknüpfungsanzeige",
     "Verlegeart",
     "Verwaltungsmitarbeitende",
     "Websitebesucher",
@@ -98,7 +103,8 @@
     "Überg"
   ],
   "ignoreRegExpList": [
-    "/\\bTR-[A-Z0-9]{5,}\\b/g"
+    "/\\bTR-[A-Z0-9]{5,}\\b/g",
+    "/'[A-Z2-7]{7,8}'/g"
   ],
   "ignorePaths": [
     ".git/**/*",
