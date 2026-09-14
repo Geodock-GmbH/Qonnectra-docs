@@ -1,26 +1,42 @@
 // Setup project (runs automatically before all specs, see playwright.config.ts).
 //
 // Checks that the local Qonnectra instance is reachable, logs in with the
-// credentials from local-app/deployment/.env and stores the logged-in state in
-// auth-state.json. No manual login step needed any more.
+// credentials from local-app/deployment/.env and stores the logged-in states.
+// No manual login step needed any more.
 //
-// Login happens with the account WITHOUT administration rights
-// (APP_USER_USERNAME, group "Editor") so that the images show the interface the
-// way ordinary users see it. For areas only the superuser can see, start the run
-// with QONNECTRA_LOGIN=admin - but then every permission check is bypassed and
-// the "Logs" menu entry is additionally in the picture.
+// Two states are written, because the manual needs two accounts:
+//
+// - auth-state.json       account WITHOUT administration rights (APP_USER_*,
+//                         group "Editor"). Used by the project "chromium", so
+//                         that the images show the interface the way ordinary
+//                         users see it. QONNECTRA_LOGIN=admin switches this one
+//                         to the superuser - but then every permission check is
+//                         bypassed and the "Logs" menu entry is additionally in
+//                         the picture.
+// - admin-auth-state.json Django superuser, always. Used by the project
+//                         "chromium-admin" for the chapters 19-24 of part B,
+//                         which show /admin/*. Only the superuser can open that
+//                         area at all.
+//
+// Both are written on every run, so that a plain `pnpm test:e2e` covers part A
+// and part B in one go and no image can end up taken with the wrong account.
 //
 // The credentials are only sent to the API, never printed.
 //
-// auth-state.json is regenerated on every run and is deliberately not
+// The state files are regenerated on every run and are deliberately not
 // reusable: the backend rotates refresh tokens and blacklists the old one
 // (SIMPLE_JWT: ROTATE_REFRESH_TOKENS + BLACKLIST_AFTER_ROTATION), and the
 // access token lives for 15 minutes.
 import { expect, request as playwrightRequest, test as setup } from '@playwright/test'
+import type { APIRequestContext, Browser } from '@playwright/test'
 
-import { localApp } from './local-app'
+import { credentialsFor, localApp, type Role } from './local-app'
 
-const AUTH_STATE = 'auth-state.json'
+/** Where the logged-in state of a role goes; see the header comment. */
+const AUTH_STATE: Record<Role, string> = {
+  user: 'auth-state.json',
+  admin: 'admin-auth-state.json',
+}
 
 /** Project "Testprojekt" from scripts/qonnectra-demo-data/testprojekt-export.json. */
 const TEST_PROJECT_ID = '2'
@@ -34,21 +50,15 @@ const TEST_PROJECT_ID = '2'
 const MAP_CENTER = [1083532, 7308590]
 const MAP_ZOOM = 16.5
 
-setup('Anmelden und Zustand speichern', async ({ browser, request }) => {
-  const { appUrl, apiUrl, username, password, role } = localApp()
+/**
+ * Reachability is a property of the instance, not of the account - checking it
+ * once for the first login is enough.
+ */
+let instanceChecked = false
 
-  // Only the role goes into the output, never the account name - the
-  // credentials in .env hang off it.
-  setup.info().annotations.push({
-    type: 'Login',
-    description:
-      role === 'admin'
-        ? 'Django superuser (QONNECTRA_LOGIN=admin)'
-        : 'Account without administration rights (default)',
-  })
+async function checkInstanceReachable(request: APIRequestContext, appUrl: string) {
+  if (instanceChecked) return
 
-  // 1. Check reachability first so that a stack that is not running does not
-  //    show up as a login error.
   let status: number
   try {
     status = (await request.get(appUrl, { maxRedirects: 0 })).status()
@@ -63,6 +73,29 @@ setup('Anmelden und Zustand speichern', async ({ browser, request }) => {
     status,
     `${appUrl} responds with HTTP ${status}. Is the stack running? (scripts/setup-local-qonnectra.sh)`,
   ).toBeLessThan(500)
+
+  instanceChecked = true
+}
+
+/**
+ * Logs in as `loginRole` and writes the state to AUTH_STATE[loginRole].
+ *
+ * `loginRole` is the account to use, which for auth-state.json is the role of
+ * the run (see role() in local-app.ts) and for admin-auth-state.json is always
+ * the superuser.
+ */
+async function storeLoggedInState(
+  browser: Browser,
+  request: APIRequestContext,
+  loginRole: Role,
+  stateFile: string,
+) {
+  const { appUrl, apiUrl } = localApp()
+  const { username, password } = credentialsFor(loginRole)
+
+  // 1. Check reachability first so that a stack that is not running does not
+  //    show up as a login error.
+  await checkInstanceReachable(request, appUrl)
 
   // 2. Log in against the API directly instead of through the form - no CSRF
   //    token needed and independent of how the login page looks.
@@ -93,7 +126,7 @@ setup('Anmelden und Zustand speichern', async ({ browser, request }) => {
           'cached the old container IP of the backend (log: "Host is unreachable").\n' +
           'Then this helps:\n  docker restart qonnectra_nginx_prod'
         : login.status() === 401 || login.status() === 400
-          ? role === 'admin'
+          ? loginRole === 'admin'
             ? 'Credentials rejected. Are DJANGO_SUPERUSER_USERNAME/-PASSWORD in ' +
               'local-app/deployment/.env correct? Rebuild with:\n' +
               '  scripts/setup-local-qonnectra.sh --reset'
@@ -152,11 +185,35 @@ setup('Anmelden und Zustand speichern', async ({ browser, request }) => {
 
   // 4. Cross-check: does the app really show the test project?
   await page.goto(`${appUrl}/dashboard`, { waitUntil: 'domcontentloaded' })
-  await expect(
-    page,
-    'The test project was not opened after login.',
-  ).toHaveURL(new RegExp(`/dashboard/${TEST_PROJECT_ID}(/|$)`))
+  await expect(page, 'The test project was not opened after login.').toHaveURL(
+    new RegExp(`/dashboard/${TEST_PROJECT_ID}(/|$)`),
+  )
 
-  await context.storageState({ path: AUTH_STATE })
+  await context.storageState({ path: stateFile })
   await context.close()
+}
+
+setup('Anmelden und Zustand speichern', async ({ browser, request }) => {
+  const { role } = localApp()
+
+  // Only the role goes into the output, never the account name - the
+  // credentials in .env hang off it.
+  setup.info().annotations.push({
+    type: 'Login',
+    description:
+      role === 'admin'
+        ? 'Django superuser (QONNECTRA_LOGIN=admin)'
+        : 'Account without administration rights (default)',
+  })
+
+  await storeLoggedInState(browser, request, role, AUTH_STATE.user)
+})
+
+setup('Als Administration anmelden und Zustand speichern', async ({ browser, request }) => {
+  setup.info().annotations.push({
+    type: 'Login',
+    description: 'Django superuser for the chapters 19-24 (/admin/*)',
+  })
+
+  await storeLoggedInState(browser, request, 'admin', AUTH_STATE.admin)
 })

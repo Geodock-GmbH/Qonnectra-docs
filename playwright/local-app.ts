@@ -88,16 +88,39 @@ export function role(): Role {
   throw new Error(`QONNECTRA_LOGIN=${value} is unknown. Allowed are "user" (default) and "admin".`)
 }
 
-export interface LocalApp {
+export interface Credentials {
+  /** Credentials of the role - never print or commit them. */
+  username: string
+  password: string
+}
+
+export interface LocalApp extends Credentials {
   /** Frontend, e.g. https://app.qonnectra.localhost */
   appUrl: string
   /** Backend API, e.g. https://api.qonnectra.localhost */
   apiUrl: string
   /** Account this run works with (see role()). */
   role: Role
-  /** Credentials of the selected role - never print or commit them. */
-  username: string
-  password: string
+}
+
+/**
+ * Credentials of a named role, independent of what the run itself works with.
+ *
+ * The setup project needs both in the same run: part A and the chapters of
+ * part B that show the ordinary interface log in as `user`, the chapters 19-24
+ * with `/admin/*` as `admin` (see playwright/auth.setup.ts).
+ */
+export function credentialsFor(selected: Role): Credentials {
+  const env = readDeploymentEnv()
+  return selected === 'admin'
+    ? {
+        username: required(env, 'DJANGO_SUPERUSER_USERNAME'),
+        password: required(env, 'DJANGO_SUPERUSER_PASSWORD'),
+      }
+    : {
+        username: requiredNew(env, 'APP_USER_USERNAME'),
+        password: requiredNew(env, 'APP_USER_PASSWORD'),
+      }
 }
 
 let cached: LocalApp | undefined
@@ -111,14 +134,7 @@ export function localApp(): LocalApp {
     appUrl: `https://${required(env, 'APP_DOMAIN')}`,
     apiUrl: `https://${required(env, 'API_DOMAIN')}`,
     role: selected,
-    username:
-      selected === 'admin'
-        ? required(env, 'DJANGO_SUPERUSER_USERNAME')
-        : requiredNew(env, 'APP_USER_USERNAME'),
-    password:
-      selected === 'admin'
-        ? required(env, 'DJANGO_SUPERUSER_PASSWORD')
-        : requiredNew(env, 'APP_USER_PASSWORD'),
+    ...credentialsFor(selected),
   }
   return cached
 }
@@ -134,12 +150,8 @@ export function localApp(): LocalApp {
  * for a capture - an attachment, say - cannot remove it again with the capture
  * account, and the next run would start in a different state.
  */
-export function superuserCredentials(): { username: string; password: string } {
-  const env = readDeploymentEnv()
-  return {
-    username: required(env, 'DJANGO_SUPERUSER_USERNAME'),
-    password: required(env, 'DJANGO_SUPERUSER_PASSWORD'),
-  }
+export function superuserCredentials(): Credentials {
+  return credentialsFor('admin')
 }
 
 /**

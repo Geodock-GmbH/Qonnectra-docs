@@ -252,18 +252,15 @@ QGIS. Assumes part A.
 ### 25. QGIS-Arbeitsplatz einrichten
 
 - 25.1 Voraussetzungen und geprüfte QGIS-Versionen
-- 25.2 Verbindung zur PostGIS-Datenbank einrichten
-- 25.3 Anmeldung an den Diensten der Instanz
-- 25.4 Layer laden, Stile und Beschriftungen
-- 25.5 Koordinatenbezugssystem EPSG:25832
+- 25.2 Verbindung zur PostGIS-Datenbank und zu den Diensten
+- 25.3 Layer, Koordinatenbezugssystem und Stile
 
 ### 26. Netzdaten in QGIS bearbeiten
 
 - 26.1 Welche Layer bearbeitet werden dürfen
-- 26.2 Trassen, Netzknoten, Adressen und Gebiete erfassen
-- 26.3 Pflichtfelder, Wertelisten und Validierung
-- 26.4 Gleichzeitiges Arbeiten mit der Weboberfläche
-- 26.5 Feldaufnahme über GeoPackage und Rückführung
+- 26.2 Pflichtfelder, Wertelisten und Validierung
+- 26.3 Gleichzeitiges Arbeiten mit der Weboberfläche
+- 26.4 Feldaufnahme über GeoPackage und Rückführung
 
 ### 27. QGIS-Server und Kartendienste
 
@@ -404,6 +401,29 @@ are still missing inside a written chapter carry the same sentence.
   afterwards.
 - Chapter 18 collects the error cases that would otherwise be repeated in every
   chapter.
+- The chapters 25 and 26 stay short and carry **no screenshots at all**. QGIS is
+  a desktop application: it cannot be captured by the Playwright specs the rest
+  of the manual is built from, and hand-made images would be the only ones in
+  the manual nobody can regenerate after a QGIS update. The two chapters
+  therefore describe what is specific to Qonnectra - which connection, which
+  layers, which fields, which way back from the field - and link to the official
+  QGIS documentation for everything QGIS itself already documents (digitising,
+  styling, labelling). 25 and 26 were cut down to three resp. four sections for
+  that reason. Chapter 27 is not affected: hinterlegte QGIS-Projekte and
+  external WMS sources are maintained in Qonnectra, so it gets its screenshots
+  from the administration area like 19-24.
+- The chapters 19-24 show `/admin/*` and are the only ones that log in as Django
+  superuser. They are split off into the Playwright project `chromium-admin`
+  (`ADMIN_SPECS` in `playwright.config.ts`), which uses `admin-auth-state.json`;
+  the setup project writes both states on every run. So a plain `pnpm test:e2e`
+  still covers everything, and no part A image can be retaken with the wrong
+  account - which is what a whole run switched over with `QONNECTRA_LOGIN=admin`
+  would do silently.
+- The instance knows only two accounts, both belonging to whoever set it up.
+  `playwright/admin-users.ts` creates three recognisable placeholder accounts for
+  the length of a capture run - one per shipped group (Admin, Editor, Viewer) -
+  and removes them again afterwards. Without them 19.1 and 19.5 would have
+  nothing to show but an empty group membership.
 - Four models have a `RoleBasedPermission` but no seeded `ModelPermission` row
   (`nodetrenchselection`, `nodeslotclipnumber`, `nodeslotdivider`, `wmssource`),
   so every account except a Django superuser gets 403 on them – reading
