@@ -7,7 +7,7 @@
 // deviceScaleFactor 2 (= images of 3584 x 2240), light mode, language DE.
 import { defineConfig } from '@playwright/test'
 
-import { localAppUrl } from './playwright/local-app'
+import { localAdminUrl, localAppUrl } from './playwright/local-app'
 
 /**
  * Specs of the chapters 19-24 (part B, administration area). They are the only
@@ -86,14 +86,26 @@ export default defineConfig({
       dependencies: ['setup'],
     },
     {
-      // The chapters 19-24 of part B show /admin/*, which no account without
-      // administration rights can open. Splitting them off by chapter number
-      // keeps a plain `pnpm test:e2e` covering both parts in one run - the
-      // alternative, a whole run switched over with QONNECTRA_LOGIN=admin,
-      // silently retakes the part A images with the wrong account.
+      // The chapters 19-24 of part B show the Django administration, which no
+      // account without administration rights can open. Splitting them off by
+      // chapter number keeps a plain `pnpm test:e2e` covering both parts in one
+      // run - the alternative, a whole run switched over with
+      // QONNECTRA_LOGIN=admin, silently retakes the part A images with the
+      // wrong account.
       name: 'chromium-admin',
       testMatch: ADMIN_SPECS,
-      use: { storageState: 'admin-auth-state.json' },
+      use: {
+        // Its own origin, not the frontend: the administration sits on
+        // {$ADMIN_DOMAIN} (Caddy -> nginx -> Django). On the app domain
+        // `/admin/...` only knows the route `/admin/logs` and answers
+        // everything else with a 303 to `/login`, so a spec with the frontend
+        // baseURL would silently capture the login page.
+        // The path stays in the spec (`page.goto('/admin/auth/user/')`) -
+        // Playwright resolves an absolute path against the origin alone, so a
+        // baseURL ending in /admin would be dropped anyway.
+        baseURL: localAdminUrl(),
+        storageState: 'admin-auth-state.json',
+      },
       dependencies: ['setup'],
     },
   ],

@@ -99,6 +99,18 @@ export interface LocalApp extends Credentials {
   appUrl: string
   /** Backend API, e.g. https://api.qonnectra.localhost */
   apiUrl: string
+  /**
+   * Administration area, e.g. https://admin.qonnectra.localhost - the origin
+   * only, the Django admin itself sits below `/admin/`.
+   *
+   * A separate origin, not a path of the frontend: the chapters 19-24 describe
+   * the Django administration, which Caddy routes to the backend on this domain
+   * (`{$ADMIN_DOMAIN}` in Caddyfile.production.local). The frontend knows
+   * exactly one route below `/admin/`, namely `/admin/logs`, and answers
+   * everything else with a redirect to `/login`; the API domain blocks
+   * `/admin/*` with a 404 on purpose.
+   */
+  adminUrl: string
   /** Account this run works with (see role()). */
   role: Role
 }
@@ -133,6 +145,7 @@ export function localApp(): LocalApp {
   cached = {
     appUrl: `https://${required(env, 'APP_DOMAIN')}`,
     apiUrl: `https://${required(env, 'API_DOMAIN')}`,
+    adminUrl: `https://${required(env, 'ADMIN_DOMAIN')}`,
     role: selected,
     ...credentialsFor(selected),
   }
@@ -155,11 +168,12 @@ export function superuserCredentials(): Credentials {
 }
 
 /**
- * Frontend address assigned by scripts/setup-local-qonnectra.sh. Serves as a
+ * Addresses assigned by scripts/setup-local-qonnectra.sh. They serve as a
  * fallback while the instance is not set up yet, so that
  * `playwright test --list` works even then.
  */
 export const DEFAULT_APP_URL = 'https://app.qonnectra.localhost'
+export const DEFAULT_ADMIN_URL = 'https://admin.qonnectra.localhost'
 
 /**
  * The URL only - for playwright.config.ts, without touching the credentials and
@@ -171,5 +185,14 @@ export function localAppUrl(): string {
     return localApp().appUrl
   } catch {
     return DEFAULT_APP_URL
+  }
+}
+
+/** Like localAppUrl(), but for the administration area (chapters 19-24). */
+export function localAdminUrl(): string {
+  try {
+    return localApp().adminUrl
+  } catch {
+    return DEFAULT_ADMIN_URL
   }
 }

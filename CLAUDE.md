@@ -441,25 +441,49 @@ target address and no `.env` in the repo root any more – `GEODOCK_URL` is no
 longer read.
 
 - `playwright/local-app.ts` is the single source for address and credentials and
-  reads `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`, `APP_USER_*`,
-  `DJANGO_SUPERUSER_*`). Only obtain credentials through `localApp()`, never
-  write them into specs, output or commits.
+  reads `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`, `ADMIN_DOMAIN`,
+  `APP_USER_*`, `DJANGO_SUPERUSER_*`). Only obtain credentials through
+  `localApp()`, never write them into specs, output or commits.
+- **Two different `/admin/`.** The app domain has exactly one route below it,
+  `/admin/logs` (footer „Logs“, `RoutePermission`); everything else there
+  answers with a 303 to `/login`. The administration area the chapters 19–24
+  describe is the Django admin and sits on its own domain,
+  `https://admin.qonnectra.localhost/admin/` (`ADMIN_DOMAIN`, routed by Caddy to
+  the backend). The API domain blocks `/admin/*` with a 404 on purpose. Keep the
+  two apart – a spec pointed at the wrong origin captures the login page without
+  failing.
 - Which account a spec uses follows from its chapter number, not from an
   environment variable. Two projects in `playwright.config.ts` split the run:
   `chromium` takes everything with the account **without** administration rights
-  and is the right one for the whole of part A, `chromium-admin` matches
-  `tests/19-` to `tests/24-` (`ADMIN_SPECS`) and uses the Django superuser,
-  because those chapters show `/admin/*`. So `pnpm test:e2e` covers both parts in
-  one run. `QONNECTRA_LOGIN=admin` still switches `auth-state.json` over to the
-  superuser, but only for looking at part A views as an administrator – images
-  from such a run show an interface that does not exist for the audience of part
-  A (extra menu entry „Logs“, every permission check bypassed).
+  against `APP_DOMAIN` and is the right one for the whole of part A,
+  `chromium-admin` matches `tests/19-` to `tests/24-` (`ADMIN_SPECS`), uses the
+  Django superuser and has `ADMIN_DOMAIN` as its `baseURL`, because those
+  chapters show the Django administration. Its specs write the path in full
+  (`page.goto('/admin/auth/user/')`) – Playwright resolves an absolute path
+  against the origin alone, so a `baseURL` ending in `/admin` would be dropped.
+  So `pnpm test:e2e` covers both parts in one run. `QONNECTRA_LOGIN=admin` still
+  switches `auth-state.json` over to the superuser, but only for looking at part
+  A views as an administrator – images from such a run show an interface that
+  does not exist for the audience of part A (extra menu entry „Logs“, every
+  permission check bypassed).
 - `playwright/auth.setup.ts` runs as a setup project automatically before every
   spec: it checks reachability (with a pointer to
-  `scripts/setup-local-qonnectra.sh` if the stack is down), logs in through
-  `POST /api/v1/auth/login/` and writes both states – `auth-state.json` for the
-  role of the run and `admin-auth-state.json` always with the superuser.
-  `pnpm test:e2e:setup` runs only this step.
+  `scripts/setup-local-qonnectra.sh` if the stack is down), logs in and writes
+  both states – `auth-state.json` for the role of the run and
+  `admin-auth-state.json` always with the superuser. `pnpm test:e2e:setup` runs
+  only this step.
+- **Two logins, because the instance has two authentication mechanisms.**
+  Frontend and REST API work with the JWT cookies `api-access-token` /
+  `api-refresh-token` from `POST /api/v1/auth/login/`; the Django administration
+  works with a session and needs `sessionid` (plus `csrftoken` for forms) from
+  the form under `/admin/login/`. The JWT does reach the admin domain – all
+  these cookies carry `Domain=.qonnectra.localhost` (`SESSION_COOKIE_DOMAIN` /
+  `CSRF_COOKIE_DOMAIN`, set by `USE_COOKIE_DOMAIN_MIDDLEWARE`) – but Django does
+  not evaluate it there, and `/admin/` answers with a 302 to `/admin/login/`.
+  `admin-auth-state.json` therefore carries both, so that a chapter of part B
+  can also show an ordinary app view. The form POST needs a `Referer` header:
+  Django checks it on HTTPS against `CSRF_TRUSTED_ORIGINS`, and an
+  `APIRequestContext` sends none by itself (symptom: 403 instead of a session).
 - Neither state file is reusable; both are regenerated per run: the access
   token lives for 15 minutes, and the backend rotates refresh tokens with a
   blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`).
