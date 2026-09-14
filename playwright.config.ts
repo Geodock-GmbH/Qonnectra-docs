@@ -7,7 +7,15 @@
 // deviceScaleFactor 2 (= images of 3584 x 2240), light mode, language DE.
 import { defineConfig } from '@playwright/test'
 
-import { localAppUrl } from './playwright/local-app'
+import { localAdminUrl, localAppUrl } from './playwright/local-app'
+
+/**
+ * Specs of the chapters 19-24 (part B, administration area). They are the only
+ * ones that log in as Django superuser; everything else uses the account
+ * without administration rights. Matched on the file name, because the chapter
+ * number is part of it (tests/<NN>-<chapter-slug>.spec.ts).
+ */
+const ADMIN_SPECS = /[\\/](19|20|21|22|23|24)-[^\\/]*\.spec\.ts$/
 
 export default defineConfig({
   testDir: './tests',
@@ -64,14 +72,40 @@ export default defineConfig({
   projects: [
     {
       // Checks the instance and logs in programmatically; the result lands in
-      // auth-state.json.
+      // auth-state.json and admin-auth-state.json.
       name: 'setup',
       testDir: './playwright',
       testMatch: /auth\.setup\.ts/,
     },
     {
+      // Everything except the administration chapters: the account without
+      // administration rights, which is the interface part A describes.
       name: 'chromium',
+      testIgnore: ADMIN_SPECS,
       use: { storageState: 'auth-state.json' },
+      dependencies: ['setup'],
+    },
+    {
+      // The chapters 19-24 of part B show the Django administration, which no
+      // account without administration rights can open. Splitting them off by
+      // chapter number keeps a plain `pnpm test:e2e` covering both parts in one
+      // run - the alternative, a whole run switched over with
+      // QONNECTRA_LOGIN=admin, silently retakes the part A images with the
+      // wrong account.
+      name: 'chromium-admin',
+      testMatch: ADMIN_SPECS,
+      use: {
+        // Its own origin, not the frontend: the administration sits on
+        // {$ADMIN_DOMAIN} (Caddy -> nginx -> Django). On the app domain
+        // `/admin/...` only knows the route `/admin/logs` and answers
+        // everything else with a 303 to `/login`, so a spec with the frontend
+        // baseURL would silently capture the login page.
+        // The path stays in the spec (`page.goto('/admin/auth/user/')`) -
+        // Playwright resolves an absolute path against the origin alone, so a
+        // baseURL ending in /admin would be dropped anyway.
+        baseURL: localAdminUrl(),
+        storageState: 'admin-auth-state.json',
+      },
       dependencies: ['setup'],
     },
   ],

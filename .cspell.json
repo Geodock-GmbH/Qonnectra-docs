@@ -25,6 +25,8 @@
     "Auswirkungsübersicht",
     "Browserdaten",
     "Browserzeile",
+    "csrfmiddlewaretoken",
+    "csrftoken",
     "dbaeumer",
     "dedupe",
     "dokumentationsbezogenen",

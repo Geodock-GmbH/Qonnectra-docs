@@ -120,7 +120,7 @@ pnpm install
 pnpm dev              # http://localhost:5173
 pnpm build            # BASE_PATH="/Qonnectra-docs/" in CI
 pnpm lint:spelling    # cspell (en, en-GB, de) – has to be green before every commit
-pnpm test:e2e:setup   # write the login state to auth-state.json
+pnpm test:e2e:setup   # write the login states to auth-state.json + admin-auth-state.json
 pnpm test:e2e         # Playwright specs in tests/
 
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
@@ -197,6 +197,12 @@ sentences the chapter exists for.
   Menüpunkt „Rohrverwaltung“.“), followed directly by an overview screenshot.
   **Navigationsleiste**, not „linke Navigation“ – chapter 1.2.1 introduces the
   term and the chapters 4–17 all repeat this sentence.
+  The chapters 25 and 26 are the exception and carry no screenshots at all: QGIS
+  is a desktop application, no Playwright spec can capture it, and a hand-made
+  image would be the only one in the manual nobody can regenerate. Both stay
+  short, describe what is specific to Qonnectra and link to the official QGIS
+  documentation for what QGIS itself documents. Chapter 27 is not affected –
+  QGIS projects and external WMS sources are maintained in Qonnectra.
 - Bullet lists for options/properties, **numbered** lists only for genuine
   step-by-step procedures.
 - Notes as VitePress containers, closed with `:::`, in three escalating levels:
@@ -280,8 +286,14 @@ places in the app that can show personal data:
 | `/settings` | „Benutzername“ and the e-mail address of the logged-in account (chapter 17) |
 | `/admin/*` | the user accounts of the instance including e-mail (chapters 19–24) |
 
-The last two are the reason a run with `QONNECTRA_LOGIN=admin` needs a second
-look: the account it shows belongs to whoever set the instance up.
+The last two are the reason the images of the administration area need a second
+look: the accounts they show belong to whoever set the instance up. For the
+chapters 19–24 `playwright/admin-users.ts` therefore creates three recognisable
+placeholder accounts for the length of the run – „Erika Mustermann“ (group
+`Admin`), „Max Mustermann“ (`Editor`), „Moritz Mustermann“ (`Viewer`), e-mail at
+the reserved TLD `.example` – and removes them again afterwards. They are not
+demo data; they exist so that a capture of the user list shows a group
+membership at all.
 
 - Never make up plausible data. An invented name with a real dialling code
   („M. Petersen“, „04631 123456“) is indistinguishable from a real contact in
@@ -429,21 +441,50 @@ target address and no `.env` in the repo root any more – `GEODOCK_URL` is no
 longer read.
 
 - `playwright/local-app.ts` is the single source for address and credentials and
-  reads `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`, `APP_USER_*`,
-  `DJANGO_SUPERUSER_*`). Only obtain credentials through `localApp()`, never
-  write them into specs, output or commits.
-- Login uses the account **without** administration rights by default – that is
-  the right one for the whole of part A. `QONNECTRA_LOGIN=admin pnpm test:e2e`
-  switches to the superuser and is needed for the chapters 19–24 of part B,
-  which show `/admin/*`. Images from an admin run otherwise show an interface
-  that does not exist for the audience of part A (extra menu entry „Logs“, every
+  reads `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`, `ADMIN_DOMAIN`,
+  `APP_USER_*`, `DJANGO_SUPERUSER_*`). Only obtain credentials through
+  `localApp()`, never write them into specs, output or commits.
+- **Two different `/admin/`.** The app domain has exactly one route below it,
+  `/admin/logs` (footer „Logs“, `RoutePermission`); everything else there
+  answers with a 303 to `/login`. The administration area the chapters 19–24
+  describe is the Django admin and sits on its own domain,
+  `https://admin.qonnectra.localhost/admin/` (`ADMIN_DOMAIN`, routed by Caddy to
+  the backend). The API domain blocks `/admin/*` with a 404 on purpose. Keep the
+  two apart – a spec pointed at the wrong origin captures the login page without
+  failing.
+- Which account a spec uses follows from its chapter number, not from an
+  environment variable. Two projects in `playwright.config.ts` split the run:
+  `chromium` takes everything with the account **without** administration rights
+  against `APP_DOMAIN` and is the right one for the whole of part A,
+  `chromium-admin` matches `tests/19-` to `tests/24-` (`ADMIN_SPECS`), uses the
+  Django superuser and has `ADMIN_DOMAIN` as its `baseURL`, because those
+  chapters show the Django administration. Its specs write the path in full
+  (`page.goto('/admin/auth/user/')`) – Playwright resolves an absolute path
+  against the origin alone, so a `baseURL` ending in `/admin` would be dropped.
+  So `pnpm test:e2e` covers both parts in one run. `QONNECTRA_LOGIN=admin` still
+  switches `auth-state.json` over to the superuser, but only for looking at part
+  A views as an administrator – images from such a run show an interface that
+  does not exist for the audience of part A (extra menu entry „Logs“, every
   permission check bypassed).
 - `playwright/auth.setup.ts` runs as a setup project automatically before every
   spec: it checks reachability (with a pointer to
-  `scripts/setup-local-qonnectra.sh` if the stack is down), logs in through
-  `POST /api/v1/auth/login/` and writes `auth-state.json`. `pnpm test:e2e:setup`
-  runs only this step.
-- `auth-state.json` is **not** reusable and is regenerated per run: the access
+  `scripts/setup-local-qonnectra.sh` if the stack is down), logs in and writes
+  both states – `auth-state.json` for the role of the run and
+  `admin-auth-state.json` always with the superuser. `pnpm test:e2e:setup` runs
+  only this step.
+- **Two logins, because the instance has two authentication mechanisms.**
+  Frontend and REST API work with the JWT cookies `api-access-token` /
+  `api-refresh-token` from `POST /api/v1/auth/login/`; the Django administration
+  works with a session and needs `sessionid` (plus `csrftoken` for forms) from
+  the form under `/admin/login/`. The JWT does reach the admin domain – all
+  these cookies carry `Domain=.qonnectra.localhost` (`SESSION_COOKIE_DOMAIN` /
+  `CSRF_COOKIE_DOMAIN`, set by `USE_COOKIE_DOMAIN_MIDDLEWARE`) – but Django does
+  not evaluate it there, and `/admin/` answers with a 302 to `/admin/login/`.
+  `admin-auth-state.json` therefore carries both, so that a chapter of part B
+  can also show an ordinary app view. The form POST needs a `Referer` header:
+  Django checks it on HTTPS against `CSRF_TRUSTED_ORIGINS`, and an
+  `APIRequestContext` sends none by itself (symptom: 403 instead of a session).
+- Neither state file is reusable; both are regenerated per run: the access
   token lives for 15 minutes, and the backend rotates refresh tokens with a
   blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`).
 - The setup pins the state the images depend on: cookie `selected-project=2`
@@ -460,7 +501,7 @@ longer read.
 - Output goes to `tests/screenshots/<chapter-slug>/<name>.png` through
   `shotPath()` resp. `tests/videos/<chapter-slug>/<name>.webm` through
   `videoPath()`. `tests/screenshots/`, `tests/videos/`, `test-results/`,
-  `playwright-report/` and `auth-state.json` are gitignored – those are raw
+  `playwright-report/`, `auth-state.json` and `admin-auth-state.json` are gitignored – those are raw
   captures, not the files of the manual.
 - `pnpm screenshots:publish` (`scripts/publish-screenshots.sh`) publishes them to
   `public/images/manual/…` resp. `public/videos/…` and converts images to JPEG in
