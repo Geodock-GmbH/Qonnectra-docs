@@ -339,6 +339,18 @@ local instance, so that they can be regenerated when the app changes.
 - `scripts/setup-local-qonnectra.sh` clones the app into `local-app/` and starts
   it through the **production** compose file. Idempotent, may be run any number
   of times.
+- The app is **pinned to a release**, `QONNECTRA_REF` at the top of the script,
+  currently **`v1.7.0`** – not the default branch. Every image of the manual has
+  to show the same version; unpinned, a CI run and a laptop built two different
+  apps and the images differed without anyone being able to see why. An existing
+  `local-app/` is switched to the pinned version on the next run; if it carries
+  uncommitted changes the script stops instead (`--reset-checkout` throws the
+  checkout away).
+  Raising the version is its own piece of work, not a side effect: bump
+  `QONNECTRA_REF`, regenerate the screenshots, go through what changed in the
+  app, and update the version in this file and in `OUTLINE.md`.
+  `QONNECTRA_REF=… ` looks at another version – images from such a run are not
+  committed.
 - Reachable at `https://app.qonnectra.localhost` (admin:
   `https://admin.qonnectra.localhost/admin`, API: `https://api.qonnectra.localhost`).
 - Two accounts, credentials in `local-app/deployment/.env`, generated randomly on
@@ -577,8 +589,9 @@ looking for a race in the spec.
 
 **The app (context for selectors and routes)**
 
-SvelteKit + Skeleton, currently version **1.7.0** (the app shows it in the
-header). The navigation bar is sorted into groups; the labels are short and only
+SvelteKit + Skeleton, version **1.7.0** (the app shows it in the header) – the
+release the setup pins the checkout to, see `QONNECTRA_REF` above. The
+navigation bar is sorted into groups; the labels are short and only
 unambiguous together with their group (group „Rohr“ → „Verwaltung“ =
 Rohrverwaltung). This order is the order of the chapters 4–17. Routes and
 labels:

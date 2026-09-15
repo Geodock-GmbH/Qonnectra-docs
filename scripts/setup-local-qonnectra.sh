@@ -5,6 +5,10 @@
 # that the screenshots/examples in the manual match the real production
 # configuration (not docker-compose.dev.yml).
 #
+# The app is pinned to a fixed release (QONNECTRA_REF below) and NOT taken from
+# the default branch: every image in the manual has to show the same version,
+# whoever generates it and wherever.
+#
 # local-app/ is deliberately NOT part of this repo (see .gitignore) - this
 # script is the reproducible replacement for it and may be run as often as you
 # like on any machine (idempotent).
@@ -37,6 +41,21 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOCAL_APP_DIR="$REPO_ROOT/local-app"
 DEPLOY_DIR="$LOCAL_APP_DIR/deployment"
 QONNECTRA_REPO_URL="https://github.com/Geodock-GmbH/Qonnectra.git"
+
+# The app version the manual is generated against - pinned, not the default
+# branch.
+#
+# Every screenshot in manual/ shows this version, OUTLINE.md is derived from it
+# and CLAUDE.md names it. An unpinned checkout meant that two people, or a CI
+# run and a laptop, produced images of two different apps without either
+# noticing: the images simply differed and it looked like the capture pipeline
+# was unreliable.
+#
+# Raising it is a deliberate step, not a side effect of running the setup
+# again: bump the version here, regenerate the screenshots, and go through what
+# changed in the app. Overridable via QONNECTRA_REF for a look at another
+# version - the result must not be committed.
+QONNECTRA_REF="${QONNECTRA_REF:-v1.7.0}"
 
 # Persistent local dev CA. Deliberately lives OUTSIDE local-app/ (which gets
 # cloned/deleted) and outside this repo (it contains a private key), so that it
@@ -121,10 +140,17 @@ Usage: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
                     also discards your own changes in it. On its own it leaves
                     database and secrets alone, and can be combined with
                     --reset.
+                    Also the way out when the checkout sits on another version
+                    and cannot be switched because of local changes.
   --skip-tiles      Do not generate map tiles. The tileserver then runs into a
                     restart loop without data and the map falls back to OSM
                     raster tiles.
   -h, --help        Show this help.
+
+The app is built from the pinned version $QONNECTRA_REF. All images of the
+manual show it; raising it means regenerating the screenshots. QONNECTRA_REF
+points the checkout somewhere else for a look at another version - the images
+from such a run must not be committed.
 
 The local dev CA in
   $CA_DIR
@@ -258,11 +284,44 @@ fi
 
 # --- Clone/update the app repo ----------------------------------------------
 
-if [ -d "$LOCAL_APP_DIR/.git" ]; then
-	log "local-app/ already exists, skipping the clone (no automatic 'git pull', so that local changes are not overwritten)."
+if [ ! -d "$LOCAL_APP_DIR/.git" ]; then
+	log "Cloning $QONNECTRA_REPO_URL at $QONNECTRA_REF into local-app/"
+	# Shallow: nothing in this repo looks at the history of the app, and it
+	# saves a good deal of time in CI.
+	git -c advice.detachedHead=false clone --depth 1 --branch "$QONNECTRA_REF" \
+		"$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR" ||
+		die "Could not clone $QONNECTRA_REF. Does the tag exist in $QONNECTRA_REPO_URL?"
 else
-	log "Cloning $QONNECTRA_REPO_URL into local-app/"
-	git clone "$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR"
+	# The checkout exists. It has to sit on QONNECTRA_REF - otherwise the images
+	# of this run would show a different app than the rest of the manual.
+	WANTED_COMMIT="$(git -C "$LOCAL_APP_DIR" rev-parse --verify --quiet "${QONNECTRA_REF}^{commit}" || true)"
+
+	if [ -z "$WANTED_COMMIT" ]; then
+		log "Fetching $QONNECTRA_REF into local-app/"
+		git -C "$LOCAL_APP_DIR" fetch --depth 1 origin \
+			"refs/tags/$QONNECTRA_REF:refs/tags/$QONNECTRA_REF" 2>/dev/null ||
+			git -C "$LOCAL_APP_DIR" fetch --depth 1 origin "$QONNECTRA_REF" ||
+			die "Could not fetch $QONNECTRA_REF. Does the tag exist in $QONNECTRA_REPO_URL?"
+		WANTED_COMMIT="$(git -C "$LOCAL_APP_DIR" rev-parse --verify --quiet "${QONNECTRA_REF}^{commit}" ||
+			git -C "$LOCAL_APP_DIR" rev-parse FETCH_HEAD)"
+	fi
+
+	if [ "$(git -C "$LOCAL_APP_DIR" rev-parse HEAD)" = "$WANTED_COMMIT" ]; then
+		log "local-app/ is at $QONNECTRA_REF"
+	else
+		# Only tracked files are looked at: the import command is copied into
+		# the checkout by this script further down and is untracked there, so it
+		# would make every checkout look modified.
+		if ! git -C "$LOCAL_APP_DIR" diff --quiet ||
+			! git -C "$LOCAL_APP_DIR" diff --cached --quiet; then
+			die "local-app/ has uncommitted changes and is not at $QONNECTRA_REF.
+Commit or discard them, or throw the checkout away with --reset-checkout."
+		fi
+
+		log "Switching local-app/ from $(git -C "$LOCAL_APP_DIR" rev-parse --short HEAD) to $QONNECTRA_REF"
+		git -C "$LOCAL_APP_DIR" -c advice.detachedHead=false checkout "$WANTED_COMMIT" ||
+			die "Could not switch local-app/ to $QONNECTRA_REF."
+	fi
 fi
 
 if [ -n "$ENV_BACKUP" ]; then
@@ -860,7 +919,7 @@ fi
 log "Done."
 cat <<EOF
 
-Qonnectra is running at:
+Qonnectra $QONNECTRA_REF is running at:
   Frontend : https://app.qonnectra.localhost
   Admin    : https://admin.qonnectra.localhost/admin
   API      : https://api.qonnectra.localhost

@@ -102,8 +102,11 @@ jobs:
           127.0.0.1 tiles.qonnectra.localhost
           EOF
 
-      # Clones github.com/Geodock-GmbH/Qonnectra (public), builds the images,
-      # starts the production compose file and imports the demo project.
+      # Clones github.com/Geodock-GmbH/Qonnectra (public) at the release pinned
+      # in the script, builds the images, starts the production compose file and
+      # imports the demo project. The pin is what makes this job a gate at all:
+      # against the default branch it would go red whenever the app moved,
+      # whether or not the pull request touched anything.
       - name: Start the local Qonnectra instance
         run: scripts/setup-local-qonnectra.sh
 
