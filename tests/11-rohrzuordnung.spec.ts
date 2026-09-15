@@ -3,7 +3,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test'
 import {
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
@@ -252,7 +252,7 @@ test('11. Übersicht der Rohrzuordnung', async ({ page }) => {
   await openAssignment(page)
 
   await expect(page.getByText('Wählen Sie ein Rohr rechts aus dem Drop-Down.')).toBeVisible()
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_connection') })
+  await shoot(page, CHAPTER, 'conduit_connection')
 })
 
 test('11.1 Arbeitsbereich rechts neben der Karte', async ({ page }) => {
@@ -260,7 +260,7 @@ test('11.1 Arbeitsbereich rechts neben der Karte', async ({ page }) => {
   await selectConduit(page)
 
   const spotlightOff = await spotlight(page, workArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_connection_edit_area') })
+  await shoot(page, CHAPTER, 'conduit_connection_edit_area')
   await spotlightOff()
 })
 
@@ -269,7 +269,7 @@ test('11.3 Umschalter „Routing-Modus"', async ({ page }) => {
   await selectConduit(page)
 
   const spotlightOff = await spotlight(page, switchRow(page, 'Routing-Modus'))
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_connection_routing') })
+  await shoot(page, CHAPTER, 'conduit_connection_routing')
   await spotlightOff()
 })
 
@@ -289,7 +289,7 @@ test('11.5 Umschalter „Trassenverbindungen anzeigen"', async ({ page }) => {
     switchRow(page, 'Trassenverbindungen anzeigen'),
     corridor,
   ])
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_connection_linked_trenches') })
+  await shoot(page, CHAPTER, 'conduit_connection_linked_trenches')
   await spotlightOff()
 })
 
@@ -303,7 +303,7 @@ test('11.6 Projekt und Kennzeichen', async ({ page }) => {
     projectPicker(page),
     comboboxBlock(page, 'Kennzeichen'),
   ])
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_connection_project_flag') })
+  await shoot(page, CHAPTER, 'conduit_connection_project_flag')
   await spotlightOff()
 })
 
@@ -327,7 +327,7 @@ test('11.1 Geöffnete Rohrauswahl', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, [comboboxBlock(page, 'Rohr'), options])
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_connection_conduit') })
+  await shoot(page, CHAPTER, 'conduit_connection_conduit')
   await spotlightOff()
 })
 
@@ -344,6 +344,6 @@ test('11.2.2 Liste der zugeordneten Trassensegmente', async ({ page }) => {
   await expect(page.locator('[data-scope="pagination"] [data-part="item"]')).toHaveCount(2)
 
   const spotlightOff = await spotlight(page, trenchList(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_connection_list') })
+  await shoot(page, CHAPTER, 'conduit_connection_list')
   await spotlightOff()
 })

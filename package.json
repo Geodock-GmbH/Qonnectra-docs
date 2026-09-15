@@ -15,9 +15,11 @@
     "preview": "vitepress preview",
     "lint:spelling": "cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'",
     "lint:gender": "! grep -rn --include='*.md' '[[:alpha:]][*][[:upper:]]' manual/",
+    "lint:captures": "! grep -rn --include='*.spec.ts' '\\.screenshot(' tests/",
     "test:e2e:setup": "playwright test --project=setup",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
+    "test:e2e": "playwright test --project=chromium",
+    "test:e2e:videos": "playwright test --project=videos",
+    "test:e2e:ui": "playwright test --project=chromium --ui",
     "screenshots:publish": "scripts/publish-screenshots.sh"
   },
   "devDependencies": {

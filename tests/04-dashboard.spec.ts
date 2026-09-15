@@ -8,7 +8,7 @@ import {
   crop16by10,
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
 } from '../playwright/manual-shots'
 
@@ -335,7 +335,7 @@ function clearDashboardCache() {
 
 test('4. Übersicht des Dashboards', async ({ page }) => {
   await openDashboard(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard')
 })
 
 test('1.3 Projektauswahl in der Kopfzeile', async ({ page }) => {
@@ -345,7 +345,7 @@ test('1.3 Projektauswahl in der Kopfzeile', async ({ page }) => {
   await expect(page.getByPlaceholder('Projekt', { exact: true })).toHaveValue('Testprojekt')
 
   const spotlightOff = await spotlight(page, projectPicker(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_project'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_project')
   await spotlightOff()
 })
 
@@ -368,13 +368,11 @@ test('1.3 Geöffnete Projektliste', async ({ page }) => {
   // from the selection, not from hovering.
   await moveCursorAway(page)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'dashboard_project_detail'),
-    // A bit more padding than usual: input field and list together are only
-    // about 250 x 150 px, and without surroundings the image would not show
-    // that the picker sits in the header.
+  // A bit more padding than usual: input field and list together are only about
+  // 250 x 150 px, and without surroundings the image would not show that the
+  // picker sits in the header.
+  await shoot(page, CHAPTER, 'dashboard_project_detail', {
     clip: await crop16by10(page, [picker, list], { padding: 56 }),
-    animations: 'disabled',
   })
 })
 
@@ -383,7 +381,7 @@ test('4. Reiterleiste', async ({ page }) => {
 
   await expect(page.getByRole('tab')).toHaveCount(6)
   const spotlightOff = await spotlight(page, tabBar(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_tabs'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_tabs')
   await spotlightOff()
 })
 
@@ -391,7 +389,7 @@ test('4.1 Karten im Reiter „Übersicht"', async ({ page }) => {
   await openDashboard(page)
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_overview'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_overview')
   await spotlightOff()
 })
 
@@ -400,7 +398,7 @@ test('4.2 Diagramme im Reiter „Trasse"', async ({ page }) => {
   await openTab(page, 'Trasse', 'Gesamtlänge pro Oberfläche')
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_trench'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_trench')
   await spotlightOff()
 })
 
@@ -433,11 +431,7 @@ test('4.2 Kurzhinweis auf einem Balken', async ({ page }) => {
       'only shows it while the cursor rests on the bar.',
   ).toBeGreaterThan(withoutTooltip * 2)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'dashboard_trench_hover'),
-    clip: await crop16by10(page, chart),
-    animations: 'disabled',
-  })
+  await shoot(page, CHAPTER, 'dashboard_trench_hover', { clip: await crop16by10(page, chart) })
 })
 
 test('4.3 Auswertungen im Reiter „Rohre"', async ({ page }) => {
@@ -445,7 +439,7 @@ test('4.3 Auswertungen im Reiter „Rohre"', async ({ page }) => {
   await openTab(page, 'Rohre', 'Top 5 längste Rohre')
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_conduit'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_conduit')
   await spotlightOff()
 })
 
@@ -454,7 +448,7 @@ test('4.4 Diagramme im Reiter „Netzknoten"', async ({ page }) => {
   await openTab(page, 'Netzknoten', 'Netzknoten nach Ort')
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_node'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_node')
   await spotlightOff()
 })
 
@@ -463,7 +457,7 @@ test('4.5 Diagramme im Reiter „Adressen"', async ({ page }) => {
   await openTab(page, 'Adressen', 'Adressen nach Ort')
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_address'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_address')
   await spotlightOff()
 })
 
@@ -472,7 +466,7 @@ test('4.6 Karten und Diagramme im Reiter „Gebiete"', async ({ page }) => {
   await openTab(page, 'Gebiete', 'Gebiete nach Typ')
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_area'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_area')
   await spotlightOff()
 })
 
@@ -537,7 +531,7 @@ test.describe('Gewährleistung', () => {
     await expect(warrantyCard()).toBeInViewport({ ratio: 1 })
 
     const spotlightOff = await spotlight(page, warrantyCard())
-    await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_warranty'), animations: 'disabled' })
+    await shoot(page, CHAPTER, 'dashboard_warranty')
     await spotlightOff()
   })
 })

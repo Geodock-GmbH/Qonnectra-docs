@@ -11,7 +11,7 @@ import { localApp, superuserCredentials } from '../playwright/local-app'
 import {
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
 } from '../playwright/manual-shots'
 
@@ -242,7 +242,7 @@ async function cleanUpAttachments(uuid: string) {
 
 test('10. Übersicht der Rohrverwaltung', async ({ page }) => {
   await openConduits(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit') })
+  await shoot(page, CHAPTER, 'conduit')
 })
 
 test('10.1 Aufbau der Tabelle', async ({ page }) => {
@@ -254,7 +254,7 @@ test('10.1 Aufbau der Tabelle', async ({ page }) => {
   const paging = page.getByTestId('pagination-count').locator('xpath=..')
 
   const spotlightOff = await spotlight(page, [headings, paging])
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_table') })
+  await shoot(page, CHAPTER, 'conduit_table')
   await spotlightOff()
 })
 
@@ -271,7 +271,7 @@ test('10.1 Suchfeld oben', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, page.locator('.search-container'))
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_search') })
+  await shoot(page, CHAPTER, 'conduit_search')
   await spotlightOff()
 })
 
@@ -288,7 +288,7 @@ test('10.1 Suchfelder unter den Spaltenüberschriften', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, page.locator('table thead tr').nth(1))
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_search_columns') })
+  await shoot(page, CHAPTER, 'conduit_search_columns')
   await spotlightOff()
 })
 
@@ -303,7 +303,7 @@ test('10.2 Rohr hinzufügen', async ({ page }) => {
   await expect(dialog.locator('#pipe-name')).toHaveValue('')
   await page.waitForTimeout(400)
   await moveCursorAway(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_add') })
+  await shoot(page, CHAPTER, 'conduit_add')
 })
 
 test('10.3 Reiter „Eigenschaften"', async ({ page }) => {
@@ -313,7 +313,7 @@ test('10.3 Reiter „Eigenschaften"', async ({ page }) => {
   await expect(drawer.getByRole('button', { name: 'Rohr löschen', exact: true })).toBeVisible()
 
   const spotlightOff = await spotlight(page, drawer)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_properties') })
+  await shoot(page, CHAPTER, 'conduit_properties')
   await spotlightOff()
 })
 
@@ -335,7 +335,7 @@ test('10.4 Reiter „Status"', async ({ page }) => {
   await expect(drawer.locator('.placeholder.animate-pulse')).toHaveCount(0)
 
   const spotlightOff = await spotlight(page, drawer)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_status') })
+  await shoot(page, CHAPTER, 'conduit_status')
   await spotlightOff()
 })
 
@@ -381,7 +381,7 @@ test('10.7 Reiter „Anhänge"', async ({ page }) => {
     })
 
     const spotlightOff = await spotlight(page, drawer)
-    await page.screenshot({ path: shotPath(CHAPTER, 'conduit_attachment') })
+    await shoot(page, CHAPTER, 'conduit_attachment')
     await spotlightOff()
   } finally {
     await cleanUpAttachments(uuid)
@@ -398,6 +398,6 @@ test('10.5 Excel-Vorlage und Datenimport', async ({ page }) => {
     .locator('xpath=ancestor::nav[1]')
 
   const spotlightOff = await spotlight(page, buttons)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_excel') })
+  await shoot(page, CHAPTER, 'conduit_excel')
   await spotlightOff()
 })

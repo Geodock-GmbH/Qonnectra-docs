@@ -120,8 +120,10 @@ pnpm install
 pnpm dev              # http://localhost:5173
 pnpm build            # BASE_PATH="/Qonnectra-docs/" in CI
 pnpm lint:spelling    # cspell (en, en-GB, de) – has to be green before every commit
+pnpm lint:captures    # no spec may call .screenshot() itself – see shoot() below
 pnpm test:e2e:setup   # write the login state to auth-state.json
-pnpm test:e2e         # Playwright specs in tests/
+pnpm test:e2e         # the image specs in tests/ – without the videos
+pnpm test:e2e:videos  # only the video specs, deliberately a separate command
 
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
@@ -397,6 +399,19 @@ longer read.
   chapter sit next to it in `tests/<NN>-<chapter-slug>-video.spec.ts`; a separate
   file is mandatory, because `test.use({ video: … })` is only allowed at file
   level ("forces a new worker" inside a `test.describe` group).
+- The file name suffix `-video` is what splits the two Playwright projects
+  (`playwright.config.ts`): `chromium` ignores it, `videos` matches exactly it.
+  A video spec that is not named that way gets re-recorded by every `pnpm
+  test:e2e`.
+- **Captures go exclusively through `shoot()` resp. `shootTile()`**, never
+  through `page.screenshot()` or `locator.screenshot()`. `pnpm lint:captures`
+  fails on a direct call. Reason: both default to `animations: "allow"`, and
+  the frontend is Svelte 5, whose transitions run through the Web Animations
+  API. `disableAnimations()` only injects CSS and cannot reach them, so the
+  capture lands somewhere in the middle of the movement – that is how
+  `login_mobile_more.jpg` came out with the menu at a different slide offset on
+  every run. `shoot()` passes `animations: "disabled"`, which the browser
+  applies to CSS animations, CSS transitions **and** Web Animations.
 - Output goes to `tests/screenshots/<chapter-slug>/<name>.png` through
   `shotPath()` resp. `tests/videos/<chapter-slug>/<name>.webm` through
   `videoPath()`. `tests/screenshots/`, `tests/videos/`, `test-results/`,
@@ -411,6 +426,19 @@ longer read.
   Captures without a reference are skipped, so that nothing ends up in the wrong
   folder. `--dry-run` shows beforehand what would be created and what replaced,
   `--videos` and `--images` restrict the run to one kind.
+- An image whose picture matches the published one is **not** written; the run
+  reports it as „unchanged“. Without that gate every run rewrote nearly every
+  file: two captures of the same view differ in the anti-aliasing of the glyph
+  edges by at most 17 of 255 – invisible, but enough to change every byte of the
+  JPEG. One commit rewrote 99 of 137 images that way, 72 of them without any
+  visible difference. The tolerance (`DIFF_FUZZ`, `MAX_DIFF_PIXELS` in the
+  script) is measured, not guessed: at a fuzz of 10 % the noise comes out at 0
+  differing pixels, the smallest genuine change at 217. `--force` writes anyway.
+- Two capture folders with the same file name make the script abort. The chapter
+  renumbering left `tests/screenshots/03-einstieg-anmeldung/` next to
+  `01-erste-schritte/`, and because „03“ sorts after „01“ six `login_*` images
+  were published from weeks-old captures on every run – silently, over the fresh
+  ones. When a chapter is renumbered, its capture folder is renamed with it.
 - Only patterns 1 and 2 go through fully automatically. Images with hand-drawn
   annotations (pattern 3) are post-processed after publishing – look at
   `--dry-run` first, otherwise the run overwrites the handwork with a raw
@@ -422,8 +450,10 @@ longer read.
   logged-in calls of `/login` to `/map`.
 - `workers: 1` and `fullyParallel: false` are deliberate: all specs share one
   instance including project selection and map position.
-- Determinism helpers in `playwright/manual-shots.ts`: `disableAnimations()`
-  (transitions and text caret off), `moveCursorAway()` (no hover states in the
+- Determinism helpers in `playwright/manual-shots.ts`: `shoot()` (the one way to
+  capture, see above) and `shootTile()` for the tiles of a composite,
+  `disableAnimations()` (CSS transitions and text caret off – not enough on its
+  own), `moveCursorAway()` (no hover states in the
   image), `spotlight()` for pattern 2 and `composite2x2()` for pattern 4. The
   grid is assembled in the browser, so the repo needs no image library. Pattern 3
   (hand-drawn ellipses/arrows) stays post-processing.
@@ -481,6 +511,35 @@ longer read.
   Map images therefore show the real vector base map in light mode. If the
   `.mbtiles` is missing (run with `--skip-tiles`, no Java), the `tileserver` runs
   in a restart loop and the map falls back to OSM raster tiles.
+
+**What the pipeline cannot make deterministic**
+
+These sit in the app, not in the specs. An image that keeps changing on every
+run without anyone touching it is most likely one of them – check here before
+looking for a race in the spec.
+
+- **Result order of the search.** `trigram_address_search()` ends in
+  `order_by("-similarity")` without a second sort key
+  (`local-app/backend/apps/api/search.py`). Addresses of the same street tie on
+  the score, and Postgres then returns them in whatever order it likes; the
+  images of the search fields reorder their rows from run to run. That is a bug
+  in the app, not in the capture: paginating through tied results skips and
+  repeats rows for users too. The fix belongs upstream (`order_by("-similarity",
+  "id")`) – `local-app/` is a foreign, gitignored checkout and is never patched
+  from here. Until then, pick a search term whose hits do not tie.
+- **Charts over equal values.** „Neueste Netzknoten“ sorts with
+  `(a, b) => b.value - a.value` (`NodeStatistics.svelte`); all bars carry the
+  same value, the comparison returns 0 throughout, and a stable sort keeps
+  whatever order the API delivered. Same cause, same fix.
+- **Timestamps of seeded records.** `created_at`/`modified_at` of
+  `PipelineRecord` are `auto_now_add` resp. `auto_now` and are set by the
+  backend, which discards any supplied value. `page.clock` only moves the clock
+  of the browser and changes nothing here. What works is intercepting the list
+  response with `page.route()` and writing a fixed time into it.
+- **Labels of the base map.** OpenLayers places them per run depending on which
+  vector tiles arrived when; the trench geometry stays pixel-identical while the
+  street names shift by a few pixels. Nothing to fix – the tolerance of
+  `screenshots:publish` absorbs it.
 
 - If the API answers with **502** although the backend container is running:
   after a restart of the backend, `nginx` has cached its old container IP
