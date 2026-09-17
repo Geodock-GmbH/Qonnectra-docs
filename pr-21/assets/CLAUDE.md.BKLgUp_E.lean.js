@@ -1,0 +1,1 @@
+import{_ as t,c as o,o as a,ah as s}from"./chunks/framework.DQmge11f.js";const u=JSON.parse('{"title":"CLAUDE.md","description":"","frontmatter":{},"headers":[],"relativePath":"CLAUDE.md","filePath":"CLAUDE.md"}'),n={name:"CLAUDE.md"};function i(r,e,d,c,h,l){return a(),o("div",null,[...e[0]||(e[0]=[s("",67)])])}const g=t(n,[["render",i]]);export{u as __pageData,g as default};
