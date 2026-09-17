@@ -415,6 +415,21 @@ longer read.
   (`playwright.config.ts`): `chromium` ignores it, `videos` matches exactly it.
   A video spec that is not named that way gets re-recorded by every `pnpm
   test:e2e`.
+- **Videos follow a different rule from the images, deliberately.** An image is
+  judged by its content – the same view has to come out the same, and CI checks
+  it. A recording cannot: it is a screencast of a real interaction, and its
+  length follows render and network latency (measured across two runs: all 13
+  videos differed, 1 to 19 frames apart, while only 8 of 137 images did). They
+  are therefore judged by their provenance – a video is renewed when its spec
+  or the app version changed, not because a run happened. Hence the own
+  project, hence `screenshots:publish --images` in CI, and hence no tolerance
+  gate for `public/videos/`.
+  What does **not** follow from that: a video may show whatever it likes. It
+  sits in the same manual as the images, so the same data rules apply –
+  placeholders instead of personal data, and `freezeDates()` wherever the app
+  shows a date the backend stamped. `map_attachment.webm` ended on the day it
+  was recorded while `conduit_attachment.jpg` showed `CAPTURE_DATE`; that is a
+  contradiction in the manual, not a capture detail.
 - **Captures go exclusively through `shoot()` resp. `shootTile()`**, never
   through `page.screenshot()` or `locator.screenshot()`. `pnpm lint:captures`
   fails on a direct call. Reason: both default to `animations: "allow"`, and

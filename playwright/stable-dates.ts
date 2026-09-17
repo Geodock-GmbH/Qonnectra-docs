@@ -53,6 +53,14 @@ export async function freezeDates(page: Page, options: FreezeDatesOptions): Prom
   const wanted = new Set(fields)
 
   await page.route(url, async (route) => {
+    // Reading only. The same path takes the uploads, and re-issuing a multipart
+    // POST through route.fetch() is a good way to break a capture for no gain -
+    // the date is read back with the list afterwards anyway.
+    if (route.request().method() !== 'GET') {
+      await route.continue()
+      return
+    }
+
     const response = await route.fetch()
 
     let body: unknown

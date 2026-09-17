@@ -4,9 +4,11 @@ import {
   disableAnimations,
   moveCursorAway,
   shoot,
+  type ShootOptions,
   spotlight,
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
+import { waitForBaseMapSettled } from '../playwright/stable-map'
 
 // Screenshots for chapter "11. Rohrzuordnung" in the manual
 // (manual/teil-a-anwenderhandbuch/11-rohrzuordnung.md). Produces all images of
@@ -129,9 +131,22 @@ async function openAssignment(page: Page, options: OpenOptions = {}) {
   await page.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.
   await page.waitForTimeout(2500)
+  // And then until the picture stops moving, see playwright/stable-map.ts.
+  await waitForBaseMapSettled(page)
 
   await disableAnimations(page)
   await moveCursorAway(page)
+}
+
+/**
+ * `shoot()` for this chapter: every image shows the map, and `spotlight()` puts
+ * an SVG over the page whose reflow makes OpenLayers render again - with a fresh
+ * declutter pass that can move the street names. Settling once on load is
+ * therefore not enough; see playwright/stable-map.ts.
+ */
+async function shootMap(page: Page, name: string, options?: ShootOptions): Promise<void> {
+  await waitForBaseMapSettled(page)
+  await shoot(page, CHAPTER, name, options)
 }
 
 /** Work area to the right of the map (the `order-2` column of +page.svelte). */
@@ -252,7 +267,7 @@ test('11. Übersicht der Rohrzuordnung', async ({ page }) => {
   await openAssignment(page)
 
   await expect(page.getByText('Wählen Sie ein Rohr rechts aus dem Drop-Down.')).toBeVisible()
-  await shoot(page, CHAPTER, 'conduit_connection')
+  await shootMap(page, 'conduit_connection')
 })
 
 test('11.1 Arbeitsbereich rechts neben der Karte', async ({ page }) => {
@@ -260,7 +275,7 @@ test('11.1 Arbeitsbereich rechts neben der Karte', async ({ page }) => {
   await selectConduit(page)
 
   const spotlightOff = await spotlight(page, workArea(page))
-  await shoot(page, CHAPTER, 'conduit_connection_edit_area')
+  await shootMap(page, 'conduit_connection_edit_area')
   await spotlightOff()
 })
 
@@ -269,7 +284,7 @@ test('11.3 Umschalter „Routing-Modus"', async ({ page }) => {
   await selectConduit(page)
 
   const spotlightOff = await spotlight(page, switchRow(page, 'Routing-Modus'))
-  await shoot(page, CHAPTER, 'conduit_connection_routing')
+  await shootMap(page, 'conduit_connection_routing')
   await spotlightOff()
 })
 
@@ -289,7 +304,7 @@ test('11.5 Umschalter „Trassenverbindungen anzeigen"', async ({ page }) => {
     switchRow(page, 'Trassenverbindungen anzeigen'),
     corridor,
   ])
-  await shoot(page, CHAPTER, 'conduit_connection_linked_trenches')
+  await shootMap(page, 'conduit_connection_linked_trenches')
   await spotlightOff()
 })
 
@@ -303,7 +318,7 @@ test('11.6 Projekt und Kennzeichen', async ({ page }) => {
     projectPicker(page),
     comboboxBlock(page, 'Kennzeichen'),
   ])
-  await shoot(page, CHAPTER, 'conduit_connection_project_flag')
+  await shootMap(page, 'conduit_connection_project_flag')
   await spotlightOff()
 })
 
@@ -327,7 +342,7 @@ test('11.1 Geöffnete Rohrauswahl', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, [comboboxBlock(page, 'Rohr'), options])
-  await shoot(page, CHAPTER, 'conduit_connection_conduit')
+  await shootMap(page, 'conduit_connection_conduit')
   await spotlightOff()
 })
 
@@ -344,6 +359,6 @@ test('11.2.2 Liste der zugeordneten Trassensegmente', async ({ page }) => {
   await expect(page.locator('[data-scope="pagination"] [data-part="item"]')).toHaveCount(2)
 
   const spotlightOff = await spotlight(page, trenchList(page))
-  await shoot(page, CHAPTER, 'conduit_connection_list')
+  await shootMap(page, 'conduit_connection_list')
   await spotlightOff()
 })

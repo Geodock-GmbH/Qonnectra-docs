@@ -13,6 +13,7 @@ import {
   type ShootOptions,
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
+import { waitForBaseMapSettled } from '../playwright/stable-map'
 
 // Screenshots for chapter "5. Karte" in the manual
 // (manual/teil-a-anwenderhandbuch/05-karte.md). Produces all images of the
@@ -309,73 +310,6 @@ async function countSelectionPixels(page: Page, enough = 20): Promise<number> {
 
     return found
   }, enough)
-}
-
-/**
- * Checksum per map canvas, skipping the ones currently painting the selection
- * colour.
- *
- * With vector tiles OpenLayers keeps two canvases, base map and features. Only
- * the base map is of interest for "are the tiles done"; the feature canvas
- * blinks after a jump to an object and would never come out stable. Leaving out
- * whatever currently carries the selection colour separates the two without
- * having to know which canvas is which.
- */
-async function baseMapChecksums(page: Page): Promise<Record<number, string>> {
-  return page.evaluate(() => {
-    const checksums: Record<number, string> = {}
-
-    document.querySelectorAll('div.map canvas').forEach((canvas, index) => {
-      const surface = canvas as HTMLCanvasElement
-      let data
-      try {
-        const ctx = surface.getContext('2d')
-        if (!ctx) return
-        data = ctx.getImageData(0, 0, surface.width, surface.height).data
-      } catch {
-        return
-      }
-
-      let sum = 0
-      let selection = 0
-      // Every 64th byte, as in chartsSettled() of the dashboard spec: enough for
-      // "has the picture changed", cheap enough to poll.
-      for (let i = 0; i < data.length; i += 64) {
-        sum += data[i]
-        if (data[i + 3] > 200 && data[i] > 225 && data[i + 1] > 215 && data[i + 2] < 110) {
-          selection += 1
-        }
-      }
-
-      if (selection === 0) checksums[index] = String(sum)
-    })
-
-    return checksums
-  })
-}
-
-/**
- * Waits until the base map stops changing.
- *
- * A jump to an object loads new tiles, and a tile still being rasterised paints
- * the previous zoom level. That was the last difference left between two runs
- * of the composite: a watercourse five pixels off, 45 pixels in total - below
- * the tolerance of screenshots:publish, but only just.
- */
-async function waitForBaseMapSettled(page: Page, timeout = 4000): Promise<void> {
-  const deadline = Date.now() + timeout
-  let previous = await baseMapChecksums(page)
-
-  while (Date.now() < deadline) {
-    await page.waitForTimeout(120)
-    const now = await baseMapChecksums(page)
-
-    const shared = Object.keys(now).filter((index) => index in previous)
-    if (shared.length > 0 && shared.every((index) => now[+index] === previous[+index])) {
-      return
-    }
-    previous = now
-  }
 }
 
 /**
