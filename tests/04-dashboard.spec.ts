@@ -11,6 +11,7 @@ import {
   shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
 
 // Screenshots for chapter "4. Dashboard" in the manual
 // (manual/teil-a-anwenderhandbuch/04-dashboard.md). Produces all images of the
@@ -182,6 +183,9 @@ const DEADLINES_IN_DAYS = [14, 60, 200]
 /** Nodes whose deadline this run seeded - for the revert. */
 let seededNodes: string[] = []
 
+/** The deadlines actually written, in the order of DEADLINES_IN_DAYS. */
+let seededDeadlines: string[] = []
+
 /**
  * Logged-in API context using the capture account.
  *
@@ -229,9 +233,11 @@ async function seedDeadlines() {
 
     for (const [index, days] of DEADLINES_IN_DAYS.entries()) {
       const uuid = nodes[index].id
-      const patch = await api.patch(`/api/v1/node/${uuid}/`, { data: { warranty: inDays(days) } })
+      const deadline = inDays(days)
+      const patch = await api.patch(`/api/v1/node/${uuid}/`, { data: { warranty: deadline } })
       expect(patch.ok(), `The deadline could not be set (HTTP ${patch.status()}).`).toBe(true)
       seededNodes.push(uuid)
+      seededDeadlines.push(deadline)
     }
   } finally {
     await api.dispose()
@@ -253,6 +259,7 @@ async function revertDeadlines() {
       ).toBe(true)
     }
     seededNodes = []
+    seededDeadlines = []
 
     // Cross-check at the source: /api/v1/node/expiring_warranties/ reads
     // straight from the database and does not go through the cache of the
@@ -555,6 +562,37 @@ test('4.6 Karten und Diagramme im Reiter „Gebiete"', async ({ page }) => {
 // minutes (see clearDashboardCache()). All images above are therefore taken
 // beforehand - they show the card "Gewährleistung" in its empty state, the way
 // the demo data leave it.
+/**
+ * Opens the dashboard the way a user does, through the navigation bar.
+ *
+ * `page.goto('/dashboard')` renders the page on the server, and its data -
+ * `+page.server.ts` fetching `dashboard/statistics/` - never leaves the
+ * container. Reached from inside the app, SvelteKit fetches the same data as
+ * `__data.json` from the browser, and only then can it be rewritten. The
+ * detour over /settings is just some light page to start from; the map would
+ * load its tiles for nothing.
+ */
+async function openDashboardFromNavigation(page: Page) {
+  await page.goto('/settings')
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
+
+  await expect(page).toHaveURL(/\/dashboard\/2(\/|$)/)
+  await expect(page.getByRole('heading', { name: 'Trassenstatistik' })).toBeVisible()
+  await expect(page.getByText('km Gesamtlänge')).toBeVisible()
+  await page.waitForLoadState('networkidle')
+
+  await disableAnimations(page)
+  await moveCursorAway(page)
+}
+
+/** `CAPTURE_DATE` plus `days`, in the format of the API. */
+function captureDeadline(days: number): string {
+  const day = new Date(CAPTURE_DATE)
+  day.setDate(day.getDate() + days)
+  const twoDigits = (value: number) => String(value).padStart(2, '0')
+  return `${day.getFullYear()}-${twoDigits(day.getMonth() + 1)}-${twoDigits(day.getDate())}`
+}
+
 test.describe('Gewährleistung', () => {
   test.beforeAll(seedDeadlines)
   // Runs even when the test case fails. Without it every following run - and
@@ -571,15 +609,37 @@ test.describe('Gewährleistung', () => {
         '[class*="border-error-500"], [class*="border-warning-500"], [class*="border-success-500"]',
       )
 
+    // The deadlines are seeded relative to today, so that the card keeps saying
+    // "in 14 / 60 / 200 Tagen" and keeps its three colour levels - those come
+    // from `days_until_expiry`, which the backend works out against its own
+    // clock. The dates next to them moved by a day with every day that passed,
+    // which is 413 pixels of difference in the image for nothing. They are
+    // therefore rewritten to CAPTURE_DATE plus the same terms: the card stays
+    // correct in itself and comes out the same in every run.
+    const displayDates = await replaceInResponses(
+      page,
+      '**/__data.json*',
+      Object.fromEntries(
+        DEADLINES_IN_DAYS.map((days, index) => [seededDeadlines[index], captureDeadline(days)]),
+      ),
+    )
+
     // gunicorn only stops the old worker processes once they have finished
     // their current request. Right after the restart an old process can
     // therefore still answer and the card stay empty - hence several attempts
     // instead of a single load.
     for (let attempt = 1; attempt <= 8; attempt++) {
-      await openDashboard(page)
+      await openDashboardFromNavigation(page)
       if ((await entries().count()) === DEADLINES_IN_DAYS.length) break
       await page.waitForTimeout(1500)
     }
+
+    expect(
+      displayDates(),
+      'No deadline was rewritten in the page data. Does SvelteKit still deliver ' +
+        'the load data of the dashboard as __data.json? Without the rewrite the ' +
+        'image carries the day of the run.',
+    ).toBeGreaterThan(0)
 
     await expect(
       entries(),

@@ -177,9 +177,14 @@ for png in $(((WITH_IMAGES)) && find tests/screenshots -name '*.png' 2>/dev/null
 	trap 'rm -f "$candidate"' EXIT
 
 	# Lower the quality as far as the target file size requires.
+	#
+	# "JPEG:" is not decoration. ImageMagick takes the output format from the
+	# file name extension, and the name mktemp produces ends in its random
+	# suffix - so it fell back to the format of the input and wrote a PNG into a
+	# file called .jpg, at roughly three times the size and ignoring -quality.
 	quality=$QUALITY
 	while :; do
-		convert "$png" -quality "$quality" -strip "$candidate"
+		convert "$png" -quality "$quality" -strip "JPEG:$candidate"
 		size=$(stat -c%s "$candidate")
 		if ((size <= MAX_BYTES)) || ((quality <= 60)); then
 			break

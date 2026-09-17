@@ -68,6 +68,44 @@ export async function freezeDates(page: Page, options: FreezeDatesOptions): Prom
   })
 }
 
+/**
+ * Replaces literal strings in the matching responses and reports how often it
+ * did so.
+ *
+ * For the places where the field name is not in the response at all: SvelteKit
+ * delivers the data of a `+page.server.ts` as `__data.json` when the page is
+ * reached from inside the app, and `devalue` flattens it into an array in which
+ * the keys are gone and only the values are left. Replacing by value works
+ * there, as long as what is replaced is known exactly - the dates the spec
+ * seeded itself, for instance.
+ *
+ * The returned function gives the number of replacements. Check it: if
+ * SvelteKit ever changes the route of that payload, the interception stops
+ * working, and without the check the dates would quietly start moving again.
+ */
+export async function replaceInResponses(
+  page: Page,
+  url: string | RegExp,
+  replacements: Record<string, string>,
+): Promise<() => number> {
+  let count = 0
+
+  await page.route(url, async (route) => {
+    const response = await route.fetch()
+    let text = await response.text()
+
+    for (const [from, to] of Object.entries(replacements)) {
+      const parts = text.split(from)
+      count += parts.length - 1
+      text = parts.join(to)
+    }
+
+    await route.fulfill({ response, body: text })
+  })
+
+  return () => count
+}
+
 /** Walks the response and replaces the wanted fields wherever they occur. */
 function withFrozenFields(node: unknown, fields: Set<string>, value: string): unknown {
   if (Array.isArray(node)) {

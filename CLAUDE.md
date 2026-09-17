@@ -563,10 +563,16 @@ looking for a race in the spec.
   phase, so even a capture bracketed by „is it on“ checks fell into the gap
   (three of four runs). Capture the settled state instead, and check that the
   transient is over rather than waiting a fixed time.
-- **Labels of the base map.** OpenLayers places them per run depending on which
-  vector tiles arrived when; the trench geometry stays pixel-identical while the
-  street names shift by a few pixels. Nothing to fix – the tolerance of
-  `screenshots:publish` absorbs it.
+- **Labels of the base map.** OpenLayers places them with a declutter pass over
+  the features it happens to have at the moment of the render, so a tile
+  arriving late moves the street names by a few pixels – 10 700 pixels of
+  difference in `map_search` between two runs, and the amplified diff showed
+  nothing but street names. Fixed, and the fix is the pattern for every map
+  image: wait until the painted picture stops changing, `waitForBaseMapSettled()`
+  in `tests/05-karte.spec.ts`. Once in `openMap()` is **not** enough –
+  `spotlight()` puts an SVG over the page, and the reflow makes OpenLayers render
+  again with a fresh declutter pass. Every capture of that chapter therefore goes
+  through `shootMap()`, which settles immediately before the shot.
 
 - If the API answers with **502** although the backend container is running:
   after a restart of the backend, `nginx` has cached its old container IP
