@@ -14,6 +14,7 @@ import {
   shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { freezeDates } from '../playwright/stable-dates'
 
 // Screenshots for chapter "10. Rohrverwaltung" in the manual
 // (manual/teil-a-anwenderhandbuch/10-rohrverwaltung.md). Produces all images of
@@ -346,6 +347,12 @@ test('10.7 Reiter „Anhänge"', async ({ page }) => {
   await cleanUpAttachments(uuid)
 
   try {
+    // The file list shows the upload date next to every name, and the backend
+    // stamps it with the moment of the upload - the image would otherwise carry
+    // the day of the run. Installed before the view is opened, because
+    // FileExplorer.svelte fetches the list as soon as the tab appears.
+    await freezeDates(page, { url: '**/api/v1/feature-files/**', fields: ['created_at'] })
+
     await openConduits(page, DRAWER_WIDTH)
     const drawer = await openDrawer(page, CONDUIT)
 

@@ -245,6 +245,159 @@ function mapShot(page: Page): Promise<Buffer> {
   return shootTile(page.locator('.map-wrapper'))
 }
 
+/**
+ * Number of pixels currently painted in the selection colour of the app.
+ *
+ * Same colour test as `selectedMapFeature()` above, only counting instead of
+ * measuring, and it stops early: for "is the object visible at all" a handful
+ * of pixels is enough, and the poll below runs every few dozen milliseconds.
+ */
+async function countSelectionPixels(page: Page, enough = 20): Promise<number> {
+  return page.evaluate((limit) => {
+    let found = 0
+
+    for (const canvas of Array.from(document.querySelectorAll('div.map canvas'))) {
+      const surface = canvas as HTMLCanvasElement
+      let data
+      try {
+        const ctx = surface.getContext('2d')
+        if (!ctx) continue
+        data = ctx.getImageData(0, 0, surface.width, surface.height).data
+      } catch {
+        continue
+      }
+
+      // Every second pixel in both directions - a quarter of the work, and the
+      // highlighted object is far larger than two pixels.
+      for (let py = 0; py < surface.height; py += 2) {
+        const row = py * surface.width * 4
+        for (let px = 0; px < surface.width; px += 2) {
+          const i = row + px * 4
+          if (data[i + 3] <= 200) continue
+          if (data[i] <= 225 || data[i + 1] <= 215 || data[i + 2] >= 110) continue
+          found += 1
+          if (found >= limit) return found
+        }
+      }
+    }
+
+    return found
+  }, enough)
+}
+
+/**
+ * Checksum per map canvas, skipping the ones currently painting the selection
+ * colour.
+ *
+ * With vector tiles OpenLayers keeps two canvases, base map and features. Only
+ * the base map is of interest for "are the tiles done"; the feature canvas
+ * blinks after a jump to an object and would never come out stable. Leaving out
+ * whatever currently carries the selection colour separates the two without
+ * having to know which canvas is which.
+ */
+async function baseMapChecksums(page: Page): Promise<Record<number, string>> {
+  return page.evaluate(() => {
+    const checksums: Record<number, string> = {}
+
+    document.querySelectorAll('div.map canvas').forEach((canvas, index) => {
+      const surface = canvas as HTMLCanvasElement
+      let data
+      try {
+        const ctx = surface.getContext('2d')
+        if (!ctx) return
+        data = ctx.getImageData(0, 0, surface.width, surface.height).data
+      } catch {
+        return
+      }
+
+      let sum = 0
+      let selection = 0
+      // Every 64th byte, as in chartsSettled() of the dashboard spec: enough for
+      // "has the picture changed", cheap enough to poll.
+      for (let i = 0; i < data.length; i += 64) {
+        sum += data[i]
+        if (data[i + 3] > 200 && data[i] > 225 && data[i + 1] > 215 && data[i + 2] < 110) {
+          selection += 1
+        }
+      }
+
+      if (selection === 0) checksums[index] = String(sum)
+    })
+
+    return checksums
+  })
+}
+
+/**
+ * Waits until the base map stops changing.
+ *
+ * A jump to an object loads new tiles, and a tile still being rasterised paints
+ * the previous zoom level. That was the last difference left between two runs
+ * of the composite: a watercourse five pixels off, 45 pixels in total - below
+ * the tolerance of screenshots:publish, but only just.
+ */
+async function waitForBaseMapSettled(page: Page, timeout = 4000): Promise<void> {
+  const deadline = Date.now() + timeout
+  let previous = await baseMapChecksums(page)
+
+  while (Date.now() < deadline) {
+    await page.waitForTimeout(120)
+    const now = await baseMapChecksums(page)
+
+    const shared = Object.keys(now).filter((index) => index in previous)
+    if (shared.length > 0 && shared.every((index) => now[+index] === previous[+index])) {
+      return
+    }
+    previous = now
+  }
+}
+
+/**
+ * Duration of everything transient after a jump to a search hit: `zoomToFeature`
+ * animates for 1000 ms and then blinks the highlight six times at 300 ms before
+ * removing it for good (searchUtils.ts). Plus air for a slow machine.
+ */
+const JUMP_SETTLED_MS = 1000 + 6 * 300 + 800
+
+/**
+ * Map tile of the settled state after a jump to a search hit.
+ *
+ * Two transient things live in this view, and between two runs of the composite
+ * they were the entire difference: the toast "Feature gefunden!", which fades
+ * out by itself, and the blinking highlight of the object.
+ *
+ * The highlight cannot be captured reproducibly from the outside. It is on for
+ * 300 ms at a time, while an element screenshot of the map area takes longer
+ * than that - a capture bracketed by "is it on" checks before and after can
+ * still span the off phase in between, and that is what happened: of four runs
+ * three delivered a tile without the highlight although every check had passed.
+ * Holding it by hand is not possible either, the OpenLayers map is not reachable
+ * from the page.
+ *
+ * So the tile shows the state after the blinking - what users have in front of
+ * them a moment after the jump, and the only one that comes out the same in
+ * every run. What the step has to show, the map jumped to the address, is in the
+ * picture either way.
+ */
+async function settledMapShot(page: Page): Promise<Buffer> {
+  await page.waitForTimeout(JUMP_SETTLED_MS)
+  await waitForBaseMapSettled(page)
+
+  await expect(
+    page.getByText('Feature gefunden'),
+    'The toast of the jump is still visible - it fades out on its own, and in ' +
+      'the image it would be there in one run and gone in the next.',
+  ).toBeHidden()
+
+  expect(
+    await countSelectionPixels(page),
+    'The object is still blinking. Has blinkCount in zoomToFeature ' +
+      '(searchUtils.ts) been raised? Then JUMP_SETTLED_MS has to follow.',
+  ).toBe(0)
+
+  return mapShot(page)
+}
+
 test('5. Übersicht der Karte', async ({ page }) => {
   await openMap(page)
   await shoot(page, CHAPTER, 'map')
@@ -444,15 +597,8 @@ test('3.4 Suchablauf (Composite)', async ({ page }) => {
   await firstResult.locator('button.result-button').click()
   await moveCursorAway(page)
 
-  // The object should be highlighted in the picture. `zoomToFeature` animates
-  // the view for 1000 ms and only starts the blinking in the callback: toggling
-  // every 300 ms, visible in the windows 300-600, 900-1200 and 1500-1800 ms
-  // after the end of the animation (searchUtils.ts). 1400 ms after the click is
-  // therefore in the middle of the first visible window. After 1800 ms the
-  // highlight is removed for good - waiting longer here yields a tile without a
-  // recognisable object.
-  await page.waitForTimeout(1400)
-  const tile4 = await mapShot(page)
+  // Everything transient of the jump has to be over - see settledMapShot().
+  const tile4 = await settledMapShot(page)
 
   // Cross-check after the capture: the app closes the result list as soon as a
   // result has been clicked. If it stays open, the tile shows a state that does

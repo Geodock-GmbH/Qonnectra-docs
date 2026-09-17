@@ -539,15 +539,30 @@ looking for a race in the spec.
   repeats rows for users too. The fix belongs upstream (`order_by("-similarity",
   "id")`) – `local-app/` is a foreign, gitignored checkout and is never patched
   from here. Until then, pick a search term whose hits do not tie.
-- **Charts over equal values.** „Neueste Netzknoten“ sorts with
-  `(a, b) => b.value - a.value` (`NodeStatistics.svelte`); all bars carry the
-  same value, the comparison returns 0 throughout, and a stable sort keeps
-  whatever order the API delivered. Same cause, same fix.
-- **Timestamps of seeded records.** `created_at`/`modified_at` of
-  `PipelineRecord` are `auto_now_add` resp. `auto_now` and are set by the
-  backend, which discards any supplied value. `page.clock` only moves the clock
-  of the browser and changes nothing here. What works is intercepting the list
-  response with `page.route()` and writing a fixed time into it.
+- **Charts over equal values.** „Neueste Netzknoten“ is `order_by("-date")[:5]`
+  without a second sort key (`views.py`), and 47 of the 118 nodes of the demo
+  data carry the same date while 71 have none – which five come back is up to
+  Postgres and changes as soon as anything writes to the table. On top of that
+  `NodeStatistics.svelte` sorts with `(a, b) => b.value - a.value` over a
+  hard-coded `value: 1`, so the comparison returns 0 throughout. Not
+  interceptable either, the dashboard is loaded by `+page.server.ts`. The spec
+  therefore gives five nodes a date of its own and reverts it afterwards, the
+  same device the warranty card uses (`tests/04-dashboard.spec.ts`).
+- **Timestamps the backend sets.** `created_at`/`modified_at` are `auto_now_add`
+  resp. `auto_now` on the models, so the backend discards any supplied value and
+  `page.clock` (browser only) changes nothing. `freezeDates()` in
+  `playwright/stable-dates.ts` rewrites them on the way into the page and keeps
+  every capture at `CAPTURE_DATE`; the tab „Anhänge“ showed the day of the run
+  next to every file name before that. Works only where the browser fetches the
+  data itself – whatever a `+page.server.ts` loads runs inside the container and
+  never passes Playwright.
+- **Anything transient in the app.** A capture is not fast enough to hit a state
+  that only exists for a moment. After a jump to a search hit the map blinks the
+  object six times at 300 ms (`zoomToFeature` in `searchUtils.ts`) and a toast
+  fades out on its own – an element screenshot takes longer than one blink
+  phase, so even a capture bracketed by „is it on“ checks fell into the gap
+  (three of four runs). Capture the settled state instead, and check that the
+  transient is over rather than waiting a fixed time.
 - **Labels of the base map.** OpenLayers places them per run depending on which
   vector tiles arrived when; the trench geometry stays pixel-identical while the
   street names shift by a few pixels. Nothing to fix – the tolerance of

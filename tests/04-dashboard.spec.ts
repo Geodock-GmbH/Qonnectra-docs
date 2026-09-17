@@ -443,13 +443,93 @@ test('4.3 Auswertungen im Reiter „Rohre"', async ({ page }) => {
   await spotlightOff()
 })
 
-test('4.4 Diagramme im Reiter „Netzknoten"', async ({ page }) => {
-  await openDashboard(page)
-  await openTab(page, 'Netzknoten', 'Netzknoten nach Ort')
+// ---------------------------------------------------------------------------
+// Seeding node dates (only for dashboard_node)
+// ---------------------------------------------------------------------------
+//
+// The card "Neueste Netzknoten" is `order_by("-date")[:5]` without a second
+// sort key (views.py), and in the demo data 47 of the 118 nodes carry the exact
+// same date 2026-03-19 while the other 71 have none at all. Which five of the
+// 47 come back is therefore up to Postgres, and it changes as soon as anything
+// writes to the table - which this spec does itself when it seeds the warranty
+// deadlines. Between two consecutive runs the chart reordered itself without
+// anyone having touched the app.
+//
+// Rewriting the response is not available here: the dashboard is loaded by
+// +page.server.ts inside the container, so the request never passes Playwright
+// (unlike the attachment dates, see playwright/stable-dates.ts). Five nodes
+// therefore get a date of their own - the same device the warranty card above
+// already uses for its deadlines - and it is reverted afterwards.
 
-  const spotlightOff = await spotlight(page, contentArea(page))
-  await shoot(page, CHAPTER, 'dashboard_node')
-  await spotlightOff()
+/** Dates for the five newest nodes, newest first. After the 2026-03-19 of the demo data. */
+const NODE_DATES = ['2026-03-24', '2026-03-23', '2026-03-22', '2026-03-21', '2026-03-20']
+
+/** Nodes whose date this run overwrote, together with the value they had before. */
+let seededDates: { uuid: string; date: string | null }[] = []
+
+/**
+ * Gives the first five nodes by name a date of their own. Picked by name for
+ * the same reason as the deadlines above: every run hits the same nodes, so the
+ * image always shows the same labels.
+ */
+async function seedNodeDates() {
+  const api = await apiContext()
+  try {
+    const response = await api.get('/api/v1/node/?project=2&ordering=name')
+    expect(response.ok(), 'The nodes of the test project cannot be fetched.').toBe(true)
+    const nodes: { id: string; properties?: { date?: string | null } }[] =
+      (await response.json()).results?.features ?? []
+    expect(
+      nodes.length,
+      'The test project has fewer than five nodes - were the demo data ' +
+        'imported? (scripts/setup-local-qonnectra.sh)',
+    ).toBeGreaterThanOrEqual(NODE_DATES.length)
+
+    for (const [index, date] of NODE_DATES.entries()) {
+      const { id: uuid, properties } = nodes[index]
+      const patch = await api.patch(`/api/v1/node/${uuid}/`, { data: { date } })
+      expect(patch.ok(), `The node date could not be set (HTTP ${patch.status()}).`).toBe(true)
+      seededDates.push({ uuid, date: properties?.date ?? null })
+    }
+  } finally {
+    await api.dispose()
+  }
+
+  clearDashboardCache()
+}
+
+/** Puts the overwritten dates back. */
+async function revertNodeDates() {
+  const api = await apiContext()
+  try {
+    for (const { uuid, date } of seededDates) {
+      const patch = await api.patch(`/api/v1/node/${uuid}/`, { data: { date } })
+      expect(
+        patch.ok(),
+        `The date of ${uuid} could not be reverted (HTTP ${patch.status()}). ` +
+          'Please check by hand - otherwise every following run carries it along.',
+      ).toBe(true)
+    }
+    seededDates = []
+  } finally {
+    await api.dispose()
+  }
+
+  clearDashboardCache()
+}
+
+test.describe('Netzknoten', () => {
+  test.beforeAll(seedNodeDates)
+  test.afterAll(revertNodeDates)
+
+  test('4.4 Diagramme im Reiter „Netzknoten"', async ({ page }) => {
+    await openDashboard(page)
+    await openTab(page, 'Netzknoten', 'Netzknoten nach Ort')
+
+    const spotlightOff = await spotlight(page, contentArea(page))
+    await shoot(page, CHAPTER, 'dashboard_node')
+    await spotlightOff()
+  })
 })
 
 test('4.5 Diagramme im Reiter „Adressen"', async ({ page }) => {
