@@ -24,7 +24,7 @@ Liegt in der angeklickten Trasse kein Rohr, meldet die Info-Box „Keine Leerroh
 
 ## 13.2 Mikrorohrtabelle: Nummer, Farbe, Status
 
-Klappen Sie ein Rohr auf, listet die Tabelle darunter seine Mikrorohre auf – mit denselben Spalten wie der Reiter „Status“ der Rohrverwaltung, siehe Abschnitt [Mikrorohre eines Rohrs](./10-rohrverwaltung.md#_10-4-mikrorohre-eines-rohrs): „#“, „Farbe“, „Adresse“, „Kabel“ und „Status“.
+Klappen Sie ein Rohr auf, listet die Tabelle darunter seine Mikrorohre auf – mit denselben Spalten wie der Reiter „Status“ der Rohrverwaltung, siehe Abschnitt [Mikrorohre eines Rohrs](./10-rohrverwaltung.md#_10-4-mikrorohre-eines-rohrs): „#“ für die Mikrorohrnummer, „Farbe“, „Adresse“, „Kabel“ und „Status“.
 
 ![Screenshot der Ansicht Mikrorohre mit der Tabelle der Mikrorohre eines Rohrs in der verbreiterten Info-Box](/images/manual/teil-a/microduct_table.jpg)
 

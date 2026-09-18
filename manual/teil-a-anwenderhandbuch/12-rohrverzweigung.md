@@ -8,6 +8,10 @@ Den größten Teil der Ansicht nimmt die **Arbeitsfläche** ein. Sie ist ein Dia
 
 Der Weg durch diese Ansicht ist immer derselbe: Netzknoten auswählen, Trassen und Rohre auf die Arbeitsfläche laden, Mikrorohre verbinden.
 
+::: warning
+Die Rohrverzweigung ist reine Dokumentation. Qonnectra hält fest, welches Mikrorohr an dieser Stelle in welchem weiterläuft, wertet die Verbindungen sonst aber nirgends aus. Belegen Sie an anderer Stelle ein Mikrorohr – mit einem Kabel im Netzschema, siehe Abschnitt [Kabel mit Mikrorohren verknüpfen](./14-netzschema.md#_14-5-kabel-mit-mikrorohren-verknupfen), oder mit einem Hausanschluss, siehe Abschnitt [Hausanschlüsse dokumentieren](./13-mikrorohre.md#_13-4-hausanschlusse-dokumentieren) –, prüft die Anwendung deshalb nicht, ob dieses Mikrorohr über den Abzweig überhaupt erreichbar ist. Ein Mikrorohr, das im durchgehenden Rohr liegt und hier noch nicht verbunden ist, nimmt sie widerspruchslos an; eine Warnung bleibt aus.
+:::
+
 ## 12.1 Rohrverzweigung auswählen
 
 Im Feld „Rohrverzweigung auswählen“ stehen die Netzknoten des Projekts, die als Rohrabzweig infrage kommen. Welche das sind, legt Ihre Administration fest, siehe Abschnitt [Voraussetzung](#_12-5-voraussetzung-konfigurierte-rohrabzweig-einstellungen).
@@ -48,7 +52,7 @@ Jedes geladene Rohr erscheint als Kreis auf der Arbeitsfläche. Der Kasten daneb
 ![Ausschnitt eines Rohrs auf der Arbeitsfläche mit seinen Mikrorohren als farbige Punkte](/images/manual/teil-a/pipe_branch_canvas_detail.jpg)
 {.img-row}
 
-Zeigen Sie auf einen Punkt, nennt der Hinweis Rohr, Nummer und Farbe des Mikrorohrs. Er ist englisch beschriftet, etwa „St-VL-01 - Microduct 3 (blau)“.
+Zeigen Sie auf einen Punkt, nennt der Hinweis Rohr, Nummer und Farbe des Mikrorohrs, etwa „St-VL-01 - Microduct 3 (blau)“.
 
 Mikrorohre mit einem Status – etwa „Defekt“, siehe Abschnitt [Mikrorohre eines Rohrs](./10-rohrverwaltung.md#_10-4-mikrorohre-eines-rohrs) – sind blass gezeichnet und tragen ein Kreuz.
 

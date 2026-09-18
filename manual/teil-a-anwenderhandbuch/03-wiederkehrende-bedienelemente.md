@@ -185,7 +185,7 @@ Qonnectra hat keinen Menüpunkt „Export“. Daten verlassen die Anwendung dort
 | Format | Wo | Inhalt |
 |---|---|---|
 | Excel (`.xlsx`) | Rohrverwaltung, „Vorlage“ | leere Importvorlage für Rohre, siehe Abschnitt [Excel-Import](./10-rohrverwaltung.md#_10-5-excel-import-vorlage-ablauf-fehlermeldungen) |
-| Excel (`.xlsx`) | Netzknoten, Fenster „Netzknoten-Konfiguration“ – in der Karte und im Netzschema | Einbauplätze und Komponenten eines Netzknotens, siehe Abschnitt [Netzknoten](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen) |
+| Excel (`.xlsx`) | Netzknoten, Fenster „Netzknoten-Konfiguration“ – in der Karte und im Netzschema | Spleißplan eines Netzknotens: Einbauplätze, Komponenten und die Fasern auf deren Ports, siehe Abschnitt [Netzknoten](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen) |
 | CSV | Störungsanalyse, „CSV exportieren“ | Schadensbericht mit den betroffenen Objekten, siehe Kapitel [Störungsanalyse](./06-stoerungsanalyse.md) |
 | PDF | Adressdetails, „PDF herunterladen“; Nachverdichtung, „Start“ → „Exportieren“ | Datenblatt zu einer Adresse, wahlweise mit den Wohneinheiten, siehe Kapitel [Adressen](./16-adressen.md) und [Nachverdichtung](./07-nachverdichtung.md) |
 | GeoJSON | Faserweg, „GeoJSON herunterladen“ | Geometrien des ermittelten Faserwegs, siehe Kapitel [Faserweg](./15-faserweg.md) |

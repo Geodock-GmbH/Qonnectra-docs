@@ -155,7 +155,7 @@ Solange „Einrasten“ eingeschaltet ist, springen die Punkte auf ein Raster vo
 Wo eine Beschriftung liegt, ist am Kabel gespeichert. Ist dort keine Position hinterlegt, setzt Qonnectra sie in die Mitte der Linie; andernfalls steht sie genau an der gespeicherten Stelle.
 
 ::: info
-Bei importierten Kabeln stammt diese Position aus dem Herkunftssystem. Zeichnet Qonnectra die Linie anders – etwa mit einem rechten Winkel um einen Netzknoten herum –, liegt die Beschriftung dann neben ihrem Kabel. Von selbst rückt sie nicht nach; ziehen Sie sie an die Linie.
+Die gespeicherte Position ist ein fester Punkt auf der Zeichenfläche, keine Angabe relativ zur Linie. Verschieben Sie später einen der beiden Netzknoten oder ändern Sie den Verlauf des Kabels, bleibt die Beschriftung liegen, wo sie ist, und steht dann neben ihrem Kabel. Von selbst rückt sie nicht nach; ziehen Sie sie an die Linie oder setzen Sie die Position zurück.
 :::
 
 Verschieben können Sie sie so: Halten Sie die linke Maustaste eine halbe Sekunde auf der Beschriftung gedrückt – ein Ring am Mauszeiger füllt sich –, danach folgt sie der Maus. Mit dem Loslassen ist die neue Position gespeichert; Qonnectra meldet „Kabelbeschriftung erfolgreich gespeichert“. Shift + Klick setzt die Position zurück, sodass die Beschriftung wieder in der Mitte der Linie liegt.
@@ -238,7 +238,7 @@ Beide Fenster öffnen mittig und gleich groß übereinander, und „Netzknotenst
 
 ![Screenshot des Fensters „Netzknoten-Konfiguration“ mit dem Container „RACK-A1“ und der darin liegenden Slot-Konfiguration](/images/manual/teil-a/schema_slot_config.jpg){.big}
 
-Jede Zeile trägt rechts ihre Schaltflächen: das Auge („Struktur anzeigen“) zeigt die Struktur dieser Seite, der Stift öffnet die Konfiguration zum Bearbeiten, der Papierkorb löscht sie. Das Auge schaltet dabei das Fenster „Netzknotenstruktur“ auf diese Seite um – ist es schon offen, holt es das Fenster aber nicht nach vorn, siehe Abschnitt [Netzknoten: Slot-Konfiguration und Struktur öffnen](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen). Am Griff links ziehen Sie eine Slot-Konfiguration in einen Container oder aus ihm heraus; Container lassen sich ineinander schieben. Das Download-Symbol oben rechts speichert den Aufbau als Excel-Datei, siehe Abschnitt [Exportformate im Überblick](./03-wiederkehrende-bedienelemente.md#_3-8-exportformate-im-uberblick).
+Jede Zeile trägt rechts ihre Schaltflächen: das Auge („Struktur anzeigen“) zeigt die Struktur dieser Seite, der Stift öffnet die Konfiguration zum Bearbeiten, der Papierkorb löscht sie. Das Auge schaltet dabei das Fenster „Netzknotenstruktur“ auf diese Seite um – ist es schon offen, holt es das Fenster aber nicht nach vorn, siehe Abschnitt [Netzknoten: Slot-Konfiguration und Struktur öffnen](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen). Am Griff links ziehen Sie eine Slot-Konfiguration in einen Container oder aus ihm heraus; Container lassen sich ineinander schieben. Das Download-Symbol oben rechts lädt den **Spleißplan** des Netzknotens als Excel-Datei herunter – die vollständige Spleißdokumentation, je Seite ein Tabellenblatt mit den Einbauplätzen, den eingebauten Komponenten und den Fasern, die auf deren Ports liegen, siehe Abschnitt [Exportformate im Überblick](./03-wiederkehrende-bedienelemente.md#_3-8-exportformate-im-uberblick).
 
 ::: warning
 Container-Typen sind Stammdaten der Installation und lassen sich nur im Administrationsbereich anlegen, siehe Kapitel [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md). Gibt es keinen einzigen, fehlt die Schaltfläche „Container hinzufügen“ ganz.
@@ -254,7 +254,7 @@ Jedes Löschen in diesem Fenster – Slot-Konfiguration wie Container – setzt 
 
 **Komponenten einbauen**
 
-Das Fenster „Netzknotenstruktur“ hat im Netzschema drei Spalten: links die Leiste „Komponententypen“, in der Mitte das Slot-Grid, rechts die Leiste „Kabel“.
+Das Fenster „Netzknotenstruktur“ hat drei Spalten: links die Leiste „Komponententypen“, in der Mitte das Slot-Grid, rechts die Leiste „Kabel“.
 
 ![Screenshot des Fensters „Netzknotenstruktur“ mit der Leiste „Komponententypen“ links, dem Slot-Grid in der Mitte und der Kabelleiste rechts](/images/manual/teil-a/schema_structure.jpg){.big}
 
@@ -290,13 +290,18 @@ Sie können auch größere Einheiten ziehen:
 
 - Ein **Bündel** füllt die Ports ab der Zelle, in der Sie loslassen, mit seinen Fasern der Reihe nach – bis zum ersten Port, auf dem schon eine Faser liegt. Qonnectra meldet dann, wie viele Fasern verbunden wurden („24 Fasern verbunden“ oder „18 von 24 Fasern verbunden“).
 - Ein **Kabel** füllt auf dieselbe Weise weiter und läuft dabei in die folgenden Komponenten der Seite über.
-- Eine **Wohneinheit** aus dem Abschnitt „Adressen“ der Leiste belegt einen Port genauso wie eine Faser. So dokumentieren Sie, welche Wohneinheit an welchem Port hängt – der Faserweg zeigt sie später als Ziel, siehe Abschnitt [Betroffene Adressen und Wohneinheiten](./15-faserweg.md#_15-5-betroffene-adressen-und-wohneinheiten).
 
 Fasern, die schon auf einem Port liegen, sind in der Leiste grün hinterlegt; ein vollständig aufgelegtes Bündel ebenso. Innerhalb der Tabelle ziehen Sie eine Faser von einer Zelle in eine andere und verschieben damit den Spleiß.
 
 ::: warning
 Eine Zelle nimmt immer nur eine Faser auf. Lassen Sie eine Faser auf einer Zelle los, die schon belegt ist, **ersetzt** sie die bisherige – ohne Rückfrage, und ohne dass die alte Faser auf einen anderen Port ausweicht. Bei zusammengeführten Ports gilt das für die ganze Gruppe.
 :::
+
+**Wohneinheiten auflegen**
+
+Unter den Kabeln steht der Abschnitt „Adressen“, und zwar nur dann, wenn dem geöffneten Netzknoten eine Adresse zugeordnet ist – in aller Regel also an einem Hausanschluss. Diese Netzknoten erreichen Sie meist über das Subnetz ihres Verteilers, siehe Abschnitt [Subnetz eines Netzknotens](#_14-9-subnetz-eines-netzknotens).
+
+Eine **Wohneinheit** aus diesem Abschnitt belegt einen Port genauso wie eine Faser. So dokumentieren Sie, welche Wohneinheit an welchem Port hängt – der Faserweg zeigt sie später als Ziel, siehe Abschnitt [Betroffene Adressen und Wohneinheiten](./15-faserweg.md#_15-5-betroffene-adressen-und-wohneinheiten).
 
 Jede belegte Zelle trägt beim Zeigen mit der Maus drei Schaltflächen: „Folgen“ öffnet den Faserweg dieser Faser (siehe Kapitel [Faserweg](./15-faserweg.md)) und zeigt anschließend in der Zelle eine Zusammenfassung („2 Spleisse · 1 Adresse“), „Löschen“ nimmt die Faser vom Port, und bei zusammengeführten Ports kommt „Trennen“ hinzu.
 
