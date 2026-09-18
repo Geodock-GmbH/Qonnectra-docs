@@ -8,8 +8,8 @@ on:
   # filter on "main" would leave all but the bottom one untested.
   pull_request:
 
-# An outdated run of the screenshot job is worth nothing and occupies a runner
-# for the better part of an hour.
+# An outdated run of the capture job is worth nothing and occupies a runner for
+# the better part of an hour.
 concurrency:
   group: tests-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -34,11 +34,11 @@ jobs:
       - name: Run spellcheck
         run: pnpm lint:spelling
 
-  screenshots:
-    name: Screenshots
+  captures:
+    name: Captures
     runs-on: ubuntu-latest
     # Docker build of the app ~15 min, map tiles ~10 min on a cache miss, the
-    # specs themselves ~10 min.
+    # image specs ~10 min and the recordings a few more.
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
@@ -110,21 +110,38 @@ jobs:
       - name: Start the local Qonnectra instance
         run: scripts/setup-local-qonnectra.sh
 
-      - name: Install Chromium
-        run: pnpm exec playwright install --with-deps chromium
+      # ffmpeg as well as the browser: Playwright encodes the recordings with it,
+      # and scripts/check-videos.sh reads them back with the same binary.
+      - name: Install Chromium and ffmpeg
+        run: pnpm exec playwright install --with-deps chromium ffmpeg
 
+      # The two capture runs come first, both of them. They are the part that
+      # actually exercises the app, and a failure here is a broken interaction,
+      # not a stale image.
+      #
       # Without the videos - a recording is never byte-identical, see the
       # project "videos" in playwright.config.ts.
       - name: Take the screenshots
         run: pnpm test:e2e
 
-      - name: Publish them into the manual
+      # The recordings are produced but never compared with the published ones:
+      # two runs of the same spec differ by a handful of frames whatever anyone
+      # does. What this catches is the interaction breaking - the specs assert
+      # their way through every step, so a moved button fails here long before
+      # anyone notices it in the manual.
+      - name: Record the videos
+        if: ${{ !cancelled() }}
+        run: pnpm test:e2e:videos
+
+      - name: Publish the screenshots into the manual
+        if: ${{ !cancelled() }}
         run: pnpm screenshots:publish --images
 
       # screenshots:publish only writes an image whose picture actually differs
       # from the published one, so anything left here is a real difference
       # between the manual and the app as it currently builds.
       - name: Fail if the published screenshots are out of date
+        if: ${{ !cancelled() }}
         run: |
           changed="$(git status --porcelain -- public/images/)"
           if [ -z "$changed" ]; then
@@ -141,12 +158,31 @@ jobs:
           echo "::error::The manual's screenshots do not match this run. Regenerate them with 'pnpm test:e2e && pnpm screenshots:publish --images' and commit the result, or check the artifact 'screenshots-from-this-run' for what changed."
           exit 1
 
+      # What the specs themselves cannot see: the crop runs after the recording
+      # and knows nothing about the layout, so it can end up pointing past the
+      # interface while every assertion still passes. Deliberately the last
+      # check, and deliberately not a comparison with public/videos/.
+      - name: Check the recordings
+        if: ${{ !cancelled() }}
+        run: pnpm check:videos
+
       - name: Upload the differing screenshots
         if: failure()
         uses: actions/upload-artifact@v7
         with:
           name: screenshots-from-this-run
           path: screenshot-diff/
+          if-no-files-found: ignore
+
+      # The recordings themselves, so a failed check can be looked at without
+      # reproducing the run. They are not compared with anything - this is for
+      # eyes, not for a diff.
+      - name: Upload the recordings
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: recordings-from-this-run
+          path: tests/videos/
           if-no-files-found: ignore
 
       - name: Upload the Playwright report

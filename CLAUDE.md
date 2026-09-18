@@ -124,6 +124,7 @@ pnpm lint:captures    # no spec may call .screenshot() itself – see shoot() be
 pnpm test:e2e:setup   # write the login state to auth-state.json
 pnpm test:e2e         # the image specs in tests/ – without the videos
 pnpm test:e2e:videos  # only the video specs, deliberately a separate command
+pnpm check:videos     # recordings sound? (no comparison with public/videos/)
 
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
@@ -430,6 +431,15 @@ longer read.
   shows a date the backend stamped. `map_attachment.webm` ended on the day it
   was recorded while `conduit_attachment.jpg` showed `CAPTURE_DATE`; that is a
   contradiction in the manual, not a capture detail.
+  Nor does it follow that CI leaves them alone. It records them on every run –
+  the specs assert their way through every step, so a moved button fails there
+  long before anyone notices it in the manual – and then checks the files with
+  `pnpm check:videos`: is every video the manual embeds there, is it VP8, are
+  width, length and size in range, and is the picture not empty. The last one is
+  the point of the script: the crop of `postProcessVideo()` runs after the
+  recording and knows nothing about the layout, so it can end up pointing past
+  the interface while every assertion still passes. What CI never does is
+  compare a recording with the published one.
 - **Captures go exclusively through `shoot()` resp. `shootTile()`**, never
   through `page.screenshot()` or `locator.screenshot()`. `pnpm lint:captures`
   fails on a direct call. Reason: both default to `animations: "allow"`, and

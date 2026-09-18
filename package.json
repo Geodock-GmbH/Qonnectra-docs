@@ -16,6 +16,7 @@
     "lint:spelling": "cspell lint --no-progress --gitignore '{**,.*}/{*,.*}'",
     "lint:gender": "! grep -rn --include='*.md' '[[:alpha:]][*][[:upper:]]' manual/",
     "lint:captures": "! grep -rn --include='*.spec.ts' '\\.screenshot(' tests/",
+    "check:videos": "scripts/check-videos.sh",
     "test:e2e:setup": "playwright test --project=setup",
     "test:e2e": "playwright test --project=chromium",
     "test:e2e:videos": "playwright test --project=videos",
