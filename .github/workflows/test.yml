@@ -50,6 +50,18 @@ jobs:
           sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
           df -h /
 
+      # The ubuntu-24.04 runner image does not ship ImageMagick. All three
+      # binaries come from this one package: `convert` turns the captures into
+      # JPEG, `compare` is the tolerance gate that decides whether an image
+      # changed at all, `identify` measures the frames in check-videos.sh.
+      # Installed here rather than where it is first needed, so a missing
+      # package fails within seconds instead of after the stack build.
+      - name: Install ImageMagick
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends imagemagick
+          convert -version | head -n 1
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:

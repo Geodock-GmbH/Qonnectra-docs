@@ -76,9 +76,15 @@ for arg in "$@"; do
 	esac
 done
 
-if ((WITH_IMAGES)) && ! command -v convert >/dev/null 2>&1; then
-	echo "ImageMagick (convert) is missing. Install it with: sudo apt install imagemagick" >&2
-	exit 1
+if ((WITH_IMAGES)); then
+	# Both, not just convert: `compare` is what decides whether an image changed
+	# at all, and without it every run would look like a full rewrite.
+	for tool in convert compare; do
+		if ! command -v "$tool" >/dev/null 2>&1; then
+			echo "ImageMagick ($tool) is missing. Install it with: sudo apt install imagemagick" >&2
+			exit 1
+		fi
+	done
 fi
 
 if [[ ! -d tests/screenshots && ! -d tests/videos ]]; then
