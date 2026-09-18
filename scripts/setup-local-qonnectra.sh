@@ -77,11 +77,25 @@ CA_NAME="Qonnectra Local Dev CA"
 # --reset-checkout and a fresh clone do not trigger a multi-minute Planetiler
 # run every time. The default is Schleswig-Holstein: the test project lies
 # entirely at 9.74 E / 54.73 N (north-east of Flensburg). Overridable via
-# QONNECTRA_TILE_AREA (e.g. "germany", which takes considerably longer and
-# needs ~3 GB).
+# QONNECTRA_TILE_OSM_URL (a larger extract takes considerably longer and needs
+# more space).
 TILES_DIR="${QONNECTRA_TILES_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/qonnectra-local-tiles}"
-TILE_AREA="${QONNECTRA_TILE_AREA:-schleswig-holstein}"
-TILE_MBTILES="$TILES_DIR/$TILE_AREA.mbtiles"
+
+# The OSM extract is pinned to a dated snapshot, not to "the current one".
+# Planetiler's --area downloads whatever Geofabrik serves today, and OSM changes
+# daily: a machine that built its tiles in September draws different buildings
+# and field boundaries than one building them today, so the map images differ
+# without anyone having touched the app. That is what was left after the capture
+# container had made everything else reproducible.
+#
+# Geofabrik keeps the dated extracts for a few months only. When the URL starts
+# answering 404 the snapshot has to be moved on - and the map images regenerated
+# with it, which is a deliberate step, not a surprise.
+TILE_OSM_URL="${QONNECTRA_TILE_OSM_URL:-https://download.geofabrik.de/europe/germany/schleswig-holstein-260915.osm.pbf}"
+# Name of the tile set, derived from the snapshot: a different snapshot is a
+# different file and is therefore generated instead of silently reused.
+TILE_ID="$(basename "$TILE_OSM_URL" .osm.pbf)"
+TILE_MBTILES="$TILES_DIR/$TILE_ID.mbtiles"
 PLANETILER_JAR="$TILES_DIR/planetiler.jar"
 PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar"
 
@@ -170,6 +184,7 @@ EOF
 
 RESET=0
 RESET_CHECKOUT=0
+TILES_RELINKED=0
 SKIP_TILES=0
 ENV_BACKUP=""
 for arg in "$@"; do
@@ -584,7 +599,7 @@ else
 		mv "$PLANETILER_JAR.tmp" "$PLANETILER_JAR"
 	fi
 
-	log "Generating map tiles for \"$TILE_AREA\" (one-off, takes a few minutes)"
+	log "Generating map tiles from $TILE_OSM_URL (one-off, takes a few minutes)"
 	# Write under an intermediate name first and rename afterwards: an aborted
 	# run would otherwise leave half an .mbtiles behind that counts as finished
 	# on the next run. The extension has to stay .mbtiles - Planetiler derives
@@ -593,15 +608,19 @@ else
 	# Working directory $TILES_DIR, so that Planetiler puts its downloads
 	# (data/sources) and temporary files there as well and can reuse them next
 	# time.
-	TILE_TMP="$TILES_DIR/.$TILE_AREA.partial.mbtiles"
+	TILE_TMP="$TILES_DIR/.$TILE_ID.partial.mbtiles"
+	# --area only names the downloaded file here; --osm-url decides what is
+	# fetched. It is set to the snapshot all the same, because Planetiler skips
+	# the download when the local file already exists - with the default name a
+	# new snapshot would silently be built from the previous extract.
 	if (cd "$TILES_DIR" && java -Xmx4g -jar "$PLANETILER_JAR" \
-		--download --area="$TILE_AREA" --force \
+		--download --osm-url="$TILE_OSM_URL" --area="$TILE_ID" --force \
 		--output="$TILE_TMP"); then
 		mv "$TILE_TMP" "$TILE_MBTILES"
 		log "Map tiles finished: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
 	else
 		rm -f "$TILE_TMP"
-		warn "Planetiler run for \"$TILE_AREA\" failed. Because of that the tileserver runs in a restart loop and the map uses OSM raster tiles."
+		warn "Planetiler run for $TILE_OSM_URL failed. If it answers 404 the snapshot has expired - see TILE_OSM_URL at the top of this script. Until then the tileserver runs in a restart loop and the map uses OSM raster tiles."
 	fi
 fi
 
@@ -621,13 +640,20 @@ if [ -f "$TILE_MBTILES" ]; then
 	# Link again when the file is missing or holds a different state than the
 	# cache. The size comparison covers both: a hard link always has the same
 	# size (no unnecessary recreation), a freshly generated extract or a change
-	# of QONNECTRA_TILE_AREA practically never.
+	# of the snapshot practically never.
 	if [ ! -e "$TILE_LINK" ] ||
 		[ "$(stat -c %s "$TILE_MBTILES")" != "$(stat -c %s "$TILE_LINK")" ]; then
 		rm -f "$TILE_LINK"
 		ln "$TILE_MBTILES" "$TILE_LINK" 2>/dev/null ||
 			cp "$TILE_MBTILES" "$TILE_LINK" ||
 			warn "Map tiles could not be linked to $TILE_LINK."
+		# The tileserver opens the file once at start and holds that inode.
+		# Replacing the link under a running container changes nothing until it
+		# is restarted, and `compose up` leaves an unchanged service alone - so
+		# a new tile set was generated, linked, and then quietly not used. Cost
+		# an afternoon: the map images kept differing from CI although both were
+		# supposedly building the same snapshot.
+		TILES_RELINKED=1
 	fi
 fi
 
@@ -689,6 +715,12 @@ if ! "${COMPOSE[@]}" up -d --build "${SERVICES[@]}"; then
 	# initdb.
 	warn "First start failed (probably the known postgres/init.sh bug with an empty DB volume), trying again..."
 	"${COMPOSE[@]}" up -d "${SERVICES[@]}"
+fi
+
+if ((TILES_RELINKED)); then
+	log "Restarting the tileserver so that it reads the new tiles"
+	"${COMPOSE[@]}" restart tileserver >/dev/null 2>&1 ||
+		warn "The tileserver could not be restarted - it is still serving the previous tiles."
 fi
 
 # nginx may have to be restarted if the backend container was recreated on the
@@ -908,7 +940,7 @@ if [ -f "$TILE_MBTILES" ]; then
 With them the map shows the real vector base map (light/dark mode), not the OSM
 fallback. The tiles live outside local-app/ and survive --reset and
 --reset-checkout. For a different region, delete them and generate again:
-  QONNECTRA_TILE_AREA=<region> $REPO_ROOT/scripts/setup-local-qonnectra.sh"
+  QONNECTRA_TILE_OSM_URL=<url> $REPO_ROOT/scripts/setup-local-qonnectra.sh"
 else
 	TILES_SECTION="Map tiles: NONE at $TILE_MBTILES
 The tileserver therefore runs in a restart loop; the frontend falls back to OSM

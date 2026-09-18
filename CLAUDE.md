@@ -383,6 +383,30 @@ All runs go exclusively against the local instance. There is no configurable
 target address and no `.env` in the repo root any more – `GEODOCK_URL` is no
 longer read.
 
+- **The specs run in a container, not on the machine you are sitting at.**
+  `scripts/capture.sh` (and with it `pnpm test:e2e`) starts them in the image
+  from `playwright/capture.Dockerfile`; the app stack stays on the host and is
+  reached through `--network host`.
+  The reason is one line in the app: `--font-family: system-ui` (`app.css`),
+  with no webfont shipped. Every glyph in every screenshot therefore comes from
+  the fonts of whoever runs the browser – a developer machine resolves
+  `system-ui` to Noto Sans, a GitHub runner to something else, and the first CI
+  run reported **all 50 images** as changed, text everywhere, differences up to
+  236 of 255. Fonts are only half of it: freetype and harfbuzz decide the
+  hinting and differ between distributions too, so installing the same font on
+  the runner would not have been enough.
+  The image pins Noto Sans (`playwright/capture-fonts.conf`) because that is
+  what the published images already show; the Playwright base image on its own
+  answers `system-ui` with WenQuanYi Zen Hei, a Chinese font for a German
+  interface. Measured afterwards: the container produces images **byte-identical**
+  to the ones the runner produces.
+  `pnpm test:e2e:ui` is the exception and stays on the host – it is for finding
+  selectors, and images from it must not be published.
+  The container needs the host's docker socket, which `capture.sh` mounts:
+  `tests/04-dashboard.spec.ts` HUPs the gunicorn workers to drop the five-minute
+  statistics cache (`clearDashboardCache()`), and without it exactly those two
+  seeding tests fail while everything else passes.
+
 - `playwright/local-app.ts` is the single source for address and credentials and
   reads `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`, `APP_USER_*`,
   `DJANGO_SUPERUSER_*`). Only obtain credentials through `localApp()`, never
@@ -548,6 +572,18 @@ longer read.
   Map images therefore show the real vector base map in light mode. If the
   `.mbtiles` is missing (run with `--skip-tiles`, no Java), the `tileserver` runs
   in a restart loop and the map falls back to OSM raster tiles.
+- The OSM extract is **pinned to a dated snapshot** (`TILE_OSM_URL` at the top of
+  the setup script), not to whatever Geofabrik serves today. OSM changes daily,
+  and tiles built in September draw different buildings and field boundaries
+  than tiles built today – the map images then differ between two machines
+  although nothing in the app or the specs changed. That was what was left over
+  after the capture container had made everything else reproducible.
+  Geofabrik keeps the dated extracts only for a few months. When the URL starts
+  answering 404, move the snapshot on **and regenerate the map images with it** –
+  that is a deliberate step, like raising `QONNECTRA_REF`. The file name of the
+  tile set carries the snapshot, so a changed pin is generated rather than
+  silently reused, and the CI cache key follows the setup script for the same
+  reason.
 
 **What the pipeline cannot make deterministic**
 

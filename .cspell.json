@@ -26,9 +26,13 @@
     "Elgendorfer",
     "EPSG",
     "esbenp",
+    "fontconfig",
+    "freetype",
     "gehostet",
+    "Geofabrik",
     "gezoomt",
     "gunicorn",
+    "harfbuzz",
     "Hosters",
     "hovern",
     "Händelhof",
@@ -54,6 +58,7 @@
     "Newsletterdaten",
     "Nieharde",
     "noout",
+    "noto",
     "nssdb",
     "pexels",
     "pixabay",
@@ -78,7 +83,8 @@
     "Verlegeart",
     "Verwaltungsmitarbeitende",
     "Websitebesucher",
-    "Websitebetreiber"
+    "Websitebetreiber",
+    "WenQuanYi"
   ],
   "ignoreRegExpList": [
     "/\\bTR-[A-Z0-9]{5,}\\b/g"

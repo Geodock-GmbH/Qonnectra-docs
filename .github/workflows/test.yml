@@ -88,16 +88,18 @@ jobs:
           java-version: '21'
 
       # Only the finished tiles and the Planetiler jar, not its intermediate
-      # downloads - around 230 MB instead of 1.8 GB. The region is fixed
-      # (schleswig-holstein, where the test project lies), so the key is too:
-      # the cache is rebuilt by bumping the suffix, not by a hash.
+      # downloads - around 230 MB instead of 1.8 GB.
+      #
+      # The key follows the setup script, which is where the pinned OSM snapshot
+      # lives: moving the snapshot on has to rebuild the tiles, and a stale cache
+      # would otherwise keep the old extract and quietly change every map image.
       - name: Cache the map tiles
         uses: actions/cache@v4
         with:
           path: |
             ~/.local/share/qonnectra-local-tiles/planetiler.jar
-            ~/.local/share/qonnectra-local-tiles/schleswig-holstein.mbtiles
-          key: qonnectra-tiles-schleswig-holstein-v1
+            ~/.local/share/qonnectra-local-tiles/*.mbtiles
+          key: qonnectra-tiles-${{ hashFiles('scripts/setup-local-qonnectra.sh') }}
 
       # *.localhost resolves to loopback on its own (RFC 6761), but on the
       # runner it answers with ::1 first. The entries pin it to IPv4, where the
@@ -122,14 +124,20 @@ jobs:
       - name: Start the local Qonnectra instance
         run: scripts/setup-local-qonnectra.sh
 
-      # ffmpeg as well as the browser: Playwright encodes the recordings with it,
-      # and scripts/check-videos.sh reads them back with the same binary.
-      - name: Install Chromium and ffmpeg
-        run: pnpm exec playwright install --with-deps chromium ffmpeg
+      # Only ffmpeg, and only for scripts/check-videos.sh, which reads the
+      # finished recordings back on the host. The browser lives in the capture
+      # container (playwright/capture.Dockerfile) - see the note on the capture
+      # steps below.
+      - name: Install ffmpeg
+        run: pnpm exec playwright install ffmpeg
 
-      # The two capture runs come first, both of them. They are the part that
-      # actually exercises the app, and a failure here is a broken interaction,
-      # not a stale image.
+      # Both capture runs come first. They are the part that actually exercises
+      # the app, and a failure here is a broken interaction, not a stale image.
+      #
+      # They run in the capture container, not on the runner. The app asks for
+      # `system-ui` and ships no font, so every glyph comes from the machine
+      # running the browser - the first CI run reported all 50 images as changed
+      # for that reason alone. scripts/capture.sh builds the image on demand.
       #
       # Without the videos - a recording is never byte-identical, see the
       # project "videos" in playwright.config.ts.

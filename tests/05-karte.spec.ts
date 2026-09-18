@@ -552,9 +552,23 @@ test('3.4 Suchablauf (Composite)', async ({ page }) => {
   // "Nieharde 12" - the map jumps to the corresponding house. A second search
   // for a different term would be a break in the narrative and additionally left
   // the result list standing.
-  const firstResult = results.locator('li.result-item').first()
-  await expect(firstResult).toContainText('Nieharde 12')
-  await firstResult.locator('button.result-button').click()
+  // The address, picked by its exact label rather than as the first of the
+  // list. Filtering for "12" leaves two hits of different kinds - the address
+  // "Nieharde 12" and the node "HA - Sterup,Nieharde 12" - and which of them
+  // comes first is not settled: the search sorts by `order_by("-similarity")`
+  // without a second key (search.py). Clicking the node instead jumps to a
+  // different feature, and the whole tile shows a different piece of map. That
+  // was the last difference left between this machine and CI.
+  // Only the address carries "Nieharde 12" as its complete text.
+  const hit = results
+    .locator('li.result-item')
+    .filter({ has: page.getByText('Nieharde 12', { exact: true }) })
+  await expect(
+    hit,
+    'The address "Nieharde 12" is not among the filtered results - has the demo ' +
+      'data changed?',
+  ).toHaveCount(1)
+  await hit.locator('button.result-button').click()
   await moveCursorAway(page)
 
   // Everything transient of the jump has to be over - see settledMapShot().
