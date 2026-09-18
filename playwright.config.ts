@@ -70,9 +70,28 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
     },
     {
+      // Everything that produces still images. Deliberately without the video
+      // specs - see the project "videos" below.
       name: 'chromium',
       use: { storageState: 'auth-state.json' },
       dependencies: ['setup'],
+      testIgnore: /-video\.spec\.ts$/,
+    },
+    {
+      // Videos are a project of their own so that `pnpm test:e2e` does not
+      // re-record them.
+      //
+      // A recording can never come out byte-identical: it is a screencast of a
+      // real interaction, and its length follows render and network latency.
+      // Measured across two consecutive runs of the same specs, all 13 videos
+      // differed, with durations 1 to 19 frames apart - while of 137 still
+      // images only 8 changed. Re-recording therefore has to be a decision, not
+      // a side effect: a video is renewed when its spec or the app changed, and
+      // `pnpm test:e2e:videos [file]` is how that is done.
+      name: 'videos',
+      use: { storageState: 'auth-state.json' },
+      dependencies: ['setup'],
+      testMatch: /-video\.spec\.ts$/,
     },
   ],
 })
