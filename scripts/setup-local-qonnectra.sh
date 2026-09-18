@@ -96,8 +96,14 @@ TILE_OSM_URL="${QONNECTRA_TILE_OSM_URL:-https://download.geofabrik.de/europe/ger
 # different file and is therefore generated instead of silently reused.
 TILE_ID="$(basename "$TILE_OSM_URL" .osm.pbf)"
 TILE_MBTILES="$TILES_DIR/$TILE_ID.mbtiles"
-PLANETILER_JAR="$TILES_DIR/planetiler.jar"
-PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar"
+# Pinned like the extract, and for the same reason: the tiles are only
+# reproducible if both inputs are. "latest" would have meant that a Planetiler
+# release changes the base map of every map image, at a moment nobody chose.
+# The version is part of the file name so that a bump is fetched instead of the
+# old jar being reused.
+PLANETILER_VERSION="${QONNECTRA_PLANETILER_VERSION:-v0.10.2}"
+PLANETILER_JAR="$TILES_DIR/planetiler-$PLANETILER_VERSION.jar"
+PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/download/$PLANETILER_VERSION/planetiler.jar"
 
 # Help link of the app (PUBLIC_DOCUMENTATION_URL). The app shows it in the
 # header, the navigation bar and the mobile navigation, and hides it while the

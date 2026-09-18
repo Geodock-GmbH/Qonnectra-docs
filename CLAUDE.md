@@ -584,6 +584,11 @@ longer read.
   tile set carries the snapshot, so a changed pin is generated rather than
   silently reused, and the CI cache key follows the setup script for the same
   reason.
+- Planetiler itself is pinned too (`PLANETILER_VERSION`, currently `v0.10.2`).
+  Tiles have two inputs, and both have to be fixed: with `releases/latest` a new
+  Planetiler would have redrawn the base map of every map image at a moment
+  nobody chose. The jar carries its version in the file name for the same reason
+  the tile set carries its snapshot.
 
 **What the pipeline cannot make deterministic**
 
