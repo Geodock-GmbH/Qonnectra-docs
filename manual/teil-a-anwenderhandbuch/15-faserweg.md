@@ -71,7 +71,7 @@ Jede Station des Weges beginnt mit der Faser („F1“), dem Kabel und dessen Ka
 Jeder Spleiß rückt die nächste Station eine Stufe ein. Teilt sich der Weg – etwa hinter einem Splitter –, stehen mehrere Stationen auf derselben Stufe, und die Statistik meldet „Verzweigungen: Ja“.
 
 ::: info
-Die Schaltflächen im Baum tun zwei verschiedene Dinge. Faser, Kabel, Netzknoten und Adresse in den ersten Zeilen einer Station **markieren** das Objekt in der Karte, sofern sie eingeblendet ist (siehe Abschnitt [Geometrie](#_15-6-geometrie-modus-ausrichtung-geojson-download)); ohne Karte bewirken sie nichts. Die Netzknoten- und Adress-Schaltflächen **in den Details** – unter „Endpunkt“, „Kabelpfad“ und „Adresse:“ – starten dagegen einen neuen Faserweg von diesem Objekt aus.
+Die Schaltflächen im Baum tun zwei verschiedene Dinge. Faser, Kabel, Netzknoten und Adresse in den ersten Zeilen einer Station **markieren** das Objekt in der Karte des Faserwegs. Die steht nur dann neben dem Ergebnis, wenn Sie von einer Faser aus eingestiegen sind und „Geometrie einbeziehen“ angekreuzt haben, siehe Abschnitt [Geometrie](#_15-6-geometrie-modus-ausrichtung-geojson-download); ohne sie bewirken diese Schaltflächen nichts. Die Netzknoten- und Adress-Schaltflächen **in den Details** – unter „Endpunkt“, „Kabelpfad“ und „Adresse:“ – starten dagegen einen neuen Faserweg von diesem Objekt aus.
 :::
 
 **Die Tabelle**

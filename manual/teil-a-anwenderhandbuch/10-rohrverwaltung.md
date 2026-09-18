@@ -48,7 +48,7 @@ Speichern Sie Ihre Änderungen, bevor Sie ein anderes Rohr aus der Tabelle ausw�
 
 ## 10.4 Mikrorohre eines Rohrs
 
-Der Reiter „Status“ listet die **Mikrorohre** des Rohrs auf, mit den Spalten „#“, „Farbe“, „Adresse“ (des angeschlossenen Netzknotens), „Kabel“ und „Status“. Anzahl und Farben gibt der Rohrtyp vor; ändern lassen sie sich hier nicht.
+Der Reiter „Status“ listet die **Mikrorohre** des Rohrs auf, mit den Spalten „#“ für die Mikrorohrnummer, „Farbe“, „Adresse“ (des angeschlossenen Netzknotens), „Kabel“ und „Status“. Anzahl und Farben gibt der Rohrtyp vor; ändern lassen sie sich hier nicht.
 
 ![Screenshot Rohrverwaltung mit Hervorhebung der Info-Box im Reiter „Status“ mit der Liste der Mikrorohre](/images/manual/teil-a/conduit_status.jpg)
 
