@@ -120,8 +120,11 @@ pnpm install
 pnpm dev              # http://localhost:5173
 pnpm build            # BASE_PATH="/Qonnectra-docs/" in CI
 pnpm lint:spelling    # cspell (en, en-GB, de) – has to be green before every commit
+pnpm lint:captures    # no spec may call .screenshot() itself – see shoot() below
 pnpm test:e2e:setup   # write the login state to auth-state.json
-pnpm test:e2e         # Playwright specs in tests/
+pnpm test:e2e         # the image specs in tests/ – without the videos
+pnpm test:e2e:videos  # only the video specs, deliberately a separate command
+pnpm check:videos     # recordings sound? (no comparison with public/videos/)
 
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
@@ -337,6 +340,18 @@ local instance, so that they can be regenerated when the app changes.
 - `scripts/setup-local-qonnectra.sh` clones the app into `local-app/` and starts
   it through the **production** compose file. Idempotent, may be run any number
   of times.
+- The app is **pinned to a release**, `QONNECTRA_REF` at the top of the script,
+  currently **`v1.7.0`** – not the default branch. Every image of the manual has
+  to show the same version; unpinned, a CI run and a laptop built two different
+  apps and the images differed without anyone being able to see why. An existing
+  `local-app/` is switched to the pinned version on the next run; if it carries
+  uncommitted changes the script stops instead (`--reset-checkout` throws the
+  checkout away).
+  Raising the version is its own piece of work, not a side effect: bump
+  `QONNECTRA_REF`, regenerate the screenshots, go through what changed in the
+  app, and update the version in this file and in `OUTLINE.md`.
+  `QONNECTRA_REF=… ` looks at another version – images from such a run are not
+  committed.
 - Reachable at `https://app.qonnectra.localhost` (admin:
   `https://admin.qonnectra.localhost/admin`, API: `https://api.qonnectra.localhost`).
 - Two accounts, credentials in `local-app/deployment/.env`, generated randomly on
@@ -368,6 +383,30 @@ All runs go exclusively against the local instance. There is no configurable
 target address and no `.env` in the repo root any more – `GEODOCK_URL` is no
 longer read.
 
+- **The specs run in a container, not on the machine you are sitting at.**
+  `scripts/capture.sh` (and with it `pnpm test:e2e`) starts them in the image
+  from `playwright/capture.Dockerfile`; the app stack stays on the host and is
+  reached through `--network host`.
+  The reason is one line in the app: `--font-family: system-ui` (`app.css`),
+  with no webfont shipped. Every glyph in every screenshot therefore comes from
+  the fonts of whoever runs the browser – a developer machine resolves
+  `system-ui` to Noto Sans, a GitHub runner to something else, and the first CI
+  run reported **all 50 images** as changed, text everywhere, differences up to
+  236 of 255. Fonts are only half of it: freetype and harfbuzz decide the
+  hinting and differ between distributions too, so installing the same font on
+  the runner would not have been enough.
+  The image pins Noto Sans (`playwright/capture-fonts.conf`) because that is
+  what the published images already show; the Playwright base image on its own
+  answers `system-ui` with WenQuanYi Zen Hei, a Chinese font for a German
+  interface. Measured afterwards: the container produces images **byte-identical**
+  to the ones the runner produces.
+  `pnpm test:e2e:ui` is the exception and stays on the host – it is for finding
+  selectors, and images from it must not be published.
+  The container needs the host's docker socket, which `capture.sh` mounts:
+  `tests/04-dashboard.spec.ts` HUPs the gunicorn workers to drop the five-minute
+  statistics cache (`clearDashboardCache()`), and without it exactly those two
+  seeding tests fail while everything else passes.
+
 - `playwright/local-app.ts` is the single source for address and credentials and
   reads `local-app/deployment/.env` (`APP_DOMAIN`, `API_DOMAIN`, `APP_USER_*`,
   `DJANGO_SUPERUSER_*`). Only obtain credentials through `localApp()`, never
@@ -397,6 +436,43 @@ longer read.
   chapter sit next to it in `tests/<NN>-<chapter-slug>-video.spec.ts`; a separate
   file is mandatory, because `test.use({ video: … })` is only allowed at file
   level ("forces a new worker" inside a `test.describe` group).
+- The file name suffix `-video` is what splits the two Playwright projects
+  (`playwright.config.ts`): `chromium` ignores it, `videos` matches exactly it.
+  A video spec that is not named that way gets re-recorded by every `pnpm
+  test:e2e`.
+- **Videos follow a different rule from the images, deliberately.** An image is
+  judged by its content – the same view has to come out the same, and CI checks
+  it. A recording cannot: it is a screencast of a real interaction, and its
+  length follows render and network latency (measured across two runs: all 13
+  videos differed, 1 to 19 frames apart, while only 8 of 137 images did). They
+  are therefore judged by their provenance – a video is renewed when its spec
+  or the app version changed, not because a run happened. Hence the own
+  project, hence `screenshots:publish --images` in CI, and hence no tolerance
+  gate for `public/videos/`.
+  What does **not** follow from that: a video may show whatever it likes. It
+  sits in the same manual as the images, so the same data rules apply –
+  placeholders instead of personal data, and `freezeDates()` wherever the app
+  shows a date the backend stamped. `map_attachment.webm` ended on the day it
+  was recorded while `conduit_attachment.jpg` showed `CAPTURE_DATE`; that is a
+  contradiction in the manual, not a capture detail.
+  Nor does it follow that CI leaves them alone. It records them on every run –
+  the specs assert their way through every step, so a moved button fails there
+  long before anyone notices it in the manual – and then checks the files with
+  `pnpm check:videos`: is every video the manual embeds there, is it VP8, are
+  width, length and size in range, and is the picture not empty. The last one is
+  the point of the script: the crop of `postProcessVideo()` runs after the
+  recording and knows nothing about the layout, so it can end up pointing past
+  the interface while every assertion still passes. What CI never does is
+  compare a recording with the published one.
+- **Captures go exclusively through `shoot()` resp. `shootTile()`**, never
+  through `page.screenshot()` or `locator.screenshot()`. `pnpm lint:captures`
+  fails on a direct call. Reason: both default to `animations: "allow"`, and
+  the frontend is Svelte 5, whose transitions run through the Web Animations
+  API. `disableAnimations()` only injects CSS and cannot reach them, so the
+  capture lands somewhere in the middle of the movement – that is how
+  `login_mobile_more.jpg` came out with the menu at a different slide offset on
+  every run. `shoot()` passes `animations: "disabled"`, which the browser
+  applies to CSS animations, CSS transitions **and** Web Animations.
 - Output goes to `tests/screenshots/<chapter-slug>/<name>.png` through
   `shotPath()` resp. `tests/videos/<chapter-slug>/<name>.webm` through
   `videoPath()`. `tests/screenshots/`, `tests/videos/`, `test-results/`,
@@ -411,6 +487,19 @@ longer read.
   Captures without a reference are skipped, so that nothing ends up in the wrong
   folder. `--dry-run` shows beforehand what would be created and what replaced,
   `--videos` and `--images` restrict the run to one kind.
+- An image whose picture matches the published one is **not** written; the run
+  reports it as „unchanged“. Without that gate every run rewrote nearly every
+  file: two captures of the same view differ in the anti-aliasing of the glyph
+  edges by at most 17 of 255 – invisible, but enough to change every byte of the
+  JPEG. One commit rewrote 99 of 137 images that way, 72 of them without any
+  visible difference. The tolerance (`DIFF_FUZZ`, `MAX_DIFF_PIXELS` in the
+  script) is measured, not guessed: at a fuzz of 10 % the noise comes out at 0
+  differing pixels, the smallest genuine change at 217. `--force` writes anyway.
+- Two capture folders with the same file name make the script abort. The chapter
+  renumbering left `tests/screenshots/03-einstieg-anmeldung/` next to
+  `01-erste-schritte/`, and because „03“ sorts after „01“ six `login_*` images
+  were published from weeks-old captures on every run – silently, over the fresh
+  ones. When a chapter is renumbered, its capture folder is renamed with it.
 - Only patterns 1 and 2 go through fully automatically. Images with hand-drawn
   annotations (pattern 3) are post-processed after publishing – look at
   `--dry-run` first, otherwise the run overwrites the handwork with a raw
@@ -422,8 +511,10 @@ longer read.
   logged-in calls of `/login` to `/map`.
 - `workers: 1` and `fullyParallel: false` are deliberate: all specs share one
   instance including project selection and map position.
-- Determinism helpers in `playwright/manual-shots.ts`: `disableAnimations()`
-  (transitions and text caret off), `moveCursorAway()` (no hover states in the
+- Determinism helpers in `playwright/manual-shots.ts`: `shoot()` (the one way to
+  capture, see above) and `shootTile()` for the tiles of a composite,
+  `disableAnimations()` (CSS transitions and text caret off – not enough on its
+  own), `moveCursorAway()` (no hover states in the
   image), `spotlight()` for pattern 2 and `composite2x2()` for pattern 4. The
   grid is assembled in the browser, so the repo needs no image library. Pattern 3
   (hand-drawn ellipses/arrows) stays post-processing.
@@ -481,6 +572,73 @@ longer read.
   Map images therefore show the real vector base map in light mode. If the
   `.mbtiles` is missing (run with `--skip-tiles`, no Java), the `tileserver` runs
   in a restart loop and the map falls back to OSM raster tiles.
+- The OSM extract is **pinned to a dated snapshot** (`TILE_OSM_URL` at the top of
+  the setup script), not to whatever Geofabrik serves today. OSM changes daily,
+  and tiles built in September draw different buildings and field boundaries
+  than tiles built today – the map images then differ between two machines
+  although nothing in the app or the specs changed. That was what was left over
+  after the capture container had made everything else reproducible.
+  Geofabrik keeps the dated extracts only for a few months. When the URL starts
+  answering 404, move the snapshot on **and regenerate the map images with it** –
+  that is a deliberate step, like raising `QONNECTRA_REF`. The file name of the
+  tile set carries the snapshot, so a changed pin is generated rather than
+  silently reused, and the CI cache key follows the setup script for the same
+  reason.
+- Planetiler itself is pinned too (`PLANETILER_VERSION`, currently `v0.10.2`).
+  Tiles have two inputs, and both have to be fixed: with `releases/latest` a new
+  Planetiler would have redrawn the base map of every map image at a moment
+  nobody chose. The jar carries its version in the file name for the same reason
+  the tile set carries its snapshot.
+
+**What the pipeline cannot make deterministic**
+
+These sit in the app, not in the specs. An image that keeps changing on every
+run without anyone touching it is most likely one of them – check here before
+looking for a race in the spec.
+
+- **Result order of the search.** `trigram_address_search()` ends in
+  `order_by("-similarity")` without a second sort key
+  (`local-app/backend/apps/api/search.py`). Addresses of the same street tie on
+  the score, and Postgres then returns them in whatever order it likes; the
+  images of the search fields reorder their rows from run to run. That is a bug
+  in the app, not in the capture: paginating through tied results skips and
+  repeats rows for users too. The fix belongs upstream (`order_by("-similarity",
+  "id")`) – `local-app/` is a foreign, gitignored checkout and is never patched
+  from here. Until then, pick a search term whose hits do not tie.
+- **Charts over equal values.** „Neueste Netzknoten“ is `order_by("-date")[:5]`
+  without a second sort key (`views.py`), and 47 of the 118 nodes of the demo
+  data carry the same date while 71 have none – which five come back is up to
+  Postgres and changes as soon as anything writes to the table. On top of that
+  `NodeStatistics.svelte` sorts with `(a, b) => b.value - a.value` over a
+  hard-coded `value: 1`, so the comparison returns 0 throughout. Not
+  interceptable either, the dashboard is loaded by `+page.server.ts`. The spec
+  therefore gives five nodes a date of its own and reverts it afterwards, the
+  same device the warranty card uses (`tests/04-dashboard.spec.ts`).
+- **Timestamps the backend sets.** `created_at`/`modified_at` are `auto_now_add`
+  resp. `auto_now` on the models, so the backend discards any supplied value and
+  `page.clock` (browser only) changes nothing. `freezeDates()` in
+  `playwright/stable-dates.ts` rewrites them on the way into the page and keeps
+  every capture at `CAPTURE_DATE`; the tab „Anhänge“ showed the day of the run
+  next to every file name before that. Works only where the browser fetches the
+  data itself – whatever a `+page.server.ts` loads runs inside the container and
+  never passes Playwright.
+- **Anything transient in the app.** A capture is not fast enough to hit a state
+  that only exists for a moment. After a jump to a search hit the map blinks the
+  object six times at 300 ms (`zoomToFeature` in `searchUtils.ts`) and a toast
+  fades out on its own – an element screenshot takes longer than one blink
+  phase, so even a capture bracketed by „is it on“ checks fell into the gap
+  (three of four runs). Capture the settled state instead, and check that the
+  transient is over rather than waiting a fixed time.
+- **Labels of the base map.** OpenLayers places them with a declutter pass over
+  the features it happens to have at the moment of the render, so a tile
+  arriving late moves the street names by a few pixels – 10 700 pixels of
+  difference in `map_search` between two runs, and the amplified diff showed
+  nothing but street names. Fixed, and the fix is the pattern for every map
+  image: wait until the painted picture stops changing, `waitForBaseMapSettled()`
+  in `tests/05-karte.spec.ts`. Once in `openMap()` is **not** enough –
+  `spotlight()` puts an SVG over the page, and the reflow makes OpenLayers render
+  again with a fresh declutter pass. Every capture of that chapter therefore goes
+  through `shootMap()`, which settles immediately before the shot.
 
 - If the API answers with **502** although the backend container is running:
   after a restart of the backend, `nginx` has cached its old container IP
@@ -518,8 +676,9 @@ longer read.
 
 **The app (context for selectors and routes)**
 
-SvelteKit + Skeleton, currently version **1.7.0** (the app shows it in the
-header). The navigation bar is sorted into groups; the labels are short and only
+SvelteKit + Skeleton, version **1.7.0** (the app shows it in the header) – the
+release the setup pins the checkout to, see `QONNECTRA_REF` above. The
+navigation bar is sorted into groups; the labels are short and only
 unambiguous together with their group (group „Rohr“ → „Verwaltung“ =
 Rohrverwaltung). This order is the order of the chapters 4–17. Routes and
 labels:

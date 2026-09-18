@@ -8,9 +8,10 @@ import {
   crop16by10,
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
 
 // Screenshots for chapter "4. Dashboard" in the manual
 // (manual/teil-a-anwenderhandbuch/04-dashboard.md). Produces all images of the
@@ -182,6 +183,9 @@ const DEADLINES_IN_DAYS = [14, 60, 200]
 /** Nodes whose deadline this run seeded - for the revert. */
 let seededNodes: string[] = []
 
+/** The deadlines actually written, in the order of DEADLINES_IN_DAYS. */
+let seededDeadlines: string[] = []
+
 /**
  * Logged-in API context using the capture account.
  *
@@ -229,9 +233,11 @@ async function seedDeadlines() {
 
     for (const [index, days] of DEADLINES_IN_DAYS.entries()) {
       const uuid = nodes[index].id
-      const patch = await api.patch(`/api/v1/node/${uuid}/`, { data: { warranty: inDays(days) } })
+      const deadline = inDays(days)
+      const patch = await api.patch(`/api/v1/node/${uuid}/`, { data: { warranty: deadline } })
       expect(patch.ok(), `The deadline could not be set (HTTP ${patch.status()}).`).toBe(true)
       seededNodes.push(uuid)
+      seededDeadlines.push(deadline)
     }
   } finally {
     await api.dispose()
@@ -253,6 +259,7 @@ async function revertDeadlines() {
       ).toBe(true)
     }
     seededNodes = []
+    seededDeadlines = []
 
     // Cross-check at the source: /api/v1/node/expiring_warranties/ reads
     // straight from the database and does not go through the cache of the
@@ -335,7 +342,7 @@ function clearDashboardCache() {
 
 test('4. Übersicht des Dashboards', async ({ page }) => {
   await openDashboard(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard')
 })
 
 test('1.3 Projektauswahl in der Kopfzeile', async ({ page }) => {
@@ -345,7 +352,7 @@ test('1.3 Projektauswahl in der Kopfzeile', async ({ page }) => {
   await expect(page.getByPlaceholder('Projekt', { exact: true })).toHaveValue('Testprojekt')
 
   const spotlightOff = await spotlight(page, projectPicker(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_project'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_project')
   await spotlightOff()
 })
 
@@ -368,13 +375,11 @@ test('1.3 Geöffnete Projektliste', async ({ page }) => {
   // from the selection, not from hovering.
   await moveCursorAway(page)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'dashboard_project_detail'),
-    // A bit more padding than usual: input field and list together are only
-    // about 250 x 150 px, and without surroundings the image would not show
-    // that the picker sits in the header.
+  // A bit more padding than usual: input field and list together are only about
+  // 250 x 150 px, and without surroundings the image would not show that the
+  // picker sits in the header.
+  await shoot(page, CHAPTER, 'dashboard_project_detail', {
     clip: await crop16by10(page, [picker, list], { padding: 56 }),
-    animations: 'disabled',
   })
 })
 
@@ -383,7 +388,7 @@ test('4. Reiterleiste', async ({ page }) => {
 
   await expect(page.getByRole('tab')).toHaveCount(6)
   const spotlightOff = await spotlight(page, tabBar(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_tabs'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_tabs')
   await spotlightOff()
 })
 
@@ -391,7 +396,7 @@ test('4.1 Karten im Reiter „Übersicht"', async ({ page }) => {
   await openDashboard(page)
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_overview'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_overview')
   await spotlightOff()
 })
 
@@ -400,7 +405,7 @@ test('4.2 Diagramme im Reiter „Trasse"', async ({ page }) => {
   await openTab(page, 'Trasse', 'Gesamtlänge pro Oberfläche')
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_trench'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_trench')
   await spotlightOff()
 })
 
@@ -433,11 +438,7 @@ test('4.2 Kurzhinweis auf einem Balken', async ({ page }) => {
       'only shows it while the cursor rests on the bar.',
   ).toBeGreaterThan(withoutTooltip * 2)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'dashboard_trench_hover'),
-    clip: await crop16by10(page, chart),
-    animations: 'disabled',
-  })
+  await shoot(page, CHAPTER, 'dashboard_trench_hover', { clip: await crop16by10(page, chart) })
 })
 
 test('4.3 Auswertungen im Reiter „Rohre"', async ({ page }) => {
@@ -445,17 +446,97 @@ test('4.3 Auswertungen im Reiter „Rohre"', async ({ page }) => {
   await openTab(page, 'Rohre', 'Top 5 längste Rohre')
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_conduit'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_conduit')
   await spotlightOff()
 })
 
-test('4.4 Diagramme im Reiter „Netzknoten"', async ({ page }) => {
-  await openDashboard(page)
-  await openTab(page, 'Netzknoten', 'Netzknoten nach Ort')
+// ---------------------------------------------------------------------------
+// Seeding node dates (only for dashboard_node)
+// ---------------------------------------------------------------------------
+//
+// The card "Neueste Netzknoten" is `order_by("-date")[:5]` without a second
+// sort key (views.py), and in the demo data 47 of the 118 nodes carry the exact
+// same date 2026-03-19 while the other 71 have none at all. Which five of the
+// 47 come back is therefore up to Postgres, and it changes as soon as anything
+// writes to the table - which this spec does itself when it seeds the warranty
+// deadlines. Between two consecutive runs the chart reordered itself without
+// anyone having touched the app.
+//
+// Rewriting the response is not available here: the dashboard is loaded by
+// +page.server.ts inside the container, so the request never passes Playwright
+// (unlike the attachment dates, see playwright/stable-dates.ts). Five nodes
+// therefore get a date of their own - the same device the warranty card above
+// already uses for its deadlines - and it is reverted afterwards.
 
-  const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_node'), animations: 'disabled' })
-  await spotlightOff()
+/** Dates for the five newest nodes, newest first. After the 2026-03-19 of the demo data. */
+const NODE_DATES = ['2026-03-24', '2026-03-23', '2026-03-22', '2026-03-21', '2026-03-20']
+
+/** Nodes whose date this run overwrote, together with the value they had before. */
+let seededDates: { uuid: string; date: string | null }[] = []
+
+/**
+ * Gives the first five nodes by name a date of their own. Picked by name for
+ * the same reason as the deadlines above: every run hits the same nodes, so the
+ * image always shows the same labels.
+ */
+async function seedNodeDates() {
+  const api = await apiContext()
+  try {
+    const response = await api.get('/api/v1/node/?project=2&ordering=name')
+    expect(response.ok(), 'The nodes of the test project cannot be fetched.').toBe(true)
+    const nodes: { id: string; properties?: { date?: string | null } }[] =
+      (await response.json()).results?.features ?? []
+    expect(
+      nodes.length,
+      'The test project has fewer than five nodes - were the demo data ' +
+        'imported? (scripts/setup-local-qonnectra.sh)',
+    ).toBeGreaterThanOrEqual(NODE_DATES.length)
+
+    for (const [index, date] of NODE_DATES.entries()) {
+      const { id: uuid, properties } = nodes[index]
+      const patch = await api.patch(`/api/v1/node/${uuid}/`, { data: { date } })
+      expect(patch.ok(), `The node date could not be set (HTTP ${patch.status()}).`).toBe(true)
+      seededDates.push({ uuid, date: properties?.date ?? null })
+    }
+  } finally {
+    await api.dispose()
+  }
+
+  clearDashboardCache()
+}
+
+/** Puts the overwritten dates back. */
+async function revertNodeDates() {
+  const api = await apiContext()
+  try {
+    for (const { uuid, date } of seededDates) {
+      const patch = await api.patch(`/api/v1/node/${uuid}/`, { data: { date } })
+      expect(
+        patch.ok(),
+        `The date of ${uuid} could not be reverted (HTTP ${patch.status()}). ` +
+          'Please check by hand - otherwise every following run carries it along.',
+      ).toBe(true)
+    }
+    seededDates = []
+  } finally {
+    await api.dispose()
+  }
+
+  clearDashboardCache()
+}
+
+test.describe('Netzknoten', () => {
+  test.beforeAll(seedNodeDates)
+  test.afterAll(revertNodeDates)
+
+  test('4.4 Diagramme im Reiter „Netzknoten"', async ({ page }) => {
+    await openDashboard(page)
+    await openTab(page, 'Netzknoten', 'Netzknoten nach Ort')
+
+    const spotlightOff = await spotlight(page, contentArea(page))
+    await shoot(page, CHAPTER, 'dashboard_node')
+    await spotlightOff()
+  })
 })
 
 test('4.5 Diagramme im Reiter „Adressen"', async ({ page }) => {
@@ -463,7 +544,7 @@ test('4.5 Diagramme im Reiter „Adressen"', async ({ page }) => {
   await openTab(page, 'Adressen', 'Adressen nach Ort')
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_address'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_address')
   await spotlightOff()
 })
 
@@ -472,7 +553,7 @@ test('4.6 Karten und Diagramme im Reiter „Gebiete"', async ({ page }) => {
   await openTab(page, 'Gebiete', 'Gebiete nach Typ')
 
   const spotlightOff = await spotlight(page, contentArea(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_area'), animations: 'disabled' })
+  await shoot(page, CHAPTER, 'dashboard_area')
   await spotlightOff()
 })
 
@@ -481,6 +562,37 @@ test('4.6 Karten und Diagramme im Reiter „Gebiete"', async ({ page }) => {
 // minutes (see clearDashboardCache()). All images above are therefore taken
 // beforehand - they show the card "Gewährleistung" in its empty state, the way
 // the demo data leave it.
+/**
+ * Opens the dashboard the way a user does, through the navigation bar.
+ *
+ * `page.goto('/dashboard')` renders the page on the server, and its data -
+ * `+page.server.ts` fetching `dashboard/statistics/` - never leaves the
+ * container. Reached from inside the app, SvelteKit fetches the same data as
+ * `__data.json` from the browser, and only then can it be rewritten. The
+ * detour over /settings is just some light page to start from; the map would
+ * load its tiles for nothing.
+ */
+async function openDashboardFromNavigation(page: Page) {
+  await page.goto('/settings')
+  await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
+
+  await expect(page).toHaveURL(/\/dashboard\/2(\/|$)/)
+  await expect(page.getByRole('heading', { name: 'Trassenstatistik' })).toBeVisible()
+  await expect(page.getByText('km Gesamtlänge')).toBeVisible()
+  await page.waitForLoadState('networkidle')
+
+  await disableAnimations(page)
+  await moveCursorAway(page)
+}
+
+/** `CAPTURE_DATE` plus `days`, in the format of the API. */
+function captureDeadline(days: number): string {
+  const day = new Date(CAPTURE_DATE)
+  day.setDate(day.getDate() + days)
+  const twoDigits = (value: number) => String(value).padStart(2, '0')
+  return `${day.getFullYear()}-${twoDigits(day.getMonth() + 1)}-${twoDigits(day.getDate())}`
+}
+
 test.describe('Gewährleistung', () => {
   test.beforeAll(seedDeadlines)
   // Runs even when the test case fails. Without it every following run - and
@@ -497,15 +609,37 @@ test.describe('Gewährleistung', () => {
         '[class*="border-error-500"], [class*="border-warning-500"], [class*="border-success-500"]',
       )
 
+    // The deadlines are seeded relative to today, so that the card keeps saying
+    // "in 14 / 60 / 200 Tagen" and keeps its three colour levels - those come
+    // from `days_until_expiry`, which the backend works out against its own
+    // clock. The dates next to them moved by a day with every day that passed,
+    // which is 413 pixels of difference in the image for nothing. They are
+    // therefore rewritten to CAPTURE_DATE plus the same terms: the card stays
+    // correct in itself and comes out the same in every run.
+    const displayDates = await replaceInResponses(
+      page,
+      '**/__data.json*',
+      Object.fromEntries(
+        DEADLINES_IN_DAYS.map((days, index) => [seededDeadlines[index], captureDeadline(days)]),
+      ),
+    )
+
     // gunicorn only stops the old worker processes once they have finished
     // their current request. Right after the restart an old process can
     // therefore still answer and the card stay empty - hence several attempts
     // instead of a single load.
     for (let attempt = 1; attempt <= 8; attempt++) {
-      await openDashboard(page)
+      await openDashboardFromNavigation(page)
       if ((await entries().count()) === DEADLINES_IN_DAYS.length) break
       await page.waitForTimeout(1500)
     }
+
+    expect(
+      displayDates(),
+      'No deadline was rewritten in the page data. Does SvelteKit still deliver ' +
+        'the load data of the dashboard as __data.json? Without the rewrite the ' +
+        'image carries the day of the run.',
+    ).toBeGreaterThan(0)
 
     await expect(
       entries(),
@@ -537,7 +671,7 @@ test.describe('Gewährleistung', () => {
     await expect(warrantyCard()).toBeInViewport({ ratio: 1 })
 
     const spotlightOff = await spotlight(page, warrantyCard())
-    await page.screenshot({ path: shotPath(CHAPTER, 'dashboard_warranty'), animations: 'disabled' })
+    await shoot(page, CHAPTER, 'dashboard_warranty')
     await spotlightOff()
   })
 })

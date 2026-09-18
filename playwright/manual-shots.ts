@@ -1,8 +1,8 @@
 // Tools for manual screenshots. Implements the visual language described in
 // CLAUDE.md, as far as it can be automated reproducibly:
 //
-//   Pattern 1  plain overview shot            -> page.screenshot()
-//   Pattern 2  dim + spotlight                -> spotlight()
+//   Pattern 1  plain overview shot            -> shoot()
+//   Pattern 2  dim + spotlight                -> spotlight() + shoot()
 //   Pattern 3  hand-drawn annotation          -> stays manual post-processing
 //   Pattern 4  composite grid 2 x 2           -> composite2x2()
 //
@@ -26,10 +26,65 @@ export function shotPath(chapter: string, name: string): string {
   return path
 }
 
+export interface ShootOptions {
+  /** Crop in CSS pixels of the viewport, as delivered by crop16by10(). */
+  clip?: { x: number; y: number; width: number; height: number }
+}
+
 /**
- * Disables all CSS animations and transitions and stops the blinking text
- * caret. Without this a screenshot catches, depending on timing, a half
- * extended info box or a half opened menu.
+ * Takes a chapter image. **The only way a spec is allowed to capture** -
+ * `pnpm lint:captures` fails on a direct `page.screenshot()`.
+ *
+ * The reason is the `animations` option. `page.screenshot()` defaults to
+ * `"allow"`, and that is not a theoretical gap: the frontend is Svelte 5, whose
+ * transitions run through the **Web Animations API**, not through CSS
+ * keyframes. `disableAnimations()` below injects `animation-duration: 0s`,
+ * which a script-driven animation never reads - so the capture lands somewhere
+ * in the middle of the movement. It cost us a `login_mobile_more.jpg` that
+ * showed the menu "Weitere Seiten" at a different slide offset on every run,
+ * 150 000 pixels apart, while the spec asserted the menu was visible and the
+ * comment next to it claimed the animation was off.
+ *
+ * `animations: "disabled"` is handled by the browser, not by page CSS, and
+ * covers CSS animations, CSS transitions **and** Web Animations: finite
+ * animations are fast-forwarded to their end state, which is exactly the state
+ * the manual wants to show.
+ *
+ * `caret` is not set here - `page.screenshot()` already hides it by default.
+ */
+export async function shoot(
+  page: Page,
+  chapter: string,
+  name: string,
+  options: ShootOptions = {},
+): Promise<void> {
+  await page.screenshot({
+    path: shotPath(chapter, name),
+    animations: 'disabled',
+    ...options,
+  })
+}
+
+/**
+ * A single tile for `composite2x2()`, as a PNG buffer rather than a file.
+ *
+ * Same reasoning as `shoot()`: an element screenshot defaults to
+ * `animations: "allow"` just like a page screenshot does, and the tiles of a
+ * grid are captured in the middle of a flow - exactly where a transition is
+ * most likely to be running.
+ */
+export async function shootTile(target: Locator): Promise<Buffer> {
+  return target.screenshot({ animations: 'disabled' })
+}
+
+/**
+ * Disables CSS animations and transitions and stops the blinking text caret.
+ *
+ * Still worth calling before a capture - it settles CSS-driven movement early,
+ * instead of leaving it to be fast-forwarded at the moment of the shot. But it
+ * is **not** sufficient on its own: it cannot touch animations of the Web
+ * Animations API, which is what Svelte 5 uses for its transitions. Only
+ * `shoot()` closes that gap; see the note there.
  */
 export async function disableAnimations(page: Page): Promise<void> {
   await page.addStyleTag({

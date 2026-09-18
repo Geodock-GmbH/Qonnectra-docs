@@ -5,6 +5,10 @@
 # that the screenshots/examples in the manual match the real production
 # configuration (not docker-compose.dev.yml).
 #
+# The app is pinned to a fixed release (QONNECTRA_REF below) and NOT taken from
+# the default branch: every image in the manual has to show the same version,
+# whoever generates it and wherever.
+#
 # local-app/ is deliberately NOT part of this repo (see .gitignore) - this
 # script is the reproducible replacement for it and may be run as often as you
 # like on any machine (idempotent).
@@ -38,6 +42,21 @@ LOCAL_APP_DIR="$REPO_ROOT/local-app"
 DEPLOY_DIR="$LOCAL_APP_DIR/deployment"
 QONNECTRA_REPO_URL="https://github.com/Geodock-GmbH/Qonnectra.git"
 
+# The app version the manual is generated against - pinned, not the default
+# branch.
+#
+# Every screenshot in manual/ shows this version, OUTLINE.md is derived from it
+# and CLAUDE.md names it. An unpinned checkout meant that two people, or a CI
+# run and a laptop, produced images of two different apps without either
+# noticing: the images simply differed and it looked like the capture pipeline
+# was unreliable.
+#
+# Raising it is a deliberate step, not a side effect of running the setup
+# again: bump the version here, regenerate the screenshots, and go through what
+# changed in the app. Overridable via QONNECTRA_REF for a look at another
+# version - the result must not be committed.
+QONNECTRA_REF="${QONNECTRA_REF:-v1.7.0}"
+
 # Persistent local dev CA. Deliberately lives OUTSIDE local-app/ (which gets
 # cloned/deleted) and outside this repo (it contains a private key), so that it
 # survives rebuilds, "docker compose down -v" and fresh clones and only has to
@@ -58,13 +77,33 @@ CA_NAME="Qonnectra Local Dev CA"
 # --reset-checkout and a fresh clone do not trigger a multi-minute Planetiler
 # run every time. The default is Schleswig-Holstein: the test project lies
 # entirely at 9.74 E / 54.73 N (north-east of Flensburg). Overridable via
-# QONNECTRA_TILE_AREA (e.g. "germany", which takes considerably longer and
-# needs ~3 GB).
+# QONNECTRA_TILE_OSM_URL (a larger extract takes considerably longer and needs
+# more space).
 TILES_DIR="${QONNECTRA_TILES_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/qonnectra-local-tiles}"
-TILE_AREA="${QONNECTRA_TILE_AREA:-schleswig-holstein}"
-TILE_MBTILES="$TILES_DIR/$TILE_AREA.mbtiles"
-PLANETILER_JAR="$TILES_DIR/planetiler.jar"
-PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar"
+
+# The OSM extract is pinned to a dated snapshot, not to "the current one".
+# Planetiler's --area downloads whatever Geofabrik serves today, and OSM changes
+# daily: a machine that built its tiles in September draws different buildings
+# and field boundaries than one building them today, so the map images differ
+# without anyone having touched the app. That is what was left after the capture
+# container had made everything else reproducible.
+#
+# Geofabrik keeps the dated extracts for a few months only. When the URL starts
+# answering 404 the snapshot has to be moved on - and the map images regenerated
+# with it, which is a deliberate step, not a surprise.
+TILE_OSM_URL="${QONNECTRA_TILE_OSM_URL:-https://download.geofabrik.de/europe/germany/schleswig-holstein-260915.osm.pbf}"
+# Name of the tile set, derived from the snapshot: a different snapshot is a
+# different file and is therefore generated instead of silently reused.
+TILE_ID="$(basename "$TILE_OSM_URL" .osm.pbf)"
+TILE_MBTILES="$TILES_DIR/$TILE_ID.mbtiles"
+# Pinned like the extract, and for the same reason: the tiles are only
+# reproducible if both inputs are. "latest" would have meant that a Planetiler
+# release changes the base map of every map image, at a moment nobody chose.
+# The version is part of the file name so that a bump is fetched instead of the
+# old jar being reused.
+PLANETILER_VERSION="${QONNECTRA_PLANETILER_VERSION:-v0.10.2}"
+PLANETILER_JAR="$TILES_DIR/planetiler-$PLANETILER_VERSION.jar"
+PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/download/$PLANETILER_VERSION/planetiler.jar"
 
 # Help link of the app (PUBLIC_DOCUMENTATION_URL). The app shows it in the
 # header, the navigation bar and the mobile navigation, and hides it while the
@@ -121,10 +160,17 @@ Usage: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
                     also discards your own changes in it. On its own it leaves
                     database and secrets alone, and can be combined with
                     --reset.
+                    Also the way out when the checkout sits on another version
+                    and cannot be switched because of local changes.
   --skip-tiles      Do not generate map tiles. The tileserver then runs into a
                     restart loop without data and the map falls back to OSM
                     raster tiles.
   -h, --help        Show this help.
+
+The app is built from the pinned version $QONNECTRA_REF. All images of the
+manual show it; raising it means regenerating the screenshots. QONNECTRA_REF
+points the checkout somewhere else for a look at another version - the images
+from such a run must not be committed.
 
 The local dev CA in
   $CA_DIR
@@ -144,6 +190,7 @@ EOF
 
 RESET=0
 RESET_CHECKOUT=0
+TILES_RELINKED=0
 SKIP_TILES=0
 ENV_BACKUP=""
 for arg in "$@"; do
@@ -258,11 +305,44 @@ fi
 
 # --- Clone/update the app repo ----------------------------------------------
 
-if [ -d "$LOCAL_APP_DIR/.git" ]; then
-	log "local-app/ already exists, skipping the clone (no automatic 'git pull', so that local changes are not overwritten)."
+if [ ! -d "$LOCAL_APP_DIR/.git" ]; then
+	log "Cloning $QONNECTRA_REPO_URL at $QONNECTRA_REF into local-app/"
+	# Shallow: nothing in this repo looks at the history of the app, and it
+	# saves a good deal of time in CI.
+	git -c advice.detachedHead=false clone --depth 1 --branch "$QONNECTRA_REF" \
+		"$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR" ||
+		die "Could not clone $QONNECTRA_REF. Does the tag exist in $QONNECTRA_REPO_URL?"
 else
-	log "Cloning $QONNECTRA_REPO_URL into local-app/"
-	git clone "$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR"
+	# The checkout exists. It has to sit on QONNECTRA_REF - otherwise the images
+	# of this run would show a different app than the rest of the manual.
+	WANTED_COMMIT="$(git -C "$LOCAL_APP_DIR" rev-parse --verify --quiet "${QONNECTRA_REF}^{commit}" || true)"
+
+	if [ -z "$WANTED_COMMIT" ]; then
+		log "Fetching $QONNECTRA_REF into local-app/"
+		git -C "$LOCAL_APP_DIR" fetch --depth 1 origin \
+			"refs/tags/$QONNECTRA_REF:refs/tags/$QONNECTRA_REF" 2>/dev/null ||
+			git -C "$LOCAL_APP_DIR" fetch --depth 1 origin "$QONNECTRA_REF" ||
+			die "Could not fetch $QONNECTRA_REF. Does the tag exist in $QONNECTRA_REPO_URL?"
+		WANTED_COMMIT="$(git -C "$LOCAL_APP_DIR" rev-parse --verify --quiet "${QONNECTRA_REF}^{commit}" ||
+			git -C "$LOCAL_APP_DIR" rev-parse FETCH_HEAD)"
+	fi
+
+	if [ "$(git -C "$LOCAL_APP_DIR" rev-parse HEAD)" = "$WANTED_COMMIT" ]; then
+		log "local-app/ is at $QONNECTRA_REF"
+	else
+		# Only tracked files are looked at: the import command is copied into
+		# the checkout by this script further down and is untracked there, so it
+		# would make every checkout look modified.
+		if ! git -C "$LOCAL_APP_DIR" diff --quiet ||
+			! git -C "$LOCAL_APP_DIR" diff --cached --quiet; then
+			die "local-app/ has uncommitted changes and is not at $QONNECTRA_REF.
+Commit or discard them, or throw the checkout away with --reset-checkout."
+		fi
+
+		log "Switching local-app/ from $(git -C "$LOCAL_APP_DIR" rev-parse --short HEAD) to $QONNECTRA_REF"
+		git -C "$LOCAL_APP_DIR" -c advice.detachedHead=false checkout "$WANTED_COMMIT" ||
+			die "Could not switch local-app/ to $QONNECTRA_REF."
+	fi
 fi
 
 if [ -n "$ENV_BACKUP" ]; then
@@ -525,7 +605,7 @@ else
 		mv "$PLANETILER_JAR.tmp" "$PLANETILER_JAR"
 	fi
 
-	log "Generating map tiles for \"$TILE_AREA\" (one-off, takes a few minutes)"
+	log "Generating map tiles from $TILE_OSM_URL (one-off, takes a few minutes)"
 	# Write under an intermediate name first and rename afterwards: an aborted
 	# run would otherwise leave half an .mbtiles behind that counts as finished
 	# on the next run. The extension has to stay .mbtiles - Planetiler derives
@@ -534,15 +614,19 @@ else
 	# Working directory $TILES_DIR, so that Planetiler puts its downloads
 	# (data/sources) and temporary files there as well and can reuse them next
 	# time.
-	TILE_TMP="$TILES_DIR/.$TILE_AREA.partial.mbtiles"
+	TILE_TMP="$TILES_DIR/.$TILE_ID.partial.mbtiles"
+	# --area only names the downloaded file here; --osm-url decides what is
+	# fetched. It is set to the snapshot all the same, because Planetiler skips
+	# the download when the local file already exists - with the default name a
+	# new snapshot would silently be built from the previous extract.
 	if (cd "$TILES_DIR" && java -Xmx4g -jar "$PLANETILER_JAR" \
-		--download --area="$TILE_AREA" --force \
+		--download --osm-url="$TILE_OSM_URL" --area="$TILE_ID" --force \
 		--output="$TILE_TMP"); then
 		mv "$TILE_TMP" "$TILE_MBTILES"
 		log "Map tiles finished: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
 	else
 		rm -f "$TILE_TMP"
-		warn "Planetiler run for \"$TILE_AREA\" failed. Because of that the tileserver runs in a restart loop and the map uses OSM raster tiles."
+		warn "Planetiler run for $TILE_OSM_URL failed. If it answers 404 the snapshot has expired - see TILE_OSM_URL at the top of this script. Until then the tileserver runs in a restart loop and the map uses OSM raster tiles."
 	fi
 fi
 
@@ -562,13 +646,20 @@ if [ -f "$TILE_MBTILES" ]; then
 	# Link again when the file is missing or holds a different state than the
 	# cache. The size comparison covers both: a hard link always has the same
 	# size (no unnecessary recreation), a freshly generated extract or a change
-	# of QONNECTRA_TILE_AREA practically never.
+	# of the snapshot practically never.
 	if [ ! -e "$TILE_LINK" ] ||
 		[ "$(stat -c %s "$TILE_MBTILES")" != "$(stat -c %s "$TILE_LINK")" ]; then
 		rm -f "$TILE_LINK"
 		ln "$TILE_MBTILES" "$TILE_LINK" 2>/dev/null ||
 			cp "$TILE_MBTILES" "$TILE_LINK" ||
 			warn "Map tiles could not be linked to $TILE_LINK."
+		# The tileserver opens the file once at start and holds that inode.
+		# Replacing the link under a running container changes nothing until it
+		# is restarted, and `compose up` leaves an unchanged service alone - so
+		# a new tile set was generated, linked, and then quietly not used. Cost
+		# an afternoon: the map images kept differing from CI although both were
+		# supposedly building the same snapshot.
+		TILES_RELINKED=1
 	fi
 fi
 
@@ -630,6 +721,12 @@ if ! "${COMPOSE[@]}" up -d --build "${SERVICES[@]}"; then
 	# initdb.
 	warn "First start failed (probably the known postgres/init.sh bug with an empty DB volume), trying again..."
 	"${COMPOSE[@]}" up -d "${SERVICES[@]}"
+fi
+
+if ((TILES_RELINKED)); then
+	log "Restarting the tileserver so that it reads the new tiles"
+	"${COMPOSE[@]}" restart tileserver >/dev/null 2>&1 ||
+		warn "The tileserver could not be restarted - it is still serving the previous tiles."
 fi
 
 # nginx may have to be restarted if the backend container was recreated on the
@@ -849,7 +946,7 @@ if [ -f "$TILE_MBTILES" ]; then
 With them the map shows the real vector base map (light/dark mode), not the OSM
 fallback. The tiles live outside local-app/ and survive --reset and
 --reset-checkout. For a different region, delete them and generate again:
-  QONNECTRA_TILE_AREA=<region> $REPO_ROOT/scripts/setup-local-qonnectra.sh"
+  QONNECTRA_TILE_OSM_URL=<url> $REPO_ROOT/scripts/setup-local-qonnectra.sh"
 else
 	TILES_SECTION="Map tiles: NONE at $TILE_MBTILES
 The tileserver therefore runs in a restart loop; the frontend falls back to OSM
@@ -860,7 +957,7 @@ fi
 log "Done."
 cat <<EOF
 
-Qonnectra is running at:
+Qonnectra $QONNECTRA_REF is running at:
   Frontend : https://app.qonnectra.localhost
   Admin    : https://admin.qonnectra.localhost/admin
   API      : https://api.qonnectra.localhost

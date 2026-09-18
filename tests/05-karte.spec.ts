@@ -6,10 +6,14 @@ import {
   crop16by10,
   disableAnimations,
   moveCursorAway,
+  shoot,
+  shootTile,
   shotPath,
   spotlight,
+  type ShootOptions,
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
+import { waitForBaseMapSettled } from '../playwright/stable-map'
 
 // Screenshots for chapter "5. Karte" in the manual
 // (manual/teil-a-anwenderhandbuch/05-karte.md). Produces all images of the
@@ -87,6 +91,15 @@ async function openMap(page: Page, view = VIEW.overview) {
   await page.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.
   await page.waitForTimeout(2500)
+
+  // And then until the picture really stops moving. The fixed wait above is not
+  // enough: OpenLayers places the labels of the base map with a declutter pass
+  // over the features it has at the moment of the render, so a tile arriving
+  // late moves the street names by a few pixels. That was not a theoretical
+  // worry - between two runs it was the entire difference in map_search
+  // (10 745 pixels, and the amplified diff shows nothing but street names) and
+  // one redrawn building in map_address_detail.
+  await waitForBaseMapSettled(page)
 
   await disableAnimations(page)
   await moveCursorAway(page)
@@ -238,14 +251,116 @@ async function typeSearchTerm(page: Page, field: Locator, term: string) {
   await field.pressSequentially(term, { delay: 30 })
 }
 
+/**
+ * `shoot()` for images of this chapter: waits until the base map has stopped
+ * redrawing, then captures.
+ *
+ * Settling once in `openMap()` is not enough. `spotlight()` puts an SVG over the
+ * page, and the reflow that causes makes OpenLayers render again - with a fresh
+ * declutter pass, which may place the street names of the base map a few pixels
+ * elsewhere. map_legend and map_opacity differed by around 10 700 pixels
+ * between two runs for exactly that reason, while the images without a
+ * spotlight had already become stable.
+ */
+async function shootMap(page: Page, name: string, options?: ShootOptions): Promise<void> {
+  await waitForBaseMapSettled(page)
+  await shoot(page, CHAPTER, name, options)
+}
+
 /** Screenshot of the map area, for the tiles of the composite grids. */
 function mapShot(page: Page): Promise<Buffer> {
-  return page.locator('.map-wrapper').screenshot()
+  return shootTile(page.locator('.map-wrapper'))
+}
+
+/**
+ * Number of pixels currently painted in the selection colour of the app.
+ *
+ * Same colour test as `selectedMapFeature()` above, only counting instead of
+ * measuring, and it stops early: for "is the object visible at all" a handful
+ * of pixels is enough, and the poll below runs every few dozen milliseconds.
+ */
+async function countSelectionPixels(page: Page, enough = 20): Promise<number> {
+  return page.evaluate((limit) => {
+    let found = 0
+
+    for (const canvas of Array.from(document.querySelectorAll('div.map canvas'))) {
+      const surface = canvas as HTMLCanvasElement
+      let data
+      try {
+        const ctx = surface.getContext('2d')
+        if (!ctx) continue
+        data = ctx.getImageData(0, 0, surface.width, surface.height).data
+      } catch {
+        continue
+      }
+
+      // Every second pixel in both directions - a quarter of the work, and the
+      // highlighted object is far larger than two pixels.
+      for (let py = 0; py < surface.height; py += 2) {
+        const row = py * surface.width * 4
+        for (let px = 0; px < surface.width; px += 2) {
+          const i = row + px * 4
+          if (data[i + 3] <= 200) continue
+          if (data[i] <= 225 || data[i + 1] <= 215 || data[i + 2] >= 110) continue
+          found += 1
+          if (found >= limit) return found
+        }
+      }
+    }
+
+    return found
+  }, enough)
+}
+
+/**
+ * Duration of everything transient after a jump to a search hit: `zoomToFeature`
+ * animates for 1000 ms and then blinks the highlight six times at 300 ms before
+ * removing it for good (searchUtils.ts). Plus air for a slow machine.
+ */
+const JUMP_SETTLED_MS = 1000 + 6 * 300 + 800
+
+/**
+ * Map tile of the settled state after a jump to a search hit.
+ *
+ * Two transient things live in this view, and between two runs of the composite
+ * they were the entire difference: the toast "Feature gefunden!", which fades
+ * out by itself, and the blinking highlight of the object.
+ *
+ * The highlight cannot be captured reproducibly from the outside. It is on for
+ * 300 ms at a time, while an element screenshot of the map area takes longer
+ * than that - a capture bracketed by "is it on" checks before and after can
+ * still span the off phase in between, and that is what happened: of four runs
+ * three delivered a tile without the highlight although every check had passed.
+ * Holding it by hand is not possible either, the OpenLayers map is not reachable
+ * from the page.
+ *
+ * So the tile shows the state after the blinking - what users have in front of
+ * them a moment after the jump, and the only one that comes out the same in
+ * every run. What the step has to show, the map jumped to the address, is in the
+ * picture either way.
+ */
+async function settledMapShot(page: Page): Promise<Buffer> {
+  await page.waitForTimeout(JUMP_SETTLED_MS)
+  await waitForBaseMapSettled(page)
+
+  await expect(
+    page.getByText('Feature gefunden'),
+    'The toast of the jump is still visible - it fades out on its own, and in ' +
+      'the image it would be there in one run and gone in the next.',
+  ).toBeHidden()
+
+  expect(
+    await countSelectionPixels(page),
+    'The object is still blinking. Has blinkCount in zoomToFeature ' +
+      '(searchUtils.ts) been raised? Then JUMP_SETTLED_MS has to follow.',
+  ).toBe(0)
+
+  return mapShot(page)
 }
 
 test('5. Übersicht der Karte', async ({ page }) => {
   await openMap(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'map') })
+  await shootMap(page, 'map')
 })
 
 test('5.1 Legendeneintrag „Adresse" und Zoom auf den Layer', async ({ page }) => {
@@ -253,7 +368,7 @@ test('5.1 Legendeneintrag „Adresse" und Zoom auf den Layer', async ({ page }) 
 
   // Full shot with the row "Adresse" highlighted.
   const spotlightOff = await spotlight(page, legendRow(page, 'Adresse'))
-  await page.screenshot({ path: shotPath(CHAPTER, 'map_address_detail') })
+  await shootMap(page, 'map_address_detail')
   await spotlightOff()
 
   // After zooming to the extent of the layer.
@@ -263,7 +378,7 @@ test('5.1 Legendeneintrag „Adresse" und Zoom auf den Layer', async ({ page }) 
   await moveCursorAway(page)
   // view.fit runs for 800 ms, after which tiles load in.
   await page.waitForTimeout(3000)
-  await page.screenshot({ path: shotPath(CHAPTER, 'map_address_detail_select') })
+  await shootMap(page, 'map_address_detail_select')
 })
 
 test('3.3 Transparenz-Regler', async ({ page }) => {
@@ -271,7 +386,7 @@ test('3.3 Transparenz-Regler', async ({ page }) => {
 
   const slider = page.getByLabel('Ändert die Transparenz der OpenStreetMap-Hintergrundkarte.')
   const spotlightOff = await spotlight(page, slider)
-  await page.screenshot({ path: shotPath(CHAPTER, 'map_opacity') })
+  await shootMap(page, 'map_opacity')
   await spotlightOff()
 })
 
@@ -279,7 +394,7 @@ test('3.3 Legende', async ({ page }) => {
   await openMap(page)
 
   const spotlightOff = await spotlight(page, legend(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'map_legend') })
+  await shootMap(page, 'map_legend')
   await spotlightOff()
 })
 
@@ -392,7 +507,7 @@ test('5.3 Ausgewähltes Objekt mit Info-Box', async ({ page }) => {
   // at all - the thin yellow trench line disappears in the dimmed map picture.
   const feature = await selectedMapFeature(page)
   const spotlightOff = await spotlight(page, [feature, page.locator('[data-drawer]')])
-  await page.screenshot({ path: shotPath(CHAPTER, 'map_selected_object') })
+  await shootMap(page, 'map_selected_object')
   await spotlightOff()
 })
 
@@ -400,7 +515,7 @@ test('3.4 Suchfeld', async ({ page }) => {
   await openMap(page)
 
   const spotlightOff = await spotlight(page, page.locator('.search-panel'))
-  await page.screenshot({ path: shotPath(CHAPTER, 'map_search') })
+  await shootMap(page, 'map_search')
   await spotlightOff()
 })
 
@@ -437,20 +552,27 @@ test('3.4 Suchablauf (Composite)', async ({ page }) => {
   // "Nieharde 12" - the map jumps to the corresponding house. A second search
   // for a different term would be a break in the narrative and additionally left
   // the result list standing.
-  const firstResult = results.locator('li.result-item').first()
-  await expect(firstResult).toContainText('Nieharde 12')
-  await firstResult.locator('button.result-button').click()
+  // The address, picked by its exact label rather than as the first of the
+  // list. Filtering for "12" leaves two hits of different kinds - the address
+  // "Nieharde 12" and the node "HA - Sterup,Nieharde 12" - and which of them
+  // comes first is not settled: the search sorts by `order_by("-similarity")`
+  // without a second key (search.py). Clicking the node instead jumps to a
+  // different feature, and the whole tile shows a different piece of map. That
+  // was the last difference left between this machine and CI.
+  // Only the address carries "Nieharde 12" as its complete text.
+  const hit = results
+    .locator('li.result-item')
+    .filter({ has: page.getByText('Nieharde 12', { exact: true }) })
+  await expect(
+    hit,
+    'The address "Nieharde 12" is not among the filtered results - has the demo ' +
+      'data changed?',
+  ).toHaveCount(1)
+  await hit.locator('button.result-button').click()
   await moveCursorAway(page)
 
-  // The object should be highlighted in the picture. `zoomToFeature` animates
-  // the view for 1000 ms and only starts the blinking in the callback: toggling
-  // every 300 ms, visible in the windows 300-600, 900-1200 and 1500-1800 ms
-  // after the end of the animation (searchUtils.ts). 1400 ms after the click is
-  // therefore in the middle of the first visible window. After 1800 ms the
-  // highlight is removed for good - waiting longer here yields a tile without a
-  // recognisable object.
-  await page.waitForTimeout(1400)
-  const tile4 = await mapShot(page)
+  // Everything transient of the jump has to be over - see settledMapShot().
+  const tile4 = await settledMapShot(page)
 
   // Cross-check after the capture: the app closes the result list as soon as a
   // result has been clicked. If it stays open, the tile shows a state that does
@@ -688,10 +810,7 @@ test('5.5 Grabenprofil einer Trasse', async ({ page }) => {
 
   // Cropped to the window: at 900 x 600 in a window of 1792 x 1120 the labels
   // would be barely readable in the 512 px rendering of the manual.
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'map_trench_profile'),
-    clip: await crop16by10(page, panel),
-  })
+  await shootMap(page, 'map_trench_profile', { clip: await crop16by10(page, panel) })
 })
 
 test.describe('Netzknoten mit Slot-Konfiguration', () => {
@@ -727,10 +846,7 @@ test.describe('Netzknoten mit Slot-Konfiguration', () => {
     await moveCursorAway(page)
     await page.waitForTimeout(1000)
 
-    await page.screenshot({
-      path: shotPath(CHAPTER, 'map_node_slots'),
-      clip: await crop16by10(page, panel),
-    })
+    await shootMap(page, 'map_node_slots', { clip: await crop16by10(page, panel) })
   })
 
   test('5.6 Struktur eines Netzknotens', async ({ page }) => {
@@ -749,10 +865,7 @@ test.describe('Netzknoten mit Slot-Konfiguration', () => {
     await moveCursorAway(page)
     await page.waitForTimeout(1000)
 
-    await page.screenshot({
-      path: shotPath(CHAPTER, 'map_node_structure'),
-      clip: await crop16by10(page, panel),
-    })
+    await shootMap(page, 'map_node_structure', { clip: await crop16by10(page, panel) })
   })
 })
 
@@ -820,10 +933,7 @@ test('5.4 Reiter „Rohrübersicht“', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(800)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'map_trench_conduits'),
-    clip: await drawerClip(page),
-  })
+  await shootMap(page, 'map_trench_conduits', { clip: await drawerClip(page) })
 })
 
 test('5.4 Reiter „Kabelübersicht“', async ({ page }) => {
@@ -851,8 +961,5 @@ test('5.4 Reiter „Kabelübersicht“', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(800)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'map_trench_cables'),
-    clip: await drawerClip(page),
-  })
+  await shootMap(page, 'map_trench_cables', { clip: await drawerClip(page) })
 })
