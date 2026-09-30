@@ -80,7 +80,7 @@ The manual is split into three parts (target audiences see `manual/index.md`):
 ## The chapter structure
 
 `OUTLINE.md` in the repo root is the binding outline: three levels (part,
-chapter, section), derived from the app of version 1.7.0. It also holds the
+chapter, section), derived from the pinned app (`main` of 2026-09-11). It also holds the
 mapping from the old numbering to the new one and is excluded from the VitePress
 build (`srcExclude`). **Which sections a chapter has is decided there, not while
 writing** – a chapter that needs a section the outline does not have gets the
@@ -390,16 +390,23 @@ local instance, so that they can be regenerated when the app changes.
 - `scripts/setup-local-qonnectra.sh` clones the app into `local-app/` and starts
   it through the **production** compose file. Idempotent, may be run any number
   of times.
-- The app is **pinned to a release**, `QONNECTRA_REF` at the top of the script,
-  currently **`v1.7.0`** – not the default branch. Every image of the manual has
-  to show the same version; unpinned, a CI run and a laptop built two different
-  apps and the images differed without anyone being able to see why. An existing
-  `local-app/` is switched to the pinned version on the next run; if it carries
-  uncommitted changes the script stops instead (`--reset-checkout` throws the
-  checkout away).
-  Raising the version is its own piece of work, not a side effect: bump
+- The app is **pinned to a commit**, `QONNECTRA_REF` at the top of the script,
+  currently **`aa28575`** (the tip of `main` on 2026-09-11) – not the default
+  branch. Every image of the manual has to show the same version; unpinned, a CI
+  run and a laptop built two different apps and the images differed without
+  anyone being able to see why. An existing `local-app/` is switched to the
+  pinned commit on the next run; if it carries uncommitted changes the script
+  stops instead (`--reset-checkout` throws the checkout away).
+  A commit and not the tag `v1.7.0`, because part A was surveyed and written
+  against that state and describes what it does: the edit mode of the cable
+  labels (chapter 14.4, „Kabel bearbeiten“) came with app PR #88 **after** the
+  v1.7.0 release, and against the tag the chapter describes an app that is not
+  there. The app reports **1.7.0** in its header either way – that is the
+  version of the last release, not of the checkout, so the number in a
+  screenshot says nothing about which commit produced it.
+  Raising the pin is its own piece of work, not a side effect: bump
   `QONNECTRA_REF`, regenerate the screenshots, go through what changed in the
-  app, and update the version in this file and in `OUTLINE.md`.
+  app, and update the commit in this file and in `OUTLINE.md`.
   `QONNECTRA_REF=… ` looks at another version – images from such a run are not
   committed.
 - Reachable at `https://app.qonnectra.localhost` (admin:
@@ -736,8 +743,9 @@ looking for a race in the spec.
 
 **The app (context for selectors and routes)**
 
-SvelteKit + Skeleton, version **1.7.0** (the app shows it in the header) – the
-release the setup pins the checkout to, see `QONNECTRA_REF` above. The
+SvelteKit + Skeleton, `main` as of 2026-09-11 (commit `aa28575`) – the state the
+setup pins the checkout to, see `QONNECTRA_REF` above. The header shows
+**v1.7.0**, the last release before it. The
 navigation bar is sorted into groups; the labels are short and only
 unambiguous together with their group (group „Rohr“ → „Verwaltung“ =
 Rohrverwaltung). This order is the order of the chapters 4–17. Routes and

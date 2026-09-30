@@ -83,15 +83,16 @@ const SPLICE = { node: 'St-V01', component: 'Spleisskassette', cable: 'St-V01-14
 /**
  * Crops in CSS pixels of the window (see the head of playwright/manual-videos.ts).
  *
- * All three stay below the 1000 px CLAUDE.md aims at, so the labels of the app
- * remain legible at the width the manual renders a video at (around 690 px).
+ * All three stay at the 1000 px CLAUDE.md aims at or below it, so the labels of
+ * the app remain legible at the width the manual renders a video at (around
+ * 690 px) - and at or above the 900 px `pnpm check:videos` insists on.
  * They are measured against the seeded viewport: node St-V02 sits at x 620-740,
  * St-S01 at 980-1100, PoP-St at 980-1100 / y 897-1017. The lower edge holds the
  * message, which Qonnectra places at the bottom centre of the window.
  */
 const CROP = {
-  cable: { x: 300, y: 92, width: 840, height: 1028 },
-  path: { x: 620, y: 400, width: 840, height: 720 },
+  cable: { x: 300, y: 92, width: 900, height: 1028 },
+  path: { x: 620, y: 400, width: 1000, height: 720 },
   splice: { x: 430, y: 245, width: 930, height: 855 },
 }
 
@@ -133,10 +134,18 @@ async function cables(api: APIRequestContext): Promise<CableRecord[]> {
 
 /**
  * Puts the test project back into the state of the demo data: cables created by
- * a recording are deleted, and the diagram path of PATH_CABLE is cleared.
+ * a recording are deleted, the diagram path of PATH_CABLE is cleared and the
+ * label positions of the demo cables are dropped.
  *
  * Runs before **and** after every capture. The still images of the chapter show
- * five cables and straight lines and would otherwise fail on the leftover.
+ * five cables, straight lines and labels in the middle of their line and would
+ * otherwise fail on the leftover.
+ *
+ * The labels are part of it because the app writes one on a long press of half
+ * a second: a mouse down that the page answers late enough turns into a label
+ * drag, and the label then stays where the pointer left it - in the database,
+ * for every run that follows. Two of them were found that way, in the demo
+ * data, days after the recording that produced them.
  */
 async function restoreDemoState() {
   const api = await apiContext(superuserCredentials())
@@ -162,6 +171,8 @@ async function restoreDemoState() {
       }
     }
 
+    await removeCableLabels(api)
+
     const left = await cables(api)
     expect(
       left.map((cable) => cable.name).sort(),
@@ -172,6 +183,32 @@ async function restoreDemoState() {
     await removeSplices(api)
   } finally {
     await api.dispose()
+  }
+}
+
+/**
+ * Removes the labels of the demo cables.
+ *
+ * The demo data carries none for them - the 36 labels of the export all belong
+ * to the house connection cables in the subnet of St-V02 - so everything found
+ * here is from a recording.
+ */
+async function removeCableLabels(api: APIRequestContext) {
+  const response = await api.get('/api/v1/cable_label/?page_size=200')
+  expect(response.ok(), 'The cable labels of the test project could not be read.').toBe(true)
+  const body = (await response.json()) as
+    | { results?: { uuid: string; cable?: { name?: string } }[] }
+    | { uuid: string; cable?: { name?: string } }[]
+  const rows = Array.isArray(body) ? body : (body.results ?? [])
+
+  for (const row of rows) {
+    if (!DEMO_CABLES.includes(row.cable?.name ?? '')) continue
+
+    const deleted = await api.delete(`/api/v1/cable_label/${row.uuid}/`)
+    expect(
+      deleted.ok(),
+      `The label of "${row.cable?.name}" could not be deleted (HTTP ${deleted.status()}).`,
+    ).toBe(true)
   }
 }
 

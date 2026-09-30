@@ -5,7 +5,7 @@
 # that the screenshots/examples in the manual match the real production
 # configuration (not docker-compose.dev.yml).
 #
-# The app is pinned to a fixed release (QONNECTRA_REF below) and NOT taken from
+# The app is pinned to a fixed commit (QONNECTRA_REF below) and NOT taken from
 # the default branch: every image in the manual has to show the same version,
 # whoever generates it and wherever.
 #
@@ -51,11 +51,21 @@ QONNECTRA_REPO_URL="https://github.com/Geodock-GmbH/Qonnectra.git"
 # noticing: the images simply differed and it looked like the capture pipeline
 # was unreliable.
 #
+# A commit, not a tag, and deliberately so: the manual was surveyed and written
+# against the state of `main` of 2026-09-11, and part A describes features that
+# no release carries yet - the edit mode of the cable labels in chapter 14
+# („Kabel bearbeiten“, app PR #88) arrived after v1.7.0. Pinning to v1.7.0
+# instead would take those sections out of the app. The app still reports 1.7.0
+# in its header; the release after it will carry the state pinned here.
+#
+# aa28575 is the last commit of 2026-09-11. The four before it on that day are
+# backend and OpenAPI changes and cannot move a pixel of the interface.
+#
 # Raising it is a deliberate step, not a side effect of running the setup
-# again: bump the version here, regenerate the screenshots, and go through what
+# again: bump the commit here, regenerate the screenshots, and go through what
 # changed in the app. Overridable via QONNECTRA_REF for a look at another
 # version - the result must not be committed.
-QONNECTRA_REF="${QONNECTRA_REF:-v1.7.0}"
+QONNECTRA_REF="${QONNECTRA_REF:-aa2857516278cc5d2d0fe1f27fc255bedcc4bcc0}"
 
 # Persistent local dev CA. Deliberately lives OUTSIDE local-app/ (which gets
 # cloned/deleted) and outside this repo (it contains a private key), so that it
@@ -167,7 +177,7 @@ Usage: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
                     raster tiles.
   -h, --help        Show this help.
 
-The app is built from the pinned version $QONNECTRA_REF. All images of the
+The app is built from the pinned commit $QONNECTRA_REF. All images of the
 manual show it; raising it means regenerating the screenshots. QONNECTRA_REF
 points the checkout somewhere else for a look at another version - the images
 from such a run must not be committed.
@@ -307,11 +317,19 @@ fi
 
 if [ ! -d "$LOCAL_APP_DIR/.git" ]; then
 	log "Cloning $QONNECTRA_REPO_URL at $QONNECTRA_REF into local-app/"
-	# Shallow: nothing in this repo looks at the history of the app, and it
-	# saves a good deal of time in CI.
-	git -c advice.detachedHead=false clone --depth 1 --branch "$QONNECTRA_REF" \
-		"$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR" ||
-		die "Could not clone $QONNECTRA_REF. Does the tag exist in $QONNECTRA_REPO_URL?"
+	# Shallow, and through fetch rather than `clone --branch`: the pin is a
+	# commit, and --branch takes tags and branches only. A bare SHA is what
+	# GitHub answers a fetch with, so this one line serves all three.
+	#
+	# Nothing in this repo looks at the history of the app, and the shallow
+	# fetch saves a good deal of time in CI.
+	mkdir -p "$LOCAL_APP_DIR"
+	git -C "$LOCAL_APP_DIR" init --quiet
+	git -C "$LOCAL_APP_DIR" remote add origin "$QONNECTRA_REPO_URL" 2>/dev/null || true
+	git -C "$LOCAL_APP_DIR" fetch --depth 1 origin "$QONNECTRA_REF" ||
+		die "Could not fetch $QONNECTRA_REF. Does it exist in $QONNECTRA_REPO_URL?"
+	git -C "$LOCAL_APP_DIR" -c advice.detachedHead=false checkout --detach FETCH_HEAD ||
+		die "Could not check $QONNECTRA_REF out in local-app/."
 else
 	# The checkout exists. It has to sit on QONNECTRA_REF - otherwise the images
 	# of this run would show a different app than the rest of the manual.
@@ -322,7 +340,7 @@ else
 		git -C "$LOCAL_APP_DIR" fetch --depth 1 origin \
 			"refs/tags/$QONNECTRA_REF:refs/tags/$QONNECTRA_REF" 2>/dev/null ||
 			git -C "$LOCAL_APP_DIR" fetch --depth 1 origin "$QONNECTRA_REF" ||
-			die "Could not fetch $QONNECTRA_REF. Does the tag exist in $QONNECTRA_REPO_URL?"
+			die "Could not fetch $QONNECTRA_REF. Does it exist in $QONNECTRA_REPO_URL?"
 		WANTED_COMMIT="$(git -C "$LOCAL_APP_DIR" rev-parse --verify --quiet "${QONNECTRA_REF}^{commit}" ||
 			git -C "$LOCAL_APP_DIR" rev-parse FETCH_HEAD)"
 	fi
