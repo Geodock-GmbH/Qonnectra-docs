@@ -50,7 +50,16 @@ export default defineConfig({
     viewport: { width: 1792, height: 1120 },
     deviceScaleFactor: 2,
 
+    // `locale` covers everything that goes through Intl (toLocaleString,
+    // navigator.language, Accept-Language), but not the widgets Chromium draws
+    // itself: the placeholder of <input type="date"> ("tt.mm.jjjj" vs.
+    // "mm/dd/yyyy") follows the locale of the browser process, i.e. its
+    // environment. The capture image sets LC_ALL=C.UTF-8, which beats LANG, so
+    // all three are set.
     locale: 'de-DE',
+    launchOptions: {
+      env: { ...process.env, LANGUAGE: 'de_DE', LC_ALL: 'de_DE.UTF-8', LANG: 'de_DE.UTF-8' },
+    },
     timezoneId: 'Europe/Berlin',
     colorScheme: 'light',
 
