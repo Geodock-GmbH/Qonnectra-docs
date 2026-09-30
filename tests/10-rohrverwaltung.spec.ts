@@ -11,9 +11,10 @@ import { localApp, superuserCredentials } from '../playwright/local-app'
 import {
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { freezeDates } from '../playwright/stable-dates'
 
 // Screenshots for chapter "10. Rohrverwaltung" in the manual
 // (manual/teil-a-anwenderhandbuch/10-rohrverwaltung.md). Produces all images of
@@ -242,7 +243,7 @@ async function cleanUpAttachments(uuid: string) {
 
 test('10. Übersicht der Rohrverwaltung', async ({ page }) => {
   await openConduits(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit') })
+  await shoot(page, CHAPTER, 'conduit')
 })
 
 test('10.1 Aufbau der Tabelle', async ({ page }) => {
@@ -254,7 +255,7 @@ test('10.1 Aufbau der Tabelle', async ({ page }) => {
   const paging = page.getByTestId('pagination-count').locator('xpath=..')
 
   const spotlightOff = await spotlight(page, [headings, paging])
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_table') })
+  await shoot(page, CHAPTER, 'conduit_table')
   await spotlightOff()
 })
 
@@ -271,7 +272,7 @@ test('10.1 Suchfeld oben', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, page.locator('.search-container'))
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_search') })
+  await shoot(page, CHAPTER, 'conduit_search')
   await spotlightOff()
 })
 
@@ -288,7 +289,7 @@ test('10.1 Suchfelder unter den Spaltenüberschriften', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, page.locator('table thead tr').nth(1))
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_search_columns') })
+  await shoot(page, CHAPTER, 'conduit_search_columns')
   await spotlightOff()
 })
 
@@ -303,7 +304,7 @@ test('10.2 Rohr hinzufügen', async ({ page }) => {
   await expect(dialog.locator('#pipe-name')).toHaveValue('')
   await page.waitForTimeout(400)
   await moveCursorAway(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_add') })
+  await shoot(page, CHAPTER, 'conduit_add')
 })
 
 test('10.3 Reiter „Eigenschaften"', async ({ page }) => {
@@ -313,7 +314,7 @@ test('10.3 Reiter „Eigenschaften"', async ({ page }) => {
   await expect(drawer.getByRole('button', { name: 'Rohr löschen', exact: true })).toBeVisible()
 
   const spotlightOff = await spotlight(page, drawer)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_properties') })
+  await shoot(page, CHAPTER, 'conduit_properties')
   await spotlightOff()
 })
 
@@ -335,7 +336,7 @@ test('10.4 Reiter „Status"', async ({ page }) => {
   await expect(drawer.locator('.placeholder.animate-pulse')).toHaveCount(0)
 
   const spotlightOff = await spotlight(page, drawer)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_status') })
+  await shoot(page, CHAPTER, 'conduit_status')
   await spotlightOff()
 })
 
@@ -346,6 +347,12 @@ test('10.7 Reiter „Anhänge"', async ({ page }) => {
   await cleanUpAttachments(uuid)
 
   try {
+    // The file list shows the upload date next to every name, and the backend
+    // stamps it with the moment of the upload - the image would otherwise carry
+    // the day of the run. Installed before the view is opened, because
+    // FileExplorer.svelte fetches the list as soon as the tab appears.
+    await freezeDates(page, { url: '**/api/v1/feature-files/**', fields: ['created_at'] })
+
     await openConduits(page, DRAWER_WIDTH)
     const drawer = await openDrawer(page, CONDUIT)
 
@@ -381,7 +388,7 @@ test('10.7 Reiter „Anhänge"', async ({ page }) => {
     })
 
     const spotlightOff = await spotlight(page, drawer)
-    await page.screenshot({ path: shotPath(CHAPTER, 'conduit_attachment') })
+    await shoot(page, CHAPTER, 'conduit_attachment')
     await spotlightOff()
   } finally {
     await cleanUpAttachments(uuid)
@@ -398,6 +405,6 @@ test('10.5 Excel-Vorlage und Datenimport', async ({ page }) => {
     .locator('xpath=ancestor::nav[1]')
 
   const spotlightOff = await spotlight(page, buttons)
-  await page.screenshot({ path: shotPath(CHAPTER, 'conduit_excel') })
+  await shoot(page, CHAPTER, 'conduit_excel')
   await spotlightOff()
 })

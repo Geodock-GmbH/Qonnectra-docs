@@ -4,7 +4,7 @@ import {
   crop16by10,
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
 } from '../playwright/manual-shots'
 
@@ -37,13 +37,12 @@ test.describe('Abgemeldet', () => {
     await disableAnimations(page)
     await moveCursorAway(page)
 
-    await page.screenshot({ path: shotPath(CHAPTER, 'login_start') })
+    await shoot(page, CHAPTER, 'login_start')
 
     // Detail crop of the form as the second image of the image pair. The fields
     // stay empty - no credentials are typed on purpose; the placeholder texts of
     // the app explain the fields anyway.
-    await page.screenshot({
-      path: shotPath(CHAPTER, 'login_start_detail'),
+    await shoot(page, CHAPTER, 'login_start_detail', {
       clip: await crop16by10(page, loginCard(page)),
     })
   })
@@ -88,14 +87,14 @@ test.describe('Angemeldet', () => {
     await openDashboard(page)
     // Raw capture for the labelled orientation image (pattern 3), see the
     // comment at the top of this file.
-    await page.screenshot({ path: shotPath(CHAPTER, 'login_navigation') })
+    await shoot(page, CHAPTER, 'login_navigation')
   })
 
   test('1.2.1 Navigationsleiste', async ({ page }) => {
     await openDashboard(page)
 
     const spotlightOff = await spotlight(page, sidebar(page))
-    await page.screenshot({ path: shotPath(CHAPTER, 'login_sidebar') })
+    await shoot(page, CHAPTER, 'login_sidebar')
     await spotlightOff()
   })
 
@@ -103,7 +102,7 @@ test.describe('Angemeldet', () => {
     await openDashboard(page)
 
     const spotlightOff = await spotlight(page, header(page))
-    await page.screenshot({ path: shotPath(CHAPTER, 'login_header') })
+    await shoot(page, CHAPTER, 'login_header')
     await spotlightOff()
   })
 
@@ -120,7 +119,7 @@ test.describe('Angemeldet', () => {
     await expect(page.getByRole('link', { name: 'Einstellungen' })).toBeInViewport()
 
     const spotlightOff = await spotlight(page, systemGroup(page))
-    await page.screenshot({ path: shotPath(CHAPTER, 'login_settings') })
+    await shoot(page, CHAPTER, 'login_settings')
     await spotlightOff()
   })
 })
@@ -169,7 +168,7 @@ test.describe('Mobil', () => {
     ).toBeHidden()
 
     const spotlightOff = await spotlight(page, mobileBar(page))
-    await page.screenshot({ path: shotPath(CHAPTER, 'login_mobile_bar') })
+    await shoot(page, CHAPTER, 'login_mobile_bar')
     await spotlightOff()
   })
 
@@ -185,6 +184,6 @@ test.describe('Mobil', () => {
 
     // No spotlight: the menu brings its own backdrop (bg-black/50), a second
     // scrim on top would dim the page twice.
-    await page.screenshot({ path: shotPath(CHAPTER, 'login_mobile_more') })
+    await shoot(page, CHAPTER, 'login_mobile_more')
   })
 })

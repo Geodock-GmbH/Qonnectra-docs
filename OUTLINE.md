@@ -4,8 +4,10 @@ Everything around the outline is English, the chapter and section titles are the
 German ones that go into the manual verbatim (see the language rule in
 `CLAUDE.md`).
 
-Basis: Qonnectra v1.7.0 (local instance, project „Testprojekt“), surveyed on
-2026-09-07. Part A follows the left navigation bar of the app (groups „Info“,
+Basis: Qonnectra, `main` as of 2026-09-11 (commit `aa28575`, the app reports
+v1.7.0 in its header – see `QONNECTRA_REF` in
+`scripts/setup-local-qonnectra.sh`), local instance, project „Testprojekt“,
+surveyed on 2026-09-07. Part A follows the left navigation bar of the app (groups „Info“,
 „Funktionen“, „Rohr“, „Kabel“, „Gebäude“ and the footer „System“). Three levels:
 **part** – **chapter** – **section**.
 
