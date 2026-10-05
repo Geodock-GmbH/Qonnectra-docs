@@ -8,6 +8,7 @@
 import { defineConfig } from '@playwright/test'
 
 import { localAppUrl } from './playwright/local-app'
+import { APP_TIME_ZONE } from './playwright/stable-dates'
 
 export default defineConfig({
   testDir: './tests',
@@ -60,7 +61,7 @@ export default defineConfig({
     launchOptions: {
       env: { ...process.env, LANGUAGE: 'de_DE', LC_ALL: 'de_DE.UTF-8', LANG: 'de_DE.UTF-8' },
     },
-    timezoneId: 'Europe/Berlin',
+    timezoneId: APP_TIME_ZONE,
     colorScheme: 'light',
 
     // Manual screenshots are saved explicitly in the specs; these artefacts
