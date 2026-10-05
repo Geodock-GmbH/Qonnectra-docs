@@ -157,9 +157,9 @@ jobs:
         if: ${{ !cancelled() }}
         run: pnpm screenshots:publish --images
 
-      # screenshots:publish only writes an image whose picture actually differs
-      # from the published one, so anything left here is a real difference
-      # between the manual and the app as it currently builds.
+      # screenshots:publish only writes an image whose picture differs from the
+      # committed one - without any tolerance - so anything left here is a real
+      # difference between the manual and the app as it currently builds.
       - name: Fail if the published screenshots are out of date
         if: ${{ !cancelled() }}
         run: |

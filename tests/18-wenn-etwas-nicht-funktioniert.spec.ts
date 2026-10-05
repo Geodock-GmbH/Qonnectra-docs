@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 
-import { disableAnimations, moveCursorAway, shotPath, spotlight } from '../playwright/manual-shots'
+import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
 
 // Screenshots for chapter "18. Wenn etwas nicht funktioniert" in the manual
 // (manual/teil-a-anwenderhandbuch/18-wenn-etwas-nicht-funktioniert.md).
@@ -97,7 +97,7 @@ test('18.1 Meldung „Erfolg" am unteren Bildschirmrand', async ({ page }) => {
   // Quickly: the message fades by itself after a few seconds - which is what
   // the section is about.
   const spotlightOff = await spotlight(page, toast(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'error_toast') })
+  await shoot(page, CHAPTER, 'error_toast')
   await spotlightOff()
 })
 
@@ -110,7 +110,7 @@ test('18.1 Fehlerseite 404', async ({ page }) => {
   await disableAnimations(page)
   await moveCursorAway(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'error_not_found') })
+  await shoot(page, CHAPTER, 'error_not_found')
 })
 
 test('18.3 Meldung über das fehlende Recht', async ({ page }) => {
@@ -144,7 +144,7 @@ test('18.3 Meldung über das fehlende Recht', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, toast(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'error_permission') })
+  await shoot(page, CHAPTER, 'error_permission')
   await spotlightOff()
 })
 
@@ -177,7 +177,7 @@ test('18.4 Leere Karte mit Projektauswahl und Legende', async ({ page }) => {
   // Both places the section sends the reader to: the project in the header and
   // the layer entry with "Auf Ausdehnung zoomen".
   const spotlightOff = await spotlight(page, [projectPicker(page), addressRow])
-  await page.screenshot({ path: shotPath(CHAPTER, 'error_map_empty') })
+  await shoot(page, CHAPTER, 'error_map_empty')
   await spotlightOff()
 })
 
@@ -192,6 +192,6 @@ test('18.5 Version und Projekt in der Kopfzeile', async ({ page }) => {
   await expect(version(page)).toHaveText(/^v\d+\.\d+\.\d+$/)
 
   const spotlightOff = await spotlight(page, [projectPicker(page), version(page)])
-  await page.screenshot({ path: shotPath(CHAPTER, 'error_support_info') })
+  await shoot(page, CHAPTER, 'error_support_info')
   await spotlightOff()
 })

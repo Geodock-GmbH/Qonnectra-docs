@@ -28,6 +28,7 @@ import {
   typeText,
   videoPath,
 } from '../playwright/manual-videos'
+import { stableSearchOrder } from '../playwright/stable-search'
 
 const CHAPTER = '07-nachverdichtung'
 
@@ -101,6 +102,9 @@ test('7.1 Adresse suchen und auswählen', async ({ page, context }) => {
   const capture = await context.newPage()
   const pageStart = Date.now()
 
+  // The hits of "Toft 1" all score the same and come back in an order of
+  // Postgres' choosing; see playwright/stable-search.ts.
+  await stableSearchOrder(capture)
   await capture.goto('/post-compaction')
   await expect(capture.getByRole('heading', { name: 'Nachverdichtung' })).toBeVisible()
   await capture.waitForLoadState('networkidle')

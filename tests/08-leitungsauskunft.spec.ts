@@ -1,7 +1,7 @@
 import { expect, request as playwrightRequest, test, type Locator, type Page } from '@playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
-import { disableAnimations, moveCursorAway, shoot, shotPath, spotlight } from '../playwright/manual-shots'
+import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
 import { CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
 
 // Screenshots for chapter "8. Leitungsauskunft" in the manual
@@ -374,11 +374,18 @@ test('8.2 Neue Auskunft anlegen', async ({ page }) => {
   }
 
   // The last combobox keeps the focus ring after the click; it would sit in the
-  // image as a green frame around a field that is not the subject.
-  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  // image as a green frame around a field that is not the subject. One blur()
+  // is not enough: the widget takes the focus back a moment after the option
+  // click, and the image carried the ring in one run and not in the next. So
+  // blur until the focus has really left the form, and only then capture.
+  await expect(async () => {
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true)
+  }).toPass()
+  await expect(page.locator('[data-scope="combobox"][data-focus]')).toHaveCount(0)
 
   await moveCursorAway(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_new') })
+  await shoot(page, CHAPTER, 'records_new')
 })
 
 test('8.3 Auskunftsbereiche zeichnen, umbenennen und löschen', async ({ page }) => {
@@ -389,10 +396,10 @@ test('8.3 Auskunftsbereiche zeichnen, umbenennen und löschen', async ({ page })
   await openInquiry(page, uuidsToRemove[1])
   await drawArea(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_inquiry') })
+  await shoot(page, CHAPTER, 'records_inquiry')
 
   const spotlightOff = await spotlight(page, [inquiryTools(page), inquiryAreaList(page)])
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_inquiry_tools') })
+  await shoot(page, CHAPTER, 'records_inquiry_tools')
   await spotlightOff()
 })
 
@@ -404,7 +411,7 @@ test('8.4 Auskunft exportieren', async ({ page }) => {
   // part of the app and would not be in the image anyway.
   const exportButton = page.getByRole('button', { name: 'Exportieren' }).first()
   const spotlightOff = await spotlight(page, exportButton)
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_export') })
+  await shoot(page, CHAPTER, 'records_export')
   await spotlightOff()
 })
 
@@ -416,6 +423,6 @@ test('8.5 Auskunft ändern und löschen', async ({ page }) => {
     buttons.getByRole('button', { name: 'Löschen' }),
     buttons.getByRole('button', { name: 'Speichern' }),
   ])
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_detail') })
+  await shoot(page, CHAPTER, 'records_detail')
   await spotlightOff()
 })

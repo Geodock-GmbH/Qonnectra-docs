@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 
-import { disableAnimations, moveCursorAway, shotPath, spotlight } from '../playwright/manual-shots'
+import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
 
 // Screenshots for chapter "16. Adressen" in the manual
 // (manual/teil-a-anwenderhandbuch/16-adressen.md). Produces all images of the
@@ -123,7 +123,7 @@ async function scrollTo(page: Page, target: Locator) {
 test('16. Übersicht der Adressliste', async ({ page }) => {
   await openAddressList(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'address') })
+  await shoot(page, CHAPTER, 'address')
 })
 
 test('16.1 Suche in der Adressliste', async ({ page }) => {
@@ -146,14 +146,14 @@ test('16.1 Suche in der Adressliste', async ({ page }) => {
     search.locator('xpath=..'),
     page.locator('table tbody tr').first(),
   ])
-  await page.screenshot({ path: shotPath(CHAPTER, 'address_search') })
+  await shoot(page, CHAPTER, 'address_search')
   await spotlightOff()
 })
 
 test('16.2 Adressdetails', async ({ page }) => {
   await openAddress(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'address_detail') })
+  await shoot(page, CHAPTER, 'address_detail')
 })
 
 test('16.2 PDF herunterladen mit Wohneinheiten', async ({ page }) => {
@@ -172,7 +172,7 @@ test('16.2 PDF herunterladen mit Wohneinheiten', async ({ page }) => {
     pdf.locator('xpath=..'),
     option.locator('xpath=ancestor::*[@data-part="content"][1]'),
   ])
-  await page.screenshot({ path: shotPath(CHAPTER, 'address_pdf') })
+  await shoot(page, CHAPTER, 'address_pdf')
   await spotlightOff()
 })
 
@@ -189,7 +189,7 @@ test('16.3 Abschnitt „Wohneinheiten"', async ({ page }) => {
   ).toHaveCount(ADDRESS.units)
 
   const spotlightOff = await spotlight(page, units)
-  await page.screenshot({ path: shotPath(CHAPTER, 'address_units') })
+  await shoot(page, CHAPTER, 'address_units')
   await spotlightOff()
 })
 
@@ -211,7 +211,7 @@ test('16.3 Fenster „Wohneinheit hinzufügen"', async ({ page }) => {
   // Deliberately no spotlight: the window already lifts itself off the page
   // with its own backdrop. Deliberately not saved either - the image needs the
   // filled form, not a new record in the demo data.
-  await page.screenshot({ path: shotPath(CHAPTER, 'address_unit_modal') })
+  await shoot(page, CHAPTER, 'address_unit_modal')
 })
 
 test('16.3 Wohneinheit im Detail', async ({ page }) => {
@@ -223,5 +223,5 @@ test('16.3 Wohneinheit im Detail', async ({ page }) => {
   await disableAnimations(page)
   await moveCursorAway(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'address_unit') })
+  await shoot(page, CHAPTER, 'address_unit')
 })

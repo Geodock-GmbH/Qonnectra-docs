@@ -540,6 +540,14 @@ longer read.
   `login_mobile_more.jpg` came out with the menu at a different slide offset on
   every run. `shoot()` passes `animations: "disabled"`, which the browser
   applies to CSS animations, CSS transitions **and** Web Animations.
+  Both also wait until the canvases of the page have stopped changing
+  (`waitForBaseMapSettled()`, see „Labels of the base map“ below), and `shoot()`
+  snaps a `clip` to the grid Chromium captures on: origin on whole device
+  pixels, size truncated to whole CSS pixels. A crop at an arbitrary fraction
+  is resampled, and `fault_result_detail` differed in 272 000 pixels between
+  two runs without any pixel being off by more than 19 of 255. Snapped any
+  other way the image shifts by a device pixel or grows by two – measured on
+  the published images, see `wholePixels()`.
 - Output goes to `tests/screenshots/<chapter-slug>/<name>.png` through
   `shotPath()` resp. `tests/videos/<chapter-slug>/<name>.webm` through
   `videoPath()`. `tests/screenshots/`, `tests/videos/`, `test-results/`,
@@ -552,16 +560,23 @@ longer read.
   the manual itself: the script looks for the reference
   `/images/manual/<part>/<name>.jpg` resp. `/videos/<name>.webm` in `manual/`.
   Captures without a reference are skipped, so that nothing ends up in the wrong
-  folder. `--dry-run` shows beforehand what would be created and what replaced,
-  `--videos` and `--images` restrict the run to one kind.
-- An image whose picture matches the published one is **not** written; the run
-  reports it as „unchanged“. Without that gate every run rewrote nearly every
-  file: two captures of the same view differ in the anti-aliasing of the glyph
-  edges by at most 17 of 255 – invisible, but enough to change every byte of the
-  JPEG. One commit rewrote 99 of 137 images that way, 72 of them without any
-  visible difference. The tolerance (`DIFF_FUZZ`, `MAX_DIFF_PIXELS` in the
-  script) is measured, not guessed: at a fuzz of 10 % the noise comes out at 0
-  differing pixels, the smallest genuine change at 217. `--force` writes anyway.
+  folder. `--dry-run` converts and compares like the real run and reports every
+  image as new, changed or unchanged without writing anything, `--videos` and
+  `--images` restrict the run to one kind.
+- An image whose picture matches the **committed** one is **not** written; the
+  run reports it as „unchanged“. Without that gate every run rewrote nearly
+  every file – one commit rewrote 99 of 137 images, 72 of them without any
+  visible difference. The tolerance is **zero** (`DIFF_FUZZ`, `MAX_DIFF_PIXELS`
+  in the script): the captures are reproducible, 127 of 137 images of a run
+  came out pixel-identical to the committed JPEG, and every one of the rest had
+  a cause in a spec. The 10 % fuzz the gate had before hid a genuine change –
+  „2.5“ became „2,5“ with the German locale, 10 to 19 pixels at that tolerance,
+  and five images stayed stale. An image that differs on every run is a spec to
+  fix, not a reason to raise the tolerance; the known causes are listed below.
+  The comparison runs against HEAD, not against the working tree: a transient
+  caught in one run and gone in the next otherwise leaves a chain of rewrites
+  behind. A working tree file that differs from HEAD while the capture matches
+  HEAD is restored from it („restored“). `--force` writes anyway.
 - Two capture folders with the same file name make the script abort. The chapter
   renumbering left `tests/screenshots/03-einstieg-anmeldung/` next to
   `01-erste-schritte/`, and because „03“ sorts after „01“ six `login_*` images
@@ -581,7 +596,11 @@ longer read.
 - Determinism helpers in `playwright/manual-shots.ts`: `shoot()` (the one way to
   capture, see above) and `shootTile()` for the tiles of a composite,
   `disableAnimations()` (CSS transitions and text caret off – not enough on its
-  own), `moveCursorAway()` (no hover states in the
+  own), `waitForAnimations()` (waits until every finite Web Animation has
+  finished – `spotlight()` and `crop16by10()` call it before they measure,
+  because `toBeVisible()` passes at the first frame of a 200 ms slide and the
+  cut-out of `compaction_search` ended after two of five hits that way),
+  `moveCursorAway()` (no hover states in the
   image), `spotlight()` for pattern 2 and `composite2x2()` for pattern 4. The
   grid is assembled in the browser, so the repo needs no image library. Pattern 3
   (hand-drawn ellipses/arrows) stays post-processing.
@@ -671,7 +690,13 @@ looking for a race in the spec.
   in the app, not in the capture: paginating through tied results skips and
   repeats rows for users too. The fix belongs upstream (`order_by("-similarity",
   "id")`) – `local-app/` is a foreign, gitignored checkout and is never patched
-  from here. Until then, pick a search term whose hits do not tie.
+  from here. Until then `stableSearchOrder()` in `playwright/stable-search.ts`
+  sorts the hits by `id_address` on their way into the page, the same device as
+  `freezeDates()` – install it before the view loads. The response carries no
+  score, so that is only right for terms whose hits all tie; „Toft 1“ and
+  „Nieharde“ do (every hit scores 1.0, the house number is a short token and
+  only filters), another term is checked in the Django shell of the backend
+  container first – the command is in the file.
 - **Charts over equal values.** „Neueste Netzknoten“ is `order_by("-date")[:5]`
   without a second sort key (`views.py`), and 47 of the 118 nodes of the demo
   data carry the same date while 71 have none – which five come back is up to
@@ -700,12 +725,14 @@ looking for a race in the spec.
   the features it happens to have at the moment of the render, so a tile
   arriving late moves the street names by a few pixels – 10 700 pixels of
   difference in `map_search` between two runs, and the amplified diff showed
-  nothing but street names. Fixed, and the fix is the pattern for every map
-  image: wait until the painted picture stops changing, `waitForBaseMapSettled()`
-  in `tests/05-karte.spec.ts`. Once in `openMap()` is **not** enough –
-  `spotlight()` puts an SVG over the page, and the reflow makes OpenLayers render
-  again with a fresh declutter pass. Every capture of that chapter therefore goes
-  through `shootMap()`, which settles immediately before the shot.
+  nothing but street names. Fixed: wait until the painted picture stops
+  changing, `waitForBaseMapSettled()` in `playwright/stable-map.ts`. Once on
+  load is **not** enough – `spotlight()` puts an SVG over the page, and the
+  reflow makes OpenLayers render again with a fresh declutter pass. `shoot()`
+  and `shootTile()` therefore settle immediately before every capture. A
+  per-chapter `shootMap()` was the previous answer, and eight of the ten specs
+  that show a map did not have one; `compaction_address` and `error_map_empty`
+  moved their labels from run to run because of it.
 
 - If the API answers with **502** although the backend container is running:
   after a restart of the backend, `nginx` has cached its old container IP
@@ -720,7 +747,11 @@ looking for a race in the spec.
   back on every `moveend`; if that lands between setting and reloading, the seed
   is gone and the map starts at the overview. Tests that click on a particular
   spot then hit nothing and the info box does not open (symptom: `#drawer-title`
-  not found).
+  not found). The same holds for `playwright/auth.setup.ts`: it seeded a loaded
+  page once, `/` redirects to the map, and in one run of ten the first `moveend`
+  won – `auth-state.json` carried `[0, 0]` at zoom 2.5 and chapters 8 and 9,
+  which rely on that seed, opened their map in the Atlantic. It seeds through
+  `context.addInitScript()` now and checks the login on the dashboard.
 - The base map layer is independent of object selection: `getClickedFeatures`
   filters via `layerFilter` down to trench, address, node and area
   (`MapInteractionManager.svelte.ts`). Whether the tileserver runs therefore has

@@ -10,7 +10,6 @@ import {
   shootTile,
   shotPath,
   spotlight,
-  type ShootOptions,
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
 import { waitForBaseMapSettled } from '../playwright/stable-map'
@@ -251,22 +250,6 @@ async function typeSearchTerm(page: Page, field: Locator, term: string) {
   await field.pressSequentially(term, { delay: 30 })
 }
 
-/**
- * `shoot()` for images of this chapter: waits until the base map has stopped
- * redrawing, then captures.
- *
- * Settling once in `openMap()` is not enough. `spotlight()` puts an SVG over the
- * page, and the reflow that causes makes OpenLayers render again - with a fresh
- * declutter pass, which may place the street names of the base map a few pixels
- * elsewhere. map_legend and map_opacity differed by around 10 700 pixels
- * between two runs for exactly that reason, while the images without a
- * spotlight had already become stable.
- */
-async function shootMap(page: Page, name: string, options?: ShootOptions): Promise<void> {
-  await waitForBaseMapSettled(page)
-  await shoot(page, CHAPTER, name, options)
-}
-
 /** Screenshot of the map area, for the tiles of the composite grids. */
 function mapShot(page: Page): Promise<Buffer> {
   return shootTile(page.locator('.map-wrapper'))
@@ -360,7 +343,7 @@ async function settledMapShot(page: Page): Promise<Buffer> {
 
 test('5. Übersicht der Karte', async ({ page }) => {
   await openMap(page)
-  await shootMap(page, 'map')
+  await shoot(page, CHAPTER, 'map')
 })
 
 test('5.1 Legendeneintrag „Adresse" und Zoom auf den Layer', async ({ page }) => {
@@ -368,7 +351,7 @@ test('5.1 Legendeneintrag „Adresse" und Zoom auf den Layer', async ({ page }) 
 
   // Full shot with the row "Adresse" highlighted.
   const spotlightOff = await spotlight(page, legendRow(page, 'Adresse'))
-  await shootMap(page, 'map_address_detail')
+  await shoot(page, CHAPTER, 'map_address_detail')
   await spotlightOff()
 
   // After zooming to the extent of the layer.
@@ -378,7 +361,7 @@ test('5.1 Legendeneintrag „Adresse" und Zoom auf den Layer', async ({ page }) 
   await moveCursorAway(page)
   // view.fit runs for 800 ms, after which tiles load in.
   await page.waitForTimeout(3000)
-  await shootMap(page, 'map_address_detail_select')
+  await shoot(page, CHAPTER, 'map_address_detail_select')
 })
 
 test('3.3 Transparenz-Regler', async ({ page }) => {
@@ -386,7 +369,7 @@ test('3.3 Transparenz-Regler', async ({ page }) => {
 
   const slider = page.getByLabel('Ändert die Transparenz der OpenStreetMap-Hintergrundkarte.')
   const spotlightOff = await spotlight(page, slider)
-  await shootMap(page, 'map_opacity')
+  await shoot(page, CHAPTER, 'map_opacity')
   await spotlightOff()
 })
 
@@ -394,7 +377,7 @@ test('3.3 Legende', async ({ page }) => {
   await openMap(page)
 
   const spotlightOff = await spotlight(page, legend(page))
-  await shootMap(page, 'map_legend')
+  await shoot(page, CHAPTER, 'map_legend')
   await spotlightOff()
 })
 
@@ -507,7 +490,7 @@ test('5.3 Ausgewähltes Objekt mit Info-Box', async ({ page }) => {
   // at all - the thin yellow trench line disappears in the dimmed map picture.
   const feature = await selectedMapFeature(page)
   const spotlightOff = await spotlight(page, [feature, page.locator('[data-drawer]')])
-  await shootMap(page, 'map_selected_object')
+  await shoot(page, CHAPTER, 'map_selected_object')
   await spotlightOff()
 })
 
@@ -515,7 +498,7 @@ test('3.4 Suchfeld', async ({ page }) => {
   await openMap(page)
 
   const spotlightOff = await spotlight(page, page.locator('.search-panel'))
-  await shootMap(page, 'map_search')
+  await shoot(page, CHAPTER, 'map_search')
   await spotlightOff()
 })
 
@@ -810,7 +793,7 @@ test('5.5 Grabenprofil einer Trasse', async ({ page }) => {
 
   // Cropped to the window: at 900 x 600 in a window of 1792 x 1120 the labels
   // would be barely readable in the 512 px rendering of the manual.
-  await shootMap(page, 'map_trench_profile', { clip: await crop16by10(page, panel) })
+  await shoot(page, CHAPTER, 'map_trench_profile', { clip: await crop16by10(page, panel) })
 })
 
 test.describe('Netzknoten mit Slot-Konfiguration', () => {
@@ -846,7 +829,7 @@ test.describe('Netzknoten mit Slot-Konfiguration', () => {
     await moveCursorAway(page)
     await page.waitForTimeout(1000)
 
-    await shootMap(page, 'map_node_slots', { clip: await crop16by10(page, panel) })
+    await shoot(page, CHAPTER, 'map_node_slots', { clip: await crop16by10(page, panel) })
   })
 
   test('5.6 Struktur eines Netzknotens', async ({ page }) => {
@@ -865,7 +848,7 @@ test.describe('Netzknoten mit Slot-Konfiguration', () => {
     await moveCursorAway(page)
     await page.waitForTimeout(1000)
 
-    await shootMap(page, 'map_node_structure', { clip: await crop16by10(page, panel) })
+    await shoot(page, CHAPTER, 'map_node_structure', { clip: await crop16by10(page, panel) })
   })
 })
 
@@ -933,7 +916,7 @@ test('5.4 Reiter „Rohrübersicht“', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(800)
 
-  await shootMap(page, 'map_trench_conduits', { clip: await drawerClip(page) })
+  await shoot(page, CHAPTER, 'map_trench_conduits', { clip: await drawerClip(page) })
 })
 
 test('5.4 Reiter „Kabelübersicht“', async ({ page }) => {
@@ -961,5 +944,5 @@ test('5.4 Reiter „Kabelübersicht“', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(800)
 
-  await shootMap(page, 'map_trench_cables', { clip: await drawerClip(page) })
+  await shoot(page, CHAPTER, 'map_trench_cables', { clip: await drawerClip(page) })
 })

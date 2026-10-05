@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 
-import { disableAnimations, moveCursorAway, shotPath, spotlight } from '../playwright/manual-shots'
+import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
+import { stableSearchOrder } from '../playwright/stable-search'
 
 // Screenshots for chapter "7. Nachverdichtung" in the manual
 // (manual/teil-a-anwenderhandbuch/07-nachverdichtung.md). Produces all images
@@ -34,6 +35,9 @@ const ADDRESS_ID = '6XCTUWG'
 
 /** Opens the post compaction view with an empty search. */
 async function openPostCompaction(page: Page) {
+  // The hits of "Toft 1" all score the same and come back in an order of
+  // Postgres' choosing; see playwright/stable-search.ts.
+  await stableSearchOrder(page)
   await page.goto('/post-compaction')
   await expect(page.getByRole('heading', { name: 'Nachverdichtung' })).toBeVisible()
   await page.waitForLoadState('networkidle')
@@ -97,7 +101,7 @@ function mapExcerpt(page: Page): Locator {
 
 test('7. Übersicht der Nachverdichtung', async ({ page }) => {
   await openPostCompaction(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'compaction') })
+  await shoot(page, CHAPTER, 'compaction')
 })
 
 test('7.1 Adresse suchen', async ({ page }) => {
@@ -105,7 +109,7 @@ test('7.1 Adresse suchen', async ({ page }) => {
   await search(page)
 
   const spotlightOff = await spotlight(page, [searchField(page), results(page)])
-  await page.screenshot({ path: shotPath(CHAPTER, 'compaction_search') })
+  await shoot(page, CHAPTER, 'compaction_search')
   await spotlightOff()
 })
 
@@ -115,7 +119,7 @@ test('7.2 Angaben zur Adresse und Kartenausschnitt', async ({ page }) => {
   await selectAddress(page)
 
   const spotlightOff = await spotlight(page, [addressValues(page), mapExcerpt(page)])
-  await page.screenshot({ path: shotPath(CHAPTER, 'compaction_address') })
+  await shoot(page, CHAPTER, 'compaction_address')
   await spotlightOff()
 })
 
@@ -133,5 +137,5 @@ test('7.3 Ausbaustatus ändern und Bemerkung erfassen', async ({ page }) => {
 
   // No spotlight: the dialog dims and blurs the page behind it by itself, and a
   // scrim on top of that would dim the subject twice over.
-  await page.screenshot({ path: shotPath(CHAPTER, 'compaction_export') })
+  await shoot(page, CHAPTER, 'compaction_export')
 })

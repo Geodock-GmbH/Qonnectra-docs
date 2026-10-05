@@ -1,11 +1,6 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 
-import {
-  disableAnimations,
-  moveCursorAway,
-  shotPath,
-  spotlight,
-} from '../playwright/manual-shots'
+import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
 
 // Screenshots for chapter "6. Störungsanalyse" in the manual
 // (manual/teil-a-anwenderhandbuch/06-stoerungsanalyse.md). Produces all images
@@ -149,7 +144,7 @@ async function mapHalfCrop(page: Page, point: { x: number; y: number }) {
 
 test('6. Übersicht der Störungsanalyse', async ({ page }) => {
   await openFaultSimulation(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'fault') })
+  await shoot(page, CHAPTER, 'fault')
 })
 
 test('6.1 Schadenspunkt in der Karte setzen', async ({ page }) => {
@@ -164,7 +159,7 @@ test('6.1 Schadenspunkt in der Karte setzen', async ({ page }) => {
     padding: 44,
     radius: 16,
   })
-  await page.screenshot({ path: shotPath(CHAPTER, 'fault_damage_point') })
+  await shoot(page, CHAPTER, 'fault_damage_point')
   await spotlightOff()
 })
 
@@ -181,7 +176,7 @@ test('6.2 Betroffene Leerrohre, Kabel und Fasern', async ({ page }) => {
   await expect(page.getByText('St-V02-01', { exact: true })).toBeVisible()
   await moveCursorAway(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'fault_result') })
+  await shoot(page, CHAPTER, 'fault_result')
 
   // Detail of the map half: damage point, the trenches of the affected cables
   // and the nodes hanging off them.
@@ -190,8 +185,7 @@ test('6.2 Betroffene Leerrohre, Kabel und Fasern', async ({ page }) => {
   // above and below the map into the picture. Here the full height of the map
   // half is used and the width follows from it, so the crop lies entirely
   // inside the map.
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'fault_result_detail'),
+  await shoot(page, CHAPTER, 'fault_result_detail', {
     clip: await mapHalfCrop(page, damagePoint),
   })
 })
@@ -218,7 +212,7 @@ test('6.3 Betroffene Adressen und Wohneinheiten', async ({ page }) => {
     page.getByRole('heading', { name: /^Betroffene Adressen \(\d+\)$/ }),
     table,
   ])
-  await page.screenshot({ path: shotPath(CHAPTER, 'fault_addresses') })
+  await shoot(page, CHAPTER, 'fault_addresses')
   await spotlightOff()
 })
 
@@ -231,6 +225,6 @@ test('6.4 Ergebnis als CSV exportieren', async ({ page }) => {
     page.getByRole('button', { name: 'CSV exportieren' }),
     page.getByRole('button', { name: 'Zurücksetzen' }),
   ])
-  await page.screenshot({ path: shotPath(CHAPTER, 'fault_export') })
+  await shoot(page, CHAPTER, 'fault_export')
   await spotlightOff()
 })

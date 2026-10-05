@@ -1,7 +1,12 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
 
-import { disableAnimations, moveCursorAway, shotPath, spotlight } from '../playwright/manual-shots'
-import { crop16by10 } from '../playwright/manual-shots'
+import {
+  crop16by10,
+  disableAnimations,
+  moveCursorAway,
+  shoot,
+  spotlight,
+} from '../playwright/manual-shots'
 
 // Screenshots for chapter "12. Rohrverzweigung" in the manual
 // (manual/teil-a-anwenderhandbuch/12-rohrverzweigung.md). Produces all images of
@@ -214,7 +219,7 @@ test('12. Übersicht der Rohrverzweigung', async ({ page }) => {
   await openPipeBranch(page)
 
   await expect(page.getByPlaceholder('Rohrverzweigung auswählen', { exact: true })).toBeVisible()
-  await page.screenshot({ path: shotPath(CHAPTER, 'pipe_branch') })
+  await shoot(page, CHAPTER, 'pipe_branch')
 })
 
 test('12.1 Auswahl der Rohrverzweigung', async ({ page }) => {
@@ -236,7 +241,7 @@ test('12.1 Auswahl der Rohrverzweigung', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, [propertiesCard(page), options])
-  await page.screenshot({ path: shotPath(CHAPTER, 'pipe_branch_select') })
+  await shoot(page, CHAPTER, 'pipe_branch_select')
   await spotlightOff()
 })
 
@@ -253,7 +258,7 @@ test('12.2 Fenster „Trassen auswählen"', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, trenchWindow(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'pipe_branch_trench_selection') })
+  await shoot(page, CHAPTER, 'pipe_branch_trench_selection')
   await spotlightOff()
 })
 
@@ -262,7 +267,7 @@ test('12.3 Rohre auf der Arbeitsfläche', async ({ page }) => {
   await selectNode(page)
   await loadCanvas(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'pipe_branch_canvas') })
+  await shoot(page, CHAPTER, 'pipe_branch_canvas')
 })
 
 test('12.3 Ein Rohr aus der Nähe', async ({ page }) => {
@@ -288,8 +293,7 @@ test('12.3 Ein Rohr aus der Nähe', async ({ page }) => {
   // The label box sits `absolute` above the circle and is translated out of it
   // (PipeBranchNode.svelte), so it does not widen the node's own extent - passed
   // separately, the crop would cut it in half.
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'pipe_branch_canvas_detail'),
+  await shoot(page, CHAPTER, 'pipe_branch_canvas_detail', {
     clip: await crop16by10(page, [target, target.locator('> div').first()], { padding: 32 }),
   })
 })
@@ -325,7 +329,7 @@ test('12.3.2 Auto-Verbindung mit zwei ausgewählten Rohren', async ({ page }) =>
   // lasso caught. Exposing the card alone would leave the selection - the point
   // of the section - in the dimmed part of the image.
   const spotlightOff = await spotlight(page, [propertiesCard(page), ...selected])
-  await page.screenshot({ path: shotPath(CHAPTER, 'pipe_branch_auto_connect') })
+  await shoot(page, CHAPTER, 'pipe_branch_auto_connect')
   await spotlightOff()
 })
 
@@ -335,7 +339,7 @@ test('12.4 Schaltflächen der Arbeitsfläche', async ({ page }) => {
   await loadCanvas(page)
 
   const spotlightOff = await spotlight(page, canvasControls(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'pipe_branch_controls') })
+  await shoot(page, CHAPTER, 'pipe_branch_controls')
   await spotlightOff()
 })
 

@@ -14,6 +14,8 @@ import { dirname, join } from 'node:path'
 
 import type { Locator, Page } from '@playwright/test'
 
+import { waitForBaseMapSettled } from './stable-map'
+
 /** Brand green, used among other things for the digits in the composite grid. */
 export const BRAND_GREEN = '#11ba81'
 
@@ -51,6 +53,16 @@ export interface ShootOptions {
  * the manual wants to show.
  *
  * `caret` is not set here - `page.screenshot()` already hides it by default.
+ *
+ * Before the shot the canvases of the page have to come to rest
+ * (`waitForBaseMapSettled()`). OpenLayers places the labels of the base map with
+ * a declutter pass over whatever tiles it has at the moment of the render, and
+ * a tile arriving late moves the street names by a few pixels. Settling once on
+ * load is not enough: `spotlight()` lays an SVG over the page, and that reflow
+ * makes OpenLayers render again. Doing it here rather than in a per-chapter
+ * `shootMap()` is deliberate - eight of the ten specs that show a map had none,
+ * and `compaction_address` and `error_map_empty` moved their labels from run to
+ * run because of it. Without a canvas on the page the wait costs one poll.
  */
 export async function shoot(
   page: Page,
@@ -58,11 +70,49 @@ export async function shoot(
   name: string,
   options: ShootOptions = {},
 ): Promise<void> {
+  await waitForBaseMapSettled(page)
+
+  const { clip, ...rest } = options
+  const devicePixelRatio = clip ? await page.evaluate(() => window.devicePixelRatio) : 1
   await page.screenshot({
     path: shotPath(chapter, name),
     animations: 'disabled',
-    ...options,
+    ...rest,
+    ...(clip ? { clip: wholePixels(clip, devicePixelRatio, page.viewportSize()) } : {}),
   })
+}
+
+/**
+ * Snaps a crop to the pixel grid Chromium captures on, and keeps it inside the
+ * viewport.
+ *
+ * Crops are derived from bounding boxes, and those are fractional. Chromium
+ * places the origin of a clip on whole **device** pixels - half a CSS pixel at
+ * the scale factor of 2 - and truncates its size to whole CSS pixels. Measured
+ * on the published images: a crop snapped any other way comes out shifted by
+ * one device pixel (`dashboard_project_detail`, `map_node_slots`,
+ * `login_start_detail`) or two pixels larger (`Math.round` on the size made
+ * `map_node_slots` 2074 wide instead of 2072). Snapping here, before the
+ * capture, does the same thing explicitly, so a fraction that differs slightly
+ * between two runs lands on the same pixel instead of a different one.
+ *
+ * The clamp is there because Playwright silently trims a clip that reaches
+ * past the window, and a trimmed image has other dimensions.
+ */
+function wholePixels(
+  clip: { x: number; y: number; width: number; height: number },
+  devicePixelRatio: number,
+  viewport: { width: number; height: number } | null,
+): { x: number; y: number; width: number; height: number } {
+  const width = Math.floor(clip.width)
+  const height = Math.floor(clip.height)
+  let x = Math.round(clip.x * devicePixelRatio) / devicePixelRatio
+  let y = Math.round(clip.y * devicePixelRatio) / devicePixelRatio
+  if (viewport) {
+    x = Math.max(0, Math.min(x, viewport.width - width))
+    y = Math.max(0, Math.min(y, viewport.height - height))
+  }
+  return { x, y, width, height }
 }
 
 /**
@@ -71,10 +121,43 @@ export async function shoot(
  * Same reasoning as `shoot()`: an element screenshot defaults to
  * `animations: "allow"` just like a page screenshot does, and the tiles of a
  * grid are captured in the middle of a flow - exactly where a transition is
- * most likely to be running.
+ * most likely to be running. And the canvases settle first, as in `shoot()`.
  */
 export async function shootTile(target: Locator): Promise<Buffer> {
+  await waitForBaseMapSettled(target.page())
   return target.screenshot({ animations: 'disabled' })
+}
+
+/**
+ * Waits until no finite animation is running anywhere on the page.
+ *
+ * `disableAnimations()` cannot reach the transitions of Svelte 5, which run
+ * through the Web Animations API, and `shoot()` only fast-forwards them at the
+ * moment of the shot. Everything that **measures** the page before the shot
+ * sees them halfway: `spotlight()` read the hit list of the Nachverdichtung
+ * while its 200 ms `slide` was still running, and the cut-out ended after two
+ * of five hits while the shot showed all five. An assertion before the
+ * measurement is no help - `toBeVisible()` passes at the first frame of a
+ * transition.
+ *
+ * Infinite animations (spinners) are left alone: they never finish, and
+ * `shoot()` cancels them anyway. Best effort - after `timeout` the measurement
+ * goes ahead, and a still running animation shows up as a difference in the
+ * image, which is the thing being watched.
+ */
+export async function waitForAnimations(page: Page, timeout = 5000): Promise<void> {
+  await page.evaluate(async (timeout) => {
+    const running = () =>
+      document.getAnimations().filter((animation) => {
+        if (animation.playState !== 'running') return false
+        const end = animation.effect?.getComputedTiming().endTime
+        return typeof end === 'number' && Number.isFinite(end)
+      })
+    const deadline = performance.now() + timeout
+    while (running().length > 0 && performance.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 50))
+    }
+  }, timeout)
 }
 
 /**
@@ -208,10 +291,14 @@ function ellipsePath({ x, y, rx, ry, rotation = 0 }: SpotlightEllipse): string {
  *   (OpenLayers) lose its canvas content on reflow, and the map ends up empty
  *   in the screenshot.
  *
+ * The targets are measured only once every transition on the page has finished
+ * (`waitForAnimations()`), otherwise the cut-out is sized to a half-open
+ * element while the shot shows the finished one.
+ *
  * The return value removes the overlay again:
  *
  *   const off = await spotlight(page, legend)
- *   await page.screenshot({ path: shotPath('05-karte', 'map_legend') })
+ *   await shoot(page, '05-karte', 'map_legend')
  *   await off()
  */
 export async function spotlight(
@@ -220,6 +307,8 @@ export async function spotlight(
   options: SpotlightOptions = {},
 ): Promise<() => Promise<void>> {
   const { dim = 0.5, radius = 8, padding = 6, outlineWidth = 3 } = options
+
+  await waitForAnimations(page)
 
   const paths: string[] = []
   for (const singleTarget of Array.isArray(target) ? target : [target]) {
@@ -298,6 +387,8 @@ export interface Crop16by10Options {
  * for subjects that consist of two parts - the opened project picker for
  * instance sits in the header, while its list renders through a portal far
  * below it in the DOM (`ProjectCombobox.svelte`).
+ *
+ * Measured only once every transition has finished, see `spotlight()`.
  */
 export async function crop16by10(
   page: Page,
@@ -305,6 +396,8 @@ export async function crop16by10(
   options: Crop16by10Options = {},
 ): Promise<{ x: number; y: number; width: number; height: number }> {
   const { padding = CROP_PADDING } = options
+
+  await waitForAnimations(page)
 
   let left = Infinity
   let top = Infinity
