@@ -375,13 +375,17 @@ test('8.2 Neue Auskunft anlegen', async ({ page }) => {
 
   // The last combobox keeps the focus ring after the click; it would sit in the
   // image as a green frame around a field that is not the subject. One blur()
-  // is not enough: the widget takes the focus back a moment after the option
-  // click, and the image carried the ring in one run and not in the next. So
-  // blur until the focus has really left the form, and only then capture.
+  // is not enough, and neither is checking right after it: the widget answers
+  // the first blur by focusing its input again, measured about 50 ms later -
+  // once; a second blur sticks. A capture right after a single blur therefore
+  // caught the ring or not depending on whether that frame came before or
+  // after the refocus. So blur, then require the focus to stay on the body
+  // for half a second; if the widget took it back in between, blur again.
   await expect(async () => {
     await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await page.waitForTimeout(500)
     expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true)
-  }).toPass()
+  }).toPass({ timeout: 15_000 })
   await expect(page.locator('[data-scope="combobox"][data-focus]')).toHaveCount(0)
 
   await moveCursorAway(page)
