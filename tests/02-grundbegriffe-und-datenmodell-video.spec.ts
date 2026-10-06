@@ -18,7 +18,7 @@
 //
 // Publish to public/videos/ with:
 //   pnpm screenshots:publish 02-grundbegriffe-und-datenmodell --videos
-import { expect, request, test, type APIRequestContext, type Page } from '@playwright/test'
+import { expect, request, test, type APIRequestContext, type Page } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'

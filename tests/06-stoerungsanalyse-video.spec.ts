@@ -18,7 +18,7 @@
 // this spec creates nothing it would have to remove again.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 06-stoerungsanalyse
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
 

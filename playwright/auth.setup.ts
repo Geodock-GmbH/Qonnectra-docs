@@ -282,12 +282,19 @@ async function storeLoggedInState(
     },
   ])
 
-  const page = await context.newPage()
-  await page.goto(appUrl, { waitUntil: 'domcontentloaded' })
-
   // Language, light mode and map extent live in localStorage. Without this the
   // look of the images depends on the previous run.
-  await page.evaluate(
+  //
+  // Seeded through an init script, i.e. before any script of the app runs in
+  // the document, and never by writing into a loaded page. The app reads
+  // mapCenter/mapZoom when its stores initialise and writes them back on every
+  // `moveend` of the map - and `/` redirects to the map. Seeding a loaded page
+  // therefore raced the first moveend, and in one run of ten the app won:
+  // auth-state.json then carried [0, 0] at zoom 2.5, and every spec that relies
+  // on this seed (chapters 8 and 9) opened its map in the Atlantic. Chapter 8
+  // drew its inquiry area into the sea, chapter 9 found no highlighted area
+  // and failed. The same rule as for the specs, see CLAUDE.md.
+  await context.addInitScript(
     ({ center, zoom }) => {
       localStorage.setItem('PARAGLIDE_LOCALE', 'de')
       localStorage.setItem('mode', 'light')
@@ -298,6 +305,19 @@ async function storeLoggedInState(
     },
     { center: MAP_CENTER, zoom: MAP_ZOOM },
   )
+
+  // 4. Load the map once. Its stores write their own keys into localStorage on
+  //    the first load - the styles per node and area type, the layer
+  //    visibility - and the saved state has to carry them: the mini-map of the
+  //    window "Kabel-Mikrorohr Verknüpfung" draws its nodes with the styles as
+  //    they are when it opens, and from a state without the keys it showed
+  //    every node in the default style (schema_micropipe_trenches). The write-
+  //    back of the view on `moveend` is harmless here, the map starts at the
+  //    seeded view and writes the same values.
+  const page = await context.newPage()
+  await page.goto(`${appUrl}/map`, { waitUntil: 'domcontentloaded' })
+  await expect(page.locator('div.map canvas').first()).toBeVisible({ timeout: 30_000 })
+  await page.waitForFunction(() => localStorage.getItem('nodeTypeStyles') !== null)
 
   // 5. Cross-check: does the app really show the test project?
   await page.goto(`${appUrl}/dashboard`, { waitUntil: 'domcontentloaded' })

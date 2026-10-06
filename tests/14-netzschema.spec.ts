@@ -1,10 +1,10 @@
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '../playwright/test'
 
 import {
   crop16by10,
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
 } from '../playwright/manual-shots'
 
@@ -257,14 +257,14 @@ test('14. Übersicht des Netzschemas', async ({ page }) => {
   await openSchema(page)
 
   // Deliberately without a selection: that is the state the view is reached in.
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema') })
+  await shoot(page, CHAPTER, 'schema')
 })
 
 test('14.1 Bereich „Eigenschaften"', async ({ page }) => {
   await openSchema(page)
 
   const spotlightOff = await spotlight(page, propertiesCard(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_panel') })
+  await shoot(page, CHAPTER, 'schema_panel')
   await spotlightOff()
 })
 
@@ -284,7 +284,7 @@ test('14.1 Suche im Schema', async ({ page }) => {
   await page.waitForTimeout(400)
 
   const spotlightOff = await spotlight(page, [propertiesCard(page), results])
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_search') })
+  await shoot(page, CHAPTER, 'schema_search')
   await spotlightOff()
 })
 
@@ -296,7 +296,7 @@ test('14.2 Schaltflächen der Zeichenfläche', async ({ page }) => {
   await openSchema(page)
 
   const spotlightOff = await spotlight(page, canvasControls(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_lock') })
+  await shoot(page, CHAPTER, 'schema_lock')
   await spotlightOff()
 })
 
@@ -314,7 +314,7 @@ test('14.2 Kabeltyp für ein neues Kabel', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, [propertiesCard(page), options])
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_cable_type') })
+  await shoot(page, CHAPTER, 'schema_cable_type')
   await spotlightOff()
 })
 
@@ -328,7 +328,7 @@ test('14.3 Eigenschaften eines Kabels', async ({ page }) => {
 
   await expect(drawer(page).getByText('Verbundene Leerrohre')).toBeVisible()
   const spotlightOff = await spotlight(page, drawer(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_cable_properties') })
+  await shoot(page, CHAPTER, 'schema_cable_properties')
   await spotlightOff()
 })
 
@@ -338,7 +338,7 @@ test('14.3 Reiter „Aktionen" eines Kabels', async ({ page }) => {
 
   await expect(page.getByRole('button', { name: 'Kabellänge neu berechnen' })).toBeVisible()
   const spotlightOff = await spotlight(page, drawer(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_cable_actions') })
+  await shoot(page, CHAPTER, 'schema_cable_actions')
   await spotlightOff()
 })
 
@@ -368,7 +368,7 @@ test('14.4 Kontextmenü einer Kabelbeschriftung', async ({ page }) => {
   // The menu sits at the pointer, so the cursor has to stay where it is; a
   // moveCursorAway() would leave the menu without its anchor in the image.
   const spotlightOff = await spotlight(page, [label, menu])
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_edit_mode') })
+  await shoot(page, CHAPTER, 'schema_edit_mode')
   await spotlightOff()
 })
 
@@ -378,7 +378,7 @@ test('14.4 Reiter „Fangpunkte" eines Kabels', async ({ page }) => {
 
   await expect(drawer(page).getByText('Fangpunkt Position').first()).toBeVisible()
   const spotlightOff = await spotlight(page, drawer(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_handles') })
+  await shoot(page, CHAPTER, 'schema_handles')
   await spotlightOff()
 })
 
@@ -390,8 +390,7 @@ test('14.5 Gräben und Leerrohre auswählen', async ({ page }) => {
   test.setTimeout(120_000)
   const panel = await openMicropipeWindow(page)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'schema_micropipe_trenches'),
+  await shoot(page, CHAPTER, 'schema_micropipe_trenches', {
     clip: await crop16by10(page, panel),
   })
 })
@@ -410,8 +409,7 @@ test('14.5 Mikrorohr auswählen', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(600)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'schema_micropipe_microducts'),
+  await shoot(page, CHAPTER, 'schema_micropipe_microducts', {
     clip: await crop16by10(page, panel),
   })
 })
@@ -438,7 +436,7 @@ test('14.6 Status einer Faser', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, [box, options])
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_fiber_status') })
+  await shoot(page, CHAPTER, 'schema_fiber_status')
   await spotlightOff()
 })
 
@@ -456,8 +454,7 @@ test('14.7 Fenster „Netzknoten-Konfiguration"', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(600)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'schema_slot_config'),
+  await shoot(page, CHAPTER, 'schema_slot_config', {
     clip: await crop16by10(page, panel),
   })
 })
@@ -473,8 +470,7 @@ test('14.7 Fenster „Netzknotenstruktur"', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(800)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'schema_structure'),
+  await shoot(page, CHAPTER, 'schema_structure', {
     clip: await crop16by10(page, panel),
   })
 })
@@ -517,8 +513,7 @@ test('14.8 Ports einer Komponente', async ({ page }) => {
   test.setTimeout(120_000)
   const panel = await openPortTable(page)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'schema_ports'),
+  await shoot(page, CHAPTER, 'schema_ports', {
     clip: await crop16by10(page, panel),
   })
 })
@@ -535,8 +530,7 @@ test('14.8 Ports zusammenführen', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(600)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'schema_port_merge'),
+  await shoot(page, CHAPTER, 'schema_port_merge', {
     clip: await crop16by10(page, panel),
   })
 })
@@ -562,5 +556,5 @@ test('14.9 Subnetz eines Netzknotens', async ({ page }) => {
   await disableAnimations(page)
   await moveCursorAway(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'schema_subnet') })
+  await shoot(page, CHAPTER, 'schema_subnet')
 })

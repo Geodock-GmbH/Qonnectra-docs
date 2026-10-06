@@ -7,7 +7,7 @@
 // worker"). The still images of the chapter live in tests/05-karte.spec.ts.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 05-karte
-import { expect, request, test } from '@playwright/test'
+import { expect, request, test } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import {
@@ -19,6 +19,7 @@ import {
   typeText,
   videoPath,
 } from '../playwright/manual-videos'
+import { freezeDates } from '../playwright/stable-dates'
 
 const CHAPTER = '05-karte'
 
@@ -157,6 +158,13 @@ test('3.7 Anhänge hinzufügen und bearbeiten', async ({ page, context }) => {
 
   const capture = await context.newPage()
   const pageStart = Date.now()
+
+  // The file list shows the upload date, and the backend stamps it with the
+  // moment of the upload - the video ended on "2. Sept. 2026" simply because it
+  // was recorded that day, while conduit_attachment.jpg shows CAPTURE_DATE. A
+  // video is never byte-identical and is therefore not compared, but what it
+  // shows still has to match the rest of the manual.
+  await freezeDates(capture, { url: '**/api/v1/feature-files/**', fields: ['created_at'] })
 
   await capture.addInitScript(
     (a) => {

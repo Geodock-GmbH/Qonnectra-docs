@@ -1,7 +1,8 @@
-import { expect, request, test, type APIRequestContext, type Locator, type Page } from '@playwright/test'
+import { expect, request, test, type APIRequestContext, type Locator, type Page } from '../playwright/test'
 
 import { localApp } from '../playwright/local-app'
-import { disableAnimations, moveCursorAway, shotPath, spotlight } from '../playwright/manual-shots'
+import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
+import { stableSearchOrder } from '../playwright/stable-search'
 
 // Screenshots for chapter "15. Faserweg" in the manual
 // (manual/teil-a-anwenderhandbuch/15-faserweg.md). Produces all images of the
@@ -166,6 +167,9 @@ function resultSection(page: Page, heading: string): Locator {
 
 /** Opens the start page of the fiber trace. */
 async function openTrace(page: Page) {
+  // The hits of "Toft 1" all score the same and come back in an order of
+  // Postgres' choosing; see playwright/stable-search.ts.
+  await stableSearchOrder(page)
   await page.goto('/trace')
   await expect(page.getByRole('heading', { name: 'Faserweg' })).toBeVisible()
   await page.waitForLoadState('networkidle')
@@ -199,7 +203,7 @@ test('15. Übersicht des Faserwegs', async ({ page }) => {
   // Deliberately with the tab "Adresse" and an empty search field: that is the
   // state the view is reached in.
   await expect(page.getByText('Mindestens 2 Zeichen eingeben zum Suchen')).toBeVisible()
-  await page.screenshot({ path: shotPath(CHAPTER, 'trace') })
+  await shoot(page, CHAPTER, 'trace')
 })
 
 test('15.1 Suchergebnisse einer Adresse', async ({ page }) => {
@@ -215,7 +219,7 @@ test('15.1 Suchergebnisse einer Adresse', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, searchCard(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'trace_search') })
+  await shoot(page, CHAPTER, 'trace_search')
   await spotlightOff()
 })
 
@@ -238,7 +242,7 @@ test('15.1 Faser eines Kabels auswählen', async ({ page }) => {
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, searchCardOfFiberTab(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'trace_fiber_picker') })
+  await shoot(page, CHAPTER, 'trace_fiber_picker')
   await spotlightOff()
 })
 
@@ -249,7 +253,7 @@ test('15.2 Ergebnis einer Adresse', async ({ page }) => {
   // table of fiber paths fits into the viewport. The count is read below the
   // table; the statistics card above carries the same words.
   await expect(resultSection(page, 'Faserwege').getByText('3 Fasern')).toBeVisible()
-  await page.screenshot({ path: shotPath(CHAPTER, 'trace_result') })
+  await shoot(page, CHAPTER, 'trace_result')
 })
 
 test('15.2 Faserweg mit geöffneten Details', async ({ page }) => {
@@ -270,7 +274,7 @@ test('15.2 Faserweg mit geöffneten Details', async ({ page }) => {
   await page.waitForTimeout(500)
 
   const spotlightOff = await spotlight(page, tree)
-  await page.screenshot({ path: shotPath(CHAPTER, 'trace_tree') })
+  await shoot(page, CHAPTER, 'trace_tree')
   await spotlightOff()
 })
 
@@ -296,7 +300,7 @@ test('15.2 Tabelle der Faserwege', async ({ page }) => {
   await page.waitForTimeout(500)
 
   const spotlightOff = await spotlight(page, paths)
-  await page.screenshot({ path: shotPath(CHAPTER, 'trace_paths_table') })
+  await shoot(page, CHAPTER, 'trace_paths_table')
   await spotlightOff()
 })
 
@@ -313,7 +317,7 @@ test('15.4 Modus „Signalanalyse"', async ({ page }) => {
   await page.waitForTimeout(3000)
   await moveCursorAway(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'trace_signal') })
+  await shoot(page, CHAPTER, 'trace_signal')
 })
 
 test('15.6 Geometrieoptionen', async ({ page }) => {
@@ -325,7 +329,7 @@ test('15.6 Geometrieoptionen', async ({ page }) => {
   await page.waitForTimeout(400)
 
   const spotlightOff = await spotlight(page, optionsCard(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'trace_geometry') })
+  await shoot(page, CHAPTER, 'trace_geometry')
   await spotlightOff()
 })
 
@@ -341,7 +345,7 @@ test('15.6 Ergebnis mit Karte', async ({ page }) => {
   await page.waitForTimeout(3500)
   await moveCursorAway(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'trace_map') })
+  await shoot(page, CHAPTER, 'trace_map')
 })
 
 // ---------------------------------------------------------------------------

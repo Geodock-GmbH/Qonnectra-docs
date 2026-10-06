@@ -8,6 +8,7 @@
 import { defineConfig } from '@playwright/test'
 
 import { localAdminUrl, localAppUrl } from './playwright/local-app'
+import { APP_TIME_ZONE } from './playwright/stable-dates'
 
 /**
  * Specs of the chapters 19-24 (part B, administration area). They are the only
@@ -35,7 +36,7 @@ export default defineConfig({
   // deliver an image from a half cleaned-up state.
   retries: 0,
 
-  reporter: process.env.CI ? 'html' : [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never' }]],
   outputDir: 'test-results',
 
   use: {
@@ -58,8 +59,28 @@ export default defineConfig({
     viewport: { width: 1792, height: 1120 },
     deviceScaleFactor: 2,
 
+    // `locale` covers everything that goes through Intl (toLocaleString,
+    // navigator.language, Accept-Language), but not the widgets Chromium draws
+    // itself: the placeholder of <input type="date"> ("tt.mm.jjjj" vs.
+    // "mm/dd/yyyy") follows the locale of the browser process, i.e. its
+    // environment. The capture image sets LC_ALL=C.UTF-8, which beats LANG, so
+    // all three are set.
     locale: 'de-DE',
-    timezoneId: 'Europe/Berlin',
+    launchOptions: {
+      env: { ...process.env, LANGUAGE: 'de_DE', LC_ALL: 'de_DE.UTF-8', LANG: 'de_DE.UTF-8' },
+      // The browser reaches nothing but the local instance. Everything in an
+      // image has to come from the pinned stack, and one thing did not: the
+      // web font of the base map labels, fetched from a CDN at a moment that
+      // depended on its latency (see playwright/vendored-fonts.ts, which now
+      // serves it from the repo). Routes are answered before any DNS lookup,
+      // so the vendored files still arrive; everything else external fails at
+      // once, which turns the next hidden dependency into an error instead of
+      // a flaky image.
+      args: [
+        '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE *.qonnectra.localhost, EXCLUDE localhost',
+      ],
+    },
+    timezoneId: APP_TIME_ZONE,
     colorScheme: 'light',
 
     // Manual screenshots are saved explicitly in the specs; these artefacts
@@ -78,12 +99,33 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
     },
     {
-      // Everything except the administration chapters: the account without
-      // administration rights, which is the interface part A describes.
+      // Everything that produces still images, except the administration
+      // chapters: the account without administration rights, which is the
+      // interface part A describes. Deliberately without the video specs - see
+      // the project "videos" below.
       name: 'chromium',
-      testIgnore: ADMIN_SPECS,
+      testIgnore: [ADMIN_SPECS, /-video\.spec\.ts$/],
       use: { storageState: 'auth-state.json' },
       dependencies: ['setup'],
+    },
+    {
+      // Videos are a project of their own so that `pnpm test:e2e` does not
+      // re-record them.
+      //
+      // A recording can never come out byte-identical: it is a screencast of a
+      // real interaction, and its length follows render and network latency.
+      // Measured across two consecutive runs of the same specs, all 13 videos
+      // differed, with durations 1 to 19 frames apart - while of 137 still
+      // images only 8 changed. Re-recording therefore has to be a decision, not
+      // a side effect: a video is renewed when its spec or the app changed, and
+      // `pnpm test:e2e:videos [file]` is how that is done.
+      name: 'videos',
+      use: { storageState: 'auth-state.json' },
+      dependencies: ['setup'],
+      testMatch: /-video\.spec\.ts$/,
+      // A video of the administration chapters needs the superuser state, which
+      // this project does not carry.
+      testIgnore: ADMIN_SPECS,
     },
     {
       // The chapters 19-24 of part B show the Django administration, which no
@@ -94,6 +136,9 @@ export default defineConfig({
       // wrong account.
       name: 'chromium-admin',
       testMatch: ADMIN_SPECS,
+      // Still images only, like "chromium" - videos are re-recorded on purpose,
+      // never as a side effect of `pnpm test:e2e`.
+      testIgnore: /-video\.spec\.ts$/,
       use: {
         // Its own origin, not the frontend: the administration sits on
         // {$ADMIN_DOMAIN} (Caddy -> nginx -> Django). On the app domain

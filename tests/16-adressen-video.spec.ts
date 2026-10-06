@@ -18,7 +18,7 @@
 // itself then - the second thing the section describes.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 16-adressen
-import { expect, request, test, type APIRequestContext, type Page } from '@playwright/test'
+import { expect, request, test, type APIRequestContext, type Page } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, pointAt, postProcessVideo, showCursor, typeText, videoPath } from '../playwright/manual-videos'

@@ -1,9 +1,9 @@
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '../playwright/test'
 
 import {
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
@@ -191,7 +191,7 @@ async function selectedArea(page: Page): Promise<SpotlightEllipse> {
 
 test('9. Übersicht der Wertermittlung', async ({ page }) => {
   await openValuation(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'valuation') })
+  await shoot(page, CHAPTER, 'valuation')
 })
 
 test('9.1 Gebiet oder Gesamtprojekt wählen', async ({ page }) => {
@@ -199,7 +199,7 @@ test('9.1 Gebiet oder Gesamtprojekt wählen', async ({ page }) => {
   await selectArea(page)
 
   const spotlightOff = await spotlight(page, [areaSelection(page), await selectedArea(page)])
-  await page.screenshot({ path: shotPath(CHAPTER, 'valuation_area') })
+  await shoot(page, CHAPTER, 'valuation_area')
   await spotlightOff()
 })
 
@@ -207,7 +207,7 @@ test('9.2 Jahr des Bauabschlusses und jährlicher Korrekturwert', async ({ page 
   await openValuation(page)
 
   const spotlightOff = await spotlight(page, projectionInputs(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'valuation_year') })
+  await shoot(page, CHAPTER, 'valuation_year')
   await spotlightOff()
 })
 
@@ -216,7 +216,7 @@ test('9.4 Ergebnis lesen', async ({ page }) => {
   await selectArea(page)
   await calculate(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'valuation_result') })
+  await shoot(page, CHAPTER, 'valuation_result')
 })
 
 test('9.5 Kennzahlen', async ({ page }) => {
@@ -227,7 +227,7 @@ test('9.5 Kennzahlen', async ({ page }) => {
   // The two KPI cards sit in a grid of their own directly below the table.
   const kpis = page.locator('div.grid-cols-2').filter({ hasText: 'Kosten pro Hausanschluss' })
   const spotlightOff = await spotlight(page, kpis)
-  await page.screenshot({ path: shotPath(CHAPTER, 'valuation_kpi') })
+  await shoot(page, CHAPTER, 'valuation_kpi')
   await spotlightOff()
 })
 
@@ -247,6 +247,6 @@ test('9.6 Zukunftsabhängige Wertermittlung', async ({ page }) => {
   await expect(projection).toBeVisible()
 
   const spotlightOff = await spotlight(page, projection)
-  await page.screenshot({ path: shotPath(CHAPTER, 'valuation_projection') })
+  await shoot(page, CHAPTER, 'valuation_projection')
   await spotlightOff()
 })

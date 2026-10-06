@@ -86,7 +86,7 @@ Erst dann sehen Sie auch, was „Struktur anzeigen“ in der Konfiguration bewir
 
 **Slot-Konfiguration**
 
-Das Fenster „Netzknoten-Konfiguration“ listet die Einbauplätze des Netzknotens auf, je Seite eine Konfiguration; sind für das Projekt Container eingerichtet, sind die Konfigurationen darin gruppiert. Zu jeder Konfiguration stehen die Seite sowie „Gesamtslots“, „Belegt“ und „Frei“ – so sehen Sie, wie viel Platz im Netzknoten noch ist. Das Auge („Struktur anzeigen“) an einer Konfiguration führt direkt in deren Belegung. Das Download-Symbol oben rechts speichert den Aufbau des Netzknotens als Excel-Datei, siehe Abschnitt [Exportformate im Überblick](./03-wiederkehrende-bedienelemente.md#_3-8-exportformate-im-uberblick).
+Das Fenster „Netzknoten-Konfiguration“ listet die Einbauplätze des Netzknotens auf, je Seite eine Konfiguration; sind für das Projekt Container eingerichtet, sind die Konfigurationen darin gruppiert. Zu jeder Konfiguration stehen die Seite sowie „Gesamtslots“, „Belegt“ und „Frei“ – so sehen Sie, wie viel Platz im Netzknoten noch ist. Das Auge („Struktur anzeigen“) an einer Konfiguration führt direkt in deren Belegung. Das Download-Symbol oben rechts lädt den **Spleißplan** des Netzknotens als Excel-Datei herunter – je Seite ein Tabellenblatt mit den Einbauplätzen, den eingebauten Komponenten und den Fasern, die auf deren Ports liegen, siehe Abschnitt [Exportformate im Überblick](./03-wiederkehrende-bedienelemente.md#_3-8-exportformate-im-uberblick).
 
 ![Screenshot des Fensters „Netzknoten-Konfiguration“ mit den beiden Konfigurationen A und B des Netzknotens](/images/manual/teil-a/map_node_slots.jpg){.big}
 

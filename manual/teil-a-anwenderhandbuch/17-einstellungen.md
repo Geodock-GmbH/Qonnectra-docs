@@ -4,7 +4,7 @@ Die **Einstellungen** sammeln, was Sie persönlich an Qonnectra einstellen könn
 
 ![Screenshot der Einstellungen mit den Abschnitten „Benutzer“, „UI“ und dem Beginn des Abschnitts „Karte“](/images/manual/teil-a/settings.jpg)
 
-Alles auf dieser Seite wirkt sofort und nur für Sie: Es gibt keinen „Speichern“-Button, und niemand sonst bekommt Ihre Farben zu sehen. Umgekehrt ändert nichts davon die Daten – nur, wie sie dargestellt werden.
+Alles auf dieser Seite wirkt sofort und nur für Sie: Jede Änderung greift mit dem Klick, ohne dass Sie sie bestätigen müssten, und niemand sonst bekommt Ihre Farben zu sehen. Umgekehrt ändert nichts davon die Daten – nur, wie sie dargestellt werden. Die Schaltflächen unter „Einstellungen synchronisieren“ übernehmen ebenfalls nichts, was noch offen wäre; sie übertragen den erreichten Stand in Ihr Konto, siehe Abschnitt [Einstellungen im Konto speichern und wieder laden](#_17-2-einstellungen-im-konto-speichern-und-wieder-laden).
 
 ::: warning
 Die Einstellungen liegen zunächst im Browser, mit dem Sie sie vorgenommen haben. An einem anderen Rechner, in einem anderen Browser oder nach dem Löschen der Browserdaten sind sie wieder auf den Ausgangswerten. Damit sie Ihnen folgen, speichern Sie sie in Ihrem Konto, siehe Abschnitt [Einstellungen im Konto speichern und wieder laden](#_17-2-einstellungen-im-konto-speichern-und-wieder-laden).

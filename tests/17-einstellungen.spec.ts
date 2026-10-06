@@ -1,6 +1,6 @@
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '../playwright/test'
 
-import { disableAnimations, moveCursorAway, shotPath, spotlight } from '../playwright/manual-shots'
+import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
 
 // Screenshots for chapter "17. Einstellungen" in the manual
 // (manual/teil-a-anwenderhandbuch/17-einstellungen.md). Produces all images of
@@ -92,7 +92,7 @@ async function scrollTo(page: Page, target: Locator, offset = HEADING_OFFSET) {
 test('17. Übersicht der Einstellungen', async ({ page }) => {
   await openSettings(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'settings') })
+  await shoot(page, CHAPTER, 'settings')
 })
 
 test('17.2 Einstellungen synchronisieren', async ({ page }) => {
@@ -103,7 +103,7 @@ test('17.2 Einstellungen synchronisieren', async ({ page }) => {
   await expect(sync.getByRole('button', { name: 'Aus Konto laden' })).toBeVisible()
 
   const spotlightOff = await spotlight(page, sync)
-  await page.screenshot({ path: shotPath(CHAPTER, 'settings_sync') })
+  await shoot(page, CHAPTER, 'settings_sync')
   await spotlightOff()
 })
 
@@ -127,7 +127,7 @@ test('17.3 Schalter „Sidebar" mit eingeklappter Navigationsleiste', async ({ p
   // of SideBar.svelte (see CLAUDE.md).
   const navigationBar = page.locator('div[class*="grid-rows-[auto_1fr_auto]"]')
   const spotlightOff = await spotlight(page, [sidebar, navigationBar])
-  await page.screenshot({ path: shotPath(CHAPTER, 'settings_sidebar') })
+  await shoot(page, CHAPTER, 'settings_sidebar')
   await spotlightOff()
 })
 
@@ -146,7 +146,7 @@ test('17.4 Trassen-Darstellung „Nach Oberfläche"', async ({ page }) => {
   // Both at once: the chosen mode and the section it makes appear - that is
   // the connection section 17.4 describes.
   const spotlightOff = await spotlight(page, [mode, surfaces])
-  await page.screenshot({ path: shotPath(CHAPTER, 'settings_trench_style') })
+  await shoot(page, CHAPTER, 'settings_trench_style')
   await spotlightOff()
 })
 
@@ -157,7 +157,7 @@ test('17.5 Netzknotentyp-Stile', async ({ page }) => {
   await scrollTo(page, nodeTypes)
 
   const spotlightOff = await spotlight(page, nodeTypes)
-  await page.screenshot({ path: shotPath(CHAPTER, 'settings_node_types') })
+  await shoot(page, CHAPTER, 'settings_node_types')
   await spotlightOff()
 })
 
@@ -171,6 +171,6 @@ test('17.6 Kabelfarbe und Routing-Toleranz', async ({ page }) => {
   // The last two sections of the page; together they fit into one window, and
   // the sections 17.6 and 17.7 share the image.
   const spotlightOff = await spotlight(page, [cableColor, conduitConnection])
-  await page.screenshot({ path: shotPath(CHAPTER, 'settings_cable_routing') })
+  await shoot(page, CHAPTER, 'settings_cable_routing')
   await spotlightOff()
 })

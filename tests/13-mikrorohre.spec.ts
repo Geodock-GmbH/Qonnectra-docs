@@ -1,9 +1,9 @@
-import { expect, test, type Locator, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '../playwright/test'
 
 import {
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
@@ -246,7 +246,7 @@ test('13. Übersicht der Mikrorohre', async ({ page }) => {
   await openMicroducts(page)
 
   await expect(page.getByText('Klicken Sie auf einen Graben um die Sidebar zu öffnen.')).toBeVisible()
-  await page.screenshot({ path: shotPath(CHAPTER, 'microduct') })
+  await shoot(page, CHAPTER, 'microduct')
 })
 
 test('13.1 Info-Box mit den Rohren der Trasse', async ({ page }) => {
@@ -254,7 +254,7 @@ test('13.1 Info-Box mit den Rohren der Trasse', async ({ page }) => {
   await openTrench(page, VIEW.conduit)
 
   const spotlightOff = await spotlight(page, infoBox(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'microduct_drawer') })
+  await shoot(page, CHAPTER, 'microduct_drawer')
   await spotlightOff()
 })
 
@@ -264,7 +264,7 @@ test('13.2 Tabelle der Mikrorohre', async ({ page }) => {
   await openConduit(page)
 
   const spotlightOff = await spotlight(page, infoBox(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'microduct_table') })
+  await shoot(page, CHAPTER, 'microduct_table')
   await spotlightOff()
 })
 
@@ -281,7 +281,7 @@ test('13.3 Hervorgehobene Trassen des Rohrs', async ({ page }) => {
   // effect.
   const trenches = await mapEllipse(page, VIEW.conduit, CONDUIT_EXTENT)
   const spotlightOff = await spotlight(page, [conduitHeader(page, CONDUIT.label), trenches])
-  await page.screenshot({ path: shotPath(CHAPTER, 'microduct_highlight') })
+  await shoot(page, CHAPTER, 'microduct_highlight')
   await spotlightOff()
 })
 
@@ -299,6 +299,6 @@ test('13.4 Schaltflächen „Zuordnen" und „Aufheben"', async ({ page }) => {
     rows.first().locator('td').last(),
     rows.last().locator('td').last(),
   ])
-  await page.screenshot({ path: shotPath(CHAPTER, 'microduct_assign') })
+  await shoot(page, CHAPTER, 'microduct_assign')
   await spotlightOff()
 })

@@ -5,14 +5,14 @@ import {
   type APIRequestContext,
   type Locator,
   type Page,
-} from '@playwright/test'
+} from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import {
   crop16by10,
   disableAnimations,
   moveCursorAway,
-  shotPath,
+  shoot,
   spotlight,
 } from '../playwright/manual-shots'
 
@@ -269,7 +269,7 @@ async function apiContext(credentials: {
 
 test('2. Objektarten in der Karte', async ({ page }) => {
   await openMapView(page, '/map', VIEW.objects)
-  await page.screenshot({ path: shotPath(CHAPTER, 'model_objects') })
+  await shoot(page, CHAPTER, 'model_objects')
 })
 
 test('2.1 Mikrorohre eines Rohrs', async ({ page }) => {
@@ -287,8 +287,7 @@ test('2.1 Mikrorohre eines Rohrs', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(1000)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'model_conduit_microducts'),
+  await shoot(page, CHAPTER, 'model_conduit_microducts', {
     clip: await drawerClip(page, drawer),
   })
 })
@@ -322,8 +321,7 @@ test('2.2 Bündel und Fasern eines Kabels', async ({ page }) => {
   await moveCursorAway(page)
   await page.waitForTimeout(1000)
 
-  await page.screenshot({
-    path: shotPath(CHAPTER, 'model_cable_fibers'),
+  await shoot(page, CHAPTER, 'model_cable_fibers', {
     clip: await drawerClip(page, drawer),
   })
 })
@@ -345,7 +343,7 @@ test('2.4 Wohneinheiten einer Adresse', async ({ page }) => {
   // side (its residential units) and the network side (the microduct it hangs
   // off).
   const spotlightOff = await spotlight(page, [microducts, units])
-  await page.screenshot({ path: shotPath(CHAPTER, 'model_address_units') })
+  await shoot(page, CHAPTER, 'model_address_units')
   await spotlightOff()
 })
 
@@ -359,7 +357,7 @@ test('2.5 Gebiete und Gebietstypen', async ({ page }) => {
   await page.waitForTimeout(1000)
 
   const spotlightOff = await spotlight(page, legend(page))
-  await page.screenshot({ path: shotPath(CHAPTER, 'model_area') })
+  await shoot(page, CHAPTER, 'model_area')
   await spotlightOff()
 })
 
@@ -380,7 +378,7 @@ test('2.6 Kennzeichen an den Objekten', async ({ page }) => {
   const filter = page.locator('table thead tr').nth(1).locator('input').nth(index)
 
   const spotlightOff = await spotlight(page, [heading, filter])
-  await page.screenshot({ path: shotPath(CHAPTER, 'model_flag') })
+  await shoot(page, CHAPTER, 'model_flag')
   await spotlightOff()
 })
 
@@ -417,7 +415,7 @@ test('2.7 Stammdaten in einer Auswahlliste', async ({ page }) => {
   await page.waitForTimeout(500)
 
   const spotlightOff = await spotlight(page, [field, list])
-  await page.screenshot({ path: shotPath(CHAPTER, 'model_master_data') })
+  await shoot(page, CHAPTER, 'model_master_data')
   await spotlightOff()
 })
 
@@ -643,8 +641,7 @@ test.describe('Komponente mit Ports', () => {
     await moveCursorAway(page)
     await page.waitForTimeout(1000)
 
-    await page.screenshot({
-      path: shotPath(CHAPTER, 'model_node_ports'),
+    await shoot(page, CHAPTER, 'model_node_ports', {
       clip: await crop16by10(page, panel),
     })
   })

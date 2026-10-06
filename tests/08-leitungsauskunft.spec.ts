@@ -1,7 +1,8 @@
-import { expect, request as playwrightRequest, test, type Locator, type Page } from '@playwright/test'
+import { expect, request as playwrightRequest, test, type Locator, type Page } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
-import { disableAnimations, moveCursorAway, shotPath, spotlight } from '../playwright/manual-shots'
+import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
+import { CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
 
 // Screenshots for chapter "8. Leitungsauskunft" in the manual
 // (manual/teil-a-anwenderhandbuch/08-leitungsauskunft.md). Produces all images
@@ -127,9 +128,55 @@ async function removeSeededRecords() {
 test.beforeAll(seedRecords)
 test.afterAll(removeSeededRecords)
 
-/** Opens the table of the pipeline records. */
+/**
+ * The timestamps the backend stamped on every record in the table.
+ *
+ * `created_at` and `modified_at` are `auto_now_add` resp. `auto_now`, so the
+ * seeded records carry the minute of the run and the demo record the moment the
+ * instance was set up - the columns "Erstellt" and "Geändert" changed with every
+ * run. They cannot be supplied, only read back, hence the extra request.
+ */
+async function recordTimestamps(): Promise<string[]> {
+  const { apiUrl, username, password } = localApp()
+  const api = await playwrightRequest.newContext({ baseURL: apiUrl, ignoreHTTPSErrors: true })
+  await api.post('/api/v1/auth/login/', { data: { username, password } })
+
+  const response = await api.get('/api/v1/pipeline-records/?page_size=100')
+  expect(response.ok(), `Listing the records failed: HTTP ${response.status()}`).toBeTruthy()
+  const { results } = (await response.json()) as {
+    results: { created_at: string | null; modified_at: string | null }[]
+  }
+  await api.dispose()
+
+  return results.flatMap((record) => [record.created_at, record.modified_at]).filter(
+    (value): value is string => Boolean(value),
+  )
+}
+
+/**
+ * Opens the table of the pipeline records with the timestamps frozen at
+ * CAPTURE_DATE.
+ *
+ * The table is loaded by a `+page.server.ts`, so `freezeDates()` cannot reach
+ * it on a `page.goto()`. Reached through the navigation bar instead, SvelteKit
+ * fetches the load data as `__data.json`, and the known timestamps are
+ * rewritten there by value - the same route the dashboard takes for its
+ * deadlines (tests/04-dashboard.spec.ts).
+ */
 async function openRecords(page: Page) {
-  await page.goto('/pipeline-records')
+  const timestamps = await recordTimestamps()
+  const rewritten = await replaceInResponses(
+    page,
+    '**/__data.json*',
+    Object.fromEntries(timestamps.map((timestamp) => [timestamp, CAPTURE_DATE])),
+  )
+
+  await page.goto('/settings')
+  // A click before SvelteKit has hydrated the page is a plain page load, which
+  // renders the table on the server and bypasses the rewrite.
+  await page.waitForLoadState('networkidle')
+  await page.getByRole('link', { name: 'Leitungsauskunft', exact: true }).click()
+  await expect(page).toHaveURL(/\/pipeline-records(\/|\?|$)/)
   await expect(page.getByRole('button', { name: 'Erstellen', exact: true })).toBeVisible()
   // The seeded records have to be in the table, otherwise the image shows the
   // state before the seeding.
@@ -137,6 +184,14 @@ async function openRecords(page: Page) {
     timeout: 20_000,
   })
   await page.waitForLoadState('networkidle')
+
+  // Every record carries two timestamps; fewer rewrites than that means some
+  // row still shows the day of the run.
+  expect(
+    rewritten(),
+    'Not every timestamp was rewritten in the page data. Does SvelteKit still ' +
+      'deliver the load data of the table as __data.json?',
+  ).toBeGreaterThanOrEqual(timestamps.length)
 
   await disableAnimations(page)
   await moveCursorAway(page)
@@ -285,14 +340,14 @@ function inquiryAreaList(page: Page): Locator {
 
 test('8. Übersicht der Leitungsauskunft', async ({ page }) => {
   await openRecords(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'records') })
+  await shoot(page, CHAPTER, 'records')
 })
 
 test('8.1 Auskünfte suchen und filtern', async ({ page }) => {
   await openRecords(page)
 
   const spotlightOff = await spotlight(page, [tableSearch(page), columnFilters(page)])
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_search') })
+  await shoot(page, CHAPTER, 'records_search')
   await spotlightOff()
 })
 
@@ -319,11 +374,22 @@ test('8.2 Neue Auskunft anlegen', async ({ page }) => {
   }
 
   // The last combobox keeps the focus ring after the click; it would sit in the
-  // image as a green frame around a field that is not the subject.
-  await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+  // image as a green frame around a field that is not the subject. One blur()
+  // is not enough, and neither is checking right after it: the widget answers
+  // the first blur by focusing its input again, measured about 50 ms later -
+  // once; a second blur sticks. A capture right after a single blur therefore
+  // caught the ring or not depending on whether that frame came before or
+  // after the refocus. So blur, then require the focus to stay on the body
+  // for half a second; if the widget took it back in between, blur again.
+  await expect(async () => {
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await page.waitForTimeout(500)
+    expect(await page.evaluate(() => document.activeElement === document.body)).toBe(true)
+  }).toPass({ timeout: 15_000 })
+  await expect(page.locator('[data-scope="combobox"][data-focus]')).toHaveCount(0)
 
   await moveCursorAway(page)
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_new') })
+  await shoot(page, CHAPTER, 'records_new')
 })
 
 test('8.3 Auskunftsbereiche zeichnen, umbenennen und löschen', async ({ page }) => {
@@ -334,10 +400,10 @@ test('8.3 Auskunftsbereiche zeichnen, umbenennen und löschen', async ({ page })
   await openInquiry(page, uuidsToRemove[1])
   await drawArea(page)
 
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_inquiry') })
+  await shoot(page, CHAPTER, 'records_inquiry')
 
   const spotlightOff = await spotlight(page, [inquiryTools(page), inquiryAreaList(page)])
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_inquiry_tools') })
+  await shoot(page, CHAPTER, 'records_inquiry_tools')
   await spotlightOff()
 })
 
@@ -349,7 +415,7 @@ test('8.4 Auskunft exportieren', async ({ page }) => {
   // part of the app and would not be in the image anyway.
   const exportButton = page.getByRole('button', { name: 'Exportieren' }).first()
   const spotlightOff = await spotlight(page, exportButton)
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_export') })
+  await shoot(page, CHAPTER, 'records_export')
   await spotlightOff()
 })
 
@@ -361,6 +427,6 @@ test('8.5 Auskunft ändern und löschen', async ({ page }) => {
     buttons.getByRole('button', { name: 'Löschen' }),
     buttons.getByRole('button', { name: 'Speichern' }),
   ])
-  await page.screenshot({ path: shotPath(CHAPTER, 'records_detail') })
+  await shoot(page, CHAPTER, 'records_detail')
   await spotlightOff()
 })

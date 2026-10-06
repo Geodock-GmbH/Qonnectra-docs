@@ -5,12 +5,16 @@
 # that the screenshots/examples in the manual match the real production
 # configuration (not docker-compose.dev.yml).
 #
+# The app is pinned to a fixed commit (QONNECTRA_REF below) and NOT taken from
+# the default branch: every image in the manual has to show the same version,
+# whoever generates it and wherever.
+#
 # local-app/ is deliberately NOT part of this repo (see .gitignore) - this
 # script is the reproducible replacement for it and may be run as often as you
 # like on any machine (idempotent).
 #
 # Requirements: git, curl, openssl, Docker Engine 24+, Docker Compose v2
-# ("docker compose") as well as Java 21+ for the map tiles (see --skip-tiles).
+# ("docker compose") and sha256sum for the map tiles (see --skip-tiles).
 # The invoking user must be able to talk to the Docker daemon (member of the
 # "docker" group or root).
 #
@@ -38,6 +42,31 @@ LOCAL_APP_DIR="$REPO_ROOT/local-app"
 DEPLOY_DIR="$LOCAL_APP_DIR/deployment"
 QONNECTRA_REPO_URL="https://github.com/Geodock-GmbH/Qonnectra.git"
 
+# The app version the manual is generated against - pinned, not the default
+# branch.
+#
+# Every screenshot in manual/ shows this version, OUTLINE.md is derived from it
+# and CLAUDE.md names it. An unpinned checkout meant that two people, or a CI
+# run and a laptop, produced images of two different apps without either
+# noticing: the images simply differed and it looked like the capture pipeline
+# was unreliable.
+#
+# A commit, not a tag, and deliberately so: the manual was surveyed and written
+# against the state of `main` of 2026-09-11, and part A describes features that
+# no release carries yet - the edit mode of the cable labels in chapter 14
+# („Kabel bearbeiten“, app PR #88) arrived after v1.7.0. Pinning to v1.7.0
+# instead would take those sections out of the app. The app still reports 1.7.0
+# in its header; the release after it will carry the state pinned here.
+#
+# aa28575 is the last commit of 2026-09-11. The four before it on that day are
+# backend and OpenAPI changes and cannot move a pixel of the interface.
+#
+# Raising it is a deliberate step, not a side effect of running the setup
+# again: bump the commit here, regenerate the screenshots, and go through what
+# changed in the app. Overridable via QONNECTRA_REF for a look at another
+# version - the result must not be committed.
+QONNECTRA_REF="${QONNECTRA_REF:-aa2857516278cc5d2d0fe1f27fc255bedcc4bcc0}"
+
 # Persistent local dev CA. Deliberately lives OUTSIDE local-app/ (which gets
 # cloned/deleted) and outside this repo (it contains a private key), so that it
 # survives rebuilds, "docker compose down -v" and fresh clones and only has to
@@ -54,17 +83,27 @@ CA_NAME="Qonnectra Local Dev CA"
 # to OSM raster tiles instead of showing the real vector base map.
 #
 # Like the dev CA, the tiles live OUTSIDE local-app/ (which gets cloned/deleted)
-# and outside this repo (several hundred MB), so that --reset,
-# --reset-checkout and a fresh clone do not trigger a multi-minute Planetiler
-# run every time. The default is Schleswig-Holstein: the test project lies
-# entirely at 9.74 E / 54.73 N (north-east of Flensburg). Overridable via
-# QONNECTRA_TILE_AREA (e.g. "germany", which takes considerably longer and
-# needs ~3 GB).
+# and outside this repo (well over 100 MB), so that --reset, --reset-checkout
+# and a fresh clone do not download them again. The region is
+# Schleswig-Holstein: the test project lies entirely at 9.74 E / 54.73 N
+# (north-east of Flensburg).
 TILES_DIR="${QONNECTRA_TILES_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/qonnectra-local-tiles}"
-TILE_AREA="${QONNECTRA_TILE_AREA:-schleswig-holstein}"
-TILE_MBTILES="$TILES_DIR/$TILE_AREA.mbtiles"
-PLANETILER_JAR="$TILES_DIR/planetiler.jar"
-PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/latest/download/planetiler.jar"
+
+# The tiles are a finished file, downloaded from a release of this repo, not
+# generated per machine. They used to be built here with Planetiler from a
+# dated Geofabrik snapshot, and that had two problems: OSM changes daily, so the
+# snapshot had to be pinned, and Geofabrik keeps the dated extracts for a few
+# months only - after that no machine could build the tiles the published map
+# images were made with. A release asset stays.
+#
+# The tile set is pinned by name AND checksum: every map image depends on its
+# exact content. Moving it on is a deliberate step - build a new set with
+# scripts/build-map-tiles.sh, publish it as a release, bump both values here
+# and regenerate the map images with it.
+TILE_ID="${QONNECTRA_TILE_ID:-schleswig-holstein-260915}"
+TILE_SHA256="${QONNECTRA_TILE_SHA256-af4a743549216a88779f49828ff1ef17a96f5e96e5be17646c824eca0da9d976}"
+TILE_URL="${QONNECTRA_TILE_URL:-https://github.com/Geodock-GmbH/Qonnectra-docs/releases/download/tiles-$TILE_ID/$TILE_ID.mbtiles}"
+TILE_MBTILES="$TILES_DIR/$TILE_ID.mbtiles"
 
 # Help link of the app (PUBLIC_DOCUMENTATION_URL). The app shows it in the
 # header, the navigation bar and the mobile navigation, and hides it while the
@@ -121,17 +160,25 @@ Usage: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
                     also discards your own changes in it. On its own it leaves
                     database and secrets alone, and can be combined with
                     --reset.
-  --skip-tiles      Do not generate map tiles. The tileserver then runs into a
+                    Also the way out when the checkout sits on another version
+                    and cannot be switched because of local changes.
+  --skip-tiles      Do not download map tiles. The tileserver then runs into a
                     restart loop without data and the map falls back to OSM
                     raster tiles.
   -h, --help        Show this help.
+
+The app is built from the pinned commit $QONNECTRA_REF. All images of the
+manual show it; raising it means regenerating the screenshots. QONNECTRA_REF
+points the checkout somewhere else for a look at another version - the images
+from such a run must not be committed.
 
 The local dev CA in
   $CA_DIR
 is kept in any case - so the trust store import does not have to be repeated.
 The map tiles in
   $TILES_DIR
-are likewise kept; they are only generated when they are missing there.
+are likewise kept; they are only downloaded when they are missing there or
+do not match the pinned checksum.
 
 Two accounts are created: the Django superuser for administration and an
 account without administration rights, which the manual screenshots are made
@@ -144,6 +191,7 @@ EOF
 
 RESET=0
 RESET_CHECKOUT=0
+TILES_RELINKED=0
 SKIP_TILES=0
 ENV_BACKUP=""
 for arg in "$@"; do
@@ -258,11 +306,52 @@ fi
 
 # --- Clone/update the app repo ----------------------------------------------
 
-if [ -d "$LOCAL_APP_DIR/.git" ]; then
-	log "local-app/ already exists, skipping the clone (no automatic 'git pull', so that local changes are not overwritten)."
+if [ ! -d "$LOCAL_APP_DIR/.git" ]; then
+	log "Cloning $QONNECTRA_REPO_URL at $QONNECTRA_REF into local-app/"
+	# Shallow, and through fetch rather than `clone --branch`: the pin is a
+	# commit, and --branch takes tags and branches only. A bare SHA is what
+	# GitHub answers a fetch with, so this one line serves all three.
+	#
+	# Nothing in this repo looks at the history of the app, and the shallow
+	# fetch saves a good deal of time in CI.
+	mkdir -p "$LOCAL_APP_DIR"
+	git -C "$LOCAL_APP_DIR" init --quiet
+	git -C "$LOCAL_APP_DIR" remote add origin "$QONNECTRA_REPO_URL" 2>/dev/null || true
+	git -C "$LOCAL_APP_DIR" fetch --depth 1 origin "$QONNECTRA_REF" ||
+		die "Could not fetch $QONNECTRA_REF. Does it exist in $QONNECTRA_REPO_URL?"
+	git -C "$LOCAL_APP_DIR" -c advice.detachedHead=false checkout --detach FETCH_HEAD ||
+		die "Could not check $QONNECTRA_REF out in local-app/."
 else
-	log "Cloning $QONNECTRA_REPO_URL into local-app/"
-	git clone "$QONNECTRA_REPO_URL" "$LOCAL_APP_DIR"
+	# The checkout exists. It has to sit on QONNECTRA_REF - otherwise the images
+	# of this run would show a different app than the rest of the manual.
+	WANTED_COMMIT="$(git -C "$LOCAL_APP_DIR" rev-parse --verify --quiet "${QONNECTRA_REF}^{commit}" || true)"
+
+	if [ -z "$WANTED_COMMIT" ]; then
+		log "Fetching $QONNECTRA_REF into local-app/"
+		git -C "$LOCAL_APP_DIR" fetch --depth 1 origin \
+			"refs/tags/$QONNECTRA_REF:refs/tags/$QONNECTRA_REF" 2>/dev/null ||
+			git -C "$LOCAL_APP_DIR" fetch --depth 1 origin "$QONNECTRA_REF" ||
+			die "Could not fetch $QONNECTRA_REF. Does it exist in $QONNECTRA_REPO_URL?"
+		WANTED_COMMIT="$(git -C "$LOCAL_APP_DIR" rev-parse --verify --quiet "${QONNECTRA_REF}^{commit}" ||
+			git -C "$LOCAL_APP_DIR" rev-parse FETCH_HEAD)"
+	fi
+
+	if [ "$(git -C "$LOCAL_APP_DIR" rev-parse HEAD)" = "$WANTED_COMMIT" ]; then
+		log "local-app/ is at $QONNECTRA_REF"
+	else
+		# Only tracked files are looked at: the import command is copied into
+		# the checkout by this script further down and is untracked there, so it
+		# would make every checkout look modified.
+		if ! git -C "$LOCAL_APP_DIR" diff --quiet ||
+			! git -C "$LOCAL_APP_DIR" diff --cached --quiet; then
+			die "local-app/ has uncommitted changes and is not at $QONNECTRA_REF.
+Commit or discard them, or throw the checkout away with --reset-checkout."
+		fi
+
+		log "Switching local-app/ from $(git -C "$LOCAL_APP_DIR" rev-parse --short HEAD) to $QONNECTRA_REF"
+		git -C "$LOCAL_APP_DIR" -c advice.detachedHead=false checkout "$WANTED_COMMIT" ||
+			die "Could not switch local-app/ to $QONNECTRA_REF."
+	fi
 fi
 
 if [ -n "$ENV_BACKUP" ]; then
@@ -499,50 +588,49 @@ EOF
 		"$DEPLOY_DIR/Caddyfile.production"
 } >"$DEPLOY_DIR/Caddyfile.production.local"
 
-# --- Generate map tiles ------------------------------------------------------
+# --- Download map tiles ------------------------------------------------------
 #
 # tileserver-gl needs an .mbtiles file; the app ships none (see
 # local-app/deployment/README.md, "Generating Map Tiles with Planetiler").
 # Without it the container exits on startup ("Not valid input file") and is
 # restarted endlessly by "restart: always".
 #
-# The run only happens once per machine: the result and the downloaded raw OSM
-# data live in $TILES_DIR outside local-app/.
+# The download only happens once per machine: the file lives in $TILES_DIR
+# outside local-app/. A file that is there but does not match the checksum -
+# a set an earlier version of this script generated locally with Planetiler,
+# or an aborted copy - is replaced: the map images are made with the released
+# bytes, not with something built from the same snapshot.
+
+tile_checksum_ok() {
+	[ -z "$TILE_SHA256" ] ||
+		[ "$(sha256sum "$1" | cut -d' ' -f1)" = "$TILE_SHA256" ]
+}
 
 if [ "$SKIP_TILES" -eq 1 ]; then
 	warn "--skip-tiles: skipping map tiles. The tileserver will run in a restart loop and the map will use OSM raster tiles."
-elif [ -f "$TILE_MBTILES" ]; then
+elif [ -f "$TILE_MBTILES" ] && tile_checksum_ok "$TILE_MBTILES"; then
 	log "Map tiles present: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
-elif ! command -v java >/dev/null 2>&1; then
-	warn "java is missing - map tiles cannot be generated (Planetiler needs Java 21+). Because of that the tileserver runs in a restart loop and the map uses OSM raster tiles. Install Java and run the script again, or deliberately do without them using --skip-tiles."
 else
 	mkdir -p "$TILES_DIR"
+	[ -f "$TILE_MBTILES" ] &&
+		warn "$TILE_MBTILES does not match the pinned checksum - downloading the released tile set again."
 
-	if [ ! -f "$PLANETILER_JAR" ]; then
-		log "Downloading Planetiler to $PLANETILER_JAR"
-		curl -fSL --retry 3 -o "$PLANETILER_JAR.tmp" "$PLANETILER_URL" ||
-			die "Planetiler could not be downloaded: $PLANETILER_URL"
-		mv "$PLANETILER_JAR.tmp" "$PLANETILER_JAR"
-	fi
-
-	log "Generating map tiles for \"$TILE_AREA\" (one-off, takes a few minutes)"
-	# Write under an intermediate name first and rename afterwards: an aborted
-	# run would otherwise leave half an .mbtiles behind that counts as finished
-	# on the next run. The extension has to stay .mbtiles - Planetiler derives
-	# the archive format from it and would otherwise abort with
-	# "Unsupported format".
-	# Working directory $TILES_DIR, so that Planetiler puts its downloads
-	# (data/sources) and temporary files there as well and can reuse them next
-	# time.
-	TILE_TMP="$TILES_DIR/.$TILE_AREA.partial.mbtiles"
-	if (cd "$TILES_DIR" && java -Xmx4g -jar "$PLANETILER_JAR" \
-		--download --area="$TILE_AREA" --force \
-		--output="$TILE_TMP"); then
-		mv "$TILE_TMP" "$TILE_MBTILES"
-		log "Map tiles finished: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
+	log "Downloading map tiles from $TILE_URL"
+	# Download under an intermediate name and rename afterwards: an aborted run
+	# would otherwise leave half an .mbtiles behind that counts as present on
+	# the next run.
+	TILE_TMP="$TILES_DIR/.$TILE_ID.partial.mbtiles"
+	if curl -fSL --retry 3 -o "$TILE_TMP" "$TILE_URL"; then
+		if tile_checksum_ok "$TILE_TMP"; then
+			mv "$TILE_TMP" "$TILE_MBTILES"
+			log "Map tiles finished: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
+		else
+			rm -f "$TILE_TMP"
+			die "The map tiles from $TILE_URL do not match TILE_SHA256 at the top of this script. Either the release asset was replaced or the pin is wrong - every map image depends on this file, so the run stops here."
+		fi
 	else
 		rm -f "$TILE_TMP"
-		warn "Planetiler run for \"$TILE_AREA\" failed. Because of that the tileserver runs in a restart loop and the map uses OSM raster tiles."
+		warn "Map tiles could not be downloaded from $TILE_URL. Until then the tileserver runs in a restart loop and the map uses OSM raster tiles."
 	fi
 fi
 
@@ -556,27 +644,36 @@ fi
 # Hence a hard link (not a copy: that saves the 130+ MB twice over, and the
 # cache in $TILES_DIR stays the only real copy). If $TILES_DIR sits on a
 # different file system than local-app/, it is copied. The name is always
-# germany.mbtiles, regardless of the region that was generated.
+# germany.mbtiles, regardless of the region of the tile set.
 if [ -f "$TILE_MBTILES" ]; then
 	TILE_LINK="$DEPLOY_DIR/tiles/germany.mbtiles"
 	# Link again when the file is missing or holds a different state than the
-	# cache. The size comparison covers both: a hard link always has the same
-	# size (no unnecessary recreation), a freshly generated extract or a change
-	# of QONNECTRA_TILE_AREA practically never.
-	if [ ! -e "$TILE_LINK" ] ||
-		[ "$(stat -c %s "$TILE_MBTILES")" != "$(stat -c %s "$TILE_LINK")" ]; then
+	# cache: either it is the same inode (the hard link), or - for the copy
+	# across file systems - the same bytes. A size comparison is not enough
+	# any more: a re-downloaded set replacing a locally generated one of the
+	# same snapshot can come out at the same size.
+	if [ ! -e "$TILE_LINK" ] || { ! [ "$TILE_MBTILES" -ef "$TILE_LINK" ] &&
+		! cmp -s "$TILE_MBTILES" "$TILE_LINK"; }; then
 		rm -f "$TILE_LINK"
 		ln "$TILE_MBTILES" "$TILE_LINK" 2>/dev/null ||
 			cp "$TILE_MBTILES" "$TILE_LINK" ||
 			warn "Map tiles could not be linked to $TILE_LINK."
+		# The tileserver opens the file once at start and holds that inode.
+		# Replacing the link under a running container changes nothing until it
+		# is restarted, and `compose up` leaves an unchanged service alone - so
+		# a new tile set was fetched, linked, and then quietly not used. Cost
+		# an afternoon: the map images kept differing from CI although both were
+		# supposedly building the same snapshot.
+		TILES_RELINKED=1
 	fi
 fi
 
 # --- Create docker-compose.override.yml -------------------------------------
 #
-# The only adjustment needed locally on the production compose: point Caddy at
-# the Caddyfile generated above with "tls internal". The nginx and qgis-server
-# commands in docker-compose.yml are already correct (unlike in
+# Adjustments to the production compose: point Caddy at the Caddyfile generated
+# above with "tls internal", hand the backend the capture account, and build the
+# db image against the PGDG archive (see the comment at "db" below). The nginx
+# and qgis-server commands in docker-compose.yml are already correct (unlike in
 # docker-compose.dev.yml).
 
 log "Creating docker-compose.override.yml"
@@ -598,6 +695,23 @@ services:
       - APP_USER_EMAIL=\${APP_USER_EMAIL}
       - APP_USER_PASSWORD=\${APP_USER_PASSWORD}
       - APP_USER_GROUP=\${APP_USER_GROUP}
+  # postgres/Dockerfile of the app installs pgRouting on top of
+  # postgis/postgis:17-3.5, which is Debian bullseye. Bullseye is end of life,
+  # and apt.postgresql.org dropped bullseye-pgdg (404, "does not have a Release
+  # file") - the image no longer builds from a clean cache. The packages moved
+  # unchanged to apt-archive.postgresql.org, which also keeps pgRouting at the
+  # version the instance was built with so far (3.8.0-1.pgdg110+1). Same
+  # Dockerfile, one sed in front. The fix belongs upstream; local-app/ is never
+  # patched from here.
+  db:
+    build:
+      dockerfile: !reset null
+      dockerfile_inline: |
+        FROM postgis/postgis:17-3.5
+        RUN sed -i 's#http://apt.postgresql.org/#http://apt-archive.postgresql.org/#' /etc/apt/sources.list.d/pgdg.list && \\
+            apt-get update && \\
+            apt-get install -y --no-install-recommends postgresql-17-pgrouting && \\
+            rm -rf /var/lib/apt/lists/*
   caddy:
     volumes:
       - ./Caddyfile.production.local:/etc/caddy/Caddyfile:ro
@@ -630,6 +744,12 @@ if ! "${COMPOSE[@]}" up -d --build "${SERVICES[@]}"; then
 	# initdb.
 	warn "First start failed (probably the known postgres/init.sh bug with an empty DB volume), trying again..."
 	"${COMPOSE[@]}" up -d "${SERVICES[@]}"
+fi
+
+if ((TILES_RELINKED)); then
+	log "Restarting the tileserver so that it reads the new tiles"
+	"${COMPOSE[@]}" restart tileserver >/dev/null 2>&1 ||
+		warn "The tileserver could not be restarted - it is still serving the previous tiles."
 fi
 
 # nginx may have to be restarted if the backend container was recreated on the
@@ -848,19 +968,19 @@ if [ -f "$TILE_MBTILES" ]; then
 	TILES_SECTION="Map tiles: $TILE_MBTILES
 With them the map shows the real vector base map (light/dark mode), not the OSM
 fallback. The tiles live outside local-app/ and survive --reset and
---reset-checkout. For a different region, delete them and generate again:
-  QONNECTRA_TILE_AREA=<region> $REPO_ROOT/scripts/setup-local-qonnectra.sh"
+--reset-checkout. A new tile set is built with
+  $REPO_ROOT/scripts/build-map-tiles.sh"
 else
 	TILES_SECTION="Map tiles: NONE at $TILE_MBTILES
 The tileserver therefore runs in a restart loop; the frontend falls back to OSM
-raster tiles automatically. To generate them (needs Java 21+):
+raster tiles automatically. To download them, run the script again:
   $REPO_ROOT/scripts/setup-local-qonnectra.sh"
 fi
 
 log "Done."
 cat <<EOF
 
-Qonnectra is running at:
+Qonnectra $QONNECTRA_REF is running at:
   Frontend : https://app.qonnectra.localhost
   Admin    : https://admin.qonnectra.localhost/admin
   API      : https://api.qonnectra.localhost

@@ -16,7 +16,7 @@
 // (PipeBranchLasso.svelte), so it cannot be photographed at all.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 12-rohrverzweigung
-import { expect, request, test, type APIRequestContext, type Locator, type Page } from '@playwright/test'
+import { expect, request, test, type APIRequestContext, type Locator, type Page } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'

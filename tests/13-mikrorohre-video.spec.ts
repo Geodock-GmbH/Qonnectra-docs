@@ -13,7 +13,7 @@
 // after - not that the second click happens in the map.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 13-mikrorohre
-import { expect, request, test, type APIRequestContext, type Page } from '@playwright/test'
+import { expect, request, test, type APIRequestContext, type Page } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'

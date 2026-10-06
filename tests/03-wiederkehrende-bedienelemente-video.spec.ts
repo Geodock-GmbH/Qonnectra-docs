@@ -13,7 +13,7 @@
 //
 // Publish to public/videos/ with:
 //   pnpm screenshots:publish 03-wiederkehrende-bedienelemente --videos
-import { expect, test } from '@playwright/test'
+import { expect, test } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
 

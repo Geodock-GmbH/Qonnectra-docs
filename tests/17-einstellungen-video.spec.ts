@@ -17,7 +17,7 @@
 // every run.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 17-einstellungen
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
 
@@ -57,9 +57,10 @@ const HEADING_OFFSET = 120
  * The first two rows of tiles below the heading: the tile of TILE (x 429 to
  * 824, y 455 to 754) together with its neighbours, so that the change is
  * visible against tiles that stay as they are. The third column starts at
- * x 1249 and stays outside.
+ * x 1249 and stays outside - hence the right edge exactly there, and the left
+ * one moved out instead to reach the 900 px `pnpm check:videos` insists on.
  */
-const CROP = { x: 400, y: 160, width: 840, height: 610 }
+const CROP = { x: 349, y: 160, width: 900, height: 610 }
 
 /** Seconds of still image before the first step. */
 const LEAD_IN = 1.0
