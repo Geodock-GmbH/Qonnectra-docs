@@ -18,7 +18,7 @@
 // this spec stops before the export dialog.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 07-nachverdichtung
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from '../playwright/test'
 
 import {
   click,

@@ -60,6 +60,17 @@ export default defineConfig({
     locale: 'de-DE',
     launchOptions: {
       env: { ...process.env, LANGUAGE: 'de_DE', LC_ALL: 'de_DE.UTF-8', LANG: 'de_DE.UTF-8' },
+      // The browser reaches nothing but the local instance. Everything in an
+      // image has to come from the pinned stack, and one thing did not: the
+      // web font of the base map labels, fetched from a CDN at a moment that
+      // depended on its latency (see playwright/vendored-fonts.ts, which now
+      // serves it from the repo). Routes are answered before any DNS lookup,
+      // so the vendored files still arrive; everything else external fails at
+      // once, which turns the next hidden dependency into an error instead of
+      // a flaky image.
+      args: [
+        '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE *.qonnectra.localhost, EXCLUDE localhost',
+      ],
     },
     timezoneId: APP_TIME_ZONE,
     colorScheme: 'light',

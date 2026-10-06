@@ -20,7 +20,7 @@
 // pile up areas with every run.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 08-leitungsauskunft
-import { expect, request as playwrightRequest, test, type Page } from '@playwright/test'
+import { expect, request as playwrightRequest, test, type Page } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import {

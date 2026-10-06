@@ -20,7 +20,7 @@
 // not DELETE (`RoleBasedPermission` answers with 403).
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 14-netzschema
-import { expect, request, test, type APIRequestContext, type Locator, type Page } from '@playwright/test'
+import { expect, request, test, type APIRequestContext, type Locator, type Page } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, drag, pointAt, postProcessVideo, showCursor, typeText, videoPath } from '../playwright/manual-videos'

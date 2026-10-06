@@ -8,7 +8,7 @@
 // tests/10-rohrverwaltung.spec.ts.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 10-rohrverwaltung
-import { expect, request, test, type APIRequestContext, type Locator } from '@playwright/test'
+import { expect, request, test, type APIRequestContext, type Locator } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import {

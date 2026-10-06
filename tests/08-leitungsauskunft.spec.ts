@@ -1,4 +1,4 @@
-import { expect, request as playwrightRequest, test, type Locator, type Page } from '@playwright/test'
+import { expect, request as playwrightRequest, test, type Locator, type Page } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'

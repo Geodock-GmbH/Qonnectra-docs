@@ -17,7 +17,7 @@
 // every run.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 17-einstellungen
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
 

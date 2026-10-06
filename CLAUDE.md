@@ -469,6 +469,23 @@ longer read.
   to the ones the runner produces.
   `pnpm test:e2e:ui` is the exception and stays on the host – it is for finding
   selectors, and images from it must not be published.
+- **The capture browser reaches nothing but the local instance**, and the one
+  thing the app fetched from the internet is vendored. `ol-mapbox-style` loads
+  the font of the base map labels as a web font from cdn.jsdelivr.net
+  (`@fontsource/noto-sans`), about 800 ms into the page while the tiles are
+  already rendering. A label measured before the font arrived used the Noto
+  Sans of the capture image, one measured after it the web font, and the two
+  differ in glyph widths – street names came out spaced differently from one
+  run to the next („Bir ristoft“), depending on the latency of the CDN. The
+  files now live in `playwright/fonts/noto-sans/` (version pinned in the README
+  there) and `playwright/vendored-fonts.ts` answers the CDN URLs from disk and
+  loads the faces at document start; `--host-resolver-rules` in
+  `playwright.config.ts` makes every other external host fail at once, so the
+  next hidden dependency becomes an error rather than a flaky image. This is
+  why **every spec imports `test` from `playwright/test.ts`**, not from
+  `@playwright/test`: the font route is an automatic fixture there, and
+  `pnpm lint:captures` fails on a direct import. A request for a font file that
+  is not vendored fails the test.
   The container needs the host's docker socket, which `capture.sh` mounts:
   `tests/04-dashboard.spec.ts` HUPs the gunicorn workers to drop the five-minute
   statistics cache (`clearDashboardCache()`), and without it exactly those two
@@ -721,18 +738,18 @@ looking for a race in the spec.
   phase, so even a capture bracketed by „is it on“ checks fell into the gap
   (three of four runs). Capture the settled state instead, and check that the
   transient is over rather than waiting a fixed time.
-- **Labels of the base map.** OpenLayers places them with a declutter pass over
-  the features it happens to have at the moment of the render, so a tile
-  arriving late moves the street names by a few pixels – 10 700 pixels of
-  difference in `map_search` between two runs, and the amplified diff showed
-  nothing but street names. Fixed: wait until the painted picture stops
-  changing, `waitForBaseMapSettled()` in `playwright/stable-map.ts`. Once on
-  load is **not** enough – `spotlight()` puts an SVG over the page, and the
-  reflow makes OpenLayers render again with a fresh declutter pass. `shoot()`
-  and `shootTile()` therefore settle immediately before every capture. A
-  per-chapter `shootMap()` was the previous answer, and eight of the ten specs
-  that show a map did not have one; `compaction_address` and `error_map_empty`
-  moved their labels from run to run because of it.
+- **Labels of the base map.** Two causes, both fixed. OpenLayers places them
+  with a declutter pass over the features it happens to have at the moment of
+  the render, so a tile arriving late moves the street names by a few pixels –
+  the answer is to wait until the painted picture stops changing,
+  `waitForBaseMapSettled()` in `playwright/stable-map.ts`, which `shoot()` and
+  `shootTile()` do immediately before every capture (once on load is **not**
+  enough, `spotlight()` puts an SVG over the page and the reflow makes
+  OpenLayers render again). And the font the labels are measured with came
+  from the internet at a moment that depended on the CDN, so a settled picture
+  could still differ from the last one – see the vendored font above. A
+  per-chapter `shootMap()` was the previous answer to the first cause, and
+  eight of the ten specs that show a map did not have one.
 
 - If the API answers with **502** although the backend container is running:
   after a restart of the backend, `nginx` has cached its old container IP

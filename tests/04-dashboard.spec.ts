@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 
-import { expect, request, test, type Locator, type Page } from '@playwright/test'
+import { expect, request, test, type Locator, type Page } from '../playwright/test'
 
 import { CHART_BLUE, countDarkPixels, measureBars } from '../playwright/dashboard-charts'
 import { localApp } from '../playwright/local-app'

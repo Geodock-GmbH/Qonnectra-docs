@@ -20,7 +20,7 @@
 // superuser.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 18-wenn-etwas-nicht-funktioniert
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Page } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
 
