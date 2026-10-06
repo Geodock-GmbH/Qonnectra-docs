@@ -306,7 +306,7 @@ async function storeLoggedInState(
     { center: MAP_CENTER, zoom: MAP_ZOOM },
   )
 
-  // 4. Load the map once. Its stores write their own keys into localStorage on
+  // 5. Load the map once. Its stores write their own keys into localStorage on
   //    the first load - the styles per node and area type, the layer
   //    visibility - and the saved state has to carry them: the mini-map of the
   //    window "Kabel-Mikrorohr Verknüpfung" draws its nodes with the styles as
@@ -319,13 +319,13 @@ async function storeLoggedInState(
   await expect(page.locator('div.map canvas').first()).toBeVisible({ timeout: 30_000 })
   await page.waitForFunction(() => localStorage.getItem('nodeTypeStyles') !== null)
 
-  // 5. Cross-check: does the app really show the test project?
+  // 6. Cross-check: does the app really show the test project?
   await page.goto(`${appUrl}/dashboard`, { waitUntil: 'domcontentloaded' })
   await expect(page, 'The test project was not opened after login.').toHaveURL(
     new RegExp(`/dashboard/${TEST_PROJECT_ID}(/|$)`),
   )
 
-  // 6. And does the state really open the administration? Without the session
+  // 7. And does the state really open the administration? Without the session
   //    Django answers with a redirect to /admin/login/ - a spec would then
   //    quietly capture the login page instead of the described view.
   if (withAdminSession) {
