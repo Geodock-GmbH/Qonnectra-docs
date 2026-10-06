@@ -7,7 +7,7 @@
 // worker"). The still images of the chapter live in tests/05-karte.spec.ts.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 05-karte
-import { expect, request, test } from '@playwright/test'
+import { expect, request, test } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import {

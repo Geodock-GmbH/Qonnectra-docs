@@ -32,6 +32,26 @@ import type { Page } from '@playwright/test'
  */
 export const CAPTURE_DATE = '2026-03-19T10:24:00+01:00'
 
+/**
+ * The time zone the app lives in: `TIME_ZONE = "Europe/Berlin"` in the backend
+ * (Django sets the process to it, so `date.today()` on the server is a Berlin
+ * date) and `timezoneId` of the browser in playwright.config.ts. The capture
+ * container itself runs on UTC, so between midnight and two in the morning a
+ * spec that reads its own clock is a day behind the app.
+ */
+export const APP_TIME_ZONE = 'Europe/Berlin'
+
+/**
+ * Today's date in APP_TIME_ZONE plus `days`, as the API writes dates
+ * (YYYY-MM-DD). Counted on calendar days, so a change of daylight saving time
+ * in between does not shift it.
+ */
+export function appDateInDays(days: number): string {
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: APP_TIME_ZONE }).format(new Date())
+  const [year, month, day] = today.split('-').map(Number)
+  return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10)
+}
+
 export interface FreezeDatesOptions {
   /** Which requests to patch, as a glob or RegExp for `page.route()`. */
   url: string | RegExp

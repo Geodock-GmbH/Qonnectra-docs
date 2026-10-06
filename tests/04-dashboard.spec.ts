@@ -1,6 +1,6 @@
 import { execFileSync } from 'node:child_process'
 
-import { expect, request, test, type Locator, type Page } from '@playwright/test'
+import { expect, request, test, type Locator, type Page } from '../playwright/test'
 
 import { CHART_BLUE, countDarkPixels, measureBars } from '../playwright/dashboard-charts'
 import { localApp } from '../playwright/local-app'
@@ -11,7 +11,7 @@ import {
   shoot,
   spotlight,
 } from '../playwright/manual-shots'
-import { CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
+import { appDateInDays, CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
 
 // Screenshots for chapter "4. Dashboard" in the manual
 // (manual/teil-a-anwenderhandbuch/04-dashboard.md). Produces all images of the
@@ -205,12 +205,18 @@ async function apiContext() {
   return api
 }
 
-/** Date in `days` days, in the format of the API (YYYY-MM-DD, local time). */
+/**
+ * Date in `days` days, in the format of the API (YYYY-MM-DD) - counted from
+ * today in the time zone of the backend, not of this process.
+ *
+ * The card shows `days_until_expiry`, which the backend computes against its
+ * own `date.today()`, a Berlin date. The capture container runs on UTC, and a
+ * run at half past midnight seeded "today + 14" from the day before: the card
+ * then said "13 Tage" instead of "14 Tage", and the image changed with the
+ * hour of the run. See APP_TIME_ZONE in playwright/stable-dates.ts.
+ */
 function inDays(days: number): string {
-  const day = new Date()
-  day.setDate(day.getDate() + days)
-  const twoDigits = (value: number) => String(value).padStart(2, '0')
-  return `${day.getFullYear()}-${twoDigits(day.getMonth() + 1)}-${twoDigits(day.getDate())}`
+  return appDateInDays(days)
 }
 
 /**

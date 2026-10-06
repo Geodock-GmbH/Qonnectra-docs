@@ -80,7 +80,7 @@ The manual is split into three parts (target audiences see `manual/index.md`):
 ## The chapter structure
 
 `OUTLINE.md` in the repo root is the binding outline: three levels (part,
-chapter, section), derived from the app of version 1.7.0. It also holds the
+chapter, section), derived from the pinned app (`main` of 2026-09-11). It also holds the
 mapping from the old numbering to the new one and is excluded from the VitePress
 build (`srcExclude`). **Which sections a chapter has is decided there, not while
 writing** – a chapter that needs a section the outline does not have gets the
@@ -129,6 +129,9 @@ pnpm check:videos     # recordings sound? (no comparison with public/videos/)
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
 scripts/install-local-ca.sh                 # import the dev CA once per machine
+scripts/build-map-tiles.sh <osm-pbf-url>    # build a new map tile set (only to move the pin)
+scripts/qonnectra-demo-data/fetch_geodock_export.py --out scripts/qonnectra-demo-data/testprojekt-export.json
+                                            # pull the demo data from app.geodock.de again
 ```
 
 New German technical terms cspell does not know go into `.cspell.json` under
@@ -153,6 +156,12 @@ app in front of them.
   repeats the title („„Trasse“ – Auswertungen zu den Trassen“).
 - Explain a mechanism once, in the section it belongs to – not again in every
   section it also occurs in.
+- Never point the reader at the demo project. „Testprojekt“ and its data exist
+  for the captures, not for the manual: „Im Testprojekt sind das sechs von 118
+  Netzknoten“ says nothing about the reader's own installation, and a count from
+  it goes stale with the next import. Write what holds in general („meist nur
+  den Begriff „Defekt““, „ein Netzknoten mit einigen hundert Fasern“) and leave
+  the concrete example to the screenshot. The same goes for alt texts.
 - Rule of thumb: a sentence that would be equally true of any other web
   application does not belong in the manual.
 
@@ -234,7 +243,7 @@ sentences the chapter exists for.
 | Video format | `.webm` (VP8), crop of the interface, approx. 1000 × 700 |
 | Mode | always light mode, language **DE** |
 | Content | only the app viewport, no browser chrome; images without a mouse cursor, videos **with** one |
-| Data | exclusively the demo project „Testprojekt“ – no real personal data |
+| Data | exclusively the demo project „Testprojekt“ – no personal data, see below |
 
 > `playwright.config.ts` sets these values centrally. Do not spread a
 > `devices[...]` preset into the project configuration – the presets bring their
@@ -258,6 +267,48 @@ legible. Only the **width** matters – the height does not change the scale in 
 manual. Unlike screenshots, videos are also recorded in CSS pixels: Chromium's
 screencast delivers no device pixels, so the `deviceScaleFactor` of 2 has no
 effect there.
+
+**Personal data in images**
+
+Every image and every video is checked for personal data **before publishing**,
+and again whenever a spec starts filling fields itself. A published image goes
+into a public repository and onto a public website; it cannot be recalled. The
+places in the app that can show personal data:
+
+| Where | What |
+|---|---|
+| Leitungsauskunft | „Organisation“, „Name“, „Telefon“, „Mobil“ |
+| Wohneinheit | „Name des Bewohners“, „Erfassungsdatum Bewohner“ |
+| Nachverdichtung | „Kommentar“ in the export dialog, and the PDF built from it |
+| Anhänge | file names of uploaded documents and photos |
+| `/settings` | „Benutzername“ and the e-mail address of the logged-in account (chapter 17) |
+| `/admin/*` | the user accounts of the instance including e-mail (chapters 19–24) |
+
+The last two are the reason a run with `QONNECTRA_LOGIN=admin` needs a second
+look: the account it shows belongs to whoever set the instance up.
+
+- Never make up plausible data. An invented name with a real dialling code
+  („M. Petersen“, „04631 123456“) is indistinguishable from a real contact in
+  the image, and nothing in the manual tells readers otherwise. That it was
+  invented is worth nothing to the person whose name it happens to be.
+- Use recognisable placeholders: **„Max Mustermann“**, **„Erika Mustermann“**,
+  **„Musterbau GmbH“**, **„Stadtwerke Musterstadt“**, and phone numbers of the
+  form **`0123 456789`** – an ascending run of digits behind the unassigned
+  prefix 0123. Anyone looking at the image can see at a glance that it is a
+  placeholder.
+- Leaving the field empty is the second-best option: it shows the layout but not
+  what belongs in the field.
+- Everything a spec creates for a capture uses these placeholders, in the seeded
+  records as well as in forms filled in for an image – also where the crop does
+  not show the field, because the record sits in the database for the length of
+  the run.
+- The demo data of „Testprojekt“ is the one exception and stays as it is:
+  addresses and residential units come from the export and are checked once at
+  the source (`scripts/qonnectra-demo-data/`). Whether the demo data itself is
+  fit to be published is decided there, not per image.
+- Images with hand-drawn annotation (pattern 3) are checked again after the
+  post-processing, and an image that already sits in `public/` is replaced
+  rather than patched – the old file stays in the git history.
 
 **Location and naming**
 - Images: `public/images/manual/teil-a/<name>.jpg` (one folder per manual part)
@@ -340,16 +391,23 @@ local instance, so that they can be regenerated when the app changes.
 - `scripts/setup-local-qonnectra.sh` clones the app into `local-app/` and starts
   it through the **production** compose file. Idempotent, may be run any number
   of times.
-- The app is **pinned to a release**, `QONNECTRA_REF` at the top of the script,
-  currently **`v1.7.0`** – not the default branch. Every image of the manual has
-  to show the same version; unpinned, a CI run and a laptop built two different
-  apps and the images differed without anyone being able to see why. An existing
-  `local-app/` is switched to the pinned version on the next run; if it carries
-  uncommitted changes the script stops instead (`--reset-checkout` throws the
-  checkout away).
-  Raising the version is its own piece of work, not a side effect: bump
+- The app is **pinned to a commit**, `QONNECTRA_REF` at the top of the script,
+  currently **`aa28575`** (the tip of `main` on 2026-09-11) – not the default
+  branch. Every image of the manual has to show the same version; unpinned, a CI
+  run and a laptop built two different apps and the images differed without
+  anyone being able to see why. An existing `local-app/` is switched to the
+  pinned commit on the next run; if it carries uncommitted changes the script
+  stops instead (`--reset-checkout` throws the checkout away).
+  A commit and not the tag `v1.7.0`, because part A was surveyed and written
+  against that state and describes what it does: the edit mode of the cable
+  labels (chapter 14.4, „Kabel bearbeiten“) came with app PR #88 **after** the
+  v1.7.0 release, and against the tag the chapter describes an app that is not
+  there. The app reports **1.7.0** in its header either way – that is the
+  version of the last release, not of the checkout, so the number in a
+  screenshot says nothing about which commit produced it.
+  Raising the pin is its own piece of work, not a side effect: bump
   `QONNECTRA_REF`, regenerate the screenshots, go through what changed in the
-  app, and update the version in this file and in `OUTLINE.md`.
+  app, and update the commit in this file and in `OUTLINE.md`.
   `QONNECTRA_REF=… ` looks at another version – images from such a run are not
   committed.
 - Reachable at `https://app.qonnectra.localhost` (admin:
@@ -373,7 +431,17 @@ local instance, so that they can be regenerated when the app changes.
   alternatively set `ignoreHTTPSErrors: true` in Playwright.
 - Demo data: project **„Testprojekt“** from
   `scripts/qonnectra-demo-data/testprojekt-export.json`, imported automatically
-  during setup. Select it in the top left after logging in.
+  during setup. Select it in the top left after logging in. It always gets the
+  primary key **2** – the Playwright setup pins `selected-project=2`, so a
+  re-import must not hand out a new id (`PROJECT_ID` in
+  `import_geodock_export.py`).
+- The export is pulled with `scripts/qonnectra-demo-data/fetch_geodock_export.py`
+  against app.geodock.de; credentials go into `scripts/qonnectra-demo-data/.env`
+  (gitignored, template `.env.example`). Four endpoints stay closed to that
+  account (`wms-sources`, `node-slot-divider`, `node-slot-clip-number`,
+  `node-trench-selection`) – what that costs is in the README next to the
+  script. Attachments come in as metadata only; the files themselves stay on
+  api.geodock.de.
 - `local-app/` is gitignored (foreign checkout) – never commit it and only change
   it through the setup script.
 
@@ -402,6 +470,23 @@ longer read.
   to the ones the runner produces.
   `pnpm test:e2e:ui` is the exception and stays on the host – it is for finding
   selectors, and images from it must not be published.
+- **The capture browser reaches nothing but the local instance**, and the one
+  thing the app fetched from the internet is vendored. `ol-mapbox-style` loads
+  the font of the base map labels as a web font from cdn.jsdelivr.net
+  (`@fontsource/noto-sans`), about 800 ms into the page while the tiles are
+  already rendering. A label measured before the font arrived used the Noto
+  Sans of the capture image, one measured after it the web font, and the two
+  differ in glyph widths – street names came out spaced differently from one
+  run to the next („Bir ristoft“), depending on the latency of the CDN. The
+  files now live in `playwright/fonts/noto-sans/` (version pinned in the README
+  there) and `playwright/vendored-fonts.ts` answers the CDN URLs from disk and
+  loads the faces at document start; `--host-resolver-rules` in
+  `playwright.config.ts` makes every other external host fail at once, so the
+  next hidden dependency becomes an error rather than a flaky image. This is
+  why **every spec imports `test` from `playwright/test.ts`**, not from
+  `@playwright/test`: the font route is an automatic fixture there, and
+  `pnpm lint:captures` fails on a direct import. A request for a font file that
+  is not vendored fails the test.
   The container needs the host's docker socket, which `capture.sh` mounts:
   `tests/04-dashboard.spec.ts` HUPs the gunicorn workers to drop the five-minute
   statistics cache (`clearDashboardCache()`), and without it exactly those two
@@ -473,6 +558,14 @@ longer read.
   `login_mobile_more.jpg` came out with the menu at a different slide offset on
   every run. `shoot()` passes `animations: "disabled"`, which the browser
   applies to CSS animations, CSS transitions **and** Web Animations.
+  Both also wait until the canvases of the page have stopped changing
+  (`waitForBaseMapSettled()`, see „Labels of the base map“ below), and `shoot()`
+  snaps a `clip` to the grid Chromium captures on: origin on whole device
+  pixels, size truncated to whole CSS pixels. A crop at an arbitrary fraction
+  is resampled, and `fault_result_detail` differed in 272 000 pixels between
+  two runs without any pixel being off by more than 19 of 255. Snapped any
+  other way the image shifts by a device pixel or grows by two – measured on
+  the published images, see `wholePixels()`.
 - Output goes to `tests/screenshots/<chapter-slug>/<name>.png` through
   `shotPath()` resp. `tests/videos/<chapter-slug>/<name>.webm` through
   `videoPath()`. `tests/screenshots/`, `tests/videos/`, `test-results/`,
@@ -485,16 +578,23 @@ longer read.
   the manual itself: the script looks for the reference
   `/images/manual/<part>/<name>.jpg` resp. `/videos/<name>.webm` in `manual/`.
   Captures without a reference are skipped, so that nothing ends up in the wrong
-  folder. `--dry-run` shows beforehand what would be created and what replaced,
-  `--videos` and `--images` restrict the run to one kind.
-- An image whose picture matches the published one is **not** written; the run
-  reports it as „unchanged“. Without that gate every run rewrote nearly every
-  file: two captures of the same view differ in the anti-aliasing of the glyph
-  edges by at most 17 of 255 – invisible, but enough to change every byte of the
-  JPEG. One commit rewrote 99 of 137 images that way, 72 of them without any
-  visible difference. The tolerance (`DIFF_FUZZ`, `MAX_DIFF_PIXELS` in the
-  script) is measured, not guessed: at a fuzz of 10 % the noise comes out at 0
-  differing pixels, the smallest genuine change at 217. `--force` writes anyway.
+  folder. `--dry-run` converts and compares like the real run and reports every
+  image as new, changed or unchanged without writing anything, `--videos` and
+  `--images` restrict the run to one kind.
+- An image whose picture matches the **committed** one is **not** written; the
+  run reports it as „unchanged“. Without that gate every run rewrote nearly
+  every file – one commit rewrote 99 of 137 images, 72 of them without any
+  visible difference. The tolerance is **zero** (`DIFF_FUZZ`, `MAX_DIFF_PIXELS`
+  in the script): the captures are reproducible, 127 of 137 images of a run
+  came out pixel-identical to the committed JPEG, and every one of the rest had
+  a cause in a spec. The 10 % fuzz the gate had before hid a genuine change –
+  „2.5“ became „2,5“ with the German locale, 10 to 19 pixels at that tolerance,
+  and five images stayed stale. An image that differs on every run is a spec to
+  fix, not a reason to raise the tolerance; the known causes are listed below.
+  The comparison runs against HEAD, not against the working tree: a transient
+  caught in one run and gone in the next otherwise leaves a chain of rewrites
+  behind. A working tree file that differs from HEAD while the capture matches
+  HEAD is restored from it („restored“). `--force` writes anyway.
 - Two capture folders with the same file name make the script abort. The chapter
   renumbering left `tests/screenshots/03-einstieg-anmeldung/` next to
   `01-erste-schritte/`, and because „03“ sorts after „01“ six `login_*` images
@@ -514,7 +614,11 @@ longer read.
 - Determinism helpers in `playwright/manual-shots.ts`: `shoot()` (the one way to
   capture, see above) and `shootTile()` for the tiles of a composite,
   `disableAnimations()` (CSS transitions and text caret off – not enough on its
-  own), `moveCursorAway()` (no hover states in the
+  own), `waitForAnimations()` (waits until every finite Web Animation has
+  finished – `spotlight()` and `crop16by10()` call it before they measure,
+  because `toBeVisible()` passes at the first frame of a 200 ms slide and the
+  cut-out of `compaction_search` ended after two of five hits that way),
+  `moveCursorAway()` (no hover states in the
   image), `spotlight()` for pattern 2 and `composite2x2()` for pattern 4. The
   grid is assembled in the browser, so the repo needs no image library. Pattern 3
   (hand-drawn ellipses/arrows) stays post-processing.
@@ -562,33 +666,33 @@ longer read.
   wide at a height that follows from the map extent of the tiles (most recently
   2656 × 1854). The aspect ratio of the assembly cannot be brought to both target
   dimensions at once; in the manual the images are rendered at 512 px anyway.
-- The map tiles are generated once by `scripts/setup-local-qonnectra.sh` through
-  Planetiler (region `schleswig-holstein`, where the test project lies) and
-  stored under `~/.local/share/qonnectra-local-tiles/` – outside `local-app/`, so
-  that `--reset` does not throw them away. The `tileserver` gets them as a hard
+- The map tiles are **downloaded**, not generated: `scripts/setup-local-qonnectra.sh`
+  fetches a finished `.mbtiles` (region `schleswig-holstein`, where the test
+  project lies) from a release of this repo (tag `tiles-<TILE_ID>`) and stores
+  it under `~/.local/share/qonnectra-local-tiles/` – outside `local-app/`, so
+  that `--reset` does not throw it away. The `tileserver` gets it as a hard
   link at `local-app/deployment/tiles/germany.mbtiles` (a bind mount for the file
   alone fails, because Docker cannot create the mount point inside the read-only
   mounted `/data`).
   Map images therefore show the real vector base map in light mode. If the
-  `.mbtiles` is missing (run with `--skip-tiles`, no Java), the `tileserver` runs
-  in a restart loop and the map falls back to OSM raster tiles.
-- The OSM extract is **pinned to a dated snapshot** (`TILE_OSM_URL` at the top of
-  the setup script), not to whatever Geofabrik serves today. OSM changes daily,
-  and tiles built in September draw different buildings and field boundaries
-  than tiles built today – the map images then differ between two machines
-  although nothing in the app or the specs changed. That was what was left over
-  after the capture container had made everything else reproducible.
-  Geofabrik keeps the dated extracts only for a few months. When the URL starts
-  answering 404, move the snapshot on **and regenerate the map images with it** –
-  that is a deliberate step, like raising `QONNECTRA_REF`. The file name of the
-  tile set carries the snapshot, so a changed pin is generated rather than
-  silently reused, and the CI cache key follows the setup script for the same
-  reason.
-- Planetiler itself is pinned too (`PLANETILER_VERSION`, currently `v0.10.2`).
-  Tiles have two inputs, and both have to be fixed: with `releases/latest` a new
-  Planetiler would have redrawn the base map of every map image at a moment
-  nobody chose. The jar carries its version in the file name for the same reason
-  the tile set carries its snapshot.
+  `.mbtiles` is missing (run with `--skip-tiles`, download failed), the
+  `tileserver` runs in a restart loop and the map falls back to OSM raster tiles.
+- The tile set is **pinned by name and checksum** (`TILE_ID`, `TILE_SHA256` at
+  the top of the setup script). A local file that does not match the checksum is
+  replaced by the release asset, and a downloaded one that does not match stops
+  the run – every map image depends on these exact bytes.
+  They used to be built per machine with Planetiler from a dated Geofabrik
+  snapshot. OSM changes daily, so the snapshot had to be pinned, and Geofabrik
+  keeps the dated extracts for a few months only – once
+  `schleswig-holstein-260915` was gone, nobody could build the tiles the
+  published images were made with any more. A release asset stays.
+- Moving the tiles on is a deliberate step, like raising `QONNECTRA_REF`:
+  `scripts/build-map-tiles.sh <dated extract URL>` builds a new set with
+  Planetiler (Java 21+, version pinned in `PLANETILER_VERSION`, currently
+  `v0.10.2`) and prints the `gh release create` command to publish it; then bump
+  `TILE_ID` and `TILE_SHA256` **and regenerate the map images with it**. Use a
+  dated extract, not `-latest` – the name of the tile set and its release says
+  which state of OSM the images show.
 
 **What the pipeline cannot make deterministic**
 
@@ -604,7 +708,13 @@ looking for a race in the spec.
   in the app, not in the capture: paginating through tied results skips and
   repeats rows for users too. The fix belongs upstream (`order_by("-similarity",
   "id")`) – `local-app/` is a foreign, gitignored checkout and is never patched
-  from here. Until then, pick a search term whose hits do not tie.
+  from here. Until then `stableSearchOrder()` in `playwright/stable-search.ts`
+  sorts the hits by `id_address` on their way into the page, the same device as
+  `freezeDates()` – install it before the view loads. The response carries no
+  score, so that is only right for terms whose hits all tie; „Toft 1“ and
+  „Nieharde“ do (every hit scores 1.0, the house number is a short token and
+  only filters), another term is checked in the Django shell of the backend
+  container first – the command is in the file.
 - **Charts over equal values.** „Neueste Netzknoten“ is `order_by("-date")[:5]`
   without a second sort key (`views.py`), and 47 of the 118 nodes of the demo
   data carry the same date while 71 have none – which five come back is up to
@@ -629,16 +739,18 @@ looking for a race in the spec.
   phase, so even a capture bracketed by „is it on“ checks fell into the gap
   (three of four runs). Capture the settled state instead, and check that the
   transient is over rather than waiting a fixed time.
-- **Labels of the base map.** OpenLayers places them with a declutter pass over
-  the features it happens to have at the moment of the render, so a tile
-  arriving late moves the street names by a few pixels – 10 700 pixels of
-  difference in `map_search` between two runs, and the amplified diff showed
-  nothing but street names. Fixed, and the fix is the pattern for every map
-  image: wait until the painted picture stops changing, `waitForBaseMapSettled()`
-  in `tests/05-karte.spec.ts`. Once in `openMap()` is **not** enough –
-  `spotlight()` puts an SVG over the page, and the reflow makes OpenLayers render
-  again with a fresh declutter pass. Every capture of that chapter therefore goes
-  through `shootMap()`, which settles immediately before the shot.
+- **Labels of the base map.** Two causes, both fixed. OpenLayers places them
+  with a declutter pass over the features it happens to have at the moment of
+  the render, so a tile arriving late moves the street names by a few pixels –
+  the answer is to wait until the painted picture stops changing,
+  `waitForBaseMapSettled()` in `playwright/stable-map.ts`, which `shoot()` and
+  `shootTile()` do immediately before every capture (once on load is **not**
+  enough, `spotlight()` puts an SVG over the page and the reflow makes
+  OpenLayers render again). And the font the labels are measured with came
+  from the internet at a moment that depended on the CDN, so a settled picture
+  could still differ from the last one – see the vendored font above. A
+  per-chapter `shootMap()` was the previous answer to the first cause, and
+  eight of the ten specs that show a map did not have one.
 
 - If the API answers with **502** although the backend container is running:
   after a restart of the backend, `nginx` has cached its old container IP
@@ -653,7 +765,11 @@ looking for a race in the spec.
   back on every `moveend`; if that lands between setting and reloading, the seed
   is gone and the map starts at the overview. Tests that click on a particular
   spot then hit nothing and the info box does not open (symptom: `#drawer-title`
-  not found).
+  not found). The same holds for `playwright/auth.setup.ts`: it seeded a loaded
+  page once, `/` redirects to the map, and in one run of ten the first `moveend`
+  won – `auth-state.json` carried `[0, 0]` at zoom 2.5 and chapters 8 and 9,
+  which rely on that seed, opened their map in the Atlantic. It seeds through
+  `context.addInitScript()` now and checks the login on the dashboard.
 - The base map layer is independent of object selection: `getClickedFeatures`
   filters via `layerFilter` down to trench, address, node and area
   (`MapInteractionManager.svelte.ts`). Whether the tileserver runs therefore has
@@ -676,8 +792,9 @@ looking for a race in the spec.
 
 **The app (context for selectors and routes)**
 
-SvelteKit + Skeleton, version **1.7.0** (the app shows it in the header) – the
-release the setup pins the checkout to, see `QONNECTRA_REF` above. The
+SvelteKit + Skeleton, `main` as of 2026-09-11 (commit `aa28575`) – the state the
+setup pins the checkout to, see `QONNECTRA_REF` above. The header shows
+**v1.7.0**, the last release before it. The
 navigation bar is sorted into groups; the labels are short and only
 unambiguous together with their group (group „Rohr“ → „Verwaltung“ =
 Rohrverwaltung). This order is the order of the chapters 4–17. Routes and

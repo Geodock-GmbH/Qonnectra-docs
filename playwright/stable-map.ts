@@ -7,10 +7,12 @@
 // runs of map_search (10 745 pixels; the amplified diff showed nothing but
 // street names), of map_address_detail and of conduit_connection_routing.
 //
-// Every spec that captures a map needs this, not just the map chapter itself.
-// And it is needed twice over: once after the view has been opened, and again
-// immediately before the capture, because `spotlight()` lays an SVG over the
-// page and that reflow makes OpenLayers render anew.
+// `shoot()` and `shootTile()` call this immediately before every capture, so a
+// spec only needs it where it measures the painted picture itself (the search
+// for the selection colour in tests/05-karte.spec.ts). Before that it lived in
+// a per-chapter `shootMap()`, which eight of the ten specs that show a map did
+// not have. Immediately before the capture, not only on load: `spotlight()`
+// lays an SVG over the page and that reflow makes OpenLayers render anew.
 import type { Page } from '@playwright/test'
 
 /**

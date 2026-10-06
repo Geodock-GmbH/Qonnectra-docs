@@ -16,7 +16,7 @@
 // of them would be indistinguishable from "nothing happened".
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 11-rohrzuordnung
-import { expect, request, test, type APIRequestContext, type Page } from '@playwright/test'
+import { expect, request, test, type APIRequestContext, type Page } from '../playwright/test'
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import {

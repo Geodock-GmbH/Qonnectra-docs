@@ -8,6 +8,7 @@
 import { defineConfig } from '@playwright/test'
 
 import { localAppUrl } from './playwright/local-app'
+import { APP_TIME_ZONE } from './playwright/stable-dates'
 
 export default defineConfig({
   testDir: './tests',
@@ -27,7 +28,7 @@ export default defineConfig({
   // deliver an image from a half cleaned-up state.
   retries: 0,
 
-  reporter: process.env.CI ? 'html' : [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never' }]],
   outputDir: 'test-results',
 
   use: {
@@ -50,8 +51,28 @@ export default defineConfig({
     viewport: { width: 1792, height: 1120 },
     deviceScaleFactor: 2,
 
+    // `locale` covers everything that goes through Intl (toLocaleString,
+    // navigator.language, Accept-Language), but not the widgets Chromium draws
+    // itself: the placeholder of <input type="date"> ("tt.mm.jjjj" vs.
+    // "mm/dd/yyyy") follows the locale of the browser process, i.e. its
+    // environment. The capture image sets LC_ALL=C.UTF-8, which beats LANG, so
+    // all three are set.
     locale: 'de-DE',
-    timezoneId: 'Europe/Berlin',
+    launchOptions: {
+      env: { ...process.env, LANGUAGE: 'de_DE', LC_ALL: 'de_DE.UTF-8', LANG: 'de_DE.UTF-8' },
+      // The browser reaches nothing but the local instance. Everything in an
+      // image has to come from the pinned stack, and one thing did not: the
+      // web font of the base map labels, fetched from a CDN at a moment that
+      // depended on its latency (see playwright/vendored-fonts.ts, which now
+      // serves it from the repo). Routes are answered before any DNS lookup,
+      // so the vendored files still arrive; everything else external fails at
+      // once, which turns the next hidden dependency into an error instead of
+      // a flaky image.
+      args: [
+        '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE *.qonnectra.localhost, EXCLUDE localhost',
+      ],
+    },
+    timezoneId: APP_TIME_ZONE,
     colorScheme: 'light',
 
     // Manual screenshots are saved explicitly in the specs; these artefacts

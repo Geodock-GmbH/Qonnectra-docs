@@ -48,14 +48,14 @@ Speichern Sie Ihre Änderungen, bevor Sie ein anderes Rohr aus der Tabelle ausw�
 
 ## 10.4 Mikrorohre eines Rohrs
 
-Der Reiter „Status“ listet die **Mikrorohre** des Rohrs auf, mit den Spalten „#“, „Farbe“, „Adresse“ (des angeschlossenen Netzknotens), „Kabel“ und „Status“. Anzahl und Farben gibt der Rohrtyp vor; ändern lassen sie sich hier nicht.
+Der Reiter „Status“ listet die **Mikrorohre** des Rohrs auf, mit den Spalten „#“ für die Mikrorohrnummer, „Farbe“, „Adresse“ (des angeschlossenen Netzknotens), „Kabel“ und „Status“. Anzahl und Farben gibt der Rohrtyp vor; ändern lassen sie sich hier nicht.
 
 ![Screenshot Rohrverwaltung mit Hervorhebung der Info-Box im Reiter „Status“ mit der Liste der Mikrorohre](/images/manual/teil-a/conduit_status.jpg)
 
 Der Status jedes Mikrorohrs steht auf „Intakt“, solange nichts anderes eingetragen ist. Über das Auswahlfeld in der Zeile vermerken Sie eine Störung, etwa „Defekt“. Diese Änderung wird sofort übernommen, es gibt dafür keinen „Speichern“-Button.
 
 ::: warning
-Ändern Sie den Rohrtyp nachträglich, bleibt die Liste der Mikrorohre unverändert – sie richtet sich nach dem Rohrtyp zum Zeitpunkt des Anlegens.
+Ändern Sie den Rohrtyp nachträglich, bleibt diese Liste unverändert, siehe Abschnitt [Trasse, Rohr und Mikrorohr](./02-grundbegriffe-und-datenmodell.md#_2-1-trasse-rohr-und-mikrorohr).
 :::
 
 ## 10.5 Excel-Import: Vorlage, Ablauf, Fehlermeldungen
