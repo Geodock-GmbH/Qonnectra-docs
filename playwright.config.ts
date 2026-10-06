@@ -28,7 +28,7 @@ export default defineConfig({
   // deliver an image from a half cleaned-up state.
   retries: 0,
 
-  reporter: process.env.CI ? 'html' : [['list'], ['html', { open: 'never' }]],
+  reporter: [['list'], ['html', { open: 'never' }]],
   outputDir: 'test-results',
 
   use: {
