@@ -167,6 +167,12 @@ The script converts images to JPEG itself (quality 85, lowered until under
 1.2 MB) and derives the target from the reference in `manual/` – captures that
 no chapter embeds are skipped. Do not write a `convert` call by hand.
 
+Publishing also writes `tests/captures.lock`: every spec that passed in the
+last run gets the fingerprint it ran under, and a video is only replaced when
+its spec's fingerprint changed (`--force` overrides that). Commit the lock with
+the images and videos – otherwise the next `pnpm test:e2e` runs the same specs
+again.
+
 Always look at `--dry-run` first: pattern 3 images have hand-drawn annotations
 that a plain run would overwrite with the raw capture.
 

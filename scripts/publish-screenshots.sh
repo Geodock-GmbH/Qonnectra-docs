@@ -26,12 +26,24 @@
 # An image whose picture matches the committed one is left untouched. The dry
 # run converts and compares exactly like the real run and reports every image
 # as new, changed or unchanged - it only does not write.
+#
+# A video cannot be compared - a recording never comes out byte-identical - so
+# it is replaced by provenance instead: only when its spec passed in the last
+# capture run (tests/.capture-stamps, written by scripts/capture.sh) under a
+# fingerprint other than the one in tests/captures.lock. A full run therefore
+# renews no video whose spec, helpers and app pin are what they were.
+#
+# Every spec stamped by the last run is then written into tests/captures.lock
+# with its fingerprint - the images it produced are published or confirmed, its
+# video is published or still current. Commit the lock with the files.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
 QUALITY=85
+LOCK=tests/captures.lock
+STAMPS=tests/.capture-stamps
 MAX_BYTES=$((1200 * 1024)) # target from CLAUDE.md: < 1.2 MB
 
 # An image is only written when it differs from the committed one.
@@ -183,6 +195,29 @@ abort_on_duplicate_names() {
 	exit 1
 }
 
+# True when no chapter was named, or $1 is one of them.
+chapter_selected() {
+	local filter
+	((${#CHAPTER_FILTER[@]} == 0)) && return 0
+	for filter in "${CHAPTER_FILTER[@]}"; do
+		[[ "$1" == "$filter" ]] && return 0
+	done
+	return 1
+}
+
+# "<fingerprint>  tests/<spec>" per line, in both files.
+declare -A LOCKED=() STAMPED=()
+read_fingerprints() {
+	local -n into=$1
+	local hash spec
+	[[ -f "$2" ]] || return 0
+	while read -r hash spec; do
+		[[ -n "$spec" ]] && into[$spec]=$hash
+	done <"$2"
+}
+read_fingerprints LOCKED "$LOCK"
+read_fingerprints STAMPED "$STAMPS"
+
 if ((WITH_IMAGES)); then abort_on_duplicate_names tests/screenshots png; fi
 if ((WITH_VIDEOS)); then abort_on_duplicate_names tests/videos webm; fi
 
@@ -195,13 +230,7 @@ for png in $(((WITH_IMAGES)) && find tests/screenshots -name '*.png' 2>/dev/null
 	chapter="$(basename "$(dirname "$png")")"
 	name="$(basename "$png" .png)"
 
-	if ((${#CHAPTER_FILTER[@]} > 0)); then
-		match=0
-		for filter in "${CHAPTER_FILTER[@]}"; do
-			[[ "$chapter" == "$filter" ]] && match=1
-		done
-		((match)) || continue
-	fi
+	chapter_selected "$chapter" || continue
 
 	# Look for the reference in the manual: /images/manual/<part>/<name>.jpg
 	target_path="$(grep -rhoE "/images/manual/[^)\"' ]*/${name}\.jpg" manual/ | head -n 1 || true)"
@@ -264,18 +293,27 @@ done
 # No conversion: the spec already delivers a finished, cropped WebM. The target
 # folder is public/videos/ (flat, without a part subfolder), which is likewise
 # derived from the reference in the manual. And no comparison - a recording is
-# never byte-identical to the previous one, see the project "videos" in
-# playwright.config.ts.
+# never byte-identical to the previous one. What decides is the lock, see the
+# head of this file.
 for webm in $(((WITH_VIDEOS)) && find tests/videos -name '*.webm' 2>/dev/null | sort); do
 	chapter="$(basename "$(dirname "$webm")")"
 	name="$(basename "$webm" .webm)"
 
-	if ((${#CHAPTER_FILTER[@]} > 0)); then
-		match=0
-		for filter in "${CHAPTER_FILTER[@]}"; do
-			[[ "$chapter" == "$filter" ]] && match=1
-		done
-		((match)) || continue
+	chapter_selected "$chapter" || continue
+
+	spec="tests/${chapter}-video.spec.ts"
+	stamp="${STAMPED[$spec]:-}"
+	if ((!FORCE)); then
+		if [[ -z "$stamp" ]]; then
+			echo "  skipped  ${chapter}/${name}.webm - ${spec} did not pass in the last capture run"
+			skipped=$((skipped + 1))
+			continue
+		fi
+		if [[ "$stamp" == "${LOCKED[$spec]:-}" ]]; then
+			echo "  unchanged  ${chapter}/${name}.webm - ${spec} matches ${LOCK}"
+			unchanged=$((unchanged + 1))
+			continue
+		fi
 	fi
 
 	target_path="$(grep -rhoE "/videos/${name}\.webm" manual/ | head -n 1 || true)"
@@ -302,21 +340,55 @@ for webm in $(((WITH_VIDEOS)) && find tests/videos -name '*.webm' 2>/dev/null | 
 	published=$((published + 1))
 done
 
+# --- Lock -----------------------------------------------------------------
+#
+# Every spec the last run stamped, as far as this run covered its kind and
+# chapter. A spec that no longer exists drops out.
+stamped=0
+for spec in "${!STAMPED[@]}"; do
+	chapter="$(basename "$spec" .spec.ts)"
+	if [[ "$chapter" == *-video ]]; then
+		((WITH_VIDEOS)) || continue
+		chapter="${chapter%-video}"
+	else
+		((WITH_IMAGES)) || continue
+	fi
+	chapter_selected "$chapter" || continue
+	[[ "${LOCKED[$spec]:-}" == "${STAMPED[$spec]}" ]] && continue
+	LOCKED[$spec]=${STAMPED[$spec]}
+	stamped=$((stamped + 1))
+done
+
+if ((!DRY_RUN)); then
+	for spec in "${!LOCKED[@]}"; do
+		printf '%s  %s\n' "${LOCKED[$spec]}" "$spec"
+	done | while read -r hash spec; do
+		[[ -f "$spec" ]] && printf '%s  %s\n' "$hash" "$spec"
+	done | sort -k2 >"$LOCK.tmp"
+	if ! cmp -s "$LOCK.tmp" "$LOCK" 2>/dev/null; then
+		mv "$LOCK.tmp" "$LOCK"
+	else
+		rm -f "$LOCK.tmp"
+	fi
+fi
+
 echo
 if ((DRY_RUN)); then
 	summary="Dry run: ${published} capture(s) would be published, ${skipped} skipped"
 	if ((unchanged > 0)); then summary="${summary}, ${unchanged} unchanged"; fi
 	if ((restored > 0)); then summary="${summary}, ${restored} would be restored from HEAD"; fi
+	if ((stamped > 0)); then summary="${summary}, ${stamped} spec(s) would be stamped in ${LOCK}"; fi
 	echo "${summary}."
 else
 	summary="${published} capture(s) published, ${skipped} skipped"
 	if ((unchanged > 0)); then summary="${summary}, ${unchanged} unchanged"; fi
 	if ((restored > 0)); then summary="${summary}, ${restored} restored from HEAD"; fi
+	if ((stamped > 0)); then summary="${summary}, ${stamped} spec(s) stamped in ${LOCK}"; fi
 	echo "${summary}."
-	if ((published > 0 || restored > 0)); then
-		echo "Review the changes with: git status public/images/ public/videos/"
+	if ((published > 0 || restored > 0 || stamped > 0)); then
+		echo "Review the changes with: git status public/images/ public/videos/ ${LOCK}"
 	fi
 	if ((unchanged > 0)); then
-		echo "Unchanged images keep their committed file; --force overrides that."
+		echo "Unchanged captures keep their committed file; --force overrides that."
 	fi
 fi

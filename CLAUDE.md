@@ -120,11 +120,11 @@ pnpm install
 pnpm dev              # http://localhost:5173
 pnpm build            # BASE_PATH="/Qonnectra-docs/" in CI
 pnpm lint:spelling    # cspell (en, en-GB, de) – has to be green before every commit
-pnpm lint:captures    # no spec may call .screenshot() itself – see shoot() below
+pnpm lint:captures    # static rules for the specs and the embedded videos – see shoot() below
 pnpm test:e2e:setup   # write the login state to auth-state.json
-pnpm test:e2e         # the image specs in tests/ – without the videos
-pnpm test:e2e:videos  # only the video specs, deliberately a separate command
-pnpm check:videos     # recordings sound? (no comparison with public/videos/)
+pnpm test:e2e         # images and videos of the specs that are stale against tests/captures.lock
+pnpm test:e2e --all   # every spec
+pnpm test:e2e tests/05-karte.spec.ts   # named specs, stale or not
 
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
@@ -509,7 +509,11 @@ longer read.
   runs only this step.
 - `auth-state.json` is **not** reusable and is regenerated per run: the access
   token lives for 15 minutes, and the backend rotates refresh tokens with a
-  blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`).
+  blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`). A run of
+  every spec takes around 25 minutes, so `test` from `playwright/test.ts` logs
+  in again before a test when less than 5 minutes of the token are left and
+  swaps the two auth cookies in the file. Without it everything after the first
+  quarter of an hour lands on the login page.
 - The setup pins the state the images depend on: cookie `selected-project=2`
   („Testprojekt“; a UI login would write `1` = „Default“) as well as
   `PARAGLIDE_LOCALE=de`, `mode=light`, `basemapTheme`, `mapCenter` and `mapZoom`
@@ -521,34 +525,52 @@ longer read.
   chapter sit next to it in `tests/<NN>-<chapter-slug>-video.spec.ts`; a separate
   file is mandatory, because `test.use({ video: … })` is only allowed at file
   level ("forces a new worker" inside a `test.describe` group).
-- The file name suffix `-video` is what splits the two Playwright projects
-  (`playwright.config.ts`): `chromium` ignores it, `videos` matches exactly it.
-  A video spec that is not named that way gets re-recorded by every `pnpm
-  test:e2e`.
+- The file name suffix `-video` is how a spec says it records. `pnpm
+  lint:captures` holds every `-video` spec to the recording size of the
+  viewport and to `postProcessVideo()`, and no other spec may record at all.
+- **`pnpm test:e2e` runs only stale specs.** `scripts/capture-fingerprint.sh`
+  hashes, per spec, everything its captures depend on – the spec, `playwright/`,
+  `playwright.config.ts`, `scripts/capture.sh`, the setup script (app pin, tile
+  pin, patches), the demo data and the installed Playwright version – and
+  `tests/captures.lock` holds the hash each spec was last published under. A
+  spec whose hash matches is skipped; `--all` runs everything, named spec files
+  always run. Deliberately per spec and deliberately coarse: a changed helper
+  marks every spec stale, and a stale spec whose images come out the same only
+  costs a run.
+  After a run, `scripts/capture.sh` stamps every spec whose tests all passed in
+  `tests/.capture-stamps` (gitignored) with the hash it ran under; a run
+  filtered below the spec level (`--grep`, `file:line`) stamps nothing.
+  `pnpm screenshots:publish` moves the stamps into the lock – **commit the lock
+  together with the images and videos.** CI never writes it: a pull request runs
+  the stale specs and passes if their images still match, `main` runs
+  everything, and a spec stays stale until someone publishes it locally.
 - **Videos follow a different rule from the images, deliberately.** An image is
   judged by its content – the same view has to come out the same, and CI checks
   it. A recording cannot: it is a screencast of a real interaction, and its
   length follows render and network latency (measured across two runs: all 13
   videos differed, 1 to 19 frames apart, while only 8 of 137 images did). They
   are therefore judged by their provenance – a video is renewed when its spec
-  or the app version changed, not because a run happened. Hence the own
-  project, hence `screenshots:publish --images` in CI, and hence no tolerance
-  gate for `public/videos/`.
+  or the app version changed, not because a run happened. `screenshots:publish`
+  therefore only replaces a video whose spec passed in the last run under a hash
+  other than the one in `tests/captures.lock`; a full run renews nothing that
+  has not changed. Hence also `screenshots:publish --images` in CI, and no
+  tolerance gate for `public/videos/`.
   What does **not** follow from that: a video may show whatever it likes. It
   sits in the same manual as the images, so the same data rules apply –
   placeholders instead of personal data, and `freezeDates()` wherever the app
   shows a date the backend stamped. `map_attachment.webm` ended on the day it
   was recorded while `conduit_attachment.jpg` showed `CAPTURE_DATE`; that is a
   contradiction in the manual, not a capture detail.
-  Nor does it follow that CI leaves them alone. It records them on every run –
-  the specs assert their way through every step, so a moved button fails there
-  long before anyone notices it in the manual – and then checks the files with
-  `pnpm check:videos`: is every video the manual embeds there, is it VP8, are
-  width, length and size in range, and is the picture not empty. The last one is
-  the point of the script: the crop of `postProcessVideo()` runs after the
-  recording and knows nothing about the layout, so it can end up pointing past
-  the interface while every assertion still passes. What CI never does is
-  compare a recording with the published one.
+  Nor does it follow that a recording goes unchecked. The specs assert their
+  way through every step, so a moved button fails long before anyone notices it
+  in the manual, and `postProcessVideo()` checks its own result
+  (`verifyVideo()`): VP8, width 900 to 1400 px, 3 to 120 s, at least 20 KB,
+  and a frame from the middle that is not empty. The last one is the point: the
+  crop runs after the recording and knows nothing about the layout, so it can
+  end up pointing past the interface while every assertion still passes.
+  `pnpm lint:captures` covers what needs no run – every video the manual embeds
+  exists in `public/videos/` and has a spec that records it. What CI never does
+  is compare a recording with the published one.
 - **Captures go exclusively through `shoot()` resp. `shootTile()`**, never
   through `page.screenshot()` or `locator.screenshot()`. `pnpm lint:captures`
   fails on a direct call. Reason: both default to `animations: "allow"`, and
@@ -580,7 +602,8 @@ longer read.
   Captures without a reference are skipped, so that nothing ends up in the wrong
   folder. `--dry-run` converts and compares like the real run and reports every
   image as new, changed or unchanged without writing anything, `--videos` and
-  `--images` restrict the run to one kind.
+  `--images` restrict the run to one kind. Videos are gated by the lock, see
+  above; `--force` publishes them regardless.
 - An image whose picture matches the **committed** one is **not** written; the
   run reports it as „unchanged“. Without that gate every run rewrote nearly
   every file – one commit rewrote 99 of 137 images, 72 of them without any
