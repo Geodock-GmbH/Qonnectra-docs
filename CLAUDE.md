@@ -129,6 +129,7 @@ pnpm check:videos     # recordings sound? (no comparison with public/videos/)
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
 scripts/install-local-ca.sh                 # import the dev CA once per machine
+scripts/build-map-tiles.sh <osm-pbf-url>    # build a new map tile set (only to move the pin)
 scripts/qonnectra-demo-data/fetch_geodock_export.py --out scripts/qonnectra-demo-data/testprojekt-export.json
                                             # pull the demo data from app.geodock.de again
 ```
@@ -665,33 +666,33 @@ longer read.
   wide at a height that follows from the map extent of the tiles (most recently
   2656 × 1854). The aspect ratio of the assembly cannot be brought to both target
   dimensions at once; in the manual the images are rendered at 512 px anyway.
-- The map tiles are generated once by `scripts/setup-local-qonnectra.sh` through
-  Planetiler (region `schleswig-holstein`, where the test project lies) and
-  stored under `~/.local/share/qonnectra-local-tiles/` – outside `local-app/`, so
-  that `--reset` does not throw them away. The `tileserver` gets them as a hard
+- The map tiles are **downloaded**, not generated: `scripts/setup-local-qonnectra.sh`
+  fetches a finished `.mbtiles` (region `schleswig-holstein`, where the test
+  project lies) from a release of this repo (tag `tiles-<TILE_ID>`) and stores
+  it under `~/.local/share/qonnectra-local-tiles/` – outside `local-app/`, so
+  that `--reset` does not throw it away. The `tileserver` gets it as a hard
   link at `local-app/deployment/tiles/germany.mbtiles` (a bind mount for the file
   alone fails, because Docker cannot create the mount point inside the read-only
   mounted `/data`).
   Map images therefore show the real vector base map in light mode. If the
-  `.mbtiles` is missing (run with `--skip-tiles`, no Java), the `tileserver` runs
-  in a restart loop and the map falls back to OSM raster tiles.
-- The OSM extract is **pinned to a dated snapshot** (`TILE_OSM_URL` at the top of
-  the setup script), not to whatever Geofabrik serves today. OSM changes daily,
-  and tiles built in September draw different buildings and field boundaries
-  than tiles built today – the map images then differ between two machines
-  although nothing in the app or the specs changed. That was what was left over
-  after the capture container had made everything else reproducible.
-  Geofabrik keeps the dated extracts only for a few months. When the URL starts
-  answering 404, move the snapshot on **and regenerate the map images with it** –
-  that is a deliberate step, like raising `QONNECTRA_REF`. The file name of the
-  tile set carries the snapshot, so a changed pin is generated rather than
-  silently reused, and the CI cache key follows the setup script for the same
-  reason.
-- Planetiler itself is pinned too (`PLANETILER_VERSION`, currently `v0.10.2`).
-  Tiles have two inputs, and both have to be fixed: with `releases/latest` a new
-  Planetiler would have redrawn the base map of every map image at a moment
-  nobody chose. The jar carries its version in the file name for the same reason
-  the tile set carries its snapshot.
+  `.mbtiles` is missing (run with `--skip-tiles`, download failed), the
+  `tileserver` runs in a restart loop and the map falls back to OSM raster tiles.
+- The tile set is **pinned by name and checksum** (`TILE_ID`, `TILE_SHA256` at
+  the top of the setup script). A local file that does not match the checksum is
+  replaced by the release asset, and a downloaded one that does not match stops
+  the run – every map image depends on these exact bytes.
+  They used to be built per machine with Planetiler from a dated Geofabrik
+  snapshot. OSM changes daily, so the snapshot had to be pinned, and Geofabrik
+  keeps the dated extracts for a few months only – once
+  `schleswig-holstein-260915` was gone, nobody could build the tiles the
+  published images were made with any more. A release asset stays.
+- Moving the tiles on is a deliberate step, like raising `QONNECTRA_REF`:
+  `scripts/build-map-tiles.sh <dated extract URL>` builds a new set with
+  Planetiler (Java 21+, version pinned in `PLANETILER_VERSION`, currently
+  `v0.10.2`) and prints the `gh release create` command to publish it; then bump
+  `TILE_ID` and `TILE_SHA256` **and regenerate the map images with it**. Use a
+  dated extract, not `-latest` – the name of the tile set and its release says
+  which state of OSM the images show.
 
 **What the pipeline cannot make deterministic**
 

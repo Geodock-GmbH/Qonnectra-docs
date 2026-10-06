@@ -14,7 +14,7 @@
 # like on any machine (idempotent).
 #
 # Requirements: git, curl, openssl, Docker Engine 24+, Docker Compose v2
-# ("docker compose") as well as Java 21+ for the map tiles (see --skip-tiles).
+# ("docker compose") and sha256sum for the map tiles (see --skip-tiles).
 # The invoking user must be able to talk to the Docker daemon (member of the
 # "docker" group or root).
 #
@@ -83,37 +83,27 @@ CA_NAME="Qonnectra Local Dev CA"
 # to OSM raster tiles instead of showing the real vector base map.
 #
 # Like the dev CA, the tiles live OUTSIDE local-app/ (which gets cloned/deleted)
-# and outside this repo (several hundred MB), so that --reset,
-# --reset-checkout and a fresh clone do not trigger a multi-minute Planetiler
-# run every time. The default is Schleswig-Holstein: the test project lies
-# entirely at 9.74 E / 54.73 N (north-east of Flensburg). Overridable via
-# QONNECTRA_TILE_OSM_URL (a larger extract takes considerably longer and needs
-# more space).
+# and outside this repo (well over 100 MB), so that --reset, --reset-checkout
+# and a fresh clone do not download them again. The region is
+# Schleswig-Holstein: the test project lies entirely at 9.74 E / 54.73 N
+# (north-east of Flensburg).
 TILES_DIR="${QONNECTRA_TILES_DIR:-${XDG_DATA_HOME:-$HOME/.local/share}/qonnectra-local-tiles}"
 
-# The OSM extract is pinned to a dated snapshot, not to "the current one".
-# Planetiler's --area downloads whatever Geofabrik serves today, and OSM changes
-# daily: a machine that built its tiles in September draws different buildings
-# and field boundaries than one building them today, so the map images differ
-# without anyone having touched the app. That is what was left after the capture
-# container had made everything else reproducible.
+# The tiles are a finished file, downloaded from a release of this repo, not
+# generated per machine. They used to be built here with Planetiler from a
+# dated Geofabrik snapshot, and that had two problems: OSM changes daily, so the
+# snapshot had to be pinned, and Geofabrik keeps the dated extracts for a few
+# months only - after that no machine could build the tiles the published map
+# images were made with. A release asset stays.
 #
-# Geofabrik keeps the dated extracts for a few months only. When the URL starts
-# answering 404 the snapshot has to be moved on - and the map images regenerated
-# with it, which is a deliberate step, not a surprise.
-TILE_OSM_URL="${QONNECTRA_TILE_OSM_URL:-https://download.geofabrik.de/europe/germany/schleswig-holstein-260915.osm.pbf}"
-# Name of the tile set, derived from the snapshot: a different snapshot is a
-# different file and is therefore generated instead of silently reused.
-TILE_ID="$(basename "$TILE_OSM_URL" .osm.pbf)"
+# The tile set is pinned by name AND checksum: every map image depends on its
+# exact content. Moving it on is a deliberate step - build a new set with
+# scripts/build-map-tiles.sh, publish it as a release, bump both values here
+# and regenerate the map images with it.
+TILE_ID="${QONNECTRA_TILE_ID:-schleswig-holstein-260915}"
+TILE_SHA256="${QONNECTRA_TILE_SHA256-af4a743549216a88779f49828ff1ef17a96f5e96e5be17646c824eca0da9d976}"
+TILE_URL="${QONNECTRA_TILE_URL:-https://github.com/Geodock-GmbH/Qonnectra-docs/releases/download/tiles-$TILE_ID/$TILE_ID.mbtiles}"
 TILE_MBTILES="$TILES_DIR/$TILE_ID.mbtiles"
-# Pinned like the extract, and for the same reason: the tiles are only
-# reproducible if both inputs are. "latest" would have meant that a Planetiler
-# release changes the base map of every map image, at a moment nobody chose.
-# The version is part of the file name so that a bump is fetched instead of the
-# old jar being reused.
-PLANETILER_VERSION="${QONNECTRA_PLANETILER_VERSION:-v0.10.2}"
-PLANETILER_JAR="$TILES_DIR/planetiler-$PLANETILER_VERSION.jar"
-PLANETILER_URL="https://github.com/onthegomap/planetiler/releases/download/$PLANETILER_VERSION/planetiler.jar"
 
 # Help link of the app (PUBLIC_DOCUMENTATION_URL). The app shows it in the
 # header, the navigation bar and the mobile navigation, and hides it while the
@@ -172,7 +162,7 @@ Usage: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
                     --reset.
                     Also the way out when the checkout sits on another version
                     and cannot be switched because of local changes.
-  --skip-tiles      Do not generate map tiles. The tileserver then runs into a
+  --skip-tiles      Do not download map tiles. The tileserver then runs into a
                     restart loop without data and the map falls back to OSM
                     raster tiles.
   -h, --help        Show this help.
@@ -187,7 +177,8 @@ The local dev CA in
 is kept in any case - so the trust store import does not have to be repeated.
 The map tiles in
   $TILES_DIR
-are likewise kept; they are only generated when they are missing there.
+are likewise kept; they are only downloaded when they are missing there or
+do not match the pinned checksum.
 
 Two accounts are created: the Django superuser for administration and an
 account without administration rights, which the manual screenshots are made
@@ -597,54 +588,49 @@ EOF
 		"$DEPLOY_DIR/Caddyfile.production"
 } >"$DEPLOY_DIR/Caddyfile.production.local"
 
-# --- Generate map tiles ------------------------------------------------------
+# --- Download map tiles ------------------------------------------------------
 #
 # tileserver-gl needs an .mbtiles file; the app ships none (see
 # local-app/deployment/README.md, "Generating Map Tiles with Planetiler").
 # Without it the container exits on startup ("Not valid input file") and is
 # restarted endlessly by "restart: always".
 #
-# The run only happens once per machine: the result and the downloaded raw OSM
-# data live in $TILES_DIR outside local-app/.
+# The download only happens once per machine: the file lives in $TILES_DIR
+# outside local-app/. A file that is there but does not match the checksum -
+# a set an earlier version of this script generated locally with Planetiler,
+# or an aborted copy - is replaced: the map images are made with the released
+# bytes, not with something built from the same snapshot.
+
+tile_checksum_ok() {
+	[ -z "$TILE_SHA256" ] ||
+		[ "$(sha256sum "$1" | cut -d' ' -f1)" = "$TILE_SHA256" ]
+}
 
 if [ "$SKIP_TILES" -eq 1 ]; then
 	warn "--skip-tiles: skipping map tiles. The tileserver will run in a restart loop and the map will use OSM raster tiles."
-elif [ -f "$TILE_MBTILES" ]; then
+elif [ -f "$TILE_MBTILES" ] && tile_checksum_ok "$TILE_MBTILES"; then
 	log "Map tiles present: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
-elif ! command -v java >/dev/null 2>&1; then
-	warn "java is missing - map tiles cannot be generated (Planetiler needs Java 21+). Because of that the tileserver runs in a restart loop and the map uses OSM raster tiles. Install Java and run the script again, or deliberately do without them using --skip-tiles."
 else
 	mkdir -p "$TILES_DIR"
+	[ -f "$TILE_MBTILES" ] &&
+		warn "$TILE_MBTILES does not match the pinned checksum - downloading the released tile set again."
 
-	if [ ! -f "$PLANETILER_JAR" ]; then
-		log "Downloading Planetiler to $PLANETILER_JAR"
-		curl -fSL --retry 3 -o "$PLANETILER_JAR.tmp" "$PLANETILER_URL" ||
-			die "Planetiler could not be downloaded: $PLANETILER_URL"
-		mv "$PLANETILER_JAR.tmp" "$PLANETILER_JAR"
-	fi
-
-	log "Generating map tiles from $TILE_OSM_URL (one-off, takes a few minutes)"
-	# Write under an intermediate name first and rename afterwards: an aborted
-	# run would otherwise leave half an .mbtiles behind that counts as finished
-	# on the next run. The extension has to stay .mbtiles - Planetiler derives
-	# the archive format from it and would otherwise abort with
-	# "Unsupported format".
-	# Working directory $TILES_DIR, so that Planetiler puts its downloads
-	# (data/sources) and temporary files there as well and can reuse them next
-	# time.
+	log "Downloading map tiles from $TILE_URL"
+	# Download under an intermediate name and rename afterwards: an aborted run
+	# would otherwise leave half an .mbtiles behind that counts as present on
+	# the next run.
 	TILE_TMP="$TILES_DIR/.$TILE_ID.partial.mbtiles"
-	# --area only names the downloaded file here; --osm-url decides what is
-	# fetched. It is set to the snapshot all the same, because Planetiler skips
-	# the download when the local file already exists - with the default name a
-	# new snapshot would silently be built from the previous extract.
-	if (cd "$TILES_DIR" && java -Xmx4g -jar "$PLANETILER_JAR" \
-		--download --osm-url="$TILE_OSM_URL" --area="$TILE_ID" --force \
-		--output="$TILE_TMP"); then
-		mv "$TILE_TMP" "$TILE_MBTILES"
-		log "Map tiles finished: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
+	if curl -fSL --retry 3 -o "$TILE_TMP" "$TILE_URL"; then
+		if tile_checksum_ok "$TILE_TMP"; then
+			mv "$TILE_TMP" "$TILE_MBTILES"
+			log "Map tiles finished: $TILE_MBTILES ($(du -h "$TILE_MBTILES" | cut -f1))"
+		else
+			rm -f "$TILE_TMP"
+			die "The map tiles from $TILE_URL do not match TILE_SHA256 at the top of this script. Either the release asset was replaced or the pin is wrong - every map image depends on this file, so the run stops here."
+		fi
 	else
 		rm -f "$TILE_TMP"
-		warn "Planetiler run for $TILE_OSM_URL failed. If it answers 404 the snapshot has expired - see TILE_OSM_URL at the top of this script. Until then the tileserver runs in a restart loop and the map uses OSM raster tiles."
+		warn "Map tiles could not be downloaded from $TILE_URL. Until then the tileserver runs in a restart loop and the map uses OSM raster tiles."
 	fi
 fi
 
@@ -658,15 +644,16 @@ fi
 # Hence a hard link (not a copy: that saves the 130+ MB twice over, and the
 # cache in $TILES_DIR stays the only real copy). If $TILES_DIR sits on a
 # different file system than local-app/, it is copied. The name is always
-# germany.mbtiles, regardless of the region that was generated.
+# germany.mbtiles, regardless of the region of the tile set.
 if [ -f "$TILE_MBTILES" ]; then
 	TILE_LINK="$DEPLOY_DIR/tiles/germany.mbtiles"
 	# Link again when the file is missing or holds a different state than the
-	# cache. The size comparison covers both: a hard link always has the same
-	# size (no unnecessary recreation), a freshly generated extract or a change
-	# of the snapshot practically never.
-	if [ ! -e "$TILE_LINK" ] ||
-		[ "$(stat -c %s "$TILE_MBTILES")" != "$(stat -c %s "$TILE_LINK")" ]; then
+	# cache: either it is the same inode (the hard link), or - for the copy
+	# across file systems - the same bytes. A size comparison is not enough
+	# any more: a re-downloaded set replacing a locally generated one of the
+	# same snapshot can come out at the same size.
+	if [ ! -e "$TILE_LINK" ] || { ! [ "$TILE_MBTILES" -ef "$TILE_LINK" ] &&
+		! cmp -s "$TILE_MBTILES" "$TILE_LINK"; }; then
 		rm -f "$TILE_LINK"
 		ln "$TILE_MBTILES" "$TILE_LINK" 2>/dev/null ||
 			cp "$TILE_MBTILES" "$TILE_LINK" ||
@@ -674,7 +661,7 @@ if [ -f "$TILE_MBTILES" ]; then
 		# The tileserver opens the file once at start and holds that inode.
 		# Replacing the link under a running container changes nothing until it
 		# is restarted, and `compose up` leaves an unchanged service alone - so
-		# a new tile set was generated, linked, and then quietly not used. Cost
+		# a new tile set was fetched, linked, and then quietly not used. Cost
 		# an afternoon: the map images kept differing from CI although both were
 		# supposedly building the same snapshot.
 		TILES_RELINKED=1
@@ -963,12 +950,12 @@ if [ -f "$TILE_MBTILES" ]; then
 	TILES_SECTION="Map tiles: $TILE_MBTILES
 With them the map shows the real vector base map (light/dark mode), not the OSM
 fallback. The tiles live outside local-app/ and survive --reset and
---reset-checkout. For a different region, delete them and generate again:
-  QONNECTRA_TILE_OSM_URL=<url> $REPO_ROOT/scripts/setup-local-qonnectra.sh"
+--reset-checkout. A new tile set is built with
+  $REPO_ROOT/scripts/build-map-tiles.sh"
 else
 	TILES_SECTION="Map tiles: NONE at $TILE_MBTILES
 The tileserver therefore runs in a restart loop; the frontend falls back to OSM
-raster tiles automatically. To generate them (needs Java 21+):
+raster tiles automatically. To download them, run the script again:
   $REPO_ROOT/scripts/setup-local-qonnectra.sh"
 fi
 

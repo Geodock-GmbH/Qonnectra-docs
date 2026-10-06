@@ -37,8 +37,8 @@ jobs:
   captures:
     name: Captures
     runs-on: ubuntu-latest
-    # Docker build of the app ~15 min, map tiles ~10 min on a cache miss, the
-    # image specs ~10 min and the recordings a few more.
+    # Docker build of the app ~15 min, the image specs ~10 min and the
+    # recordings a few more.
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v6
@@ -77,29 +77,6 @@ jobs:
       # animations halfway through.
       - name: Check that no spec captures directly
         run: pnpm lint:captures
-
-      # Planetiler needs Java 21+ for the map tiles. Without them the tileserver
-      # restart-loops, the map falls back to OSM raster tiles and every map
-      # screenshot differs from the published one.
-      - name: Setup Java for Planetiler
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-
-      # Only the finished tiles and the Planetiler jar, not its intermediate
-      # downloads - around 230 MB instead of 1.8 GB.
-      #
-      # The key follows the setup script, which is where the pinned OSM snapshot
-      # lives: moving the snapshot on has to rebuild the tiles, and a stale cache
-      # would otherwise keep the old extract and quietly change every map image.
-      - name: Cache the map tiles
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.local/share/qonnectra-local-tiles/planetiler-*.jar
-            ~/.local/share/qonnectra-local-tiles/*.mbtiles
-          key: qonnectra-tiles-${{ hashFiles('scripts/setup-local-qonnectra.sh') }}
 
       # *.localhost resolves to loopback on its own (RFC 6761), but on the
       # runner it answers with ::1 first. The entries pin it to IPv4, where the
