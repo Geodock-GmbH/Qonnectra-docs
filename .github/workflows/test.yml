@@ -34,6 +34,25 @@ jobs:
       - name: Run spellcheck
         run: pnpm lint:spelling
 
+  gender:
+    name: Gender
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+
+      - name: Run spellcheck
+        run: pnpm lint:gender
+
   captures:
     name: Captures
     runs-on: ubuntu-latest
