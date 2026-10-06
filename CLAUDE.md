@@ -121,8 +121,8 @@ pnpm dev              # http://localhost:5173
 pnpm build            # BASE_PATH="/Qonnectra-docs/" in CI
 pnpm lint:spelling    # cspell (en, en-GB, de) – has to be green before every commit
 pnpm lint:captures    # no spec may call .screenshot() itself – see shoot() below
-pnpm test:e2e:setup   # write the login state to auth-state.json + admin-auth-state.json
-pnpm test:e2e         # the image specs in tests/ – without the videos
+pnpm test:e2e:setup   # write the login states to auth-state.json + admin-auth-state.json
+pnpm test:e2e         # the image specs of both parts in tests/ – without the videos
 pnpm test:e2e:videos  # only the video specs, deliberately a separate command
 pnpm check:videos     # recordings sound? (no comparison with public/videos/)
 
@@ -517,15 +517,18 @@ longer read.
   two apart – a spec pointed at the wrong origin captures the login page without
   failing.
 - Which account a spec uses follows from its chapter number, not from an
-  environment variable. Two projects in `playwright.config.ts` split the run:
-  `chromium` takes everything with the account **without** administration rights
-  against `APP_DOMAIN` and is the right one for the whole of part A,
-  `chromium-admin` matches `tests/19-` to `tests/24-` (`ADMIN_SPECS`), uses the
-  Django superuser and has `ADMIN_DOMAIN` as its `baseURL`, because those
-  chapters show the Django administration. Its specs write the path in full
-  (`page.goto('/admin/auth/user/')`) – Playwright resolves an absolute path
-  against the origin alone, so a `baseURL` ending in `/admin` would be dropped.
-  So `pnpm test:e2e` covers both parts in one run. `QONNECTRA_LOGIN=admin` still
+  environment variable. Three projects in `playwright.config.ts` split the run
+  (plus `setup`): `chromium` takes the images with the account **without**
+  administration rights against `APP_DOMAIN` and is the right one for the whole
+  of part A, `chromium-admin` matches `tests/19-` to `tests/24-`
+  (`ADMIN_SPECS`), uses the Django superuser and has `ADMIN_DOMAIN` as its
+  `baseURL`, because those chapters show the Django administration, and
+  `videos` records the `-video` specs with the part A account (see below).
+  The admin specs write the path in full (`page.goto('/admin/auth/user/')`) –
+  Playwright resolves an absolute path against the origin alone, so a `baseURL`
+  ending in `/admin` would be dropped. `pnpm test:e2e` runs `chromium` and
+  `chromium-admin` and so covers the images of both parts in one run.
+  `QONNECTRA_LOGIN=admin` still
   switches `auth-state.json` over to the superuser, but only for looking at part
   A views as an administrator – images from such a run show an interface that
   does not exist for the audience of part A (extra menu entry „Logs“, every
@@ -548,6 +551,16 @@ longer read.
   can also show an ordinary app view. The form POST needs a `Referer` header:
   Django checks it on HTTPS against `CSRF_TRUSTED_ORIGINS`, and an
   `APIRequestContext` sends none by itself (symptom: 403 instead of a session).
+- **Dates in the Django administration cannot be frozen**, and CI compares
+  every published image with a fresh capture. `freezeDates()` rewrites API
+  responses on their way into the page; the Django admin renders on the server,
+  so nothing passes through a route. Run-dependent values sit in the „Letzte
+  Aktionen“ box of the index page (filled by `admin-users.ts` among others), in
+  „Letzte Anmeldung“ / „Mitglied seit“ of the user form, in date columns and
+  filters of list views and in the IDs of records the run created. Avoid or crop
+  them, check every image of the chapters 19–24 for dates, times and IDs and
+  run its spec twice before publishing. An image that still carries such a
+  value is reported to the user as a warning, not published silently.
 - Neither state file is reusable; both are regenerated per run: the access
   token lives for 15 minutes, and the backend rotates refresh tokens with a
   blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`).
@@ -562,10 +575,13 @@ longer read.
   chapter sit next to it in `tests/<NN>-<chapter-slug>-video.spec.ts`; a separate
   file is mandatory, because `test.use({ video: … })` is only allowed at file
   level ("forces a new worker" inside a `test.describe` group).
-- The file name suffix `-video` is what splits the two Playwright projects
-  (`playwright.config.ts`): `chromium` ignores it, `videos` matches exactly it.
-  A video spec that is not named that way gets re-recorded by every `pnpm
-  test:e2e`.
+- The file name suffix `-video` is what splits images from videos
+  (`playwright.config.ts`): `chromium` and `chromium-admin` ignore it, `videos`
+  matches exactly it. A video spec that is not named that way gets re-recorded
+  by every `pnpm test:e2e`. `videos` excludes the chapters 19–24, because it
+  carries the part A login; a video of the administration therefore runs in no
+  project at all. Add a project with `admin-auth-state.json` and the
+  `ADMIN_DOMAIN` before writing the first one.
 - **Videos follow a different rule from the images, deliberately.** An image is
   judged by its content – the same view has to come out the same, and CI checks
   it. A recording cannot: it is a screencast of a real interaction, and its
@@ -610,8 +626,8 @@ longer read.
 - Output goes to `tests/screenshots/<chapter-slug>/<name>.png` through
   `shotPath()` resp. `tests/videos/<chapter-slug>/<name>.webm` through
   `videoPath()`. `tests/screenshots/`, `tests/videos/`, `test-results/`,
-  `playwright-report/`, `auth-state.json` and `admin-auth-state.json` are gitignored – those are raw
-  captures, not the files of the manual.
+  `playwright-report/`, `auth-state.json` and `admin-auth-state.json` are
+  gitignored – those are raw captures, not the files of the manual.
 - `pnpm screenshots:publish` (`scripts/publish-screenshots.sh`) publishes them to
   `public/images/manual/…` resp. `public/videos/…` and converts images to JPEG in
   the process (quality 85, lowered until the file is under 1.2 MB); videos are
