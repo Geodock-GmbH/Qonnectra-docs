@@ -670,9 +670,10 @@ fi
 
 # --- Create docker-compose.override.yml -------------------------------------
 #
-# The only adjustment needed locally on the production compose: point Caddy at
-# the Caddyfile generated above with "tls internal". The nginx and qgis-server
-# commands in docker-compose.yml are already correct (unlike in
+# Adjustments to the production compose: point Caddy at the Caddyfile generated
+# above with "tls internal", hand the backend the capture account, and build the
+# db image against the PGDG archive (see the comment at "db" below). The nginx
+# and qgis-server commands in docker-compose.yml are already correct (unlike in
 # docker-compose.dev.yml).
 
 log "Creating docker-compose.override.yml"
@@ -694,6 +695,23 @@ services:
       - APP_USER_EMAIL=\${APP_USER_EMAIL}
       - APP_USER_PASSWORD=\${APP_USER_PASSWORD}
       - APP_USER_GROUP=\${APP_USER_GROUP}
+  # postgres/Dockerfile of the app installs pgRouting on top of
+  # postgis/postgis:17-3.5, which is Debian bullseye. Bullseye is end of life,
+  # and apt.postgresql.org dropped bullseye-pgdg (404, "does not have a Release
+  # file") - the image no longer builds from a clean cache. The packages moved
+  # unchanged to apt-archive.postgresql.org, which also keeps pgRouting at the
+  # version the instance was built with so far (3.8.0-1.pgdg110+1). Same
+  # Dockerfile, one sed in front. The fix belongs upstream; local-app/ is never
+  # patched from here.
+  db:
+    build:
+      dockerfile: !reset null
+      dockerfile_inline: |
+        FROM postgis/postgis:17-3.5
+        RUN sed -i 's#http://apt.postgresql.org/#http://apt-archive.postgresql.org/#' /etc/apt/sources.list.d/pgdg.list && \\
+            apt-get update && \\
+            apt-get install -y --no-install-recommends postgresql-17-pgrouting && \\
+            rm -rf /var/lib/apt/lists/*
   caddy:
     volumes:
       - ./Caddyfile.production.local:/etc/caddy/Caddyfile:ro
