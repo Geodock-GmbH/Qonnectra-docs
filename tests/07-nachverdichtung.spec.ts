@@ -55,6 +55,18 @@ function results(page: Page): Locator {
   return page.locator('div.max-h-80')
 }
 
+/** The request the search field sends, 300 ms after the last keystroke. */
+const SEARCH_REQUEST = /\/api\/v1\/trace-search\/\?/
+
+/** Value of the `search` parameter of a request, or undefined for any other. */
+function searchTermOf(url: string): string | undefined {
+  if (!SEARCH_REQUEST.test(url)) return undefined
+  return new URL(url).searchParams.get('search') ?? undefined
+}
+
+/** How often the term is typed before search() gives up. */
+const SEARCH_ATTEMPTS = 3
+
 /**
  * Types the search term the way users do and waits for the hit list.
  *
@@ -62,14 +74,48 @@ function results(page: Page): Locator {
  * keystroke, and a single `fill()` event is enough to trip that timer - but the
  * field then holds the whole term at once, which no `input` sequence of a real
  * keyboard produces. Typing keeps the state the image shows reachable by hand.
+ *
+ * The price of typing is that a keystroke held up for more than those 300 ms
+ * sends a search for the prefix typed so far. "Toft" already lists Toft 1, so
+ * waiting for the address ID passed on that intermediate list, and "Toft 1"
+ * then replaced its rows. Same hits, same order - but Chromium snaps the rows,
+ * which sit on fractional positions, differently in a list that existed before
+ * its final hits arrived, and rows 3 to 5 of compaction_search came out a pixel
+ * lower now and then. Hence the count: only a list built from a single search
+ * for the full term is used, otherwise the field is emptied - the list goes
+ * away with it - and the term is typed again.
  */
 async function search(page: Page, term = SEARCH_TERM) {
-  await searchField(page).click()
-  await searchField(page).pressSequentially(term, { delay: 30 })
+  for (let attempt = 1; ; attempt++) {
+    const searches: string[] = []
+    const onRequest = (request: { url(): string }) => {
+      const searched = searchTermOf(request.url())
+      if (searched !== undefined) searches.push(searched)
+    }
+    page.on('request', onRequest)
+    const finalSearch = page.waitForResponse((response) => searchTermOf(response.url()) === term, {
+      timeout: 20_000,
+    })
 
-  await expect(results(page).getByText(ADDRESS_ID, { exact: true })).toBeVisible({
-    timeout: 20_000,
-  })
+    await searchField(page).click()
+    await searchField(page).pressSequentially(term, { delay: 30 })
+    await finalSearch
+    await expect(results(page).getByText(ADDRESS_ID, { exact: true })).toBeVisible({
+      timeout: 20_000,
+    })
+    page.off('request', onRequest)
+
+    if (searches.length === 1) break
+    if (attempt === SEARCH_ATTEMPTS) {
+      throw new Error(
+        `Search: ${SEARCH_ATTEMPTS} attempts, each sent more than one search (last: ${searches.join(' | ')}).`,
+      )
+    }
+
+    // An empty field makes the app drop its hits, and the list unmounts.
+    await searchField(page).fill('')
+    await expect(results(page)).toHaveCount(0)
+  }
   await moveCursorAway(page)
 }
 
