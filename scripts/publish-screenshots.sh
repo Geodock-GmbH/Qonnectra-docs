@@ -19,6 +19,8 @@
 #   scripts/publish-screenshots.sh --dry-run    # compare and report, write nothing
 #   scripts/publish-screenshots.sh --force      # write even unchanged images
 #   scripts/publish-screenshots.sh --no-lock    # leave tests/captures.lock alone (CI)
+#   scripts/publish-screenshots.sh --keep-videos
+#                                               # stamp the video specs, keep the published videos
 #
 # --videos and --images restrict a run to one kind, e.g. to renew a single
 # video. Nothing in public/ is edited by hand after publishing: every image and
@@ -33,6 +35,16 @@
 # capture run (tests/.capture-stamps, written by scripts/capture.sh) under a
 # fingerprint other than the one in tests/captures.lock. A full run therefore
 # renews no video whose spec, helpers and app pin are what they were.
+#
+# The fingerprint is coarse, though: it cannot tell a change that alters a
+# recording from one that cannot. --keep-videos is for the second kind - a
+# comment in the setup script, an option in playwright.config.ts that has no
+# bearing on a recording. It stamps every video spec that passed in the last
+# run without touching public/videos/ or tests/videos.lock, so the lock comes
+# forward and the recordings stay. The spec has to have passed; what the flag
+# waives is the re-recording, not the run. Not for a changed video spec, a
+# changed playwright/manual-videos.ts, a new app pin or new demo data - those
+# do change the recording, and the manual would show the old one.
 #
 # Every spec stamped by the last run is then written into tests/captures.lock
 # with its fingerprint - the images it produced are published or confirmed, its
@@ -84,6 +96,7 @@ MAX_DIFF_PIXELS=0
 DRY_RUN=0
 FORCE=0
 NO_LOCK=0
+KEEP_VIDEOS=0
 WITH_IMAGES=1
 WITH_VIDEOS=1
 CHAPTER_FILTER=()
@@ -93,6 +106,7 @@ for arg in "$@"; do
 	--dry-run) DRY_RUN=1 ;;
 	--force) FORCE=1 ;;
 	--no-lock) NO_LOCK=1 ;;
+	--keep-videos) KEEP_VIDEOS=1 ;;
 	--videos) WITH_IMAGES=0 ;;
 	--images) WITH_VIDEOS=0 ;;
 	-h | --help)
@@ -240,6 +254,7 @@ published=0
 skipped=0
 unchanged=0
 restored=0
+kept=0
 declare -A VIDEO_HASHES=()
 
 for png in $(((WITH_IMAGES)) && find tests/screenshots -name '*.png' 2>/dev/null | sort); do
@@ -330,6 +345,11 @@ for webm in $(((WITH_VIDEOS)) && find tests/videos -name '*.webm' 2>/dev/null | 
 			unchanged=$((unchanged + 1))
 			continue
 		fi
+		if ((KEEP_VIDEOS)); then
+			echo "  kept  ${chapter}/${name}.webm - ${spec} passed, the published video stays (--keep-videos)"
+			kept=$((kept + 1))
+			continue
+		fi
 	fi
 
 	target_path="$(grep -rhoE "/videos/${name}\.webm" manual/ | head -n 1 || true)"
@@ -417,12 +437,14 @@ echo
 if ((DRY_RUN)); then
 	summary="Dry run: ${published} capture(s) would be published, ${skipped} skipped"
 	if ((unchanged > 0)); then summary="${summary}, ${unchanged} unchanged"; fi
+	if ((kept > 0)); then summary="${summary}, ${kept} video(s) kept"; fi
 	if ((restored > 0)); then summary="${summary}, ${restored} would be restored from HEAD"; fi
 	if ((stamped > 0)); then summary="${summary}, ${stamped} spec(s) would be stamped in ${LOCK}"; fi
 	echo "${summary}."
 else
 	summary="${published} capture(s) published, ${skipped} skipped"
 	if ((unchanged > 0)); then summary="${summary}, ${unchanged} unchanged"; fi
+	if ((kept > 0)); then summary="${summary}, ${kept} video(s) kept"; fi
 	if ((restored > 0)); then summary="${summary}, ${restored} restored from HEAD"; fi
 	if ((stamped > 0)); then summary="${summary}, ${stamped} spec(s) stamped in ${LOCK}"; fi
 	echo "${summary}."

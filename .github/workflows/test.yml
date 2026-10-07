@@ -107,8 +107,8 @@ jobs:
       # one of them. A pull request runs what it touched since its base
       # (scripts/capture-fingerprint.sh --touched): a changed spec, a changed
       # published image or video, a changed line of the lock - the claim to
-      # have republished that spec - or, for a change to a shared input, every
-      # spec. That verifies the pull request's claim on the runner; the lock
+      # have republished that spec - or a changed input, for every spec that
+      # depends on it. That verifies the pull request's claim on the runner; the lock
       # check above makes sure it claims anything at all. When nothing was
       # touched, the stack is never started.
       - name: Select the specs

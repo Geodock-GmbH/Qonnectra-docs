@@ -528,15 +528,18 @@ longer read.
   lint:captures` holds every `-video` spec to the recording size of the
   viewport and to `postProcessVideo()`, and no other spec may record at all.
 - **`pnpm test:e2e` runs only stale specs.** `scripts/capture-fingerprint.sh`
-  hashes, per spec, everything its captures depend on – the spec, `playwright/`,
-  `playwright.config.ts`, `scripts/capture.sh`, the setup script (app pin, tile
-  pin, patches), the demo data, the publish script (JPEG quality and size
-  limit) and the installed Playwright version – and
-  `tests/captures.lock` holds the hash each spec was last published under. A
-  spec whose hash matches is skipped; `--all` runs everything, named spec files
-  always run. Deliberately per spec and deliberately coarse: a changed helper
-  marks every spec stale, and a stale spec whose images come out the same only
-  costs a run.
+  hashes, per spec, everything its captures depend on: the environment every
+  capture is made in (`playwright.config.ts`, the capture image and its fonts,
+  `scripts/capture.sh`, the setup script with app pin, tile pin and patches,
+  the demo data, the auth setup, the installed Playwright version), the spec
+  and every file it imports – traced through the import statements, so a
+  video spec does not depend on the screenshot helper – and, for image specs,
+  the JPEG settings of the publish script. `tests/captures.lock` holds the
+  hash each spec was last published under. A spec whose hash matches is
+  skipped; `--all` runs everything, named spec files always run. Precise on
+  purpose: with the strict lock in CI a stale spec costs a run and a stale
+  video spec a decision about re-recording, so a changed helper stales only
+  the specs that import it, and a comment in the publish script none.
   After a run, `scripts/capture.sh` stamps every spec whose tests all passed in
   `tests/.capture-stamps` (gitignored) with the hash it ran under; a run
   filtered below the spec level (`--grep`, `file:line`) stamps nothing.
@@ -557,7 +560,11 @@ longer read.
   or the app version changed, not because a run happened. `screenshots:publish`
   therefore only replaces a video whose spec passed in the last run under a hash
   other than the one in `tests/captures.lock`; a full run renews nothing that
-  has not changed. Hence also `screenshots:publish --images` in CI, and no
+  has not changed. The fingerprint cannot tell a change that alters a recording
+  from one that cannot, so for the second kind – a comment in the setup script,
+  an option in the config with no bearing on a recording – publish with
+  `--keep-videos`: it stamps every video spec that passed without touching the
+  recordings. The run is still owed; only the re-recording is waived. Hence also `screenshots:publish --images` in CI, and no
   tolerance gate for `public/videos/`. What there is instead is
   `tests/videos.lock`: the sha256 of every published video, written by
   `screenshots:publish` and checked by `pnpm lint:captures` – the one check
