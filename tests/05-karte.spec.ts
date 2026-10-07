@@ -16,8 +16,7 @@ import { waitForBaseMapSettled } from '../playwright/stable-map'
 
 // Screenshots for chapter "5. Karte" in the manual
 // (manual/teil-a-anwenderhandbuch/05-karte.md). Produces all images of the
-// chapter; the hand-drawn annotation (pattern 3) in map_address_detail_select
-// stays post-processing.
+// chapter.
 //
 // Publish to public/images/ with: pnpm screenshots:publish 05-karte
 const CHAPTER = '05-karte'

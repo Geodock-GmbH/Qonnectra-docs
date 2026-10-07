@@ -18,10 +18,11 @@
 #   scripts/publish-screenshots.sh --images     # publish images only
 #   scripts/publish-screenshots.sh --dry-run    # compare and report, write nothing
 #   scripts/publish-screenshots.sh --force      # write even unchanged images
+#   scripts/publish-screenshots.sh --no-lock    # leave tests/captures.lock alone (CI)
 #
-# --videos and --images are not a luxury: images with hand-drawn annotations
-# (pattern 3) are post-processed by hand after publishing. A run without a
-# restriction overwrites that handwork with the raw capture.
+# --videos and --images restrict a run to one kind, e.g. to renew a single
+# video. Nothing in public/ is edited by hand after publishing: every image and
+# video is exactly what its spec produced, and CI holds it to that.
 #
 # An image whose picture matches the committed one is left untouched. The dry
 # run converts and compares exactly like the real run and reports every image
@@ -36,6 +37,17 @@
 # Every spec stamped by the last run is then written into tests/captures.lock
 # with its fingerprint - the images it produced are published or confirmed, its
 # video is published or still current. Commit the lock with the files.
+#
+# Every published video is also recorded in tests/videos.lock with its sha256
+# (the format of `sha256sum -c`). An image is compared with the fresh capture
+# whenever its spec runs; a video cannot be, so the lock is the one thing that
+# ties the committed file to the publish that wrote it. `pnpm lint:captures`
+# checks it, which catches a video that was republished but not committed, a
+# merge that kept the wrong side, and a corrupt file.
+#
+# --no-lock is for CI: it publishes the images so that a changed one shows up in
+# git status, but the lock is the developer's record of what was published, and
+# CI must not stamp a spec it only ran.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -43,6 +55,7 @@ cd "$REPO_ROOT"
 
 QUALITY=85
 LOCK=tests/captures.lock
+VIDEO_LOCK=tests/videos.lock
 STAMPS=tests/.capture-stamps
 MAX_BYTES=$((1200 * 1024)) # target from CLAUDE.md: < 1.2 MB
 
@@ -70,6 +83,7 @@ MAX_DIFF_PIXELS=0
 
 DRY_RUN=0
 FORCE=0
+NO_LOCK=0
 WITH_IMAGES=1
 WITH_VIDEOS=1
 CHAPTER_FILTER=()
@@ -78,6 +92,7 @@ for arg in "$@"; do
 	case "$arg" in
 	--dry-run) DRY_RUN=1 ;;
 	--force) FORCE=1 ;;
+	--no-lock) NO_LOCK=1 ;;
 	--videos) WITH_IMAGES=0 ;;
 	--images) WITH_VIDEOS=0 ;;
 	-h | --help)
@@ -225,6 +240,7 @@ published=0
 skipped=0
 unchanged=0
 restored=0
+declare -A VIDEO_HASHES=()
 
 for png in $(((WITH_IMAGES)) && find tests/screenshots -name '*.png' 2>/dev/null | sort); do
 	chapter="$(basename "$(dirname "$png")")"
@@ -335,6 +351,7 @@ for webm in $(((WITH_VIDEOS)) && find tests/videos -name '*.webm' 2>/dev/null | 
 
 	mkdir -p "$(dirname "$target")"
 	cp "$webm" "$target"
+	VIDEO_HASHES[$target]="$(sha256sum "$target" | cut -d' ' -f1)"
 	kb=$(($(stat -c%s "$target") / 1024))
 	echo "  ${target}  ${kb} KB"
 	published=$((published + 1))
@@ -343,8 +360,10 @@ done
 # --- Lock -----------------------------------------------------------------
 #
 # Every spec the last run stamped, as far as this run covered its kind and
-# chapter. A spec that no longer exists drops out.
+# chapter. A spec that no longer exists drops out. Skipped entirely with
+# --no-lock, so the summary does not report stamps that were never written.
 stamped=0
+((NO_LOCK)) && STAMPED=()
 for spec in "${!STAMPED[@]}"; do
 	chapter="$(basename "$spec" .spec.ts)"
 	if [[ "$chapter" == *-video ]]; then
@@ -359,7 +378,7 @@ for spec in "${!STAMPED[@]}"; do
 	stamped=$((stamped + 1))
 done
 
-if ((!DRY_RUN)); then
+if ((!DRY_RUN && !NO_LOCK)); then
 	for spec in "${!LOCKED[@]}"; do
 		printf '%s  %s\n' "${LOCKED[$spec]}" "$spec"
 	done | while read -r hash spec; do
@@ -369,6 +388,28 @@ if ((!DRY_RUN)); then
 		mv "$LOCK.tmp" "$LOCK"
 	else
 		rm -f "$LOCK.tmp"
+	fi
+
+	# The video hashes: the published ones replace their lines, the rest stay,
+	# and a line whose file is gone drops out.
+	if ((WITH_VIDEOS)); then
+		declare -A video_lock=()
+		if [[ -f "$VIDEO_LOCK" ]]; then
+			while read -r hash file; do
+				[[ -n "$file" && -f "$file" ]] && video_lock[$file]=$hash
+			done <"$VIDEO_LOCK"
+		fi
+		for file in "${!VIDEO_HASHES[@]}"; do
+			video_lock[$file]=${VIDEO_HASHES[$file]}
+		done
+		for file in "${!video_lock[@]}"; do
+			printf '%s  %s\n' "${video_lock[$file]}" "$file"
+		done | LC_ALL=C sort -k2 >"$VIDEO_LOCK.tmp"
+		if ! cmp -s "$VIDEO_LOCK.tmp" "$VIDEO_LOCK" 2>/dev/null; then
+			mv "$VIDEO_LOCK.tmp" "$VIDEO_LOCK"
+		else
+			rm -f "$VIDEO_LOCK.tmp"
+		fi
 	fi
 fi
 
@@ -386,7 +427,7 @@ else
 	if ((stamped > 0)); then summary="${summary}, ${stamped} spec(s) stamped in ${LOCK}"; fi
 	echo "${summary}."
 	if ((published > 0 || restored > 0 || stamped > 0)); then
-		echo "Review the changes with: git status public/images/ public/videos/ ${LOCK}"
+		echo "Review the changes with: git status public/images/ public/videos/ ${LOCK} ${VIDEO_LOCK}"
 	fi
 	if ((unchanged > 0)); then
 		echo "Unchanged captures keep their committed file; --force overrides that."

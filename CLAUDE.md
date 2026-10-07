@@ -306,9 +306,6 @@ look: the account it shows belongs to whoever set the instance up.
   addresses and residential units come from the export and are checked once at
   the source (`scripts/qonnectra-demo-data/`). Whether the demo data itself is
   fit to be published is decided there, not per image.
-- Images with hand-drawn annotation (pattern 3) are checked again after the
-  post-processing, and an image that already sits in `public/` is replaced
-  rather than patched – the old file stays in the git history.
 
 **Location and naming**
 - Images: `public/images/manual/teil-a/<name>.jpg` (one folder per manual part)
@@ -347,15 +344,17 @@ look: the account it shows belongs to whoever set the instance up.
    `map_selected_object.jpg` shows the selected map object and the info box with
    its values, everything in between stays dimmed. For map objects the cut-out is
    an ellipse aligned to the line, not a rectangle.
-3. **Hand-drawn annotation in brand green** (`#11ba81`) – sweeping ellipses
-   around elements, curved arrows and handwritten-looking labels. For orientation
-   images with several labels at once (`login_navigation.jpg`).
+3. **Annotation in brand green** (`#11ba81`) – outlines around regions or
+   controls, curved arrows and labels on white chips, drawn by `annotate()` in
+   `playwright/manual-shots.ts`. For orientation images with several labels at
+   once (`login_navigation.jpg`). Boxes frame regions, ellipses circle
+   controls; a label is the manual's own term for the thing it names.
 4. **Composite grid** – 2 × 2 individual images with white gutters, each step
    numbered with a large green digit in the bottom right; the digits correspond
    to the steps of the numbered list in the text (`map_search_flow.jpg`,
    `map_legend_actions.jpg`).
 
-Patterns 2 and 3 are combined (dim + ellipse + arrow). Videos are short,
+Patterns 2 and 3 can be combined – both are overlays above the page. Videos are short,
 uncut interaction recordings without sound, text or annotation – with a visible
 mouse cursor, because states like "buttons appear on hover" would otherwise look
 unmotivated (`showCursor()` in `playwright/manual-videos.ts` places a replica
@@ -531,7 +530,8 @@ longer read.
 - **`pnpm test:e2e` runs only stale specs.** `scripts/capture-fingerprint.sh`
   hashes, per spec, everything its captures depend on – the spec, `playwright/`,
   `playwright.config.ts`, `scripts/capture.sh`, the setup script (app pin, tile
-  pin, patches), the demo data and the installed Playwright version – and
+  pin, patches), the demo data, the publish script (JPEG quality and size
+  limit) and the installed Playwright version – and
   `tests/captures.lock` holds the hash each spec was last published under. A
   spec whose hash matches is skipped; `--all` runs everything, named spec files
   always run. Deliberately per spec and deliberately coarse: a changed helper
@@ -541,9 +541,13 @@ longer read.
   `tests/.capture-stamps` (gitignored) with the hash it ran under; a run
   filtered below the spec level (`--grep`, `file:line`) stamps nothing.
   `pnpm screenshots:publish` moves the stamps into the lock – **commit the lock
-  together with the images and videos.** CI never writes it: a pull request runs
-  the stale specs and passes if their images still match, `main` runs
-  everything, and a spec stays stale until someone publishes it locally.
+  together with the images and videos.** CI never writes it (`--no-lock`) and
+  fails outright on a stale spec – only a local run and publish can bring the
+  lock forward. A pull request then runs what it touched since its base
+  (`scripts/capture-fingerprint.sh --touched`): a changed spec, a changed
+  published image or video, a changed lock line – the claim to have
+  republished that spec – or every spec for a change to a shared input.
+  `main` runs everything.
 - **Videos follow a different rule from the images, deliberately.** An image is
   judged by its content – the same view has to come out the same, and CI checks
   it. A recording cannot: it is a screencast of a real interaction, and its
@@ -554,7 +558,11 @@ longer read.
   therefore only replaces a video whose spec passed in the last run under a hash
   other than the one in `tests/captures.lock`; a full run renews nothing that
   has not changed. Hence also `screenshots:publish --images` in CI, and no
-  tolerance gate for `public/videos/`.
+  tolerance gate for `public/videos/`. What there is instead is
+  `tests/videos.lock`: the sha256 of every published video, written by
+  `screenshots:publish` and checked by `pnpm lint:captures` – the one check
+  that reads the committed file, so a video that was republished but not
+  committed, a merge that kept the wrong side and a corrupt file all fail.
   What does **not** follow from that: a video may show whatever it likes. It
   sits in the same manual as the images, so the same data rules apply –
   placeholders instead of personal data, and `freezeDates()` wherever the app
@@ -568,9 +576,11 @@ longer read.
   and a frame from the middle that is not empty. The last one is the point: the
   crop runs after the recording and knows nothing about the layout, so it can
   end up pointing past the interface while every assertion still passes.
-  `pnpm lint:captures` covers what needs no run – every video the manual embeds
-  exists in `public/videos/` and has a spec that records it. What CI never does
-  is compare a recording with the published one.
+  `pnpm lint:captures` covers what needs no run – every image and every video
+  the manual embeds exists in `public/` and has a spec that captures it, and no
+  committed spec focuses or skips a test (`forbidOnly` in `playwright.config.ts`
+  fails a `test.only` in CI as well). What CI never does is compare a recording
+  with the published one.
 - **Captures go exclusively through `shoot()` resp. `shootTile()`**, never
   through `page.screenshot()` or `locator.screenshot()`. `pnpm lint:captures`
   fails on a direct call. Reason: both default to `animations: "allow"`, and
@@ -623,10 +633,9 @@ longer read.
   `01-erste-schritte/`, and because „03“ sorts after „01“ six `login_*` images
   were published from weeks-old captures on every run – silently, over the fresh
   ones. When a chapter is renumbered, its capture folder is renamed with it.
-- Only patterns 1 and 2 go through fully automatically. Images with hand-drawn
-  annotations (pattern 3) are post-processed after publishing – look at
-  `--dry-run` first, otherwise the run overwrites the handwork with a raw
-  capture. To renew only a video, use `--videos`.
+- Every pattern goes through automatically, and nothing in `public/` is edited
+  by hand after publishing: a file that is not what its spec produced fails CI.
+  To renew only a video, use `--videos`.
 - Chapter 1 („Erste Schritte“) is the only one that also needs the logged-out
   state: the images of the login page sit in a `test.describe` block with
   `test.use({ storageState: { cookies: [], origins: [] } })`, the images of the
@@ -643,8 +652,9 @@ longer read.
   cut-out of `compaction_search` ended after two of five hits that way),
   `moveCursorAway()` (no hover states in the
   image), `spotlight()` for pattern 2 and `composite2x2()` for pattern 4. The
-  grid is assembled in the browser, so the repo needs no image library. Pattern 3
-  (hand-drawn ellipses/arrows) stays post-processing.
+  grid is assembled in the browser, so the repo needs no image library.
+  `annotate()` draws pattern 3 the same way as `spotlight()`: an SVG above the
+  page with outlines, arrows and labels, measured after `waitForAnimations()`.
   `spotlight()` takes one target or a list of targets and exposes each of them; a
   target is either a locator or a `SpotlightEllipse` in CSS pixels of the
   viewport. The ellipse is meant for everything that has no element: trenches,

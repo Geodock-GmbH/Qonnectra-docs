@@ -8,7 +8,7 @@ on:
   # filter on "main" would leave all but the bottom one untested.
   pull_request:
   # Pushes to main run every spec anyway; this is the same for any other ref,
-  # e.g. to check a pull request against tests/captures.lock as a whole.
+  # e.g. to run a pull request's specs as a whole rather than the touched ones.
   workflow_dispatch:
     inputs:
       all:
@@ -86,13 +86,31 @@ jobs:
       - name: Lint the specs
         run: pnpm lint:captures
 
-      # Which specs this run is for. A pull request runs the specs whose inputs
-      # differ from tests/captures.lock (scripts/capture-fingerprint.sh); main
-      # and a manual run with "all" run every one of them. When nothing is
-      # stale, the stack is never started.
-      #
-      # Nothing here writes the lock: a stale spec whose images still come out
-      # the same passes, and stays stale until someone publishes it locally.
+      # The lock first, and a stale spec fails right here: a spec whose inputs
+      # differ from what tests/captures.lock records has not been run and
+      # published since it changed, and only a local run can do that. Running
+      # it here for half an hour would end in the same message. Nothing here
+      # writes the lock (screenshots:publish runs with --no-lock below).
+      - name: Fail if tests/captures.lock is stale
+        run: |
+          stale="$(scripts/capture-fingerprint.sh --stale)"
+          if [ -z "$stale" ]; then
+            echo "Every spec matches tests/captures.lock."
+            exit 0
+          fi
+          echo "Stale against tests/captures.lock:"
+          echo "$stale" | sed 's/^/  /'
+          echo "::error::$(echo "$stale" | wc -l) spec(s) are stale against tests/captures.lock. Run them and publish locally ('pnpm test:e2e && pnpm screenshots:publish'), then commit the lock together with the images and videos."
+          exit 1
+
+      # Which specs this run is for. main and a manual run with "all" run every
+      # one of them. A pull request runs what it touched since its base
+      # (scripts/capture-fingerprint.sh --touched): a changed spec, a changed
+      # published image or video, a changed line of the lock - the claim to
+      # have republished that spec - or, for a change to a shared input, every
+      # spec. That verifies the pull request's claim on the runner; the lock
+      # check above makes sure it claims anything at all. When nothing was
+      # touched, the stack is never started.
       - name: Select the specs
         id: select
         run: |
@@ -102,13 +120,22 @@ jobs:
             echo "run=true" >>"$GITHUB_OUTPUT"
             exit 0
           fi
-          stale="$(scripts/capture-fingerprint.sh --stale)"
-          if [ -z "$stale" ]; then
-            echo "Every spec matches tests/captures.lock - nothing to capture."
+          base="${{ github.event.pull_request.base.sha }}"
+          if [ -z "$base" ]; then
+            echo "No base to compare with - running every spec."
+            echo "args=--all" >>"$GITHUB_OUTPUT"
+            echo "run=true" >>"$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git fetch --no-tags --depth=1 origin "$base"
+          touched="$(scripts/capture-fingerprint.sh --touched "$base")"
+          if [ -z "$touched" ]; then
+            echo "No spec, capture, lock line or shared input changed since the base - nothing to capture."
             echo "run=false" >>"$GITHUB_OUTPUT"
           else
-            echo "Stale against tests/captures.lock:"
-            echo "$stale" | sed 's/^/  /'
+            echo "Touched since the base:"
+            echo "$touched" | sed 's/^/  /'
+            echo "args=$(echo "$touched" | tr '\n' ' ')" >>"$GITHUB_OUTPUT"
             echo "run=true" >>"$GITHUB_OUTPUT"
           fi
 
@@ -171,7 +198,7 @@ jobs:
 
       - name: Publish the screenshots into the manual
         if: ${{ !cancelled() && steps.select.outputs.run == 'true' }}
-        run: pnpm screenshots:publish --images
+        run: pnpm screenshots:publish --images --no-lock
 
       # screenshots:publish only writes an image whose picture differs from the
       # committed one - without any tolerance - so anything left here is a real

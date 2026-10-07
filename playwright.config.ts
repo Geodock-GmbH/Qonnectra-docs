@@ -28,6 +28,13 @@ export default defineConfig({
   // deliver an image from a half cleaned-up state.
   retries: 0,
 
+  // A committed test.only shrinks a spec to one test: the images of the other
+  // tests of that chapter are neither captured nor compared, and
+  // scripts/capture.sh still counts the spec as passed, because it only sees
+  // the tests in the report. Locally it stays allowed for iterating on a
+  // selector; scripts/capture.sh passes CI through to the container.
+  forbidOnly: !!process.env.CI,
+
   // The JSON report is what scripts/capture.sh reads to stamp the specs that
   // passed (see tests/captures.lock).
   reporter: [['list'], ['html', { open: 'never' }], ['json', { outputFile: 'test-results/report.json' }]],

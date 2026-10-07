@@ -35,6 +35,14 @@ while IFS= read -r hit; do
 	problem "${hit} - import test from '../playwright/test'"
 done < <(grep -rn --include='*.spec.ts' "from '@playwright/test'" tests/ || true)
 
+# A focused or skipped test leaves the images of the other tests of its chapter
+# neither captured nor compared, while scripts/capture.sh still counts the spec as
+# passed - it only sees the tests in the report. forbidOnly in
+# playwright.config.ts fails .only in CI; this catches all three before a run.
+while IFS= read -r hit; do
+	problem "${hit} - no test.only, test.skip or test.fixme in a committed spec"
+done < <(grep -rnE --include='*.spec.ts' '\b(test|describe)\.(only|skip|fixme)\(' tests/ || true)
+
 # Encoding goes through postProcessVideo(), which is what guarantees VP8/WebM
 # and checks the result.
 while IFS= read -r hit; do
@@ -62,6 +70,24 @@ done
 
 # --- The manual -------------------------------------------------------------
 
+# Every image the manual embeds is published and has a spec that captures it.
+# The reverse of what screenshots:publish checks: it skips a capture nothing
+# references, but a reference nothing captures - a hand-made file in public/ -
+# passed every check. The name is looked for as a literal, as the specs pass
+# it to shoot() and shotPath(); video specs capture no images and are left out.
+image_specs=()
+for spec in tests/*.spec.ts; do
+	[[ "$spec" == *-video.spec.ts ]] || image_specs+=("$spec")
+done
+while read -r reference; do
+	[[ -z "$reference" ]] && continue
+	name="$(basename "$reference" .jpg)"
+	[[ -f "public${reference}" ]] ||
+		problem "${reference}: embedded in the manual, but public${reference} does not exist"
+	grep -qF "'${name}'" "${image_specs[@]}" ||
+		problem "${reference}: embedded in the manual, but no image spec in tests/ captures '${name}'"
+done < <(grep -rhoE '/images/manual/[a-z0-9-]+/[a-z0-9_]+\.jpg' manual/ | sort -u || true)
+
 # Every video the manual embeds is published and has a spec that produces it.
 # The name is looked for as a literal: the specs pass it to videoPath() either
 # directly or through a helper.
@@ -74,8 +100,27 @@ while read -r reference; do
 		problem "${reference}: embedded in the manual, but no tests/*-video.spec.ts records '${name}'"
 done < <(grep -rhoE '/videos/[a-z0-9_]+\.webm' manual/ | sort -u || true)
 
+# Every published video is the file screenshots:publish wrote: tests/videos.lock
+# holds its sha256. A recording cannot be compared with a fresh one, so this is
+# the only check that ever reads the committed file - it catches a video that
+# was republished but not committed, a merge that kept the wrong side, and a
+# corrupt file. A video without a line was put into public/ by hand.
+VIDEO_LOCK=tests/videos.lock
+if [[ ! -f "$VIDEO_LOCK" ]]; then
+	problem "${VIDEO_LOCK} is missing - publish the videos with: pnpm screenshots:publish --videos"
+else
+	while IFS= read -r hit; do
+		[[ -z "$hit" || "$hit" == 'sha256sum: WARNING'* ]] && continue
+		problem "${hit} - the committed video is not the one screenshots:publish wrote (${VIDEO_LOCK})"
+	done < <(sha256sum -c --quiet --strict "$VIDEO_LOCK" 2>&1 || true)
+	for video in public/videos/*.webm; do
+		grep -qF "  ${video}" "$VIDEO_LOCK" ||
+			problem "${video}: not in ${VIDEO_LOCK} - publish it with screenshots:publish instead of copying it"
+	done
+fi
+
 if ((problems > 0)); then
 	echo "${problems} problem(s)." >&2
 	exit 1
 fi
-echo "Specs and embedded videos in order."
+echo "Specs and embedded images and videos in order."
