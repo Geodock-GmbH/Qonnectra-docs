@@ -529,16 +529,14 @@ longer read.
   Playwright resolves an absolute path against the origin alone, so a `baseURL`
   ending in `/admin` would be dropped. `pnpm test:e2e` runs `chromium` and
   `chromium-admin` and so covers the stale specs of both parts in one run.
-  `QONNECTRA_LOGIN=admin` still
-  switches `auth-state.json` over to the superuser, but only for looking at part
-  A views as an administrator – images from such a run show an interface that
-  does not exist for the audience of part A (extra menu entry „Logs“, every
-  permission check bypassed). `scripts/capture.sh` stamps nothing in such a run,
-  so its images never reach `tests/captures.lock`.
+  There is no switch to run part A as superuser: its images would show an
+  interface that does not exist for its audience (extra menu entry „Logs“,
+  every permission check bypassed). An app view that only the superuser can
+  open belongs to a spec matched by `ADMIN_SPECS`.
 - `playwright/auth.setup.ts` runs as a setup project automatically before every
   spec: it checks reachability (with a pointer to
   `scripts/setup-local-qonnectra.sh` if the stack is down), logs in and writes
-  both states – `auth-state.json` for the role of the run and
+  both states – `auth-state.json` with the account without administration rights and
   `admin-auth-state.json` always with the superuser. `pnpm test:e2e:setup` runs
   only this step.
 - **Two logins, because the instance has two authentication mechanisms.**

@@ -19,9 +19,8 @@ import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwrig
 // Two images trigger an action deliberately, and neither changes the demo data:
 // error_toast saves an address without having changed a field, error_permission
 // runs into the 403 of the capture account (group "Editor" may not DELETE) and
-// therefore deletes nothing. A run with QONNECTRA_LOGIN=admin would actually
-// delete the residential unit - which is why the spec refuses to run as
-// superuser.
+// therefore deletes nothing. As superuser the deletion would go through - the
+// spec relies on running in the project "chromium" with the capture account.
 //
 // Publish to public/images/ with: pnpm screenshots:publish 18-wenn-etwas-nicht-funktioniert
 const CHAPTER = '18-wenn-etwas-nicht-funktioniert'
@@ -114,14 +113,6 @@ test('18.1 Fehlerseite 404', async ({ page }) => {
 })
 
 test('18.3 Meldung über das fehlende Recht', async ({ page }) => {
-  // As superuser the deletion would go through and the demo data would lose a
-  // residential unit. The image needs the refusal, not the deletion.
-  expect(
-    process.env.QONNECTRA_LOGIN?.trim().toLowerCase() ?? 'user',
-    'This image has to be taken with the capture account without administration ' +
-      'rights. Run without QONNECTRA_LOGIN=admin.',
-  ).toBe('user')
-
   await openAddress(page)
 
   const units = page

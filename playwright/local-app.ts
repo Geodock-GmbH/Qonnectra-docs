@@ -7,7 +7,8 @@
 //
 // The instance knows two accounts: the Django superuser for administration and
 // an account without administration rights, which the images are made with.
-// The latter is the default, see Role/role() below.
+// Which one a spec uses follows from its chapter (projects "chromium" and
+// "chromium-admin" in playwright.config.ts), see Role below.
 //
 // Set up / start the instance: scripts/setup-local-qonnectra.sh
 import { readFileSync } from 'node:fs'
@@ -69,24 +70,16 @@ function requiredNew(env: Record<string, string>, key: string): string {
 }
 
 /**
- * Which account a run logs in with.
+ * The two accounts of the instance.
  *
- * - `user`: account without administration rights (group "Editor"). The
- *   default, because part A of the manual describes the view of ordinary
- *   users - the superuser additionally sees the "Logs" menu entry and bypasses
- *   every permission check.
- * - `admin`: Django superuser. Only for images of areas that stay hidden from
- *   users without administration rights (`/admin/*`).
+ * - `user`: account without administration rights (group "Editor"). Every
+ *   spec outside the chapters 19-24, because the manual describes the view of
+ *   ordinary users - the superuser additionally sees the "Logs" menu entry and
+ *   bypasses every permission check.
+ * - `admin`: Django superuser. Only for the chapters 19-24, which show the
+ *   administration area that stays hidden from everyone else (`/admin/*`).
  */
 export type Role = 'user' | 'admin'
-
-/** Switchable via QONNECTRA_LOGIN=admin (see Role). */
-export function role(): Role {
-  const value = process.env.QONNECTRA_LOGIN?.trim().toLowerCase()
-  if (!value || value === 'user') return 'user'
-  if (value === 'admin') return 'admin'
-  throw new Error(`QONNECTRA_LOGIN=${value} is unknown. Allowed are "user" (default) and "admin".`)
-}
 
 export interface Credentials {
   /** Credentials of the role - never print or commit them. */
@@ -111,16 +104,14 @@ export interface LocalApp extends Credentials {
    * `/admin/*` with a 404 on purpose.
    */
   adminUrl: string
-  /** Account this run works with (see role()). */
-  role: Role
 }
 
 /**
- * Credentials of a named role, independent of what the run itself works with.
+ * Credentials of a named role.
  *
- * The setup project needs both in the same run: part A and the chapters of
- * part B that show the ordinary interface log in as `user`, the chapters 19-24
- * with `/admin/*` as `admin` (see playwright/auth.setup.ts).
+ * The setup project needs both in the same run: every chapter outside 19-24
+ * logs in as `user`, the chapters 19-24 with `/admin/*` as `admin` (see
+ * playwright/auth.setup.ts).
  */
 export function credentialsFor(selected: Role): Credentials {
   const env = readDeploymentEnv()
@@ -141,20 +132,17 @@ export function localApp(): LocalApp {
   if (cached) return cached
 
   const env = readDeploymentEnv()
-  const selected = role()
   cached = {
     appUrl: `https://${required(env, 'APP_DOMAIN')}`,
     apiUrl: `https://${required(env, 'API_DOMAIN')}`,
     adminUrl: `https://${required(env, 'ADMIN_DOMAIN')}`,
-    role: selected,
-    ...credentialsFor(selected),
+    ...credentialsFor('user'),
   }
   return cached
 }
 
 /**
- * Credentials of the Django superuser - independent of the role the run works
- * with.
+ * Credentials of the Django superuser.
  *
  * Intended exclusively for **cleaning up** after captures, never for the
  * capture itself. Background: the group "Editor" the images are made with has

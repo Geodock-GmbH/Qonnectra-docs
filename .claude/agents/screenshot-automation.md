@@ -34,9 +34,8 @@ headings) and every string quoted from the German app (selectors, UI labels).
    `https://admin.qonnectra.localhost` (`ADMIN_DOMAIN`) – the Django
    administration, not the app route `/admin/logs`, which is the only `/admin/`
    path on the app domain. Write the path in full
-   (`page.goto('/admin/auth/user/')`). `QONNECTRA_LOGIN=admin` is **not** the
-   way to part B: it switches the part A run over to the superuser, and its
-   images then show an interface ordinary users never see.
+   (`page.goto('/admin/auth/user/')`). There is no switch to run other
+   chapters as superuser.
 5. Certificate: run `scripts/install-local-ca.sh` once, or alternatively set
    `ignoreHTTPSErrors: true` (the config already does).
 

@@ -419,8 +419,7 @@ are still missing inside a written chapter carry the same sentence.
   (`ADMIN_SPECS` in `playwright.config.ts`), which uses `admin-auth-state.json`;
   the setup project writes both states on every run. So a plain `pnpm test:e2e`
   still covers everything, and no part A image can be retaken with the wrong
-  account - which is what a whole run switched over with `QONNECTRA_LOGIN=admin`
-  would do silently.
+  account.
 - The instance knows only two accounts, both belonging to whoever set it up.
   `playwright/admin-users.ts` creates three recognisable placeholder accounts for
   the length of a capture run - one per shipped group (Admin, Editor, Viewer) -

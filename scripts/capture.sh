@@ -138,7 +138,6 @@ docker run --rm \
 	--workdir "$REPO_ROOT" \
 	--env HOME=/tmp \
 	--env CI \
-	--env QONNECTRA_LOGIN \
 	"$IMAGE" \
 	npx playwright test "${args[@]}" || status=$?
 
@@ -149,15 +148,6 @@ fi
 
 if ((partial)); then
 	echo "Filtered below the spec level - no spec stamped."
-	exit "$status"
-fi
-
-# QONNECTRA_LOGIN=admin retakes the part A images as superuser - an interface
-# their audience never sees (menu entry "Logs", no permission checks). The
-# fingerprint does not include the login, so a stamp from such a run would put
-# those images into tests/captures.lock as current.
-if [[ "${QONNECTRA_LOGIN:-}" == admin ]]; then
-	echo "QONNECTRA_LOGIN=admin - no spec stamped."
 	exit "$status"
 fi
 

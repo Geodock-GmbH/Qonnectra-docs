@@ -9,10 +9,7 @@
 // - auth-state.json       account WITHOUT administration rights (APP_USER_*,
 //                         group "Editor"). Used by the project "chromium", so
 //                         that the images show the interface the way ordinary
-//                         users see it. QONNECTRA_LOGIN=admin switches this one
-//                         to the superuser - but then every permission check is
-//                         bypassed and the "Logs" menu entry is additionally in
-//                         the picture.
+//                         users see it.
 // - admin-auth-state.json Django superuser, always. Used by the project
 //                         "chromium-admin" for the chapters 19-24 of part B,
 //                         which show the administration area on {$ADMIN_DOMAIN}.
@@ -184,11 +181,7 @@ async function djangoAdminSessionCookies(
 }
 
 /**
- * Logs in as `loginRole` and writes the state to AUTH_STATE[loginRole].
- *
- * `loginRole` is the account to use, which for auth-state.json is the role of
- * the run (see role() in local-app.ts) and for admin-auth-state.json is always
- * the superuser.
+ * Logs in as `loginRole` and writes the state to `stateFile`.
  *
  * `withAdminSession` additionally logs in to the Django administration, so that
  * the state opens {$ADMIN_DOMAIN} as well - needed for the chapters 19-24.
@@ -340,19 +333,14 @@ async function storeLoggedInState(
 }
 
 setup('Anmelden und Zustand speichern', async ({ browser, request }) => {
-  const { role } = localApp()
-
   // Only the role goes into the output, never the account name - the
   // credentials in .env hang off it.
   setup.info().annotations.push({
     type: 'Login',
-    description:
-      role === 'admin'
-        ? 'Django superuser (QONNECTRA_LOGIN=admin)'
-        : 'Account without administration rights (default)',
+    description: 'Account without administration rights',
   })
 
-  await storeLoggedInState(browser, request, role, AUTH_STATE.user)
+  await storeLoggedInState(browser, request, 'user', AUTH_STATE.user)
 })
 
 setup('Als Administration anmelden und Zustand speichern', async ({ browser, request }) => {

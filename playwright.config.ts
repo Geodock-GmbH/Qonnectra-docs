@@ -131,11 +131,10 @@ export default defineConfig({
       // The chapters 19-24 of part B show the Django administration, which no
       // account without administration rights can open. Splitting them off by
       // chapter number keeps a plain `pnpm test:e2e` covering both parts in one
-      // run - the alternative, a whole run switched over with
-      // QONNECTRA_LOGIN=admin, silently retakes the part A images with the
-      // wrong account. Otherwise it is "chromium": images and recordings,
-      // selected against tests/captures.lock the same way - only the login and
-      // the origin differ.
+      // run, each spec with the account its chapter needs. Otherwise it is
+      // "chromium": images and recordings, selected against
+      // tests/captures.lock the same way - only the login and the origin
+      // differ.
       name: 'chromium-admin',
       testMatch: ADMIN_SPECS,
       use: {

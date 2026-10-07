@@ -15,9 +15,9 @@
 //
 // Nothing is deleted: the capture account (group "Editor") has access level
 // "edit" on all domain models and may not DELETE (`RoleBasedPermission` in the
-// backend), so the API answers with 403. A run with QONNECTRA_LOGIN=admin would
-// actually delete the residential unit, which is why the spec refuses to run as
-// superuser.
+// backend), so the API answers with 403. As superuser the deletion would go
+// through - the spec relies on running in the project "chromium" with the
+// capture account.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 18-wenn-etwas-nicht-funktioniert
 import { expect, test, type Page } from '../playwright/test'
@@ -101,14 +101,6 @@ async function saveVideo(page: Page, name: string, pageStart: number, demoStart:
 
 test('18.3 Aktion ohne Recht', async ({ page, context }) => {
   test.setTimeout(120_000)
-
-  // As superuser the deletion would go through and the demo data would lose a
-  // residential unit. The recording needs the refusal, not the deletion.
-  expect(
-    process.env.QONNECTRA_LOGIN?.trim().toLowerCase() ?? 'user',
-    'This recording has to be made with the capture account without ' +
-      'administration rights. Run without QONNECTRA_LOGIN=admin.',
-  ).toBe('user')
 
   // Warm-up page. It fills the HTTP cache of the context, so that the actual
   // recording page is up within a fraction of a second - Playwright records a
