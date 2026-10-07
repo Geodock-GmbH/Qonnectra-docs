@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from '../playwright/test'
 
 import {
+  annotate,
   crop16by10,
   disableAnimations,
   moveCursorAway,
@@ -10,14 +11,10 @@ import {
 
 // Screenshots for chapter "1. Erste Schritte" in the manual
 // (manual/teil-a-anwenderhandbuch/01-erste-schritte.md). Produces all
-// images of the chapter.
+// images of the chapter, including the labelled orientation image of section
+// 1.2 (login_navigation, pattern 3): its labels are drawn by annotate(), nothing
+// is edited by hand after publishing.
 //
-// Important: login_navigation is a pattern 3 image (hand-drawn labels in brand
-// green). The test case only delivers the raw capture; the labels are added by
-// hand after publishing. So look at the dry run before publishing, otherwise
-// the raw capture overwrites the handwork:
-//
-//   pnpm screenshots:publish 01-erste-schritte --dry-run
 //   pnpm screenshots:publish 01-erste-schritte
 const CHAPTER = '01-erste-schritte'
 
@@ -85,9 +82,60 @@ test.describe('Angemeldet', () => {
 
   test('1.2 Übersicht der Oberfläche', async ({ page }) => {
     await openDashboard(page)
-    // Raw capture for the labelled orientation image (pattern 3), see the
-    // comment at the top of this file.
+
+    // The three areas section 1.2 names, labelled with its words. The content
+    // area has no element of its own that ends where the bar and the header
+    // do, so its rectangle is derived from their boxes. The outlines sit
+    // inside their areas (negative padding): bar and header are flush with
+    // the window edge, and there is no room outside them.
+    const viewport = page.viewportSize()!
+    const bar = (await sidebar(page).boundingBox())!
+    const head = (await header(page).boundingBox())!
+    const contentArea = {
+      x: bar.x + bar.width,
+      y: head.y + head.height,
+      width: viewport.width - bar.x - bar.width,
+      height: viewport.height - head.y - head.height,
+    }
+
+    // The two labels outside the header go into the gap between the card rows,
+    // measured from the headings of the lower cards: the dashboard is full of
+    // cards, and that gap and the margins are the only room there is. A
+    // heading that moves fails the test instead of putting a label on top of
+    // something.
+    const areaCard = (await page.getByRole('heading', { name: 'Gebietsstatistiken' }).boundingBox())!
+    const addressCard = (await page.getByRole('heading', { name: 'Adress-Statistiken' }).boundingBox())!
+
+    const annotationsOff = await annotate(
+      page,
+      [
+        {
+          target: sidebar(page),
+          label: 'Navigationsleiste',
+          labelAt: { x: areaCard.x + 60, y: areaCard.y - 32 },
+          shape: 'box',
+          padding: -8,
+          bend: 0,
+        },
+        {
+          target: header(page),
+          label: 'Kopfzeile',
+          labelAt: { x: 950, y: head.y + head.height / 2 },
+          shape: 'box',
+          padding: -8,
+        },
+        {
+          target: contentArea,
+          label: 'Inhaltsfläche',
+          labelAt: { x: viewport.width - 160, y: addressCard.y - 36 },
+          shape: 'box',
+          padding: -8,
+        },
+      ],
+      { fontSize: 30 },
+    )
     await shoot(page, CHAPTER, 'login_navigation')
+    await annotationsOff()
   })
 
   test('1.2.1 Navigationsleiste', async ({ page }) => {

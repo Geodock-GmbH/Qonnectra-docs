@@ -120,11 +120,11 @@ pnpm install
 pnpm dev              # http://localhost:5173
 pnpm build            # BASE_PATH="/Qonnectra-docs/" in CI
 pnpm lint:spelling    # cspell (en, en-GB, de) – has to be green before every commit
-pnpm lint:captures    # no spec may call .screenshot() itself – see shoot() below
+pnpm lint:captures    # static rules for the specs and the embedded videos – see shoot() below
 pnpm test:e2e:setup   # write the login states to auth-state.json + admin-auth-state.json
-pnpm test:e2e         # the image specs of both parts in tests/ – without the videos
-pnpm test:e2e:videos  # only the video specs, deliberately a separate command
-pnpm check:videos     # recordings sound? (no comparison with public/videos/)
+pnpm test:e2e         # images and videos of both parts whose specs are stale against tests/captures.lock
+pnpm test:e2e --all   # every spec
+pnpm test:e2e tests/05-karte.spec.ts   # named specs, stale or not
 
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
@@ -318,9 +318,6 @@ membership at all.
   addresses and residential units come from the export and are checked once at
   the source (`scripts/qonnectra-demo-data/`). Whether the demo data itself is
   fit to be published is decided there, not per image.
-- Images with hand-drawn annotation (pattern 3) are checked again after the
-  post-processing, and an image that already sits in `public/` is replaced
-  rather than patched – the old file stays in the git history.
 
 **Location and naming**
 - Images: `public/images/manual/teil-a/<name>.jpg` (one folder per manual part)
@@ -359,15 +356,17 @@ membership at all.
    `map_selected_object.jpg` shows the selected map object and the info box with
    its values, everything in between stays dimmed. For map objects the cut-out is
    an ellipse aligned to the line, not a rectangle.
-3. **Hand-drawn annotation in brand green** (`#11ba81`) – sweeping ellipses
-   around elements, curved arrows and handwritten-looking labels. For orientation
-   images with several labels at once (`login_navigation.jpg`).
+3. **Annotation in brand green** (`#11ba81`) – outlines around regions or
+   controls, curved arrows and labels on white chips, drawn by `annotate()` in
+   `playwright/manual-shots.ts`. For orientation images with several labels at
+   once (`login_navigation.jpg`). Boxes frame regions, ellipses circle
+   controls; a label is the manual's own term for the thing it names.
 4. **Composite grid** – 2 × 2 individual images with white gutters, each step
    numbered with a large green digit in the bottom right; the digits correspond
    to the steps of the numbered list in the text (`map_search_flow.jpg`,
    `map_legend_actions.jpg`).
 
-Patterns 2 and 3 are combined (dim + ellipse + arrow). Videos are short,
+Patterns 2 and 3 can be combined – both are overlays above the page. Videos are short,
 uncut interaction recordings without sound, text or annotation – with a visible
 mouse cursor, because states like "buttons appear on hover" would otherwise look
 unmotivated (`showCursor()` in `playwright/manual-videos.ts` places a replica
@@ -517,22 +516,25 @@ longer read.
   two apart – a spec pointed at the wrong origin captures the login page without
   failing.
 - Which account a spec uses follows from its chapter number, not from an
-  environment variable. Three projects in `playwright.config.ts` split the run
-  (plus `setup`): `chromium` takes the images with the account **without**
-  administration rights against `APP_DOMAIN` and is the right one for the whole
-  of part A, `chromium-admin` matches `tests/19-` to `tests/24-`
-  (`ADMIN_SPECS`), uses the Django superuser and has `ADMIN_DOMAIN` as its
-  `baseURL`, because those chapters show the Django administration, and
-  `videos` records the `-video` specs with the part A account (see below).
+  environment variable. Two projects in `playwright.config.ts` split the run
+  (plus `setup`): `chromium` takes images and videos with the account
+  **without** administration rights against `APP_DOMAIN` and is the right one
+  for the whole of part A, and `chromium-admin` matches `tests/19-` to
+  `tests/24-` (`ADMIN_SPECS`), uses the Django superuser and has `ADMIN_DOMAIN`
+  as its `baseURL`, because those chapters show the Django administration.
+  Apart from login and origin the two are the same: both take images and
+  videos, and `pnpm test:e2e` selects the specs of both against
+  `tests/captures.lock`.
   The admin specs write the path in full (`page.goto('/admin/auth/user/')`) –
   Playwright resolves an absolute path against the origin alone, so a `baseURL`
   ending in `/admin` would be dropped. `pnpm test:e2e` runs `chromium` and
-  `chromium-admin` and so covers the images of both parts in one run.
+  `chromium-admin` and so covers the stale specs of both parts in one run.
   `QONNECTRA_LOGIN=admin` still
   switches `auth-state.json` over to the superuser, but only for looking at part
   A views as an administrator – images from such a run show an interface that
   does not exist for the audience of part A (extra menu entry „Logs“, every
-  permission check bypassed).
+  permission check bypassed). `scripts/capture.sh` stamps nothing in such a run,
+  so its images never reach `tests/captures.lock`.
 - `playwright/auth.setup.ts` runs as a setup project automatically before every
   spec: it checks reachability (with a pointer to
   `scripts/setup-local-qonnectra.sh` if the stack is down), logs in and writes
@@ -563,7 +565,11 @@ longer read.
   value is reported to the user as a warning, not published silently.
 - Neither state file is reusable; both are regenerated per run: the access
   token lives for 15 minutes, and the backend rotates refresh tokens with a
-  blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`).
+  blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`). A run of
+  every spec takes around 25 minutes, so `test` from `playwright/test.ts` logs
+  in again before a test when less than 5 minutes of the token are left and
+  swaps the two auth cookies in the file. Without it everything after the first
+  quarter of an hour lands on the login page.
 - The setup pins the state the images depend on: cookie `selected-project=2`
   („Testprojekt“; a UI login would write `1` = „Default“) as well as
   `PARAGLIDE_LOCALE=de`, `mode=light`, `basemapTheme`, `mapCenter` and `mapZoom`
@@ -575,37 +581,70 @@ longer read.
   chapter sit next to it in `tests/<NN>-<chapter-slug>-video.spec.ts`; a separate
   file is mandatory, because `test.use({ video: … })` is only allowed at file
   level ("forces a new worker" inside a `test.describe` group).
-- The file name suffix `-video` is what splits images from videos
-  (`playwright.config.ts`): `chromium` and `chromium-admin` ignore it, `videos`
-  matches exactly it. A video spec that is not named that way gets re-recorded
-  by every `pnpm test:e2e`. `videos` excludes the chapters 19–24, because it
-  carries the part A login; a video of the administration therefore runs in no
-  project at all. Add a project with `admin-auth-state.json` and the
-  `ADMIN_DOMAIN` before writing the first one.
+- The file name suffix `-video` is how a spec says it records. `pnpm
+  lint:captures` holds every `-video` spec to the recording size of the
+  viewport and to `postProcessVideo()`, and no other spec may record at all.
+- **`pnpm test:e2e` runs only stale specs.** `scripts/capture-fingerprint.sh`
+  hashes, per spec, everything its captures depend on: the environment every
+  capture is made in (`playwright.config.ts`, the capture image and its fonts,
+  `scripts/capture.sh`, the setup script with app pin, tile pin and patches,
+  the demo data, the auth setup, the installed Playwright version), the spec
+  and every file it imports – traced through the import statements, so a
+  video spec does not depend on the screenshot helper – and, for image specs,
+  the JPEG settings of the publish script. `tests/captures.lock` holds the
+  hash each spec was last published under. A spec whose hash matches is
+  skipped; `--all` runs everything, named spec files always run. Precise on
+  purpose: with the strict lock in CI a stale spec costs a run and a stale
+  video spec a decision about re-recording, so a changed helper stales only
+  the specs that import it, and a comment in the publish script none.
+  After a run, `scripts/capture.sh` stamps every spec whose tests all passed in
+  `tests/.capture-stamps` (gitignored) with the hash it ran under; a run
+  filtered below the spec level (`--grep`, `file:line`) stamps nothing.
+  `pnpm screenshots:publish` moves the stamps into the lock – **commit the lock
+  together with the images and videos.** CI never writes it (`--no-lock`) and
+  fails outright on a stale spec – only a local run and publish can bring the
+  lock forward. A pull request then runs what it touched since its base
+  (`scripts/capture-fingerprint.sh --touched`): a changed spec, a changed
+  published image or video, a changed lock line – the claim to have
+  republished that spec – or every spec for a change to a shared input.
+  `main` runs everything.
 - **Videos follow a different rule from the images, deliberately.** An image is
   judged by its content – the same view has to come out the same, and CI checks
   it. A recording cannot: it is a screencast of a real interaction, and its
   length follows render and network latency (measured across two runs: all 13
   videos differed, 1 to 19 frames apart, while only 8 of 137 images did). They
   are therefore judged by their provenance – a video is renewed when its spec
-  or the app version changed, not because a run happened. Hence the own
-  project, hence `screenshots:publish --images` in CI, and hence no tolerance
-  gate for `public/videos/`.
+  or the app version changed, not because a run happened. `screenshots:publish`
+  therefore only replaces a video whose spec passed in the last run under a hash
+  other than the one in `tests/captures.lock`; a full run renews nothing that
+  has not changed. The fingerprint cannot tell a change that alters a recording
+  from one that cannot, so for the second kind – a comment in the setup script,
+  an option in the config with no bearing on a recording – publish with
+  `--keep-videos`: it stamps every video spec that passed without touching the
+  recordings. The run is still owed; only the re-recording is waived. Hence also `screenshots:publish --images` in CI, and no
+  tolerance gate for `public/videos/`. What there is instead is
+  `tests/videos.lock`: the sha256 of every published video, written by
+  `screenshots:publish` and checked by `pnpm lint:captures` – the one check
+  that reads the committed file, so a video that was republished but not
+  committed, a merge that kept the wrong side and a corrupt file all fail.
   What does **not** follow from that: a video may show whatever it likes. It
   sits in the same manual as the images, so the same data rules apply –
   placeholders instead of personal data, and `freezeDates()` wherever the app
   shows a date the backend stamped. `map_attachment.webm` ended on the day it
   was recorded while `conduit_attachment.jpg` showed `CAPTURE_DATE`; that is a
   contradiction in the manual, not a capture detail.
-  Nor does it follow that CI leaves them alone. It records them on every run –
-  the specs assert their way through every step, so a moved button fails there
-  long before anyone notices it in the manual – and then checks the files with
-  `pnpm check:videos`: is every video the manual embeds there, is it VP8, are
-  width, length and size in range, and is the picture not empty. The last one is
-  the point of the script: the crop of `postProcessVideo()` runs after the
-  recording and knows nothing about the layout, so it can end up pointing past
-  the interface while every assertion still passes. What CI never does is
-  compare a recording with the published one.
+  Nor does it follow that a recording goes unchecked. The specs assert their
+  way through every step, so a moved button fails long before anyone notices it
+  in the manual, and `postProcessVideo()` checks its own result
+  (`verifyVideo()`): VP8, width 900 to 1400 px, 3 to 120 s, at least 20 KB,
+  and a frame from the middle that is not empty. The last one is the point: the
+  crop runs after the recording and knows nothing about the layout, so it can
+  end up pointing past the interface while every assertion still passes.
+  `pnpm lint:captures` covers what needs no run – every image and every video
+  the manual embeds exists in `public/` and has a spec that captures it, and no
+  committed spec focuses or skips a test (`forbidOnly` in `playwright.config.ts`
+  fails a `test.only` in CI as well). What CI never does is compare a recording
+  with the published one.
 - **Captures go exclusively through `shoot()` resp. `shootTile()`**, never
   through `page.screenshot()` or `locator.screenshot()`. `pnpm lint:captures`
   fails on a direct call. Reason: both default to `animations: "allow"`, and
@@ -637,7 +676,8 @@ longer read.
   Captures without a reference are skipped, so that nothing ends up in the wrong
   folder. `--dry-run` converts and compares like the real run and reports every
   image as new, changed or unchanged without writing anything, `--videos` and
-  `--images` restrict the run to one kind.
+  `--images` restrict the run to one kind. Videos are gated by the lock, see
+  above; `--force` publishes them regardless.
 - An image whose picture matches the **committed** one is **not** written; the
   run reports it as „unchanged“. Without that gate every run rewrote nearly
   every file – one commit rewrote 99 of 137 images, 72 of them without any
@@ -657,10 +697,9 @@ longer read.
   `01-erste-schritte/`, and because „03“ sorts after „01“ six `login_*` images
   were published from weeks-old captures on every run – silently, over the fresh
   ones. When a chapter is renumbered, its capture folder is renamed with it.
-- Only patterns 1 and 2 go through fully automatically. Images with hand-drawn
-  annotations (pattern 3) are post-processed after publishing – look at
-  `--dry-run` first, otherwise the run overwrites the handwork with a raw
-  capture. To renew only a video, use `--videos`.
+- Every pattern goes through automatically, and nothing in `public/` is edited
+  by hand after publishing: a file that is not what its spec produced fails CI.
+  To renew only a video, use `--videos`.
 - Chapter 1 („Erste Schritte“) is the only one that also needs the logged-out
   state: the images of the login page sit in a `test.describe` block with
   `test.use({ storageState: { cookies: [], origins: [] } })`, the images of the
@@ -677,8 +716,9 @@ longer read.
   cut-out of `compaction_search` ended after two of five hits that way),
   `moveCursorAway()` (no hover states in the
   image), `spotlight()` for pattern 2 and `composite2x2()` for pattern 4. The
-  grid is assembled in the browser, so the repo needs no image library. Pattern 3
-  (hand-drawn ellipses/arrows) stays post-processing.
+  grid is assembled in the browser, so the repo needs no image library.
+  `annotate()` draws pattern 3 the same way as `spotlight()`: an SVG above the
+  page with outlines, arrows and labels, measured after `waitForAnimations()`.
   `spotlight()` takes one target or a list of targets and exposes each of them; a
   target is either a locator or a `SpotlightEllipse` in CSS pixels of the
   viewport. The ellipse is meant for everything that has no element: trenches,

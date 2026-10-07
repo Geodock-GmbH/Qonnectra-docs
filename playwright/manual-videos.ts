@@ -8,7 +8,7 @@
 //   2. The spec performs the flow with a visible mouse cursor
 //      (showCursor(), pointAt(), click(), typeText()).
 //   3. postProcessVideo() cuts off the page load, crops the picture to the
-//      described area and re-encodes.
+//      described area, re-encodes and checks the result (verifyVideo()).
 //
 // Why crop at all: the manual renders videos at the width of the text column
 // (around 690 px). The full interface at 1792 CSS pixels wide would end up at
@@ -17,10 +17,11 @@
 // (map_attachment.webm: 1849 x 1277 pixels for a crop of about 924 x 638 CSS
 // pixels) and stays legible. Only the **width** of the crop matters - the
 // height does not change the scale in the manual.
-import { execFileSync } from 'node:child_process'
-import { existsSync, mkdirSync, readdirSync } from 'node:fs'
+import { execFileSync, spawnSync } from 'node:child_process'
+import { existsSync, mkdirSync, readdirSync, statSync } from 'node:fs'
 import { homedir } from 'node:os'
 import { dirname, join } from 'node:path'
+import { inflateSync } from 'node:zlib'
 
 import type { Locator, Page } from '@playwright/test'
 
@@ -329,9 +330,100 @@ export interface PostProcessOptions {
 }
 
 /**
+ * What every manual video has to satisfy. These used to be checked after the
+ * run by a script of their own (check-videos.sh); here they fail the spec that
+ * produced the video, so a partial run checks exactly what it recorded.
+ *
+ * Measured on the existing videos: 1000-1190 px wide, 6.8-50.7 s, 169-895 KB,
+ * frame deviation 20-38.
+ */
+const LIMITS = {
+  /**
+   * Width of the finished video. Wider shrinks everything in the manual, which
+   * renders videos at the width of the text column (see the head of this file).
+   */
+  minWidth: 900,
+  maxWidth: 1400,
+  /** Too short usually means startAt cut away more than the page load. */
+  minSeconds: 3,
+  maxSeconds: 120,
+  minBytes: 20 * 1024,
+  /**
+   * Standard deviation of the grey values of one frame (0-255). A blank frame
+   * sits near 0, the lowest of the real videos at 20.
+   */
+  minDeviation: 5,
+}
+
+/** Codec, dimensions and duration, as ffmpeg reports them for its input. */
+function probe(path: string): { codec: string; width: number; height: number; seconds: number } {
+  // Without an output ffmpeg exits with 1 after printing the input - the
+  // description of the input is all that is wanted here.
+  const report = spawnSync(ffmpegPath(), ['-hide_banner', '-i', path], { encoding: 'utf8' }).stderr
+  const stream = /Video: (\w+).*?, (\d+)x(\d+)/.exec(report)
+  const clock = /Duration: (\d+):(\d+):([\d.]+)/.exec(report)
+  if (!stream) throw new Error(`${path}: no video stream found - is the file broken?`)
+  return {
+    codec: stream[1],
+    width: Number(stream[2]),
+    height: Number(stream[3]),
+    seconds: clock ? Number(clock[1]) * 3600 + Number(clock[2]) * 60 + Number(clock[3]) : 0,
+  }
+}
+
+/**
+ * Standard deviation of the grey values of the frame at `seconds`.
+ *
+ * The ffmpeg of Playwright can write PNG but no raw video. `-pred none` leaves
+ * every row unfiltered, so after inflating the image data each row is one
+ * filter byte followed by the grey values - no PNG decoder needed.
+ */
+function frameDeviation(path: string, seconds: number): number {
+  const png = execFileSync(ffmpegPath(), [
+    '-loglevel', 'error',
+    '-i', path,
+    '-ss', seconds.toFixed(3),
+    '-frames:v', '1',
+    '-vf', 'format=gray',
+    '-c:v', 'png', '-pred', 'none',
+    '-f', 'image2', '-',
+  ])
+
+  const width = png.readUInt32BE(16)
+  const chunks: Buffer[] = []
+  for (let offset = 8; offset < png.length; ) {
+    const length = png.readUInt32BE(offset)
+    if (png.toString('ascii', offset + 4, offset + 8) === 'IDAT') {
+      chunks.push(png.subarray(offset + 8, offset + 8 + length))
+    }
+    offset += length + 12
+  }
+  const rows = inflateSync(Buffer.concat(chunks))
+
+  let n = 0
+  let sum = 0
+  let squares = 0
+  for (let row = 0; row < rows.length; row += width + 1) {
+    for (let i = row + 1; i <= row + width; i++) {
+      sum += rows[i]
+      squares += rows[i] * rows[i]
+      n++
+    }
+  }
+  const mean = sum / n
+  return Math.sqrt(squares / n - mean * mean)
+}
+
+/**
  * Cuts off the page load, crops to the given region and re-encodes. Without
  * scaling: the crop keeps the pixels of the recording so that nothing is
  * needlessly blurred.
+ *
+ * Throws when the result is not what the manual can embed - see LIMITS. The
+ * interesting case is the last check: the spec asserts its way through the
+ * interaction, but the crop happens afterwards and knows nothing about the
+ * layout. A moved panel leaves every assertion green and the crop pointing at
+ * an empty corner of the page.
  */
 export function postProcessVideo(options: PostProcessOptions): void {
   const { source, target, crop, scale = 1, startAt = 0, quality = 32 } = options
@@ -342,6 +434,19 @@ export function postProcessVideo(options: PostProcessOptions): void {
   const h = even(crop.height * scale)
   const x = even(crop.x * scale)
   const y = even(crop.y * scale)
+
+  if (w < LIMITS.minWidth || w > LIMITS.maxWidth) {
+    throw new Error(
+      `${target}: crop is ${w} px wide - a crop of ${LIMITS.minWidth} to ${LIMITS.maxWidth} px is expected.`,
+    )
+  }
+  const recording = probe(source)
+  if (x < 0 || y < 0 || x + w > recording.width || y + h > recording.height) {
+    throw new Error(
+      `${target}: crop ${w}x${h} at ${x},${y} reaches past the recording of ` +
+        `${recording.width}x${recording.height}.`,
+    )
+  }
 
   mkdirSync(dirname(target), { recursive: true })
 
@@ -366,4 +471,36 @@ export function postProcessVideo(options: PostProcessOptions): void {
     ],
     { stdio: ['ignore', 'ignore', 'inherit'] },
   )
+
+  verifyVideo(target)
+}
+
+/** Checks a finished video against LIMITS; throws on the first violation. */
+export function verifyVideo(path: string): void {
+  const video = probe(path)
+  if (video.codec !== 'vp8') {
+    throw new Error(`${path}: stream is '${video.codec}', the manual expects vp8.`)
+  }
+  if (video.width < LIMITS.minWidth || video.width > LIMITS.maxWidth) {
+    throw new Error(`${path}: ${video.width} px wide, expected ${LIMITS.minWidth} to ${LIMITS.maxWidth}.`)
+  }
+  if (video.seconds < LIMITS.minSeconds || video.seconds > LIMITS.maxSeconds) {
+    throw new Error(
+      `${path}: ${video.seconds.toFixed(1)} s long, expected ${LIMITS.minSeconds} to ${LIMITS.maxSeconds} s. ` +
+        'Too short usually means startAt cut away more than the page load.',
+    )
+  }
+  const bytes = statSync(path).size
+  if (bytes < LIMITS.minBytes) {
+    throw new Error(`${path}: only ${Math.round(bytes / 1024)} KB - that is not a recording of an interaction.`)
+  }
+  // A frame from the middle, where the demonstration is running.
+  const at = video.seconds * 0.6
+  const deviation = frameDeviation(path, at)
+  if (deviation < LIMITS.minDeviation) {
+    throw new Error(
+      `${path}: the frame at ${at.toFixed(1)} s is as good as empty (deviation ${deviation.toFixed(1)}). ` +
+        'The crop is probably pointing past the interface.',
+    )
+  }
 }

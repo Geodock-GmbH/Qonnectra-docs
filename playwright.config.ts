@@ -36,7 +36,16 @@ export default defineConfig({
   // deliver an image from a half cleaned-up state.
   retries: 0,
 
-  reporter: [['list'], ['html', { open: 'never' }]],
+  // A committed test.only shrinks a spec to one test: the images of the other
+  // tests of that chapter are neither captured nor compared, and
+  // scripts/capture.sh still counts the spec as passed, because it only sees
+  // the tests in the report. Locally it stays allowed for iterating on a
+  // selector; scripts/capture.sh passes CI through to the container.
+  forbidOnly: !!process.env.CI,
+
+  // The JSON report is what scripts/capture.sh reads to stamp the specs that
+  // passed (see tests/captures.lock).
+  reporter: [['list'], ['html', { open: 'never' }], ['json', { outputFile: 'test-results/report.json' }]],
   outputDir: 'test-results',
 
   use: {
@@ -99,33 +108,24 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
     },
     {
-      // Everything that produces still images, except the administration
-      // chapters: the account without administration rights, which is the
-      // interface part A describes. Deliberately without the video specs - see
-      // the project "videos" below.
-      name: 'chromium',
-      testIgnore: [ADMIN_SPECS, /-video\.spec\.ts$/],
-      use: { storageState: 'auth-state.json' },
-      dependencies: ['setup'],
-    },
-    {
-      // Videos are a project of their own so that `pnpm test:e2e` does not
-      // re-record them.
+      // Still images and recordings in one run, with the account without
+      // administration rights - everything except the administration chapters,
+      // see "chromium-admin" below. Which specs run is decided by
+      // scripts/capture.sh against tests/captures.lock, not by the project: a
+      // spec runs when one of its inputs changed (see
+      // scripts/capture-fingerprint.sh), and only then is its video renewed.
       //
-      // A recording can never come out byte-identical: it is a screencast of a
-      // real interaction, and its length follows render and network latency.
-      // Measured across two consecutive runs of the same specs, all 13 videos
-      // differed, with durations 1 to 19 frames apart - while of 137 still
-      // images only 8 changed. Re-recording therefore has to be a decision, not
-      // a side effect: a video is renewed when its spec or the app changed, and
-      // `pnpm test:e2e:videos [file]` is how that is done.
-      name: 'videos',
+      // That used to be a project of its own for the recordings, so that
+      // `pnpm test:e2e` would not re-record them as a side effect. A recording
+      // never comes out byte-identical - it is a screencast of a real
+      // interaction, and its length follows render and network latency - so a
+      // video has to be renewed by decision, not by a run. The lock is that
+      // decision now: screenshots:publish only replaces a video whose spec was
+      // stale, whatever the run recorded.
+      name: 'chromium',
+      testIgnore: ADMIN_SPECS,
       use: { storageState: 'auth-state.json' },
       dependencies: ['setup'],
-      testMatch: /-video\.spec\.ts$/,
-      // A video of the administration chapters needs the superuser state, which
-      // this project does not carry.
-      testIgnore: ADMIN_SPECS,
     },
     {
       // The chapters 19-24 of part B show the Django administration, which no
@@ -133,12 +133,11 @@ export default defineConfig({
       // chapter number keeps a plain `pnpm test:e2e` covering both parts in one
       // run - the alternative, a whole run switched over with
       // QONNECTRA_LOGIN=admin, silently retakes the part A images with the
-      // wrong account.
+      // wrong account. Otherwise it is "chromium": images and recordings,
+      // selected against tests/captures.lock the same way - only the login and
+      // the origin differ.
       name: 'chromium-admin',
       testMatch: ADMIN_SPECS,
-      // Still images only, like "chromium" - videos are re-recorded on purpose,
-      // never as a side effect of `pnpm test:e2e`.
-      testIgnore: /-video\.spec\.ts$/,
       use: {
         // Its own origin, not the frontend: the administration sits on
         // {$ADMIN_DOMAIN} (Caddy -> nginx -> Django). On the app domain

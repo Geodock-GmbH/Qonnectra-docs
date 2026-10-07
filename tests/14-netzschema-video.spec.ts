@@ -85,7 +85,7 @@ const SPLICE = { node: 'St-V01', component: 'Spleisskassette', cable: 'St-V01-14
  *
  * All three stay at the 1000 px CLAUDE.md aims at or below it, so the labels of
  * the app remain legible at the width the manual renders a video at (around
- * 690 px) - and at or above the 900 px `pnpm check:videos` insists on.
+ * 690 px) - and at or above the 900 px postProcessVideo() insists on.
  * They are measured against the seeded viewport: node St-V02 sits at x 620-740,
  * St-S01 at 980-1100, PoP-St at 980-1100 / y 897-1017. The lower edge holds the
  * message, which Qonnectra places at the bottom centre of the window.

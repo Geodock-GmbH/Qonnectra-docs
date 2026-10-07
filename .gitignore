@@ -24,3 +24,7 @@ admin-auth-state.json
 
 # Wegwerf-Specs zum Prüfen von Selektoren (siehe testIgnore in playwright.config.ts)
 /tests/.tmp-*/
+
+# Specs that passed in the last capture run, with their fingerprint - see
+# scripts/capture.sh. Moved into tests/captures.lock by screenshots:publish.
+/tests/.capture-stamps

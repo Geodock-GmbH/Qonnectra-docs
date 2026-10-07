@@ -58,7 +58,7 @@ const HEADING_OFFSET = 120
  * 824, y 455 to 754) together with its neighbours, so that the change is
  * visible against tiles that stay as they are. The third column starts at
  * x 1249 and stays outside - hence the right edge exactly there, and the left
- * one moved out instead to reach the 900 px `pnpm check:videos` insists on.
+ * one moved out instead to reach the 900 px postProcessVideo() insists on.
  */
 const CROP = { x: 349, y: 160, width: 900, height: 610 }
 
