@@ -118,8 +118,9 @@ rm -f "$REPORT"
 
 # --init, because PID 1 of a container gets no default signal handlers: with
 # npx as PID 1 the Ctrl+C that docker forwards was ignored and the run went on.
-# tini passes it to Playwright, which stops and runs its teardown (the
-# placeholder accounts and seeded data are removed again).
+# With --init, Docker's own init process runs as PID 1 instead and passes it to
+# Playwright, which stops and runs its teardown (the placeholder accounts and
+# seeded data are removed again).
 #
 # The trap only takes effect once the container has exited: an interrupted run
 # says nothing about the specs it did not finish, so nothing is stamped.
