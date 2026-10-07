@@ -3,7 +3,7 @@
 //
 //   Pattern 1  plain overview shot            -> shoot()
 //   Pattern 2  dim + spotlight                -> spotlight() + shoot()
-//   Pattern 3  hand-drawn annotation          -> stays manual post-processing
+//   Pattern 3  annotation in brand green      -> annotate() + shoot()
 //   Pattern 4  composite grid 2 x 2           -> composite2x2()
 //
 // Output is always PNG to tests/screenshots/<chapter>/<name>.png. Converting to
@@ -522,5 +522,265 @@ export async function composite2x2(
     await assembly.locator('#grid').screenshot({ path: targetPath })
   } finally {
     await assembly.close()
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Pattern 3: annotation
+// ---------------------------------------------------------------------------
+
+export interface AnnotationRect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+export interface Annotation {
+  /** The element to mark, or a rectangle in CSS pixels of the viewport. */
+  target: Locator | AnnotationRect
+  /** The label, in the words of the manual - it is what the reader sees. */
+  label: string
+  /**
+   * Centre of the label in CSS pixels of the viewport. Chosen per image: where
+   * there is room for a word depends on the picture, and the arrow finds its
+   * own way from there to the outline. A label placed inside its own outline
+   * gets no arrow.
+   */
+  labelAt: { x: number; y: number }
+  /**
+   * `box` frames a region, `ellipse` circles a control. An ellipse that
+   * enclosed a region as wide as the content area would reach past the window;
+   * a box never does. Default: `ellipse`.
+   */
+  shape?: 'box' | 'ellipse'
+  /**
+   * Gap between target and outline in px. Negative values draw the outline
+   * inside the target - for a region flush with the window edge, where there is
+   * no room outside. Default: 10.
+   */
+  padding?: number
+  /**
+   * Sideways bend of the arrow as a fraction of its length, the sign picks the
+   * side; 0 is a straight arrow. Default: 0.2.
+   */
+  bend?: number
+}
+
+export interface AnnotateOptions {
+  /** Stroke width of outlines and arrows in px. Default: 6. */
+  strokeWidth?: number
+  /** Font size of the labels in px. Default: 34. */
+  fontSize?: number
+}
+
+/** Marks the inserted overlay so that it can be removed again. */
+const ANNOTATION_ID = 'qonnectra-docs-annotation'
+
+/**
+ * Pattern 3: outlines, arrows and labels in brand green, for orientation images
+ * that name several parts of the interface at once (`login_navigation.jpg`).
+ *
+ * Drawn into an SVG above the page, like `spotlight()`, and for the same
+ * reasons: nothing on the page is changed, and the capture stays what `shoot()`
+ * makes of it. This used to be handwork in an image editor after publishing,
+ * and the pipeline cannot keep that: the gate compares every published image
+ * with the raw capture at zero tolerance, so an annotated file is always
+ * "changed", and the first full run replaced the hand-drawn labels of
+ * `login_navigation` with the raw capture. Everything in an image is drawn by
+ * its spec now.
+ *
+ * The labels render in `system-ui`, which the capture image resolves to Noto
+ * Sans - the font of the app itself, so the capture needs no font of its own.
+ *
+ * The targets are measured only once every transition on the page has finished
+ * (`waitForAnimations()`), see `spotlight()`. The return value removes the
+ * overlay again:
+ *
+ *   const off = await annotate(page, [{ target: bar, label: 'Navigationsleiste', labelAt: { x: 500, y: 980 } }])
+ *   await shoot(page, '01-erste-schritte', 'login_navigation')
+ *   await off()
+ */
+export async function annotate(
+  page: Page,
+  annotations: Annotation[],
+  options: AnnotateOptions = {},
+): Promise<() => Promise<void>> {
+  const { strokeWidth = 6, fontSize = 34 } = options
+
+  await waitForAnimations(page)
+
+  const items: {
+    rect: AnnotationRect
+    label: string
+    labelAt: { x: number; y: number }
+    shape: 'box' | 'ellipse'
+    padding: number
+    bend: number
+  }[] = []
+  for (const annotation of annotations) {
+    const { target, label, labelAt, shape = 'ellipse', padding = 10, bend = 0.2 } = annotation
+    let rect: AnnotationRect
+    if ('width' in target) {
+      rect = target
+    } else {
+      await target.waitFor({ state: 'visible' })
+      const box = await target.boundingBox()
+      if (!box) {
+        throw new Error(`Annotation "${label}": target is visible but has no extent in the viewport.`)
+      }
+      rect = box
+    }
+    items.push({ rect, label, labelAt, shape, padding, bend })
+  }
+
+  await page.evaluate(
+    ({ items, strokeWidth, fontSize, color, overlayId }) => {
+      document.getElementById(overlayId)?.remove()
+
+      const NS = 'http://www.w3.org/2000/svg'
+      const element = (tag: string, attributes: Record<string, string | number>): SVGElement => {
+        const node = document.createElementNS(NS, tag)
+        for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, String(value))
+        return node
+      }
+
+      const width = window.innerWidth
+      const height = window.innerHeight
+      const svg = element('svg', { id: overlayId, width, height, viewBox: `0 0 ${width} ${height}` })
+      svg.style.cssText = 'position:fixed;top:0;left:0;pointer-events:none;z-index:2147483647'
+      document.body.appendChild(svg)
+
+      // The arrowhead, sized relative to the stroke. Its own stroke is off -
+      // it would otherwise inherit the line's and come out fat.
+      const defs = element('defs', {})
+      const head = element('marker', {
+        id: `${overlayId}-head`,
+        viewBox: '0 0 10 10',
+        refX: 7,
+        refY: 5,
+        markerWidth: 3.2,
+        markerHeight: 3.2,
+        orient: 'auto',
+      })
+      head.appendChild(element('path', { d: 'M0,0 L10,5 L0,10 Z', fill: color, stroke: 'none' }))
+      defs.appendChild(head)
+      svg.appendChild(defs)
+
+      const line = {
+        fill: 'none',
+        stroke: color,
+        'stroke-width': strokeWidth,
+        'stroke-linecap': 'round',
+        'stroke-linejoin': 'round',
+      }
+      const outlines = element('g', line)
+      const arrows = element('g', { ...line, 'marker-end': `url(#${overlayId}-head)` })
+      const labels = element('g', {})
+      svg.append(outlines, arrows, labels)
+
+      for (const item of items) {
+        const { rect, padding } = item
+        const cx = rect.x + rect.width / 2
+        const cy = rect.y + rect.height / 2
+
+        // Where a ray from the centre in direction (dx, dy) leaves the outline,
+        // whether a point lies inside it, and the point of the outline an
+        // arrow from (x, y) should aim at.
+        let edge: (dx: number, dy: number) => { x: number; y: number }
+        let contains: (x: number, y: number) => boolean
+        let aim: (x: number, y: number) => { x: number; y: number }
+        if (item.shape === 'ellipse') {
+          // Half sizes times the square root of two would pass exactly through
+          // the corners of the box; a little less keeps a flat control from
+          // getting a loose ring around it.
+          const rx = (rect.width / 2) * 1.25 + padding
+          const ry = (rect.height / 2) * 1.25 + padding
+          outlines.appendChild(element('ellipse', { cx, cy, rx, ry }))
+          edge = (dx, dy) => {
+            const t = 1 / Math.sqrt((dx * dx) / (rx * rx) + (dy * dy) / (ry * ry))
+            return { x: cx + dx * t, y: cy + dy * t }
+          }
+          contains = (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1
+          // A control is small and its label close by: aiming at the centre
+          // is as good as the nearest point and far simpler for an ellipse.
+          aim = (x, y) => {
+            const length = Math.hypot(cx - x, cy - y)
+            return edge((x - cx) / length, (y - cy) / length)
+          }
+        } else {
+          const x = rect.x - padding
+          const y = rect.y - padding
+          const w = rect.width + padding * 2
+          const h = rect.height + padding * 2
+          outlines.appendChild(element('rect', { x, y, width: w, height: h, rx: 14 }))
+          edge = (dx, dy) => {
+            const t = Math.min(dx ? w / 2 / Math.abs(dx) : Infinity, dy ? h / 2 / Math.abs(dy) : Infinity)
+            return { x: cx + dx * t, y: cy + dy * t }
+          }
+          contains = (px, py) => px >= x && px <= x + w && py >= y && py <= y + h
+          // The nearest point of the frame. Aiming at the centre of a region
+          // as tall as the navigation bar sends the arrow diagonally across
+          // whatever lies between; the nearest point keeps it short and
+          // straight.
+          aim = (px, py) => ({ x: Math.min(Math.max(px, x), x + w), y: Math.min(Math.max(py, y), y + h) })
+        }
+
+        // The label sits on a white chip, so it reads wherever there is room.
+        const text = element('text', {
+          x: item.labelAt.x,
+          y: item.labelAt.y,
+          'text-anchor': 'middle',
+          'dominant-baseline': 'central',
+          fill: color,
+          style: `font: 700 ${fontSize}px system-ui, sans-serif`,
+        }) as SVGTextElement
+        text.textContent = item.label
+        labels.appendChild(text)
+        const box = text.getBBox()
+        const pad = fontSize * 0.35
+        const chip = {
+          x: box.x - pad,
+          y: box.y - pad * 0.6,
+          width: box.width + pad * 2,
+          height: box.height + pad * 1.2,
+        }
+        labels.insertBefore(
+          element('rect', { ...chip, rx: 10, fill: '#fff', 'fill-opacity': 0.92 }),
+          text,
+        )
+
+        // The arrow leaves the chip on the side facing the point it aims at
+        // and ends just short of the outline there.
+        const lx = chip.x + chip.width / 2
+        const ly = chip.y + chip.height / 2
+        if (contains(lx, ly)) continue
+        const hit = aim(lx, ly)
+        const towardsX = hit.x - lx
+        const towardsY = hit.y - ly
+        const start =
+          Math.abs(towardsY) * chip.width >= Math.abs(towardsX) * chip.height
+            ? { x: lx, y: towardsY > 0 ? chip.y + chip.height + 4 : chip.y - 4 }
+            : { x: towardsX > 0 ? chip.x + chip.width + 4 : chip.x - 4, y: ly }
+        const length = Math.hypot(hit.x - start.x, hit.y - start.y)
+        const ux = (hit.x - start.x) / length
+        const uy = (hit.y - start.y) / length
+        const gap = strokeWidth * 1.5
+        const tip = { x: hit.x - ux * gap, y: hit.y - uy * gap }
+        const span = Math.hypot(tip.x - start.x, tip.y - start.y)
+        const control = {
+          x: (start.x + tip.x) / 2 - uy * item.bend * span,
+          y: (start.y + tip.y) / 2 + ux * item.bend * span,
+        }
+        arrows.appendChild(
+          element('path', { d: `M${start.x},${start.y} Q${control.x},${control.y} ${tip.x},${tip.y}` }),
+        )
+      }
+    },
+    { items, strokeWidth, fontSize, color: BRAND_GREEN, overlayId: ANNOTATION_ID },
+  )
+
+  return async () => {
+    await page.evaluate((id) => document.getElementById(id)?.remove(), ANNOTATION_ID)
   }
 }

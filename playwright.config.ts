@@ -28,7 +28,16 @@ export default defineConfig({
   // deliver an image from a half cleaned-up state.
   retries: 0,
 
-  reporter: [['list'], ['html', { open: 'never' }]],
+  // A committed test.only shrinks a spec to one test: the images of the other
+  // tests of that chapter are neither captured nor compared, and
+  // scripts/capture.sh still counts the spec as passed, because it only sees
+  // the tests in the report. Locally it stays allowed for iterating on a
+  // selector; scripts/capture.sh passes CI through to the container.
+  forbidOnly: !!process.env.CI,
+
+  // The JSON report is what scripts/capture.sh reads to stamp the specs that
+  // passed (see tests/captures.lock).
+  reporter: [['list'], ['html', { open: 'never' }], ['json', { outputFile: 'test-results/report.json' }]],
   outputDir: 'test-results',
 
   use: {
@@ -91,28 +100,21 @@ export default defineConfig({
       testMatch: /auth\.setup\.ts/,
     },
     {
-      // Everything that produces still images. Deliberately without the video
-      // specs - see the project "videos" below.
+      // Still images and recordings in one run. Which specs run is decided by
+      // scripts/capture.sh against tests/captures.lock, not by the project: a
+      // spec runs when one of its inputs changed (see
+      // scripts/capture-fingerprint.sh), and only then is its video renewed.
+      //
+      // That used to be a project of its own for the recordings, so that
+      // `pnpm test:e2e` would not re-record them as a side effect. A recording
+      // never comes out byte-identical - it is a screencast of a real
+      // interaction, and its length follows render and network latency - so a
+      // video has to be renewed by decision, not by a run. The lock is that
+      // decision now: screenshots:publish only replaces a video whose spec was
+      // stale, whatever the run recorded.
       name: 'chromium',
       use: { storageState: 'auth-state.json' },
       dependencies: ['setup'],
-      testIgnore: /-video\.spec\.ts$/,
-    },
-    {
-      // Videos are a project of their own so that `pnpm test:e2e` does not
-      // re-record them.
-      //
-      // A recording can never come out byte-identical: it is a screencast of a
-      // real interaction, and its length follows render and network latency.
-      // Measured across two consecutive runs of the same specs, all 13 videos
-      // differed, with durations 1 to 19 frames apart - while of 137 still
-      // images only 8 changed. Re-recording therefore has to be a decision, not
-      // a side effect: a video is renewed when its spec or the app changed, and
-      // `pnpm test:e2e:videos [file]` is how that is done.
-      name: 'videos',
-      use: { storageState: 'auth-state.json' },
-      dependencies: ['setup'],
-      testMatch: /-video\.spec\.ts$/,
     },
   ],
 })

@@ -18,20 +18,57 @@
 #   scripts/publish-screenshots.sh --images     # publish images only
 #   scripts/publish-screenshots.sh --dry-run    # compare and report, write nothing
 #   scripts/publish-screenshots.sh --force      # write even unchanged images
+#   scripts/publish-screenshots.sh --no-lock    # leave tests/captures.lock alone (CI)
+#   scripts/publish-screenshots.sh --keep-videos
+#                                               # stamp the video specs, keep the published videos
 #
-# --videos and --images are not a luxury: images with hand-drawn annotations
-# (pattern 3) are post-processed by hand after publishing. A run without a
-# restriction overwrites that handwork with the raw capture.
+# --videos and --images restrict a run to one kind, e.g. to renew a single
+# video. Nothing in public/ is edited by hand after publishing: every image and
+# video is exactly what its spec produced, and CI holds it to that.
 #
 # An image whose picture matches the committed one is left untouched. The dry
 # run converts and compares exactly like the real run and reports every image
 # as new, changed or unchanged - it only does not write.
+#
+# A video cannot be compared - a recording never comes out byte-identical - so
+# it is replaced by provenance instead: only when its spec passed in the last
+# capture run (tests/.capture-stamps, written by scripts/capture.sh) under a
+# fingerprint other than the one in tests/captures.lock. A full run therefore
+# renews no video whose spec, helpers and app pin are what they were.
+#
+# The fingerprint is coarse, though: it cannot tell a change that alters a
+# recording from one that cannot. --keep-videos is for the second kind - a
+# comment in the setup script, an option in playwright.config.ts that has no
+# bearing on a recording. It stamps every video spec that passed in the last
+# run without touching public/videos/ or tests/videos.lock, so the lock comes
+# forward and the recordings stay. The spec has to have passed; what the flag
+# waives is the re-recording, not the run. Not for a changed video spec, a
+# changed playwright/manual-videos.ts, a new app pin or new demo data - those
+# do change the recording, and the manual would show the old one.
+#
+# Every spec stamped by the last run is then written into tests/captures.lock
+# with its fingerprint - the images it produced are published or confirmed, its
+# video is published or still current. Commit the lock with the files.
+#
+# Every published video is also recorded in tests/videos.lock with its sha256
+# (the format of `sha256sum -c`). An image is compared with the fresh capture
+# whenever its spec runs; a video cannot be, so the lock is the one thing that
+# ties the committed file to the publish that wrote it. `pnpm lint:captures`
+# checks it, which catches a video that was republished but not committed, a
+# merge that kept the wrong side, and a corrupt file.
+#
+# --no-lock is for CI: it publishes the images so that a changed one shows up in
+# git status, but the lock is the developer's record of what was published, and
+# CI must not stamp a spec it only ran.
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 
 QUALITY=85
+LOCK=tests/captures.lock
+VIDEO_LOCK=tests/videos.lock
+STAMPS=tests/.capture-stamps
 MAX_BYTES=$((1200 * 1024)) # target from CLAUDE.md: < 1.2 MB
 
 # An image is only written when it differs from the committed one.
@@ -58,6 +95,8 @@ MAX_DIFF_PIXELS=0
 
 DRY_RUN=0
 FORCE=0
+NO_LOCK=0
+KEEP_VIDEOS=0
 WITH_IMAGES=1
 WITH_VIDEOS=1
 CHAPTER_FILTER=()
@@ -66,6 +105,8 @@ for arg in "$@"; do
 	case "$arg" in
 	--dry-run) DRY_RUN=1 ;;
 	--force) FORCE=1 ;;
+	--no-lock) NO_LOCK=1 ;;
+	--keep-videos) KEEP_VIDEOS=1 ;;
 	--videos) WITH_IMAGES=0 ;;
 	--images) WITH_VIDEOS=0 ;;
 	-h | --help)
@@ -183,6 +224,29 @@ abort_on_duplicate_names() {
 	exit 1
 }
 
+# True when no chapter was named, or $1 is one of them.
+chapter_selected() {
+	local filter
+	((${#CHAPTER_FILTER[@]} == 0)) && return 0
+	for filter in "${CHAPTER_FILTER[@]}"; do
+		[[ "$1" == "$filter" ]] && return 0
+	done
+	return 1
+}
+
+# "<fingerprint>  tests/<spec>" per line, in both files.
+declare -A LOCKED=() STAMPED=()
+read_fingerprints() {
+	local -n into=$1
+	local hash spec
+	[[ -f "$2" ]] || return 0
+	while read -r hash spec; do
+		[[ -n "$spec" ]] && into[$spec]=$hash
+	done <"$2"
+}
+read_fingerprints LOCKED "$LOCK"
+read_fingerprints STAMPED "$STAMPS"
+
 if ((WITH_IMAGES)); then abort_on_duplicate_names tests/screenshots png; fi
 if ((WITH_VIDEOS)); then abort_on_duplicate_names tests/videos webm; fi
 
@@ -190,18 +254,14 @@ published=0
 skipped=0
 unchanged=0
 restored=0
+kept=0
+declare -A VIDEO_HASHES=()
 
 for png in $(((WITH_IMAGES)) && find tests/screenshots -name '*.png' 2>/dev/null | sort); do
 	chapter="$(basename "$(dirname "$png")")"
 	name="$(basename "$png" .png)"
 
-	if ((${#CHAPTER_FILTER[@]} > 0)); then
-		match=0
-		for filter in "${CHAPTER_FILTER[@]}"; do
-			[[ "$chapter" == "$filter" ]] && match=1
-		done
-		((match)) || continue
-	fi
+	chapter_selected "$chapter" || continue
 
 	# Look for the reference in the manual: /images/manual/<part>/<name>.jpg
 	target_path="$(grep -rhoE "/images/manual/[^)\"' ]*/${name}\.jpg" manual/ | head -n 1 || true)"
@@ -264,18 +324,32 @@ done
 # No conversion: the spec already delivers a finished, cropped WebM. The target
 # folder is public/videos/ (flat, without a part subfolder), which is likewise
 # derived from the reference in the manual. And no comparison - a recording is
-# never byte-identical to the previous one, see the project "videos" in
-# playwright.config.ts.
+# never byte-identical to the previous one. What decides is the lock, see the
+# head of this file.
 for webm in $(((WITH_VIDEOS)) && find tests/videos -name '*.webm' 2>/dev/null | sort); do
 	chapter="$(basename "$(dirname "$webm")")"
 	name="$(basename "$webm" .webm)"
 
-	if ((${#CHAPTER_FILTER[@]} > 0)); then
-		match=0
-		for filter in "${CHAPTER_FILTER[@]}"; do
-			[[ "$chapter" == "$filter" ]] && match=1
-		done
-		((match)) || continue
+	chapter_selected "$chapter" || continue
+
+	spec="tests/${chapter}-video.spec.ts"
+	stamp="${STAMPED[$spec]:-}"
+	if ((!FORCE)); then
+		if [[ -z "$stamp" ]]; then
+			echo "  skipped  ${chapter}/${name}.webm - ${spec} did not pass in the last capture run"
+			skipped=$((skipped + 1))
+			continue
+		fi
+		if [[ "$stamp" == "${LOCKED[$spec]:-}" ]]; then
+			echo "  unchanged  ${chapter}/${name}.webm - ${spec} matches ${LOCK}"
+			unchanged=$((unchanged + 1))
+			continue
+		fi
+		if ((KEEP_VIDEOS)); then
+			echo "  kept  ${chapter}/${name}.webm - ${spec} passed, the published video stays (--keep-videos)"
+			kept=$((kept + 1))
+			continue
+		fi
 	fi
 
 	target_path="$(grep -rhoE "/videos/${name}\.webm" manual/ | head -n 1 || true)"
@@ -297,26 +371,87 @@ for webm in $(((WITH_VIDEOS)) && find tests/videos -name '*.webm' 2>/dev/null | 
 
 	mkdir -p "$(dirname "$target")"
 	cp "$webm" "$target"
+	VIDEO_HASHES[$target]="$(sha256sum "$target" | cut -d' ' -f1)"
 	kb=$(($(stat -c%s "$target") / 1024))
 	echo "  ${target}  ${kb} KB"
 	published=$((published + 1))
 done
 
+# --- Lock -----------------------------------------------------------------
+#
+# Every spec the last run stamped, as far as this run covered its kind and
+# chapter. A spec that no longer exists drops out. Skipped entirely with
+# --no-lock, so the summary does not report stamps that were never written.
+stamped=0
+((NO_LOCK)) && STAMPED=()
+for spec in "${!STAMPED[@]}"; do
+	chapter="$(basename "$spec" .spec.ts)"
+	if [[ "$chapter" == *-video ]]; then
+		((WITH_VIDEOS)) || continue
+		chapter="${chapter%-video}"
+	else
+		((WITH_IMAGES)) || continue
+	fi
+	chapter_selected "$chapter" || continue
+	[[ "${LOCKED[$spec]:-}" == "${STAMPED[$spec]}" ]] && continue
+	LOCKED[$spec]=${STAMPED[$spec]}
+	stamped=$((stamped + 1))
+done
+
+if ((!DRY_RUN && !NO_LOCK)); then
+	for spec in "${!LOCKED[@]}"; do
+		printf '%s  %s\n' "${LOCKED[$spec]}" "$spec"
+	done | while read -r hash spec; do
+		[[ -f "$spec" ]] && printf '%s  %s\n' "$hash" "$spec"
+	done | LC_ALL=C sort -k2 >"$LOCK.tmp"
+	if ! cmp -s "$LOCK.tmp" "$LOCK" 2>/dev/null; then
+		mv "$LOCK.tmp" "$LOCK"
+	else
+		rm -f "$LOCK.tmp"
+	fi
+
+	# The video hashes: the published ones replace their lines, the rest stay,
+	# and a line whose file is gone drops out.
+	if ((WITH_VIDEOS)); then
+		declare -A video_lock=()
+		if [[ -f "$VIDEO_LOCK" ]]; then
+			while read -r hash file; do
+				[[ -n "$file" && -f "$file" ]] && video_lock[$file]=$hash
+			done <"$VIDEO_LOCK"
+		fi
+		for file in "${!VIDEO_HASHES[@]}"; do
+			video_lock[$file]=${VIDEO_HASHES[$file]}
+		done
+		for file in "${!video_lock[@]}"; do
+			printf '%s  %s\n' "${video_lock[$file]}" "$file"
+		done | LC_ALL=C sort -k2 >"$VIDEO_LOCK.tmp"
+		if ! cmp -s "$VIDEO_LOCK.tmp" "$VIDEO_LOCK" 2>/dev/null; then
+			mv "$VIDEO_LOCK.tmp" "$VIDEO_LOCK"
+		else
+			rm -f "$VIDEO_LOCK.tmp"
+		fi
+	fi
+fi
+
 echo
 if ((DRY_RUN)); then
 	summary="Dry run: ${published} capture(s) would be published, ${skipped} skipped"
 	if ((unchanged > 0)); then summary="${summary}, ${unchanged} unchanged"; fi
+	if ((kept > 0)); then summary="${summary}, ${kept} video(s) kept"; fi
 	if ((restored > 0)); then summary="${summary}, ${restored} would be restored from HEAD"; fi
+	if ((stamped > 0)); then summary="${summary}, ${stamped} spec(s) would be stamped in ${LOCK}"; fi
 	echo "${summary}."
 else
 	summary="${published} capture(s) published, ${skipped} skipped"
 	if ((unchanged > 0)); then summary="${summary}, ${unchanged} unchanged"; fi
+	if ((kept > 0)); then summary="${summary}, ${kept} video(s) kept"; fi
 	if ((restored > 0)); then summary="${summary}, ${restored} restored from HEAD"; fi
+	if ((stamped > 0)); then summary="${summary}, ${stamped} spec(s) stamped in ${LOCK}"; fi
 	echo "${summary}."
-	if ((published > 0 || restored > 0)); then
-		echo "Review the changes with: git status public/images/ public/videos/"
+	if ((published > 0 || restored > 0 || stamped > 0)); then
+		echo "Review the changes with: git status public/images/ public/videos/ ${LOCK} ${VIDEO_LOCK}"
 	fi
 	if ((unchanged > 0)); then
-		echo "Unchanged images keep their committed file; --force overrides that."
+		echo "Unchanged captures keep their committed file; --force overrides that."
 	fi
 fi

@@ -126,9 +126,11 @@ Four patterns occur in the manual:
    `spotlight()` accepts several targets at once, and a `SpotlightEllipse` in
    CSS pixels for things drawn into the canvas that have no element (trenches,
    addresses, nodes).
-3. **Hand-drawn green ellipses, arrows and labels** in brand green `#11ba81`.
-   That stays manual post-processing; produce the clean raw image for it and say
-   so in your report.
+3. **Outlines, arrows and labels** in brand green `#11ba81`. Use `annotate()`,
+   which draws into an SVG above the page like `spotlight()`: boxes frame
+   regions, ellipses circle controls, labels sit on white chips where there is
+   room. Nothing is ever post-processed by hand - the gate compares the
+   published file with the raw capture at zero tolerance.
 4. **Composite grid** – 2 × 2 individual images with white gutters and a large
    green step digit in the bottom right. Use `composite2x2()`, which assembles
    the grid in the browser; the repo needs no image library for it. The digits
@@ -167,9 +169,14 @@ The script converts images to JPEG itself (quality 85, lowered until under
 1.2 MB) and derives the target from the reference in `manual/` – captures that
 no chapter embeds are skipped. Do not write a `convert` call by hand.
 
-Always look at `--dry-run` first: pattern 3 images have hand-drawn annotations
-that a plain run would overwrite with the raw capture.
+Publishing also writes `tests/captures.lock`: every spec that passed in the
+last run gets the fingerprint it ran under, and a video is only replaced when
+its spec's fingerprint changed (`--force` overrides that). Commit the lock with
+the images and videos – otherwise the next `pnpm test:e2e` runs the same specs
+again.
 
-Report afterwards: specs produced, files produced and published, which images
-still need manual post-processing, and whether `playwright.config.ts` was
-changed. Only overwrite existing images when that was exactly what was asked.
+Nothing in `public/` is edited by hand, so a plain run overwrites nothing worth
+keeping; `--dry-run` is for seeing what changed before it is written.
+
+Report afterwards: specs produced, files produced and published, and whether
+`playwright.config.ts` was changed. Only overwrite existing images when that was exactly what was asked.
