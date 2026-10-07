@@ -167,7 +167,7 @@ if [[ -f "$REPORT" ]]; then
 		}
 		!($2 in ran) { print }
 		END { for (spec in ran) if (ran[spec] == "passed") print hash[spec] "  " spec }
-	' "$STAMPS" | sort -k2 >"$STAMPS.tmp"
+	' "$STAMPS" | LC_ALL=C sort -k2 >"$STAMPS.tmp"
 	mv "$STAMPS.tmp" "$STAMPS"
 fi
 

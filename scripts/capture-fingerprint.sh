@@ -26,6 +26,13 @@
 # run, a spec wrongly taken as current costs a stale manual.
 set -euo pipefail
 
+# The order the files are hashed in is part of the hash, and `sort` and the
+# glob below order by the locale: en_US.UTF-8 puts "noto-sans/400.css" and
+# "noto-sans-cyrillic" the other way round from the C.UTF-8 of the GitHub
+# runner. With it unpinned every fingerprint differed between a laptop and CI,
+# and every pull request ran all specs against a lock that was current.
+export LC_ALL=C
+
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
 

@@ -364,7 +364,7 @@ if ((!DRY_RUN)); then
 		printf '%s  %s\n' "${LOCKED[$spec]}" "$spec"
 	done | while read -r hash spec; do
 		[[ -f "$spec" ]] && printf '%s  %s\n' "$hash" "$spec"
-	done | sort -k2 >"$LOCK.tmp"
+	done | LC_ALL=C sort -k2 >"$LOCK.tmp"
 	if ! cmp -s "$LOCK.tmp" "$LOCK" 2>/dev/null; then
 		mv "$LOCK.tmp" "$LOCK"
 	else
