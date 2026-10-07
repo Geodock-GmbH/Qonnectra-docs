@@ -11,14 +11,21 @@ import { readFileSync, writeFileSync } from 'node:fs'
 
 import { test as base, expect, request } from '@playwright/test'
 
-import { localApp } from './local-app'
+import { credentialsFor, localApp, type Role } from './local-app'
 import { serveVendoredFonts } from './vendored-fonts'
 
 export { expect, request } from '@playwright/test'
 export type { APIRequestContext, BrowserContext, Locator, Page } from '@playwright/test'
 
-/** Written by playwright/auth.setup.ts, used by the project in playwright.config.ts. */
-const AUTH_STATE = 'auth-state.json'
+/**
+ * Written by playwright/auth.setup.ts, used by the projects in
+ * playwright.config.ts: "chromium" with the account without administration
+ * rights, "chromium-admin" with the Django superuser.
+ */
+const AUTH_STATE: Record<string, Role> = {
+  'auth-state.json': 'user',
+  'admin-auth-state.json': 'admin',
+}
 
 /** The cookies the API login sets; everything else in the state stays as seeded. */
 const AUTH_COOKIES = ['api-access-token', 'api-refresh-token']
@@ -31,7 +38,7 @@ const AUTH_COOKIES = ['api-access-token', 'api-refresh-token']
 const MIN_REMAINING_S = 5 * 60
 
 /**
- * Logs in again when the access token in auth-state.json runs out within
+ * Logs in again when the access token in a saved state runs out within
  * MIN_REMAINING_S, and replaces the two auth cookies in the file.
  *
  * The token lives for 15 minutes, and a run of every spec takes 25. The saved
@@ -40,15 +47,20 @@ const MIN_REMAINING_S = 5 * 60
  * refresh token in the file is spent by the first context that uses it. Before
  * images and videos ran in one project this went unnoticed - each of the two
  * runs got a login of its own and stayed under a quarter of an hour.
+ *
+ * admin-auth-state.json needs the same: the admin specs run after part A, long
+ * after the setup. Its Django session is left alone - it lives for two weeks
+ * (Django's default SESSION_COOKIE_AGE) and only the JWT cookies expire.
  */
-async function renewLogin(): Promise<void> {
-  const state = JSON.parse(readFileSync(AUTH_STATE, 'utf8')) as {
+async function renewLogin(stateFile: string, role: Role): Promise<void> {
+  const state = JSON.parse(readFileSync(stateFile, 'utf8')) as {
     cookies: { name: string; expires: number }[]
   }
   const access = state.cookies.find((cookie) => cookie.name === 'api-access-token')
   if (access && access.expires - Date.now() / 1000 > MIN_REMAINING_S) return
 
-  const { apiUrl, username, password } = localApp()
+  const { apiUrl } = localApp()
+  const { username, password } = credentialsFor(role)
   const api = await request.newContext({ baseURL: apiUrl, ignoreHTTPSErrors: true })
   try {
     const login = await api.post('/api/v1/auth/login/', { data: { username, password } })
@@ -65,17 +77,19 @@ async function renewLogin(): Promise<void> {
       ...state.cookies.filter((cookie) => !AUTH_COOKIES.includes(cookie.name)),
       ...fresh,
     ]
-    writeFileSync(AUTH_STATE, JSON.stringify(state, null, 2))
+    writeFileSync(stateFile, JSON.stringify(state, null, 2))
   } finally {
     await api.dispose()
   }
 }
 
 export const test = base.extend<{ vendoredFonts: void }>({
-  // Only for the saved login - chapter 1 passes an empty state for the login
+  // Only for the saved logins - chapter 1 passes an empty state for the login
   // page, and that has to stay logged out.
   storageState: async ({ storageState }, use) => {
-    if (storageState === AUTH_STATE) await renewLogin()
+    if (typeof storageState === 'string' && storageState in AUTH_STATE) {
+      await renewLogin(storageState, AUTH_STATE[storageState])
+    }
     await use(storageState)
   },
 

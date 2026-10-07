@@ -566,8 +566,10 @@ longer read.
   blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`). A run of
   every spec takes around 25 minutes, so `test` from `playwright/test.ts` logs
   in again before a test when less than 5 minutes of the token are left and
-  swaps the two auth cookies in the file. Without it everything after the first
-  quarter of an hour lands on the login page.
+  swaps the two auth cookies in the file – in both state files, each with its
+  own account; the Django session in `admin-auth-state.json` lives for two
+  weeks and is left alone. Without it everything after the first quarter of an
+  hour lands on the login page.
 - The setup pins the state the images depend on: cookie `selected-project=2`
   („Testprojekt“; a UI login would write `1` = „Default“) as well as
   `PARAGLIDE_LOCALE=de`, `mode=light`, `basemapTheme`, `mapCenter` and `mapZoom`
