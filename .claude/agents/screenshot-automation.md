@@ -26,10 +26,16 @@ headings) and every string quoted from the German app (selectors, UI labels).
    which reads `local-app/deployment/.env`. Obtain them through `localApp()`
    resp. `superuserCredentials()` – never write passwords into test code, docs,
    log output or commits, not even as an example value.
-4. Login uses the account **without** administration rights by default
-   (`APP_USER_*`, group „Editor“), because part A of the manual describes the
-   view of ordinary users. `QONNECTRA_LOGIN=admin` switches to the superuser –
-   only for `/admin/*`, which ordinary users never see.
+4. The account follows from the chapter number, not from a switch. Part A
+   (chapters 1–18) uses the account **without** administration rights
+   (`APP_USER_*`, group „Editor“), because it describes the view of ordinary
+   users. The chapters 19–24 run in the Playwright project `chromium-admin`
+   (`ADMIN_SPECS` in `playwright.config.ts`) as Django superuser against
+   `https://admin.qonnectra.localhost` (`ADMIN_DOMAIN`) – the Django
+   administration, not the app route `/admin/logs`, which is the only `/admin/`
+   path on the app domain. Write the path in full
+   (`page.goto('/admin/auth/user/')`). There is no switch to run other
+   chapters as superuser.
 5. Certificate: run `scripts/install-local-ca.sh` once, or alternatively set
    `ignoreHTTPSErrors: true` (the config already does).
 
@@ -78,10 +84,17 @@ of 2 has no effect there.
   `videoPath(CHAPTER, name)` → `tests/videos/<chapter-slug>/<name>.webm`. The
   name is exactly the later name under `public/images/manual/teil-<x>/` (without
   the extension).
-- Login happens through the state in `auth-state.json`, written automatically by
-  the setup project `playwright/auth.setup.ts` before every spec. It is not
-  reusable across runs (the access token lives 15 minutes and refresh tokens are
-  rotated with a blacklist).
+- Login happens through two states, both written automatically by the setup
+  project `playwright/auth.setup.ts` before every spec: `auth-state.json` (part
+  A account, JWT cookies) and `admin-auth-state.json` (superuser, JWT cookies
+  **plus** the Django session the administration needs). Neither is reusable
+  across runs (the access token lives 15 minutes and refresh tokens are rotated
+  with a blacklist).
+- Images of the chapters 19–24 that show user accounts use the placeholder
+  accounts from `playwright/admin-users.ts` („Erika“, „Max“, „Moritz
+  Mustermann“), never the accounts of the instance.
+- Videos of the chapters 19–24 run in `chromium-admin` like their images, with
+  the superuser state, and are covered by `tests/captures.lock` the same way.
 
 ## Determinism
 
@@ -108,6 +121,19 @@ Screenshots have to be pixel-identical on a repeated run:
 - Selecting a map object by clicking is not reproducible on its own – a trench
   line is a few pixels wide and the project area covers the whole network. Hide
   the layer „Gebiet“ before the click for a deterministic hit.
+- **Dates in the Django administration cannot be frozen.** `freezeDates()`
+  (`playwright/stable-dates.ts`) rewrites API responses on their way into the
+  page; the Django admin renders its pages on the server, so nothing passes
+  through a route that could be patched. Candidates that change from run to
+  run: the „Letzte Aktionen“ ("Recent actions") box on the index page (filled
+  by whatever the run created, including `admin-users.ts`), „Letzte Anmeldung“
+  and „Mitglied seit“ ("Last login", "Date joined") on the user form, the date
+  filters and date columns of list views, and auto-increment IDs of records the
+  run created. Avoid these views,
+  crop them out, or pick a list without such columns. For every image of the
+  chapters 19–24, check the capture for dates, times and IDs, and run the
+  spec twice and compare (`pnpm screenshots:publish --dry-run` reports every
+  image as changed or unchanged).
 
 ## Reproducing the visual language
 
@@ -156,8 +182,9 @@ DELETE and the API answers with 403.
 
 ## Publishing the results
 
-`tests/screenshots/`, `tests/videos/`, `test-results/`, `playwright-report/` and
-`auth-state.json` are gitignored – those are raw captures. Publish them with:
+`tests/screenshots/`, `tests/videos/`, `test-results/`, `playwright-report/`,
+`auth-state.json` and `admin-auth-state.json` are gitignored – those are raw
+captures. Publish them with:
 
 ```bash
 pnpm screenshots:publish --dry-run     # see first what would be replaced
@@ -180,3 +207,10 @@ keeping; `--dry-run` is for seeing what changed before it is written.
 
 Report afterwards: specs produced, files produced and published, and whether
 `playwright.config.ts` was changed. Only overwrite existing images when that was exactly what was asked.
+
+**Warn about unstable dates, every time.** If any capture shows a date, time or
+ID that the backend produced and the spec could not freeze – in the chapters
+19–24 that is the rule, not the exception – put a separate warning at the top
+of the report: which image, which value, and whether the second run changed it.
+CI compares every published image with a fresh capture, so such an image fails
+the job on the next day. Do not publish it silently.

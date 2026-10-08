@@ -7,7 +7,8 @@
 //
 // The instance knows two accounts: the Django superuser for administration and
 // an account without administration rights, which the images are made with.
-// The latter is the default, see Role/role() below.
+// Which one a spec uses follows from its chapter (projects "chromium" and
+// "chromium-admin" in playwright.config.ts), see Role below.
 //
 // Set up / start the instance: scripts/setup-local-qonnectra.sh
 import { readFileSync } from 'node:fs'
@@ -69,35 +70,60 @@ function requiredNew(env: Record<string, string>, key: string): string {
 }
 
 /**
- * Which account a run logs in with.
+ * The two accounts of the instance.
  *
- * - `user`: account without administration rights (group "Editor"). The
- *   default, because part A of the manual describes the view of ordinary
- *   users - the superuser additionally sees the "Logs" menu entry and bypasses
- *   every permission check.
- * - `admin`: Django superuser. Only for images of areas that stay hidden from
- *   users without administration rights (`/admin/*`).
+ * - `user`: account without administration rights (group "Editor"). Every
+ *   spec outside the chapters 19-24, because the manual describes the view of
+ *   ordinary users - the superuser additionally sees the "Logs" menu entry and
+ *   bypasses every permission check.
+ * - `admin`: Django superuser. Only for the chapters 19-24, which show the
+ *   administration area that stays hidden from everyone else (`/admin/*`).
  */
 export type Role = 'user' | 'admin'
 
-/** Switchable via QONNECTRA_LOGIN=admin (see Role). */
-export function role(): Role {
-  const value = process.env.QONNECTRA_LOGIN?.trim().toLowerCase()
-  if (!value || value === 'user') return 'user'
-  if (value === 'admin') return 'admin'
-  throw new Error(`QONNECTRA_LOGIN=${value} is unknown. Allowed are "user" (default) and "admin".`)
+export interface Credentials {
+  /** Credentials of the role - never print or commit them. */
+  username: string
+  password: string
 }
 
-export interface LocalApp {
+export interface LocalApp extends Credentials {
   /** Frontend, e.g. https://app.qonnectra.localhost */
   appUrl: string
   /** Backend API, e.g. https://api.qonnectra.localhost */
   apiUrl: string
-  /** Account this run works with (see role()). */
-  role: Role
-  /** Credentials of the selected role - never print or commit them. */
-  username: string
-  password: string
+  /**
+   * Administration area, e.g. https://admin.qonnectra.localhost - the origin
+   * only, the Django admin itself sits below `/admin/`.
+   *
+   * A separate origin, not a path of the frontend: the chapters 19-24 describe
+   * the Django administration, which Caddy routes to the backend on this domain
+   * (`{$ADMIN_DOMAIN}` in Caddyfile.production.local). The frontend knows
+   * exactly one route below `/admin/`, namely `/admin/logs`, and answers
+   * everything else with a redirect to `/login`; the API domain blocks
+   * `/admin/*` with a 404 on purpose.
+   */
+  adminUrl: string
+}
+
+/**
+ * Credentials of a named role.
+ *
+ * The setup project needs both in the same run: every chapter outside 19-24
+ * logs in as `user`, the chapters 19-24 with `/admin/*` as `admin` (see
+ * playwright/auth.setup.ts).
+ */
+export function credentialsFor(selected: Role): Credentials {
+  const env = readDeploymentEnv()
+  return selected === 'admin'
+    ? {
+        username: required(env, 'DJANGO_SUPERUSER_USERNAME'),
+        password: required(env, 'DJANGO_SUPERUSER_PASSWORD'),
+      }
+    : {
+        username: requiredNew(env, 'APP_USER_USERNAME'),
+        password: requiredNew(env, 'APP_USER_PASSWORD'),
+      }
 }
 
 let cached: LocalApp | undefined
@@ -106,26 +132,17 @@ export function localApp(): LocalApp {
   if (cached) return cached
 
   const env = readDeploymentEnv()
-  const selected = role()
   cached = {
     appUrl: `https://${required(env, 'APP_DOMAIN')}`,
     apiUrl: `https://${required(env, 'API_DOMAIN')}`,
-    role: selected,
-    username:
-      selected === 'admin'
-        ? required(env, 'DJANGO_SUPERUSER_USERNAME')
-        : requiredNew(env, 'APP_USER_USERNAME'),
-    password:
-      selected === 'admin'
-        ? required(env, 'DJANGO_SUPERUSER_PASSWORD')
-        : requiredNew(env, 'APP_USER_PASSWORD'),
+    adminUrl: `https://${required(env, 'ADMIN_DOMAIN')}`,
+    ...credentialsFor('user'),
   }
   return cached
 }
 
 /**
- * Credentials of the Django superuser - independent of the role the run works
- * with.
+ * Credentials of the Django superuser.
  *
  * Intended exclusively for **cleaning up** after captures, never for the
  * capture itself. Background: the group "Editor" the images are made with has
@@ -134,20 +151,17 @@ export function localApp(): LocalApp {
  * for a capture - an attachment, say - cannot remove it again with the capture
  * account, and the next run would start in a different state.
  */
-export function superuserCredentials(): { username: string; password: string } {
-  const env = readDeploymentEnv()
-  return {
-    username: required(env, 'DJANGO_SUPERUSER_USERNAME'),
-    password: required(env, 'DJANGO_SUPERUSER_PASSWORD'),
-  }
+export function superuserCredentials(): Credentials {
+  return credentialsFor('admin')
 }
 
 /**
- * Frontend address assigned by scripts/setup-local-qonnectra.sh. Serves as a
+ * Addresses assigned by scripts/setup-local-qonnectra.sh. They serve as a
  * fallback while the instance is not set up yet, so that
  * `playwright test --list` works even then.
  */
 export const DEFAULT_APP_URL = 'https://app.qonnectra.localhost'
+export const DEFAULT_ADMIN_URL = 'https://admin.qonnectra.localhost'
 
 /**
  * The URL only - for playwright.config.ts, without touching the credentials and
@@ -159,5 +173,14 @@ export function localAppUrl(): string {
     return localApp().appUrl
   } catch {
     return DEFAULT_APP_URL
+  }
+}
+
+/** Like localAppUrl(), but for the administration area (chapters 19-24). */
+export function localAdminUrl(): string {
+  try {
+    return localApp().adminUrl
+  } catch {
+    return DEFAULT_ADMIN_URL
   }
 }

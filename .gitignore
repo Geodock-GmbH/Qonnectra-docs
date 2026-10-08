@@ -16,6 +16,7 @@ __pycache__/
 
 # Playwright
 auth-state.json
+admin-auth-state.json
 /test-results/
 /playwright-report/
 /tests/screenshots/

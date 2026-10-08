@@ -873,7 +873,7 @@ print(f"Account {username!r} {'created' if created else 'updated'}, group {group
 PYTHON
 			APP_USER_OK=1
 		else
-			warn "The account \"$APP_USER_USERNAME\" could not be created (output above). Playwright runs will then fail at login; as a stopgap work with QONNECTRA_LOGIN=admin."
+			warn "The account \"$APP_USER_USERNAME\" could not be created (output above). Playwright runs will then fail at login."
 		fi
 	fi
 else
@@ -952,16 +952,15 @@ if [ "$APP_USER_OK" -eq 1 ]; then
   Administration (Django superuser, sees and may do everything):
     ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
 
-Playwright logs in with the application account by default, so that the images
-show the view of ordinary users. For a run as the superuser:
-  QONNECTRA_LOGIN=admin pnpm test:e2e"
+Playwright logs in with the application account, so that the images show the
+view of ordinary users; only the chapters 19-24 (administration) use the
+superuser."
 else
 	LOGIN_SECTION="Login (Django superuser): ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
 
 The account without administration rights was NOT created (see the warnings
-above). Playwright runs will therefore fail at login unless they are started
-with QONNECTRA_LOGIN=admin. Once that is fixed, another run of this script is
-enough."
+above). Playwright runs will therefore fail at login. Once that is fixed,
+another run of this script is enough."
 fi
 
 if [ -f "$TILE_MBTILES" ]; then

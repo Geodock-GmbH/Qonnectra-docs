@@ -116,8 +116,20 @@ fi
 # to - Playwright only rewrites it at the end.
 rm -f "$REPORT"
 
+# --init, because PID 1 of a container gets no default signal handlers: with
+# npx as PID 1 the Ctrl+C that docker forwards was ignored and the run went on.
+# With --init, Docker's own init process runs as PID 1 instead and passes it to
+# Playwright, which stops and runs its teardown (the placeholder accounts and
+# seeded data are removed again).
+#
+# The trap only takes effect once the container has exited: an interrupted run
+# says nothing about the specs it did not finish, so nothing is stamped.
+interrupted=0
+trap 'interrupted=1' INT TERM
+
 status=0
 docker run --rm \
+	--init \
 	--network host \
 	--ipc=host \
 	--user "$(id -u):$(id -g)" \
@@ -126,9 +138,13 @@ docker run --rm \
 	--workdir "$REPO_ROOT" \
 	--env HOME=/tmp \
 	--env CI \
-	--env QONNECTRA_LOGIN \
 	"$IMAGE" \
 	npx playwright test "${args[@]}" || status=$?
+
+if ((interrupted)); then
+	echo "Interrupted - no spec stamped." >&2
+	exit 130
+fi
 
 if ((partial)); then
 	echo "Filtered below the spec level - no spec stamped."
