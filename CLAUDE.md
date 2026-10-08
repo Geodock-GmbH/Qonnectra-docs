@@ -290,7 +290,7 @@ places in the app that can show personal data:
 | `/settings` | „Benutzername“ and the e-mail address of the logged-in account (chapter 17) |
 | `/admin/*` | the user accounts of the instance including e-mail (chapters 19–24, 27 and 28) |
 | `/admin/auth/user/` | the two real accounts of the instance in every unfiltered user list – capture the list filtered to the placeholders (`?q=mustermann`) |
-| `/admin/api/qgisproject/` | „Erstellt von“ – the account that uploaded the project; the spec sets it to a placeholder account |
+| `/admin/api/qgisproject/` | the account that uploaded the project (column headed „Erstellt am“ by a mistranslation) – in captures the local superuser, whose name is the fixed `admin` of the setup |
 | `/admin/api/attributescompany/` | „Telefon“ and „E-Mail“ of the companies – the demo companies have not been checked, capture the add form with placeholder values instead of the list |
 | `/admin/api/residentialunit/` | „Name des Bewohners“ – never captured |
 | `/admin/logs` and `/admin/api/logentry/` | user names, request paths and IP addresses in the log entries – the spec seeds its own entries and filters the view to them |
@@ -849,6 +849,16 @@ looking for a race in the spec.
   interceptable either, the dashboard is loaded by `+page.server.ts`. The spec
   therefore gives five nodes a date of its own and reverts it afterwards, the
   same device the warranty card uses (`tests/04-dashboard.spec.ts`).
+- **Ties in the residential-unit chart.** „Wohneinheiten nach Typ“ on the
+  dashboard is `order_by("-count")` alone (`units_by_type` in `views.py`), and
+  in the demo data „schule“, „krankenhaus“ and „oeffentlich“ have one unit
+  each. Their legend order is whatever Postgres returns for the tie: stable on
+  a freshly imported database, which is what CI starts from, but a local
+  instance whose tables many runs have written to can return them in another
+  order, and `dashboard_address.jpg` then comes out changed (seen on
+  2026-10-08). Do not publish that change – restore the committed image, or
+  rebuild the instance with `--reset`. The fix belongs upstream
+  (`order_by("-count", "residential_unit_type__residential_unit_type")`).
 - **Timestamps the backend sets.** `created_at`/`modified_at` are `auto_now_add`
   resp. `auto_now` on the models, so the backend discards any supplied value and
   `page.clock` (browser only) changes nothing. `freezeDates()` in

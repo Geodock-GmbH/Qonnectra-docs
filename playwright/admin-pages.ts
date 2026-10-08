@@ -104,3 +104,22 @@ export async function unionBox(
     },
   }
 }
+
+/**
+ * Empties the UUID field of the blank extra rows of every inline formset on the
+ * page. Django pre-fills a UUID primary key with a fresh uuid4 for each row it
+ * offers for adding, so the row at the bottom of e.g. the colour mappings
+ * showed a different value on every run. The row is never saved; the field is
+ * empty exactly as long as nobody fills the row.
+ */
+export async function blankExtraInlineUuids(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    document
+      .querySelectorAll<HTMLInputElement>(
+        '.inline-group tr.form-row:not(.has_original):not(.empty-form) input[name$="-uuid"]',
+      )
+      .forEach((input) => {
+        input.value = ''
+      })
+  })
+}

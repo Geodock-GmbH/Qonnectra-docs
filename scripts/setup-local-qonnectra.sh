@@ -403,6 +403,15 @@ cd "$DEPLOY_DIR"
 # still resolves to 127.0.0.1 automatically (RFC 6761), no /etc/hosts entry
 # needed.
 
+# Hosts Django answers for. files.* and qgis.* belong in it although no page
+# is served under them: Caddy authenticates every WebDAV and QGIS Server
+# request with a forward_auth to the backend and passes the original Host
+# along, and Django rejects a host it does not know with 400 before any login
+# is checked - WebDAV and the OGC services then failed for every account,
+# with the right password as with a wrong one. The production template
+# (.env.production.template) lists both domains for the same reason.
+DJANGO_ALLOWED_HOSTS="api.qonnectra.localhost,admin.qonnectra.localhost,files.qonnectra.localhost,qgis.qonnectra.localhost,qonnectra.localhost,localhost,127.0.0.1,backend"
+
 if [ -f "$DEPLOY_DIR/.env" ]; then
 	log ".env already exists, skipping creation (secrets/domains are kept)."
 else
@@ -424,7 +433,7 @@ ADMIN_DOMAIN=admin.qonnectra.localhost
 TILE_SERVER_DOMAIN=tiles.qonnectra.localhost
 
 DJANGO_SECRET_KEY=$(random_alnum 60)
-DJANGO_ALLOWED_HOSTS=api.qonnectra.localhost,admin.qonnectra.localhost,qonnectra.localhost,localhost,127.0.0.1,backend
+DJANGO_ALLOWED_HOSTS=$DJANGO_ALLOWED_HOSTS
 DEBUG=False
 CSRF_TRUSTED_ORIGINS=https://api.qonnectra.localhost,https://app.qonnectra.localhost,https://admin.qonnectra.localhost
 
@@ -513,6 +522,8 @@ env_set() {
 	fi
 }
 
+env_set DJANGO_ALLOWED_HOSTS "$DJANGO_ALLOWED_HOSTS" \
+	"# Hosts Django answers for, including the WebDAV and QGIS Server domains."
 env_set PUBLIC_DOCUMENTATION_URL "$DOCUMENTATION_URL" \
 	"# Help link in the header and the navigation bar. Empty = link hidden."
 env_append APP_USER_USERNAME "$APP_USER_NAME" \
