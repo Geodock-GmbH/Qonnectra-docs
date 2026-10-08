@@ -10,6 +10,10 @@ Die Rechte eines Kontos ergeben sich aus drei voneinander unabhängigen Einstell
 - **„Mitarbeiter-Status“** – erlaubt die Anmeldung im Administrationsbereich und, zusammen mit dem passenden Routenrecht, das Lesen der Systemprotokolle („Logs“) in der Weboberfläche.
 - **„Administrator-Status“** – macht das Konto zum **Superuser**, der jede Prüfung umgeht, siehe Abschnitt [Superuser gegenüber Gruppenmitgliedschaft](#_19-4-superuser-gegenuber-gruppenmitgliedschaft).
 
+::: info
+Die Benutzerliste zeigt als Spalte nur den „Mitarbeiter-Status“, nicht den „Administrator-Status“. Welche Konten Superuser sind, sehen Sie über den Filter „Nach Administrator-Status“ rechts neben der Liste oder im Formular des Kontos.
+:::
+
 ::: warning
 Die Gruppe „Admin“ und der Administrationsbereich haben nichts miteinander zu tun, siehe Abschnitt [Superuser gegenüber Gruppenmitgliedschaft](#_19-4-superuser-gegenuber-gruppenmitgliedschaft).
 :::
