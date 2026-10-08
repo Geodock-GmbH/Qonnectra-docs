@@ -2,7 +2,7 @@
 55850879d0329ab4  tests/02-grundbegriffe-und-datenmodell-video.spec.ts
 3d06740f63621e8b  tests/02-grundbegriffe-und-datenmodell.spec.ts
 a81e564061b00efe  tests/03-wiederkehrende-bedienelemente-video.spec.ts
-79d0fede9d9096a1  tests/04-dashboard.spec.ts
+fa914574987701b0  tests/04-dashboard.spec.ts
 7a08d0bcd189488a  tests/05-karte-video.spec.ts
 e11c229ed391e9fd  tests/05-karte.spec.ts
 5ff0bdd9becabaa1  tests/06-stoerungsanalyse-video.spec.ts

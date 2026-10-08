@@ -851,14 +851,17 @@ looking for a race in the spec.
   same device the warranty card uses (`tests/04-dashboard.spec.ts`).
 - **Ties in the residential-unit chart.** „Wohneinheiten nach Typ“ on the
   dashboard is `order_by("-count")` alone (`units_by_type` in `views.py`), and
-  in the demo data „schule“, „krankenhaus“ and „oeffentlich“ have one unit
-  each. Their legend order is whatever Postgres returns for the tie: stable on
-  a freshly imported database, which is what CI starts from, but a local
-  instance whose tables many runs have written to can return them in another
-  order, and `dashboard_address.jpg` then comes out changed (seen on
-  2026-10-08). Do not publish that change – restore the committed image, or
-  rebuild the instance with `--reset`. The fix belongs upstream
-  (`order_by("-count", "residential_unit_type__residential_unit_type")`).
+  in the demo data „krankenhaus“, „oeffentlich“ and „schule“ have one unit
+  each. Postgres returns the tie in an order of chance – four different orders
+  were measured on 2026-10-08, including two on freshly reset instances, so a
+  reset does not make it reproducible. `stableUnitsByTypeOrder()` in
+  `playwright/stable-dashboard.ts` sorts `unitsByType` by count and then by
+  name on its way into the page, the same device as `stableSearchOrder()`. The
+  page data only passes through the browser when the dashboard is reached from
+  inside the app, so test 4.5 opens it through the navigation bar
+  (`openDashboardFromNavigation()`) and fails if nothing was sorted. The fix
+  belongs upstream (`order_by("-count",
+  "residential_unit_type__residential_unit_type")`).
 - **Timestamps the backend sets.** `created_at`/`modified_at` are `auto_now_add`
   resp. `auto_now` on the models, so the backend discards any supplied value and
   `page.clock` (browser only) changes nothing. `freezeDates()` in
