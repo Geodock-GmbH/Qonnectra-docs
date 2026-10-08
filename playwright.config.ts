@@ -22,6 +22,36 @@ import { APP_TIME_ZONE } from './playwright/stable-dates'
  */
 const ADMIN_SPECS = /[\\/](19|2[0-4]|27|28)-[^\\/]*\.spec\.ts$/
 
+/**
+ * Launch options of the capture browser. A function, because a project that
+ * sets `launchOptions` replaces the object of the top-level `use` instead of
+ * merging into it, and "chromium-admin" needs one flag more than the rest.
+ *
+ * `locale` covers everything that goes through Intl (toLocaleString,
+ * navigator.language, Accept-Language), but not the widgets Chromium draws
+ * itself: the placeholder of <input type="date"> ("tt.mm.jjjj" vs.
+ * "mm/dd/yyyy") follows the locale of the browser process, i.e. its
+ * environment. The capture image sets LC_ALL=C.UTF-8, which beats LANG, so
+ * all three are set.
+ *
+ * The browser reaches nothing but the local instance. Everything in an image
+ * has to come from the pinned stack, and one thing did not: the web font of
+ * the base map labels, fetched from a CDN at a moment that depended on its
+ * latency (see playwright/vendored-fonts.ts, which now serves it from the
+ * repo). Routes are answered before any DNS lookup, so the vendored files
+ * still arrive; everything else external fails at once, which turns the next
+ * hidden dependency into an error instead of a flaky image.
+ */
+function launchOptions(extraArgs: string[] = []) {
+  return {
+    env: { ...process.env, LANGUAGE: 'de_DE', LC_ALL: 'de_DE.UTF-8', LANG: 'de_DE.UTF-8' },
+    args: [
+      '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE *.qonnectra.localhost, EXCLUDE localhost',
+      ...extraArgs,
+    ],
+  }
+}
+
 export default defineConfig({
   testDir: './tests',
 
@@ -72,27 +102,9 @@ export default defineConfig({
     viewport: { width: 1792, height: 1120 },
     deviceScaleFactor: 2,
 
-    // `locale` covers everything that goes through Intl (toLocaleString,
-    // navigator.language, Accept-Language), but not the widgets Chromium draws
-    // itself: the placeholder of <input type="date"> ("tt.mm.jjjj" vs.
-    // "mm/dd/yyyy") follows the locale of the browser process, i.e. its
-    // environment. The capture image sets LC_ALL=C.UTF-8, which beats LANG, so
-    // all three are set.
+    // Together with the environment in launchOptions(), see there.
     locale: 'de-DE',
-    launchOptions: {
-      env: { ...process.env, LANGUAGE: 'de_DE', LC_ALL: 'de_DE.UTF-8', LANG: 'de_DE.UTF-8' },
-      // The browser reaches nothing but the local instance. Everything in an
-      // image has to come from the pinned stack, and one thing did not: the
-      // web font of the base map labels, fetched from a CDN at a moment that
-      // depended on its latency (see playwright/vendored-fonts.ts, which now
-      // serves it from the repo). Routes are answered before any DNS lookup,
-      // so the vendored files still arrive; everything else external fails at
-      // once, which turns the next hidden dependency into an error instead of
-      // a flaky image.
-      args: [
-        '--host-resolver-rules=MAP * ~NOTFOUND, EXCLUDE *.qonnectra.localhost, EXCLUDE localhost',
-      ],
-    },
+    launchOptions: launchOptions(),
     timezoneId: APP_TIME_ZONE,
     colorScheme: 'light',
 
@@ -152,6 +164,18 @@ export default defineConfig({
         // baseURL ending in /admin would be dropped anyway.
         baseURL: localAdminUrl(),
         storageState: 'admin-auth-state.json',
+        // Text inside the form controls of the Django administration - the
+        // filter field of the sidebar, every <select> of a change list, the
+        // language selector - came out in one of two pixel variants per
+        // browser launch: the glyphs sit at fractional positions (the table
+        // columns are not whole pixels wide), and Chromium placed them on a
+        // different subpixel phase from one launch to the next. Layout, fonts
+        // and their load state were identical in both; CSS on the controls
+        // changed nothing. Without subpixel positioning the glyphs snap to
+        // whole pixels, and six captures in a row came out byte-identical.
+        // Only here: part A was captured with subpixel positioning and is
+        // stable, so its images keep the typography they were published with.
+        launchOptions: launchOptions(['--disable-font-subpixel-positioning']),
       },
       dependencies: ['setup'],
     },

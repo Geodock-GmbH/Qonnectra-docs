@@ -125,7 +125,7 @@ Screenshots have to be pixel-identical on a repeated run:
   (`playwright/stable-dates.ts`) rewrites API responses on their way into the
   page; the Django admin renders its pages on the server, so nothing passes
   through a route that could be patched. Candidates that change from run to
-  run: the „Letzte Aktionen“ ("Recent actions") box on the index page (filled
+  run: the „Neueste Aktionen“ ("Recent actions") box on the index page (filled
   by whatever the run created, including `admin-users.ts`), „Letzte Anmeldung“
   and „Mitglied seit“ ("Last login", "Date joined") on the user form, the date
   filters and date columns of list views, and auto-increment IDs of records the

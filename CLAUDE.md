@@ -559,7 +559,7 @@ longer read.
 - **Dates in the Django administration cannot be frozen**, and CI compares
   every published image with a fresh capture. `freezeDates()` rewrites API
   responses on their way into the page; the Django admin renders on the server,
-  so nothing passes through a route. Run-dependent values sit in the „Letzte
+  so nothing passes through a route. Run-dependent values sit in the „Neueste
   Aktionen“ box of the index page (filled by `admin-users.ts` among others), in
   „Letzte Anmeldung“ / „Mitglied seit“ of the user form, in date columns and
   filters of list views and in the IDs of records the run created. Avoid or crop
@@ -574,7 +574,7 @@ longer read.
   uploaded QGIS project, `updated_at` of a seeded user-settings row, the
   timestamps of seeded log entries, `history_date` of the history a spec shows.
   `auto_now`/`auto_now_add` ignore a value passed to `save()`, so these go
-  through `QuerySet.update()`, which bypasses them. The „Letzte Aktionen“ box
+  through `QuerySet.update()`, which bypasses them. The „Neueste Aktionen“ box
   is cleared the same way at the start of the spec that shows the index page
   (`django.contrib.admin.models.LogEntry`) – it lists whatever the superuser
   last did by hand on this machine, and nothing in it is worth keeping.
