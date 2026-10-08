@@ -163,7 +163,7 @@ Für vier Objektarten bringt keine Gruppe eine Zeile mit. Ohne Zeile gilt „Kei
 
 | Modellname | Was ohne das Recht fehlt |
 |---|---|
-| `wmssource` | die externen Kartendienste in der Legende der Karte, siehe Kapitel [QGIS-Server und Kartendienste](./27-qgis-server-und-kartendienste.md) |
+| `wmssource` | die externen Kartendienste in der Legende der Karte, siehe Abschnitt [Externe WMS-Quellen als Hintergrund einbinden](./27-qgis-server-und-kartendienste.md#_27-4-externe-wms-quellen-als-hintergrund-einbinden) |
 | `nodetrenchselection` | das Speichern der „Grabenauswahl“ in der Rohrverzweigung; die Erfolgsmeldung erscheint trotzdem, siehe Kapitel [Rohrverzweigung](../teil-a-anwenderhandbuch/12-rohrverzweigung.md) |
 | `nodeslotclipnumber` | Clip-Nummern in der Slot-Ansicht eines Netzknotens |
 | `nodeslotdivider` | Trennlinien in der Slot-Ansicht eines Netzknotens |

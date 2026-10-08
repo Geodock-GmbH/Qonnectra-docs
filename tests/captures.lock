@@ -36,3 +36,5 @@ d4ff36efd382f7dd  tests/21-projekte-und-stammdaten.spec.ts
 82f6c4bb9b31f11f  tests/22-projektbezogene-konfiguration.spec.ts
 f1b8e01ac4631408  tests/23-dateien-und-anhaenge.spec.ts
 33d2bd23eda0a9e7  tests/24-daten-import-und-export.spec.ts
+963b452beee2fefa  tests/27-qgis-server-und-kartendienste.spec.ts
+3b61810d990260b7  tests/28-betrieb-der-instanz.spec.ts
