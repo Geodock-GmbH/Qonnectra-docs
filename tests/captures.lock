@@ -30,7 +30,7 @@ a10d3ed93897b09e  tests/16-adressen-video.spec.ts
 f3d16a28a4920fa7  tests/17-einstellungen.spec.ts
 b94645dbd1c44cad  tests/18-wenn-etwas-nicht-funktioniert-video.spec.ts
 81de7acc326d97b3  tests/18-wenn-etwas-nicht-funktioniert.spec.ts
-1ffff3b8565df46b  tests/19-rollen-und-rechte.spec.ts
+5ed86b8d5a0e870b  tests/19-rollen-und-rechte.spec.ts
 b517790f7a16eab0  tests/20-administrationsbereich.spec.ts
 d4ff36efd382f7dd  tests/21-projekte-und-stammdaten.spec.ts
 82f6c4bb9b31f11f  tests/22-projektbezogene-konfiguration.spec.ts

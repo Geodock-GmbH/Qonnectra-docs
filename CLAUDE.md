@@ -164,6 +164,12 @@ app in front of them.
   the concrete example to the screenshot. The same goes for alt texts.
 - Rule of thumb: a sentence that would be equally true of any other web
   application does not belong in the manual.
+- Name what the reader sees, not what the app is built with. Parts A and B
+  never mention the frameworks behind Qonnectra – no „Django-Berechtigungen“,
+  but „das Feld „Berechtigungen“ im Gruppenformular“. Part C is the place
+  for Django, SvelteKit and the like; chapter 28 names the services an
+  operator runs (`nginx`, `caddy`, the containers), because that is what
+  they type.
 
 What does **not** fall under this: pitfalls, limits and behaviour that
 contradicts expectation (see the next block). A cache that delays values, a

@@ -118,7 +118,7 @@ Ein Konto mit „Administrator-Status“ ist **Superuser**. Für ein solches Kon
 Für den Administrationsbereich gilt anderes als für die Weboberfläche:
 
 - Anmelden kann sich dort nur ein Konto mit „Mitarbeiter-Status“.
-- Bearbeiten kann es dort nur, wofür es Django-Berechtigungen hat. Die mitgelieferten Gruppen haben keine; das Feld „Berechtigungen“ im Gruppenformular ist leer.
+- Bearbeiten kann es dort nur, was ihm das Feld „Berechtigungen“ im Gruppen- oder Benutzerformular erlaubt. Bei den mitgelieferten Gruppen ist dieses Feld leer.
 
 ![Screenshot des Formulars der Gruppe „Admin“ mit Hervorhebung des leeren Feldes „Berechtigungen“ unter dem Namen](/images/manual/teil-b/permission_group_form.jpg)
 

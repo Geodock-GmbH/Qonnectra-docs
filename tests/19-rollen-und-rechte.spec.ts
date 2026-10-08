@@ -74,7 +74,7 @@ test('19.1 Benutzerformular mit Gruppen und Status', async ({ page }) => {
   await rows.remove()
 })
 
-test('19.4 Gruppe ohne Django-Berechtigungen', async ({ page }) => {
+test('19.4 Gruppe mit leerem Feld „Berechtigungen"', async ({ page }) => {
   await openAdmin(page, '/admin/auth/group/')
   await page.locator('#result_list a', { hasText: /^Admin$/ }).click()
 
