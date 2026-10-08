@@ -11,6 +11,7 @@ import {
   shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { stableUnitsByTypeOrder } from '../playwright/stable-dashboard'
 import { appDateInDays, CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
 
 // Screenshots for chapter "4. Dashboard" in the manual
@@ -546,7 +547,13 @@ test.describe('Netzknoten', () => {
 })
 
 test('4.5 Diagramme im Reiter „Adressen"', async ({ page }) => {
-  await openDashboard(page)
+  // „Wohneinheiten nach Typ“ has three types tied at one unit, which the
+  // backend returns in an order of chance (playwright/stable-dashboard.ts).
+  // Sorting them needs the page data to pass through the browser, hence the
+  // way in through the navigation bar instead of openDashboard().
+  const sortedArrays = await stableUnitsByTypeOrder(page)
+  await openDashboardFromNavigation(page)
+  expect(sortedArrays(), 'unitsByType did not pass through the browser - it would keep the order of chance').toBeGreaterThan(0)
   await openTab(page, 'Adressen', 'Adressen nach Ort')
 
   const spotlightOff = await spotlight(page, contentArea(page))

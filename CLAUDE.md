@@ -164,6 +164,12 @@ app in front of them.
   the concrete example to the screenshot. The same goes for alt texts.
 - Rule of thumb: a sentence that would be equally true of any other web
   application does not belong in the manual.
+- Name what the reader sees, not what the app is built with. Parts A and B
+  never mention the frameworks behind Qonnectra – no „Django-Berechtigungen“,
+  but „das Feld „Berechtigungen“ im Gruppenformular“. Part C is the place
+  for Django, SvelteKit and the like; chapter 28 names the services an
+  operator runs (`nginx`, `caddy`, the containers), because that is what
+  they type.
 
 What does **not** fall under this: pitfalls, limits and behaviour that
 contradicts expectation (see the next block). A cache that delays values, a
@@ -288,11 +294,16 @@ places in the app that can show personal data:
 | Nachverdichtung | „Kommentar“ in the export dialog, and the PDF built from it |
 | Anhänge | file names of uploaded documents and photos |
 | `/settings` | „Benutzername“ and the e-mail address of the logged-in account (chapter 17) |
-| `/admin/*` | the user accounts of the instance including e-mail (chapters 19–24) |
+| `/admin/*` | the user accounts of the instance including e-mail (chapters 19–24, 27 and 28) |
+| `/admin/auth/user/` | the two real accounts of the instance in every unfiltered user list – capture the list filtered to the placeholders (`?q=mustermann`) |
+| `/admin/api/qgisproject/` | the account that uploaded the project (column headed „Erstellt am“ by a mistranslation) – in captures the local superuser, whose name is the fixed `admin` of the setup |
+| `/admin/api/attributescompany/` | „Telefon“ and „E-Mail“ of the companies – the demo companies have not been checked, capture the add form with placeholder values instead of the list |
+| `/admin/api/residentialunit/` | „Name des Bewohners“ – never captured |
+| `/admin/logs` and `/admin/api/logentry/` | user names, request paths and IP addresses in the log entries – the spec seeds its own entries and filters the view to them |
 
 The last two are the reason the images of the administration area need a second
 look: the accounts they show belong to whoever set the instance up. For the
-chapters 19–24 `playwright/admin-users.ts` therefore creates three recognisable
+chapters 19–24, 27 and 28 `playwright/admin-users.ts` therefore creates three recognisable
 placeholder accounts for the length of the run – „Erika Mustermann“ (group
 `Admin`), „Max Mustermann“ (`Editor`), „Moritz Mustermann“ (`Viewer`), e-mail at
 the reserved TLD `.example` – and removes them again afterwards. They are not
@@ -510,7 +521,7 @@ longer read.
 - **Two different `/admin/`.** The app domain has exactly one route below it,
   `/admin/logs` (footer „Logs“, `RoutePermission`); everything else there
   answers with a 303 to `/login`. The administration area the chapters 19–24
-  describe is the Django admin and sits on its own domain,
+  and 27 describe is the Django admin and sits on its own domain,
   `https://admin.qonnectra.localhost/admin/` (`ADMIN_DOMAIN`, routed by Caddy to
   the backend). The API domain blocks `/admin/*` with a 404 on purpose. Keep the
   two apart – a spec pointed at the wrong origin captures the login page without
@@ -519,8 +530,8 @@ longer read.
   environment variable. Two projects in `playwright.config.ts` split the run
   (plus `setup`): `chromium` takes images and videos with the account
   **without** administration rights against `APP_DOMAIN` and is the right one
-  for the whole of part A, and `chromium-admin` matches `tests/19-` to
-  `tests/24-` (`ADMIN_SPECS`), uses the Django superuser and has `ADMIN_DOMAIN`
+  for the whole of part A, and `chromium-admin` matches the chapters 19 to 24,
+  27 and 28 (`ADMIN_SPECS`), uses the Django superuser and has `ADMIN_DOMAIN`
   as its `baseURL`, because those chapters show the Django administration.
   Apart from login and origin the two are the same: both take images and
   videos, and `pnpm test:e2e` selects the specs of both against
@@ -554,13 +565,25 @@ longer read.
 - **Dates in the Django administration cannot be frozen**, and CI compares
   every published image with a fresh capture. `freezeDates()` rewrites API
   responses on their way into the page; the Django admin renders on the server,
-  so nothing passes through a route. Run-dependent values sit in the „Letzte
+  so nothing passes through a route. Run-dependent values sit in the „Neueste
   Aktionen“ box of the index page (filled by `admin-users.ts` among others), in
   „Letzte Anmeldung“ / „Mitglied seit“ of the user form, in date columns and
   filters of list views and in the IDs of records the run created. Avoid or crop
-  them, check every image of the chapters 19–24 for dates, times and IDs and
-  run its spec twice before publishing. An image that still carries such a
-  value is reported to the user as a warning, not published silently.
+  them, check every image of the chapters 19–24, 27 and 28 for dates, times and
+  IDs and run its spec twice before publishing. An image that still carries
+  such a value is reported to the user as a warning, not published silently.
+  What cannot be avoided is **set** instead: `runInBackend()` in
+  `playwright/backend-shell.ts` runs a snippet through `manage.py shell` in the
+  backend container, and a spec pins the stamped value to `CAPTURE_DATE` from
+  there – `date_joined` of the placeholder accounts (`admin-users.ts`),
+  `created_at` of the demo attachments, `created_at` and `created_by` of an
+  uploaded QGIS project, `updated_at` of a seeded user-settings row, the
+  timestamps of seeded log entries, `history_date` of the history a spec shows.
+  `auto_now`/`auto_now_add` ignore a value passed to `save()`, so these go
+  through `QuerySet.update()`, which bypasses them. The „Neueste Aktionen“ box
+  is cleared the same way at the start of the spec that shows the index page
+  (`django.contrib.admin.models.LogEntry`) – it lists whatever the superuser
+  last did by hand on this machine, and nothing in it is worth keeping.
 - Neither state file is reusable; both are regenerated per run: the access
   token lives for 15 minutes, and the backend rotates refresh tokens with a
   blacklist (`ROTATE_REFRESH_TOKENS` + `BLACKLIST_AFTER_ROTATION`). A run of
@@ -707,6 +730,17 @@ longer read.
   logged-in calls of `/login` to `/map`.
 - `workers: 1` and `fullyParallel: false` are deliberate: all specs share one
   instance including project selection and map position.
+- **Test inputs that are not code** sit in `playwright/fixtures/` – currently
+  `netzdokumentation.qgs`, a hand-written minimal QGIS project with three
+  PostGIS layers (trench, node, address) over the service connection of the
+  stack, which chapter 27 uploads and serves as its WMS source. A helper names
+  such a file as `new URL('./fixtures/x', import.meta.url)`; that is what
+  `scripts/capture-fingerprint.sh` follows to make the file an input of every
+  spec that reaches it, the same as an import. Only files git tracks count –
+  `local-app.ts` names `local-app/deployment/.env` the same way, and its
+  per-machine secrets must not stale every spec. One trap in the `.qgs`: QGIS
+  Server 3.44 leaves a layer with the id `node_layer` out of GetCapabilities
+  without a message and still renders it.
 - Determinism helpers in `playwright/manual-shots.ts`: `shoot()` (the one way to
   capture, see above) and `shootTile()` for the tiles of a composite,
   `disableAnimations()` (CSS transitions and text caret off – not enough on its
@@ -821,6 +855,19 @@ looking for a race in the spec.
   interceptable either, the dashboard is loaded by `+page.server.ts`. The spec
   therefore gives five nodes a date of its own and reverts it afterwards, the
   same device the warranty card uses (`tests/04-dashboard.spec.ts`).
+- **Ties in the residential-unit chart.** „Wohneinheiten nach Typ“ on the
+  dashboard is `order_by("-count")` alone (`units_by_type` in `views.py`), and
+  in the demo data „krankenhaus“, „oeffentlich“ and „schule“ have one unit
+  each. Postgres returns the tie in an order of chance – four different orders
+  were measured on 2026-10-08, including two on freshly reset instances, so a
+  reset does not make it reproducible. `stableUnitsByTypeOrder()` in
+  `playwright/stable-dashboard.ts` sorts `unitsByType` by count and then by
+  name on its way into the page, the same device as `stableSearchOrder()`. The
+  page data only passes through the browser when the dashboard is reached from
+  inside the app, so test 4.5 opens it through the navigation bar
+  (`openDashboardFromNavigation()`) and fails if nothing was sorted. The fix
+  belongs upstream (`order_by("-count",
+  "residential_unit_type__residential_unit_type")`).
 - **Timestamps the backend sets.** `created_at`/`modified_at` are `auto_now_add`
   resp. `auto_now` on the models, so the backend discards any supplied value and
   `page.clock` (browser only) changes nothing. `freezeDates()` in

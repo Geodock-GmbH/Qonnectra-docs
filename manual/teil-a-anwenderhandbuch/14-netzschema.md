@@ -241,7 +241,7 @@ Beide Fenster öffnen mittig und gleich groß übereinander, und „Netzknotenst
 Jede Zeile trägt rechts ihre Schaltflächen: das Auge („Struktur anzeigen“) zeigt die Struktur dieser Seite, der Stift öffnet die Konfiguration zum Bearbeiten, der Papierkorb löscht sie. Das Auge schaltet dabei das Fenster „Netzknotenstruktur“ auf diese Seite um – ist es schon offen, holt es das Fenster aber nicht nach vorn, siehe Abschnitt [Netzknoten: Slot-Konfiguration und Struktur öffnen](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen). Am Griff links ziehen Sie eine Slot-Konfiguration in einen Container oder aus ihm heraus; Container lassen sich ineinander schieben. Das Download-Symbol oben rechts lädt den **Spleißplan** des Netzknotens als Excel-Datei herunter – die vollständige Spleißdokumentation, je Seite ein Tabellenblatt mit den Einbauplätzen, den eingebauten Komponenten und den Fasern, die auf deren Ports liegen, siehe Abschnitt [Exportformate im Überblick](./03-wiederkehrende-bedienelemente.md#_3-8-exportformate-im-uberblick).
 
 ::: warning
-Container-Typen sind Stammdaten der Installation und lassen sich nur im Administrationsbereich anlegen, siehe Kapitel [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md). Gibt es keinen einzigen, fehlt die Schaltfläche „Container hinzufügen“ ganz.
+Container-Typen sind Stammdaten der Installation und lassen sich nur im Administrationsbereich anlegen, siehe Kapitel [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md). Gibt es keinen aktiven Container-Typ, fehlt die Schaltfläche „Container hinzufügen“ ganz.
 :::
 
 ::: danger

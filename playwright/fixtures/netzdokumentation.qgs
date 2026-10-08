@@ -1,0 +1,145 @@
+<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
+<!--
+  Minimal QGIS project for the captures of chapter 27 (QGIS-Server und
+  Kartendienste). Written by hand, not saved from QGIS Desktop, so that it is
+  small enough to read: three PostGIS layers over the service connection the
+  QGIS Server container of the stack generates (service 'qonnectra',
+  QGIS_PG_SERVICE_NAME), in EPSG:25832 like the data.
+
+  The spec uploads it through the administration form and removes it again; the
+  local QGIS Server is then also the WMS source of 27.4, so no image depends on
+  a server outside the stack. A test input, not part of the manual.
+
+  Do not name a layer id "node_layer": QGIS Server 3.44 leaves a layer with that
+  id out of GetCapabilities without a message, while it still renders it.
+-->
+<qgis version="3.44.7-Solothurn" projectname="Netzdokumentation">
+  <homePath path=""/>
+  <title>Netzdokumentation</title>
+  <projectCrs>
+    <spatialrefsys nativeFormat="Wkt">
+      <wkt>PROJCRS["ETRS89 / UTM zone 32N",BASEGEOGCRS["ETRS89",ENSEMBLE["European Terrestrial Reference System 1989 ensemble",MEMBER["European Terrestrial Reference Frame 1989"],MEMBER["European Terrestrial Reference Frame 1990"],MEMBER["European Terrestrial Reference Frame 1991"],MEMBER["European Terrestrial Reference Frame 1992"],MEMBER["European Terrestrial Reference Frame 1993"],MEMBER["European Terrestrial Reference Frame 1994"],MEMBER["European Terrestrial Reference Frame 1996"],MEMBER["European Terrestrial Reference Frame 1997"],MEMBER["European Terrestrial Reference Frame 2000"],MEMBER["European Terrestrial Reference Frame 2005"],MEMBER["European Terrestrial Reference Frame 2014"],ELLIPSOID["GRS 1980",6378137,298.257222101,LENGTHUNIT["metre",1]],ENSEMBLEACCURACY[0.1]],PRIMEM["Greenwich",0,ANGLEUNIT["degree",0.0174532925199433]],ID["EPSG",4258]],CONVERSION["UTM zone 32N",METHOD["Transverse Mercator",ID["EPSG",9807]],PARAMETER["Latitude of natural origin",0,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8801]],PARAMETER["Longitude of natural origin",9,ANGLEUNIT["degree",0.0174532925199433],ID["EPSG",8802]],PARAMETER["Scale factor at natural origin",0.9996,SCALEUNIT["unity",1],ID["EPSG",8805]],PARAMETER["False easting",500000,LENGTHUNIT["metre",1],ID["EPSG",8806]],PARAMETER["False northing",0,LENGTHUNIT["metre",1],ID["EPSG",8807]]],CS[Cartesian,2],AXIS["(E)",east,ORDER[1],LENGTHUNIT["metre",1]],AXIS["(N)",north,ORDER[2],LENGTHUNIT["metre",1]],USAGE[SCOPE["Engineering survey, topographic mapping."],AREA["Europe between 6°E and 12°E: Austria; Belgium; Denmark - onshore and offshore; Germany - onshore and offshore; Norway including - onshore and offshore; Spain - offshore."],BBOX[38.76,6,84.33,12]],ID["EPSG",25832]]</wkt>
+      <proj4>+proj=utm +zone=32 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs</proj4>
+      <srsid>3044</srsid>
+      <srid>25832</srid>
+      <authid>EPSG:25832</authid>
+      <description>ETRS89 / UTM zone 32N</description>
+      <projectionacronym>utm</projectionacronym>
+      <ellipsoidacronym>EPSG:7019</ellipsoidacronym>
+      <geographicflag>false</geographicflag>
+    </spatialrefsys>
+  </projectCrs>
+  <layer-tree-group>
+    <customproperties/>
+    <layer-tree-layer id="trassen_layer" name="Trassen" source="service='qonnectra' sslmode=disable key='uuid' srid=25832 type=LineString checkPrimaryKeyUnicity='1' table=&quot;public&quot;.&quot;trench&quot; (geom)" providerKey="postgres" checked="Qt::Checked" expanded="1"/>
+    <layer-tree-layer id="netzknoten_layer" name="Netzknoten" source="service='qonnectra' sslmode=disable key='uuid' srid=25832 type=Point checkPrimaryKeyUnicity='1' table=&quot;public&quot;.&quot;node&quot; (geom)" providerKey="postgres" checked="Qt::Checked" expanded="1"/>
+    <layer-tree-layer id="adressen_layer" name="Adressen" source="service='qonnectra' sslmode=disable key='uuid' srid=25832 type=Point checkPrimaryKeyUnicity='1' table=&quot;public&quot;.&quot;address&quot; (geom)" providerKey="postgres" checked="Qt::Checked" expanded="1"/>
+  </layer-tree-group>
+  <projectlayers>
+    <maplayer type="vector" geometry="Line" autoRefreshEnabled="0" readOnly="0">
+      <id>trassen_layer</id>
+      <datasource>service='qonnectra' sslmode=disable key='uuid' srid=25832 type=LineString checkPrimaryKeyUnicity='1' table="public"."trench" (geom)</datasource>
+      <layername>Trassen</layername>
+      <shortname>trench</shortname>
+      <srs>
+        <spatialrefsys nativeFormat="Wkt">
+          <srsid>3044</srsid>
+          <srid>25832</srid>
+          <authid>EPSG:25832</authid>
+          <description>ETRS89 / UTM zone 32N</description>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="UTF-8">postgres</provider>
+      <renderer-v2 type="singleSymbol" forceraster="0" enableorderby="0" symbollevels="0">
+        <symbols>
+          <symbol type="line" name="0" alpha="1" clip_to_extent="1">
+            <layer class="SimpleLine" enabled="1" locked="0" pass="0">
+              <Option type="Map">
+                <Option type="QString" name="line_color" value="17,186,129,255"/>
+                <Option type="QString" name="line_width" value="0.6"/>
+                <Option type="QString" name="line_width_unit" value="MM"/>
+              </Option>
+            </layer>
+          </symbol>
+        </symbols>
+      </renderer-v2>
+    </maplayer>
+    <maplayer type="vector" geometry="Point" autoRefreshEnabled="0" readOnly="0">
+      <id>netzknoten_layer</id>
+      <datasource>service='qonnectra' sslmode=disable key='uuid' srid=25832 type=Point checkPrimaryKeyUnicity='1' table="public"."node" (geom)</datasource>
+      <layername>Netzknoten</layername>
+      <shortname>node</shortname>
+      <srs>
+        <spatialrefsys nativeFormat="Wkt">
+          <srsid>3044</srsid>
+          <srid>25832</srid>
+          <authid>EPSG:25832</authid>
+          <description>ETRS89 / UTM zone 32N</description>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="UTF-8">postgres</provider>
+      <renderer-v2 type="singleSymbol" forceraster="0" enableorderby="0" symbollevels="0">
+        <symbols>
+          <symbol type="marker" name="0" alpha="1" clip_to_extent="1">
+            <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+              <Option type="Map">
+                <Option type="QString" name="color" value="35,35,35,255"/>
+                <Option type="QString" name="name" value="circle"/>
+                <Option type="QString" name="size" value="2"/>
+                <Option type="QString" name="size_unit" value="MM"/>
+              </Option>
+            </layer>
+          </symbol>
+        </symbols>
+      </renderer-v2>
+    </maplayer>
+    <maplayer type="vector" geometry="Point" autoRefreshEnabled="0" readOnly="0">
+      <id>adressen_layer</id>
+      <datasource>service='qonnectra' sslmode=disable key='uuid' srid=25832 type=Point checkPrimaryKeyUnicity='1' table="public"."address" (geom)</datasource>
+      <layername>Adressen</layername>
+      <shortname>address</shortname>
+      <srs>
+        <spatialrefsys nativeFormat="Wkt">
+          <srsid>3044</srsid>
+          <srid>25832</srid>
+          <authid>EPSG:25832</authid>
+          <description>ETRS89 / UTM zone 32N</description>
+          <geographicflag>false</geographicflag>
+        </spatialrefsys>
+      </srs>
+      <provider encoding="UTF-8">postgres</provider>
+      <renderer-v2 type="singleSymbol" forceraster="0" enableorderby="0" symbollevels="0">
+        <symbols>
+          <symbol type="marker" name="0" alpha="1" clip_to_extent="1">
+            <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+              <Option type="Map">
+                <Option type="QString" name="color" value="210,95,35,255"/>
+                <Option type="QString" name="name" value="square"/>
+                <Option type="QString" name="size" value="1.6"/>
+                <Option type="QString" name="size_unit" value="MM"/>
+              </Option>
+            </layer>
+          </symbol>
+        </symbols>
+      </renderer-v2>
+    </maplayer>
+  </projectlayers>
+  <properties>
+    <WMSServiceCapabilities type="bool">true</WMSServiceCapabilities>
+    <WMSServiceTitle type="QString">Netzdokumentation</WMSServiceTitle>
+    <WMSServiceAbstract type="QString">Trassen, Netzknoten und Adressen der Netzdokumentation</WMSServiceAbstract>
+    <WMSUseLayerIDs type="bool">false</WMSUseLayerIDs>
+    <WFSLayers type="QStringList">
+      <value>trassen_layer</value>
+      <value>netzknoten_layer</value>
+      <value>adressen_layer</value>
+    </WFSLayers>
+    <WFSLayersPrecision>
+      <trassen_layer type="int">8</trassen_layer>
+      <netzknoten_layer type="int">8</netzknoten_layer>
+      <adressen_layer type="int">8</adressen_layer>
+    </WFSLayersPrecision>
+  </properties>
+</qgis>
