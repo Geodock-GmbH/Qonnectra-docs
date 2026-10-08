@@ -2,6 +2,7 @@ import { expect, test, type Page } from '../playwright/test'
 
 import { blankExtraInlineUuids, formRow, openAdmin, unionBox } from '../playwright/admin-pages'
 import { shoot, spotlight } from '../playwright/manual-shots'
+import { pinColorMappingUuids } from '../playwright/stable-admin-ids'
 
 // Screenshots for chapter "21. Projekte und Stammdaten pflegen" in the manual
 // (manual/teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md). Produces
@@ -27,6 +28,10 @@ import { shoot, spotlight } from '../playwright/manual-shots'
 //
 // Publish to public/images/ with: pnpm screenshots:publish 21-projekte-und-stammdaten
 const CHAPTER = '21-projekte-und-stammdaten'
+
+// The inline rows of 21.4 and 21.5 show the mappings' primary keys, which a
+// fresh install draws at random - see playwright/stable-admin-ids.ts.
+test.beforeAll(() => pinColorMappingUuids())
 
 /** Opens the change form of the row of `listPath` whose link reads `name`. */
 async function openRow(page: Page, listPath: string, name: string): Promise<void> {

@@ -32,7 +32,7 @@ b94645dbd1c44cad  tests/18-wenn-etwas-nicht-funktioniert-video.spec.ts
 81de7acc326d97b3  tests/18-wenn-etwas-nicht-funktioniert.spec.ts
 5ed86b8d5a0e870b  tests/19-rollen-und-rechte.spec.ts
 b517790f7a16eab0  tests/20-administrationsbereich.spec.ts
-d4ff36efd382f7dd  tests/21-projekte-und-stammdaten.spec.ts
+785ed833ff43c041  tests/21-projekte-und-stammdaten.spec.ts
 82f6c4bb9b31f11f  tests/22-projektbezogene-konfiguration.spec.ts
 f1b8e01ac4631408  tests/23-dateien-und-anhaenge.spec.ts
 33d2bd23eda0a9e7  tests/24-daten-import-und-export.spec.ts
