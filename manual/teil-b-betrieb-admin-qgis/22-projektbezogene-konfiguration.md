@@ -20,7 +20,7 @@ Die **Netzschema-Einstellungen** legen fest, welche Netzknoten das Netzschema ei
 Markieren Sie einen Typ in der linken Liste und verschieben Sie ihn mit dem Pfeil nach rechts.
 
 ::: info
-Fehlen die Netzschema-Einstellungen, zeigt das Schema alle Netzknoten des Projekts, und „Subnetz öffnen“ erscheint nirgends.
+Fehlen die Netzschema-Einstellungen, meldet das Netzschema beim Öffnen „Die Netzschema-Einstellungen sind für dieses Projekt nicht konfiguriert. Bitte konfigurieren Sie diese im Admin-Bereich.“, zeigt alle Netzknoten des Projekts, und „Subnetz öffnen“ erscheint nirgends. Sind sie angelegt, aber leer, gilt dasselbe ohne die Meldung.
 :::
 
 ## 22.2 Einstellungen der Rohrverzweigung
@@ -37,11 +37,13 @@ Es gibt drei Zustände, und nur zwei davon sind gewollt:
 
 ::: warning
 Wer die Einstellungen anlegt und das Feld leer lässt, sperrt die Rohrverzweigung für das Projekt, und die Weboberfläche sagt nicht warum. Wählen Sie mindestens einen Typ aus, oder löschen Sie die Einstellungen wieder.
+
+Eine neue Installation steht für das Projekt „Default“ genau in diesem Zustand: Sie bringt leere Rohrabzweig- und Netzschema-Einstellungen mit. Wählen Sie dort Typen aus, bevor das Projekt genutzt wird.
 :::
 
 ## 22.3 Kostensätze der Wertermittlung
 
-Die Wertermittlung rechnet mit den Kostensätzen des Projekts; was sie daraus macht, beschreibt Abschnitt [Woher die Kostensätze kommen](../teil-a-anwenderhandbuch/09-wertermittlung.md#_9-3-woher-die-kostensatze-kommen). Sie stehen unter „Wertermittlungssätze“, eine Zeile je Kostenbereich.
+Die Wertermittlung rechnet mit den Kostensätzen des Projekts; was sie daraus macht, beschreibt Abschnitt [Woher die Kostensätze kommen](../teil-a-anwenderhandbuch/09-wertermittlung.md#_9-3-woher-die-kostensatze-kommen). Sie stehen unter „Wertermittlungssätze“, eine Zeile je Kostenbereich. Eine neue Installation bringt keine mit; ohne sie lässt sich die Wertermittlung nicht benutzen.
 
 ![Screenshot der Wertermittlungssätze, gefiltert auf ein Projekt, mit Kostenbereich, Betrag, Einheit und Hausanschluss-Kennzeichnung](/images/manual/teil-b/admin_cost_rates.jpg)
 

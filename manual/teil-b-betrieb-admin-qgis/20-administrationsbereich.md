@@ -35,7 +35,7 @@ Die Namen der Bereiche weichen teils von den Begriffen der Weboberfläche und di
 | „Leitungsauskünfte“, „Leitungsauskunftsbereiche“ | Auskünfte und Auskunftsbereiche |
 | „Modell-Zugriffsrechte“, „Seiten-Zugriffsrechte“ | Modell- und Routenrechte, siehe Kapitel [Rollen und Rechte](./19-rollen-und-rechte.md) |
 
-Die Oberfläche ist überwiegend deutsch. Einzelne Feldnamen, Hilfetexte und Aktionen stehen auf Englisch, weil sie nicht übersetzt sind; die Sprachauswahl in der Kopfzeile ändert daran nichts.
+Die Oberfläche ist überwiegend deutsch. Einzelne Feldnamen, Hilfetexte und Beschriftungen stehen auf Englisch, weil sie nicht übersetzt sind, etwa „area type“ im Formular eines Gebiets, „Changes“ im Änderungsverlauf oder „Reset password“ im Formular eines Kontos; die Sprachauswahl in der Kopfzeile ändert daran nichts.
 
 ## 20.2 Suchen, Filtern und Massenbearbeitung
 
@@ -58,10 +58,10 @@ Neben „… löschen“ bieten einige Bereiche Aktionen, die Daten nachträglic
 | Bereich | Aktion | Wirkung |
 |---|---|---|
 | „Rohre“ | „Mikrorohre für ausgewählte Rohre erstellen (nur wenn keine vorhanden sind)“ | legt die Mikrorohre nach dem Rohrtyp an |
-| „Kabel“ | „Create fibers for selected cables (only if empty)“ | legt die Fasern nach dem Kabeltyp an |
-| „Kabel“ | „Recalculate length for selected cables“ und „… for ALL cables matching current filters“ | berechnet die Kabellänge aus den verknüpften Mikrorohren neu |
-| „Gräben“ | „Regenerate IDs for trenches with old format“ | vergibt Trassen-IDs im aktuellen Format |
-| „Netzknoten“ | „Auto-link micropipes for cables at selected nodes“ | verknüpft die Kabel an den gewählten Netzknoten mit den Mikrorohren ihrer Adressen |
+| „Kabel“ | „Fasern für ausgewählte Kabel erstellen (nur wenn keine vorhanden sind)“ | legt die Fasern nach dem Kabeltyp an |
+| „Kabel“ | „Kabellänge für ausgewählte Kabel neu berechnen“ und „Kabellänge für alle Kabel mit aktuellen Filtern neu berechnen“ | berechnet die Kabellänge aus den verknüpften Mikrorohren neu |
+| „Gräben“ | „Erstelle neue IDs für Trassen mit alten Formaten“ | vergibt Trassen-IDs im aktuellen Format |
+| „Netzknoten“ | „Verknüpfe Kabel automatisch mit Mikrorohren (Adressbasiert)“ | verknüpft die Kabel an den gewählten Netzknoten mit den Mikrorohren ihrer Adressen |
 | „Feature-Dateien“ | Verschieben und Löschen verwaister Dateien | siehe Abschnitt [Verwaiste Dateien](./23-dateien-und-anhaenge.md#_23-5-verwaiste-dateien-finden-verschieben-und-loschen) |
 | „Log-Einträge“ | Löschen markierter oder aller gefilterten Einträge | siehe Kapitel [Betrieb der Instanz](./28-betrieb-der-instanz.md) |
 | „WMS-Layer“ | „Empfohlene Einstellungen scannen und anwenden“ | siehe Abschnitt [Externe WMS-Quellen](./27-qgis-server-und-kartendienste.md#_27-4-externe-wms-quellen-als-hintergrund-einbinden) |
@@ -69,7 +69,7 @@ Neben „… löschen“ bieten einige Bereiche Aktionen, die Daten nachträglic
 Die beiden Aktionen „… erstellen (nur wenn keine vorhanden sind)“ überspringen jedes Rohr und jedes Kabel, das schon Mikrorohre oder Fasern hat. Ein unvollständiger Satz wird nicht ergänzt.
 
 ::: warning
-„Recalculate length for ALL cables matching current filters“ wirkt auf die ganze gefilterte Liste, nicht nur auf die angehakten Zeilen und nicht nur auf die angezeigte Seite. Ohne Filter sind das alle Kabel der Installation. Dasselbe gilt für das Löschen aller gefilterten Log-Einträge.
+„Kabellänge für alle Kabel mit aktuellen Filtern neu berechnen“ wirkt auf die ganze gefilterte Liste, nicht nur auf die angehakten Zeilen und nicht nur auf die angezeigte Seite. Ohne Filter sind das alle Kabel der Installation. Dasselbe gilt für das Löschen aller gefilterten Log-Einträge.
 :::
 
 Einige Listen lassen Werte direkt in der Zeile ändern, etwa die Zugriffsebene der Modell-Zugriffsrechte oder die Reihenfolge der Container-Typen. Solche Änderungen speichern Sie mit „Sichern“ unter der Liste.
@@ -105,7 +105,7 @@ Der Administrationsbereich zeigt zu jedem Fachobjekt ein Formular mit allen Feld
 - **IDs, UUIDs und berechnete Felder** wie Länge oder Trassen-ID. Qonnectra setzt sie selbst.
 
 ::: danger
-Löschen wirkt hier weiter als in der Weboberfläche. Ein gelöschtes Rohr etwa nimmt seine Mikrorohre, seine Rohrzuordnung und die Verknüpfungen zu Kabeln mit. Die Bestätigungsseite listet auf, was mitgelöscht wird. Lesen Sie die Liste, bevor Sie bestätigen – rückgängig machen lässt sich das Löschen nur über eine Sicherung, siehe Kapitel [Betrieb der Instanz](./28-betrieb-der-instanz.md).
+Löschen nimmt abhängige Objekte mit, hier wie in der Weboberfläche. Ein gelöschtes Rohr etwa nimmt seine Mikrorohre, seine Rohrzuordnung und die Verknüpfungen zu Kabeln mit. Die Rückfrage der Weboberfläche nennt davon höchstens die Rohrzuordnung; die Bestätigungsseite hier listet alles auf, was mitgelöscht wird. Lesen Sie die Liste, bevor Sie bestätigen – rückgängig machen lässt sich das Löschen nur über eine Sicherung, siehe Kapitel [Betrieb der Instanz](./28-betrieb-der-instanz.md).
 :::
 
 ![Screenshot der Bestätigungsseite beim Löschen eines Rohrs mit der Zusammenfassung der mitgelöschten Mikrorohre, Rohrzuordnungen und Verknüpfungen oben und der Liste der einzelnen Objekte darunter](/images/manual/teil-b/admin_delete_confirmation.jpg)

@@ -7,11 +7,18 @@ Projekte und Stammdaten legen Sie im Administrationsbereich an, siehe Kapitel [D
 Für alle Listen dieses Kapitels gilt:
 
 - Stammdaten gelten für die ganze Installation, nicht je Projekt. Ein neuer Wert steht sofort in allen Projekten zur Auswahl.
-- Ein Wert, der noch verwendet wird, lässt sich nicht löschen. Die Bestätigungsseite zeigt das nicht an; erst das Löschen selbst scheitert mit einer Fehlerseite. Benennen Sie einen solchen Wert um, statt ihn zu löschen.
 - Eine Umbenennung wirkt überall, wo der Wert verwendet wird. Ausnahmen sind die Farben, siehe Abschnitt [Rohrtypen und Mikrorohrfarben](#_21-4-rohrtypen-und-mikrorohrfarben).
+- Was beim Löschen eines Werts geschieht, der noch verwendet wird, hängt von der Liste ab:
+  - **Löschen samt Verwendung** – „Rohrtypen“, „Kabeltypen“, „Komponententypen“, „Oberflächen“, „Bau-/Verlegearten“ und „Phasen“. Alle Objekte mit diesem Wert werden mitgelöscht, siehe unten.
+  - **Löschen verweigert** – „Mikrorohrfarben“ und „Faserfarben“, die ein Rohr- oder Kabeltyp verwendet, sowie „Faserstatus“, „Container-Typen“, „Wohnungseinheit-Typen“ und „Wohnungseinheit-Status“. Die Bestätigungsseite nennt die Objekte, die den Wert verwenden, und bietet keine Schaltfläche zum Bestätigen an.
+  - **Fehler erst beim Löschen** – „Netzebenen“, „Netzknotentypen“, „Gebietstypen“ und „Ausbaustatus“. Die Bestätigungsseite warnt nicht; erst das Löschen selbst scheitert mit einer Fehlerseite, und es wird nichts gelöscht.
+  - **Mischfälle** – „Status“, „Firmen“, „Kennzeichen“ und „Projekte“. Trassen mit diesem Wert werden mitgelöscht. Verwenden ihn auch Rohre, Netzknoten oder Kabel, scheitert das Löschen dagegen mit einer Fehlerseite, und es wird nichts gelöscht – auch keine Trasse. Verwenden Fasern das Kennzeichen oder das Projekt, verweigert schon die Bestätigungsseite das Löschen. Ein Projekt nimmt außerdem seine Einstellungen, Kostensätze, externen Kartendienste und Leitungsauskünfte mit.
+  - **Wert wird entfernt** – „Mikrorohrstatus“, „Art der Arbeiten“ und „Anfragegründe“. Die Objekte bleiben erhalten und verlieren nur diese Angabe.
+
+Benennen Sie einen verwendeten Wert um, statt ihn zu löschen; wo es das Feld „Aktiv“ gibt, setzen Sie ihn auf inaktiv.
 
 ::: danger
-Rohrtypen sind die Ausnahme von der Regel, dass sich Verwendetes nicht löschen lässt. Ein gelöschter Rohrtyp nimmt alle Rohre dieses Typs mit, samt ihren Mikrorohren, ihrer Rohrzuordnung und den Verknüpfungen zu Kabeln. Die Bestätigungsseite listet sie auf – lesen Sie sie, bevor Sie bestätigen.
+Ein gelöschter Rohrtyp nimmt alle Rohre dieses Typs mit, samt ihren Mikrorohren, ihrer Rohrzuordnung und den Verknüpfungen zu Kabeln. Ein gelöschter Kabeltyp nimmt alle Kabel dieses Typs mit, samt ihren Fasern und Spleißen, ein gelöschter Komponententyp alle eingebauten Komponenten mit ihren Spleißen. Eine gelöschte Oberfläche, Bauart oder Phase löscht alle Trassen, die sie verwenden, und mit ihnen deren Rohrzuordnung. Eine Fehlermeldung gibt es dabei nicht. Die Bestätigungsseite listet auf, was mitgelöscht wird – lesen Sie sie, bevor Sie bestätigen.
 :::
 
 ## 21.1 Projekte anlegen und Vorbelegungen setzen
@@ -20,9 +27,9 @@ Projekte stehen unter „Api“ → „Projekte“. Ein Projekt hat einen Namen 
 
 Unter den drei Feldern stehen die Einstellungen des Projekts: „Netzwerkschema“, „Rohrverzweigung“ und „Wertermittlungssätze“. Füllen Sie sie gleich beim Anlegen; was sie bewirken, beschreibt Kapitel [Projektbezogene Konfiguration](./22-projektbezogene-konfiguration.md).
 
-Ohne sie sind Rohrverzweigung und Wertermittlung nur eingeschränkt nutzbar.
+Ohne Kostensätze lässt sich die Wertermittlung nicht benutzen. Ohne Netzschema- und Rohrabzweig-Einstellungen bieten Netzschema und Rohrverzweigung jeden Netzknoten des Projekts an.
 
-Ein frisch eingerichtetes Qonnectra bringt das Projekt „Default“ und das Kennzeichen „Default“ mit, außerdem eine Grundausstattung an Stammdaten: Status, Oberflächen, Netzebenen, Netzknotentypen, Rohr- und Kabeltypen mit ihren Farben, Container-Typen sowie je einen Eintrag für „Art der Arbeiten“ und „Anfragegründe“. Passen Sie diese Listen an, bevor die ersten Daten erfasst werden.
+Ein frisch eingerichtetes Qonnectra bringt das Projekt „Default“ und das Kennzeichen „Default“ mit, außerdem eine Grundausstattung an Stammdaten: Status, Oberflächen, Netzebenen, Netzknotentypen, Rohr- und Kabeltypen mit ihren Farben sowie je einen Eintrag für „Art der Arbeiten“ und „Anfragegründe“. Passen Sie diese Listen an, bevor die ersten Daten erfasst werden.
 
 ## 21.2 Kennzeichen
 
@@ -85,7 +92,7 @@ Ein **Kabeltyp** legt fest, welche Fasern ein Kabel bekommt. Kabeltypen stehen u
 Die Fasern eines neuen Kabels entstehen aus den Zuordnungen: für jedes Bündel so viele Fasern, wie „Faserzahl im Bündel“ angibt, mit der Bündelfarbe und der Farbe der Faserposition.
 
 ::: warning
-Fasern entstehen nur, wenn es mindestens so viele Bündel-Zeilen gibt, wie „Rohrzahl“ angibt, und mindestens so viele Faser-Zeilen, wie „Faserzahl im Bündel“ angibt. Fehlt auch nur eine, bleibt das neue Kabel ohne Fasern, ohne Meldung. Die Aktion „Create fibers for selected cables (only if empty)“ ergänzt sie, sobald die Zuordnungen vollständig sind, siehe Abschnitt [Suchen, Filtern und Massenbearbeitung](./20-administrationsbereich.md#_20-2-suchen-filtern-und-massenbearbeitung).
+Fasern entstehen nur, wenn es mindestens so viele Bündel-Zeilen gibt, wie „Rohrzahl“ angibt, und mindestens so viele Faser-Zeilen, wie „Faserzahl im Bündel“ angibt. Fehlt auch nur eine, bleibt das neue Kabel ohne Fasern, ohne Meldung. Die Aktion „Fasern für ausgewählte Kabel erstellen (nur wenn keine vorhanden sind)“ ergänzt sie, sobald die Zuordnungen vollständig sind, siehe Abschnitt [Suchen, Filtern und Massenbearbeitung](./20-administrationsbereich.md#_20-2-suchen-filtern-und-massenbearbeitung).
 :::
 
 Die Farben stehen unter „Faserfarben“ und werden wie die Mikrorohrfarben gepflegt; auch hier gilt die Warnung zur Umbenennung, siehe Abschnitt [Rohrtypen und Mikrorohrfarben](#_21-4-rohrtypen-und-mikrorohrfarben).
@@ -96,7 +103,7 @@ Die Farben stehen unter „Faserfarben“ und werden wie die Mikrorohrfarben gep
 
 **Komponententypen** sind die Bauteile, die in die Slots eines Netzknotens eingesetzt werden, etwa eine Spleißkassette oder ein Splitter, siehe Abschnitt [Netzknoten, Container, Slots, Komponenten und Ports](../teil-a-anwenderhandbuch/02-grundbegriffe-und-datenmodell.md#_2-3-netzknoten-container-slots-komponenten-und-ports). Sie stehen unter „Komponententypen“. „Belegte Steckplätze“ gibt an, wie viele Slots die Komponente einnimmt.
 
-Die Ports eines Komponententyps stehen unter „Komponentenstrukturen“, eine Zeile je Port mit „In/Out“, Portnummer und einem optionalen Alias. Ein Komponententyp ohne Ports lässt sich einsetzen, hat aber nichts, woran eine Faser anschließen kann.
+Die Ports eines Komponententyps stehen unter „Komponentenstrukturen“, eine Zeile je Port mit „In oder Out“, Portnummer und einem optionalen Alias. Ein Komponententyp ohne Ports lässt sich einsetzen, hat aber nichts, woran eine Faser anschließen kann.
 
 Statt jeden Port einzeln anzulegen, nutzen Sie „Ports in Bulk erstellen“ oben rechts:
 
@@ -115,7 +122,7 @@ Das Formular prüft nicht, ob es die Portnummern schon gibt. Ein zweiter Durchla
 
 ## 21.7 Container-Typen
 
-**Container-Typen** sind die Kategorien, mit denen sich Slot-Konfigurationen eines Netzknotens gruppieren lassen, etwa „Rack“ oder „Schrank“. Sie stehen unter „Container-Typen“. Gibt es keinen aktiven, fehlt in der Weboberfläche die Schaltfläche „Container hinzufügen“, siehe Kapitel [Netzschema](../teil-a-anwenderhandbuch/14-netzschema.md).
+**Container-Typen** sind die Kategorien, mit denen sich Slot-Konfigurationen eines Netzknotens gruppieren lassen, etwa „Rack“ oder „Schrank“. Sie stehen unter „Container-Typen“. Eine neue Installation bringt keine mit; solange es keinen aktiven gibt, fehlt in der Weboberfläche die Schaltfläche „Container hinzufügen“, siehe Kapitel [Netzschema](../teil-a-anwenderhandbuch/14-netzschema.md).
 
 In der Liste lassen sich „Anzeigereihenfolge“ und „Aktiv“ direkt ändern; speichern Sie mit „Sichern“ unter der Liste. Ein inaktiver Container-Typ verschwindet aus der Auswahl, bestehende Container behalten ihn.
 
@@ -130,7 +137,7 @@ Firmen stehen unter „Firmen“. Dieselbe Liste speist die Felder „Eigentüme
 ![Screenshot des Formulars „Firma hinzufügen“ mit Name, Stadt, Postleitzahl und Straße oben im Inhaltsbereich](/images/manual/teil-b/admin_company_form.jpg)
 
 ::: info
-Die Kontaktdaten einer Firma erscheinen in der Weboberfläche bei jedem Objekt, das die Firma als Eigentümer oder Baufirma nennt. Tragen Sie dort nur Kontaktdaten ein, die alle Nutzenden sehen dürfen – eine allgemeine Rufnummer statt der Durchwahl einer Person.
+Die Weboberfläche zeigt von einer Firma nur den Namen. Anschrift, „Telefon“ und „E-Mail“ gibt Qonnectra über seine Schnittstelle aber an jedes angemeldete Konto heraus, siehe Kapitel [REST-API](../teil-c-entwicklungs-systemdokumentation/32-rest-api.md). Tragen Sie dort nur Kontaktdaten ein, die alle Nutzenden sehen dürfen – eine allgemeine Rufnummer statt der Durchwahl einer Person.
 :::
 
 ## 21.9 Gebietstypen
