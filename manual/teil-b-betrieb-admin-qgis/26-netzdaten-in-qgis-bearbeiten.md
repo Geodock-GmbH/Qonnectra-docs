@@ -4,7 +4,7 @@ In QGIS bearbeiten Sie die Geometrie des Netzes und die Angaben, die die Webober
 
 ## 26.1 Welche Layer bearbeitet werden dürfen
 
-In QGIS bearbeitet werden die vier Layer mit Geometrie:
+In QGIS bearbeitet werden die vier Netz-Layer:
 
 - **Trassen** (`trench`) – zeichnen, Verlauf korrigieren, löschen. Die Rohre einer neuen Trasse ordnen Sie anschließend in der Weboberfläche zu, siehe Kapitel [Rohrzuordnung](../teil-a-anwenderhandbuch/11-rohrzuordnung.md).
 - **Netzknoten** (`node`) – setzen, verschieben, löschen. Die Spalte `uuid_address` verknüpft einen Netzknoten mit einer Adresse; leeren Sie sie, um die Verknüpfung zu lösen, die sich in der Weboberfläche nicht lösen lässt.
@@ -15,7 +15,14 @@ Alles andere bearbeiten Sie in der Weboberfläche oder im Administrationsbereich
 
 ## 26.2 Pflichtfelder, Wertelisten und Validierung
 
-Füllen Sie bei jedem neuen Objekt die Spalten `project` und `flag` mit der Nummer des Projekts und des Kennzeichens. Ohne beide weist die Datenbank das Objekt beim Speichern ab.
+Füllen Sie bei jedem neuen Objekt die Spalten `project` und `flag` mit der Nummer des Projekts und des Kennzeichens, dazu die Pflichtspalten des Layers:
+
+- Trassen: `construction_type` und `surface`
+- Netzknoten: `name` und `node_type`
+- Adressen: `street`, `housenumber`, `zip_code` und `city`
+- Gebiete: `name` und `area_type`
+
+Fehlt eine davon, weist die Datenbank das Objekt beim Speichern ab. Der Name eines Netzknotens und der eines Gebiets darf je Projekt nur einmal vorkommen.
 
 Einige Spalten füllt die Datenbank selbst. Lassen Sie sie beim Erfassen leer:
 
@@ -41,10 +48,15 @@ Gebiete müssen ebenfalls gültige Flächen sein, ohne Selbstüberschneidung.
 
 ## 26.3 Gleichzeitiges Arbeiten mit der Weboberfläche
 
-QGIS und die Weboberfläche arbeiten auf derselben Datenbank. Was Sie in QGIS speichern, gilt sofort; die Karte der Weboberfläche zeigt es nach spätestens 30 Sekunden, das Dashboard nach spätestens fünf Minuten.
+QGIS und die Weboberfläche arbeiten auf derselben Datenbank. Was Sie in QGIS speichern, gilt sofort; die Karte der Weboberfläche zeigt es nach spätestens 30 Sekunden, das Dashboard nach spätestens fünf Minuten. Ein Objekt in einem Kartenbereich, in dem bis dahin kein Objekt desselben Layers lag, erscheint erst nach bis zu zehn Minuten.
 
 ::: danger
-Wird eine Trasse oder ein Netzknoten so verschoben, dass das Trassenende mehr als fünf Meter vom Netzknoten entfernt liegt, löscht die Datenbank die Verbindungen der Mikrorohre an diesem Netzknoten, ohne Meldung. Die Rohrverzweigung dort ist danach leer und muss neu verbunden werden, siehe Kapitel [Rohrverzweigung](../teil-a-anwenderhandbuch/12-rohrverzweigung.md). Prüfen Sie nach dem Verschieben eines Netzknotens oder eines Trassenendes, ob die Trassen weiterhin am Netzknoten enden.
+Beim Verschieben prüft die Datenbank einen Abstand von fünf Metern und löscht Mikrorohrverbindungen ohne Meldung:
+
+- Liegt nach dem Verschieben einer Trasse keiner der Netzknoten, an denen ihre Mikrorohre verbunden sind, näher als fünf Meter an irgendeinem Punkt der Trasse, löscht sie alle Mikrorohrverbindungen dieser Trasse – an allen Netzknoten.
+- Liegt nach dem Verschieben eines Netzknotens keine Trasse mit Mikrorohrverbindungen näher als fünf Meter, löscht sie alle Mikrorohrverbindungen an diesem Netzknoten.
+
+Die Rohrverzweigung dort ist danach leer und muss neu verbunden werden, siehe Kapitel [Rohrverzweigung](../teil-a-anwenderhandbuch/12-rohrverzweigung.md). Bleibt dagegen einer der Netzknoten in der Nähe, bleiben alle Verbindungen bestehen – auch an einem Netzknoten, von dem das Trassenende weggezogen wurde. Prüfen Sie nach dem Verschieben die Rohrverzweigung an den betroffenen Netzknoten.
 :::
 
 Was die Weboberfläche bei einer Änderung nebenbei erledigt, geschieht in QGIS nicht:
@@ -55,7 +67,7 @@ Was die Weboberfläche bei einer Änderung nebenbei erledigt, geschieht in QGIS 
 Ein Rohr, das über die Tabelle in der Datenbank entsteht, bekommt keine Mikrorohre, ein Kabel keine Fasern. Was danach nachzuziehen ist, bieten die Aktionen in Abschnitt [Suchen, Filtern und Massenbearbeitung](./20-administrationsbereich.md#_20-2-suchen-filtern-und-massenbearbeitung). Ein gelöschtes Objekt lässt wie in der Weboberfläche seine Anhänge zurück, siehe Abschnitt [Verwaiste Dateien finden, verschieben und löschen](./23-dateien-und-anhaenge.md#_23-5-verwaiste-dateien-finden-verschieben-und-loschen).
 
 ::: info
-Ein Trassen-Layer in QGIS lässt sich automatisch neu zeichnen, sobald jemand – in QGIS oder in der Weboberfläche – Trassen ändert: Die Datenbank sendet dafür die Benachrichtigung `qgis`. Aktivieren Sie in den Eigenschaften des Layers unter „Rendern“ die Option „Layer bei Benachrichtigung aktualisieren“.
+Ein Trassen-Layer in QGIS lässt sich automatisch neu zeichnen, sobald jemand – in QGIS oder in der Weboberfläche – Trassen ändert: Die Datenbank sendet dafür die Benachrichtigung `qgis`. Aktivieren Sie in den Eigenschaften des Layers unter „Darstellung“ die Option „Layer bei Benachrichtigung aktualisieren“.
 :::
 
 Bearbeiten zwei Personen dasselbe Objekt gleichzeitig, gewinnt die letzte Speicherung, ohne Warnung. Sprechen Sie größere Änderungen an einem Gebiet ab.
@@ -73,5 +85,5 @@ Für Aufnahmen ohne Verbindung zur Datenbank – im Feld, durch ein beauftragtes
 Für die Rückführung gibt es keinen Import in Qonnectra. Sie ist ein Kopieren in QGIS, und dabei gelten alle Regeln dieses Kapitels: Die Datenbank vergibt IDs und Längen und weist ungültige Geometrien ab.
 
 ::: warning
-Leeren Sie vor dem Einfügen die Spalten `uuid`, `id_trench` und `id_address`, falls die aufnehmende Stelle sie gefüllt hat. Eine UUID oder eine Trassen-ID, die es im Projekt schon gibt, lässt das Einfügen scheitern; die Datenbank vergibt beide selbst.
+Leeren Sie vor dem Einfügen die Spalten `uuid`, `id_trench` und `id_address`, falls die aufnehmende Stelle sie gefüllt hat. Eine UUID oder eine Trassen-ID, die es im Projekt schon gibt, lässt das Einfügen scheitern; die Datenbank vergibt beide selbst. Ebenso scheitert ein Netzknoten oder Gebiet, dessen Name im Projekt schon vergeben ist – benennen Sie solche Objekte vorher um.
 :::

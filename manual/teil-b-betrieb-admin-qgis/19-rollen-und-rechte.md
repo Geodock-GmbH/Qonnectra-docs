@@ -134,7 +134,7 @@ Die „Logs“ der Weboberfläche öffnen sich nur, wenn beides zutrifft: Das Ko
 Fehlt eine der beiden Voraussetzungen, landet das Konto ohne Meldung in der Karte. Ein Mitglied der Gruppe „Admin“ ohne „Mitarbeiter-Status“ sieht den Menüpunkt „Logs“ sogar, kommt aber nicht auf die Seite.
 :::
 
-Der erste Superuser entsteht bei der Einrichtung der Instanz aus der Konfiguration, siehe Kapitel [Betrieb der Instanz](./28-betrieb-der-instanz.md). Legen Sie für die tägliche Arbeit eigene Konten an und nutzen Sie den Superuser nur für die Verwaltung.
+Der erste Superuser entsteht bei der Einrichtung der Instanz aus der Konfiguration, siehe Abschnitt [Konfiguration über Umgebungsvariablen](./28-betrieb-der-instanz.md#_28-2-konfiguration-uber-umgebungsvariablen). Legen Sie für die tägliche Arbeit eigene Konten an und nutzen Sie den Superuser nur für die Verwaltung.
 
 ## 19.5 Typische Rollenprofile: Betrachten, Bearbeiten, Verwalten
 

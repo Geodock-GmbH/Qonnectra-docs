@@ -18,12 +18,12 @@ Qonnectra läuft als Gruppe von Docker-Containern, beschrieben in `docker-compos
 | `db` | die Datenbank, PostgreSQL mit PostGIS |
 | `qgis-server` | die Kartendienste, siehe Kapitel [QGIS-Server und Kartendienste](./27-qgis-server-und-kartendienste.md) |
 | `tileserver` | die Hintergrundkarte, siehe Abschnitt [Kartenkacheln bereitstellen und erneuern](#_28-6-kartenkacheln-bereitstellen-und-erneuern) |
-| `pg-error-parser` | liest die Fehler der Datenbank mit und schreibt Fehler aus QGIS-Bearbeitungen in die Protokolle |
-| `wireguard` | das VPN für den direkten Datenbankzugang aus QGIS; optional |
+| `pg-error-parser` | liest die Fehler der Datenbank mit und schreibt sie in die Protokolle, siehe Abschnitt [Protokolle auswerten](#_28-5-protokolle-auswerten) |
+| `wireguard` | das VPN für den direkten Datenbankzugang aus QGIS; startet immer und öffnet nach außen den UDP-Port 51820 (`WIREGUARD_PORT`), auch wenn kein QGIS-Arbeitsplatz ihn nutzt |
 
 Nach außen hat eine Installation sechs Adressen, je eine für die Weboberfläche (`app.`), die Schnittstelle (`api.`), den Administrationsbereich (`admin.`), den WebDAV-Zugang (`files.`), den QGIS-Server (`qgis.`) und die Hintergrundkarte (`tiles.`).
 
-Die Daten liegen in Docker-Volumes: die Datenbank in `postgres_data`, die Anhänge in `media_volume`, die Zertifikate in `caddy_data`, der Zwischenspeicher der WMS-Bilder in `wms_cache`. Die hinterlegten QGIS-Projekte und ihre Datendateien liegen im Ordner `deployment/qgis`.
+Die Daten liegen in Docker-Volumes: die Datenbank in `qonnectra_postgres_data_prod`, die Anhänge in `qonnectra_media_prod`, die Zertifikate in `qonnectra_caddy_data_prod`, der Zwischenspeicher der WMS-Bilder in `qonnectra_wms_cache_prod`. In `docker-compose.yml` stehen sie unter kürzeren Namen (`postgres_data`, `media_volume` usw.); `docker volume ls` zeigt die vollständigen. Die hinterlegten QGIS-Projekte und ihre Datendateien liegen im Ordner `deployment/qgis`.
 
 ## 28.2 Konfiguration über Umgebungsvariablen
 
@@ -34,6 +34,12 @@ Die Einstellungen stehen in der Datei `deployment/.env`. Die vollständige Liste
 - **`PUBLIC_DOCUMENTATION_URL`** – der Link „Dokumentation“ in Kopfzeile und Navigationsleiste; leer blendet ihn aus.
 - **`QGIS_SERVER_VERSION`** – die Version des QGIS-Servers, für die Warnung beim Hochladen von QGIS-Projekten.
 - **`WIREGUARD_PEERS`** – die Namen der VPN-Zugänge, siehe Abschnitt [Verbindung zur PostGIS-Datenbank](./25-qgis-arbeitsplatz-einrichten.md#_25-2-verbindung-zur-postgis-datenbank-und-zu-den-diensten).
+
+Das erste Superuser-Konto legt das Backend aus `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_PASSWORD` und `DJANGO_SUPERUSER_EMAIL` an. Es prüft das bei jedem Start und legt das Konto nur an, wenn es noch keines mit diesem Benutzernamen gibt. Setzen Sie die drei Werte vor dem ersten Start; die Vorlage enthält für das Passwort nur einen Platzhalter.
+
+::: warning
+Ein später in `.env` geändertes Passwort ändert das bestehende Konto nicht; setzen Sie es im Benutzerformular des Administrationsbereichs neu, siehe Abschnitt [Benutzende und Gruppen anlegen](./19-rollen-und-rechte.md#_19-1-benutzende-und-gruppen-anlegen). Ein geänderter Benutzername legt beim nächsten Start ein weiteres Superuser-Konto an.
+:::
 
 ::: danger
 `FIELD_ENCRYPTION_KEY` verschlüsselt die Passwörter der WMS-Quellen. Geht der Schlüssel verloren oder wird er geändert, lassen sich diese Passwörter nicht mehr lesen, und jede WMS-Quelle mit Anmeldung muss neu eingegeben werden. Sichern Sie die Datei `.env` mit, siehe Abschnitt [Sicherung und Wiederherstellung](#_28-4-sicherung-und-wiederherstellung).
@@ -87,10 +93,10 @@ Die Versionsnummer in der Kopfzeile der Weboberfläche zeigt nach der Aktualisie
 Eine vollständige Sicherung umfasst:
 
 - die Datenbank,
-- die Anhänge im Volume `media_volume`,
+- die Anhänge im Volume `qonnectra_media_prod`,
 - die QGIS-Projekte und ihre Datendateien in `deployment/qgis`,
 - die Datei `deployment/.env`,
-- die Zertifikate im Volume `caddy_data` und die VPN-Zugänge in `deployment/wireguard`, falls verwendet.
+- die Zertifikate im Volume `qonnectra_caddy_data_prod` und die VPN-Zugänge in `deployment/wireguard`, falls verwendet.
 
 Die Datenbank allein sichern Sie mit:
 
@@ -102,8 +108,20 @@ Datenbank und Anhänge gehören zusammen: Jeder Anhang hat einen Eintrag in der 
 
 Im Ordner `deployment/backup` liegen zwei Skripte, `backup.sh` und `restore.sh`, die das alles erledigen und die Sicherungen zusätzlich mit `rclone` an einen entfernten Speicher übertragen. Sie lesen ihre Einstellungen – Zielordner, Namen der Container und Volumes, Ziel von `rclone`, Aufbewahrungsdauer – aus einer Datei `backup.conf` daneben, die Sie selbst anlegen; sie wird nicht mitgeliefert. Richten Sie `backup.sh` als nächtliche Aufgabe ein. `restore.sh` mit einem Datum stellt die Sicherung dieses Tages wieder her, mit `--db-only` oder `--media-only` nur einen Teil, mit `--list` zeigt es die vorhandenen Sicherungen.
 
+::: warning
+Tragen Sie in `backup.conf` unter `MEDIA_VOLUME` und `CADDY_VOLUME` die vollständigen Namen der Volumes ein, `qonnectra_media_prod` und `qonnectra_caddy_data_prod`, nicht die kurzen aus `docker-compose.yml`. Ein Volume mit falschem Namen legt Docker beim Sichern ohne Meldung neu und leer an – die Sicherung läuft durch und enthält keine Anhänge.
+:::
+
 ::: danger
 Eine Wiederherstellung ersetzt die Datenbank vollständig. Alles, was seit der Sicherung erfasst wurde, ist danach verloren. Stellen Sie im Zweifel zuerst in eine zweite Installation wieder her und übernehmen Sie nur, was fehlt.
+:::
+
+::: warning
+Auch mit einem Datum stellt `restore.sh` nicht die Anhänge dieses Tages her. Die Anhänge liegen in einem einzigen Spiegel am entfernten Speicher, den jede Sicherung nur ergänzt und aus dem nie etwas gelöscht wird. Wiederhergestellt wird immer der Stand der letzten Sicherung, samt aller Dateien, die in Qonnectra inzwischen gelöscht wurden; zu einer älteren Datenbank ergibt das Dateien ohne Eintrag.
+
+Die Datei `.env` stellt das Skript nicht wieder her, es nennt nur den Pfad der gesicherten Kopie. Vergleichen und übernehmen Sie sie selbst.
+
+`restore.sh` liest `.env` als Shell-Skript ein und bricht sofort ab, wenn eine Zeile dort Leerzeichen um das Gleichheitszeichen hat. Die Vorlage `.env.production.template` enthält eine solche Zeile (`COOKIE_DOMAIN = .your-domain.com`). Schreiben Sie jede Zuweisung ohne Leerzeichen, etwa `COOKIE_DOMAIN=.ihre-domain.de`.
 :::
 
 Prüfen Sie Sicherungen regelmäßig durch eine Wiederherstellung auf einem Testsystem.
@@ -112,9 +130,9 @@ Prüfen Sie Sicherungen regelmäßig durch eine Wiederherstellung auf einem Test
 
 Qonnectra schreibt Fehler und Warnungen in eine eigene Protokolltabelle. Jeder Eintrag hat eine Stufe, eine Quelle, das Konto, das Projekt und die Nachricht. Es gibt drei Quellen:
 
-- **„backend“** – Fehler und Warnungen der Schnittstelle, etwa ein abgelehnter Import oder eine Anfrage, die mit einem Serverfehler endete.
-- **„frontend“** – Fehler, die im Browser der Nutzenden auftreten und die die Weboberfläche meldet, etwa ein gescheitertes Hochladen eines Anhangs oder eine Suche ohne Antwort.
-- **„wfs“** – Fehler der Datenbank bei Bearbeitungen aus QGIS, etwa ein abgelehntes Löschen, siehe Kapitel [Netzdaten in QGIS bearbeiten](./26-netzdaten-in-qgis-bearbeiten.md).
+- **„Backend“** – Fehler und Warnungen der Schnittstelle, etwa ein abgelehnter Import oder eine Anfrage, die mit einem Serverfehler endete.
+- **„Frontend“** – Fehler, die im Browser der Nutzenden auftreten und die die Weboberfläche meldet, etwa ein gescheitertes Hochladen eines Anhangs oder eine Suche ohne Antwort.
+- **„WFS (QGIS Server)“** – jeder Fehler, den die Datenbank meldet, etwa ein abgelehntes Löschen aus QGIS, siehe Kapitel [Netzdaten in QGIS bearbeiten](./26-netzdaten-in-qgis-bearbeiten.md). Trotz des Namens stehen hier auch Datenbankfehler, die die Weboberfläche ausgelöst hat. Diese Einträge haben weder Konto noch Projekt.
 
 Die Einträge sehen Sie an zwei Stellen. In der Weboberfläche unter „Logs“ am Fuß der Navigationsleiste, mit Filtern nach Stufe, Quelle, Projekt, Text und Zeitraum:
 
@@ -130,13 +148,13 @@ Im Administrationsbereich unter „Log-Einträge“, mit denselben Filtern und z
 Die Protokolltabelle wächst ohne Grenze; Qonnectra löscht keine Einträge von selbst. Löschen Sie alte Einträge regelmäßig, etwa alle, die älter als ein Jahr sind. Ohne Filter löscht „Alle Log-Einträge mit aktuellen Filtern löschen“ das gesamte Protokoll.
 :::
 
-Meldet jemand einen Fehler, finden Sie den Eintrag über Zeitpunkt und Konto, siehe Abschnitt [Was das Support-Team von Ihnen braucht](../teil-a-anwenderhandbuch/18-wenn-etwas-nicht-funktioniert.md#_18-5-was-das-support-team-von-ihnen-braucht). Mehr als die Protokolltabelle zeigen die Ausgaben der Container selbst:
+Meldet jemand einen Fehler, finden Sie den Eintrag über Zeitpunkt und Konto, siehe Abschnitt [Was das Support-Team von Ihnen braucht](../teil-a-anwenderhandbuch/18-wenn-etwas-nicht-funktioniert.md#_18-5-was-das-support-team-von-ihnen-braucht). Einträge der Quelle „WFS (QGIS Server)“ finden Sie nur über den Zeitpunkt; ein Filter nach Projekt blendet sie aus. Mehr als die Protokolltabelle zeigen die Ausgaben der Container selbst:
 
 ```bash
 docker compose logs --since 1h backend
 ```
 
-Docker behält davon je Dienst nur die letzten 30 MB.
+Docker behält davon je Dienst nur die letzten 30 MB – außer bei `nginx` und `caddy`, deren Ausgaben `docker-compose.yml` nicht begrenzt. Sie wachsen, solange die Docker-Einstellungen des Servers keine Grenze setzen.
 
 ## 28.6 Kartenkacheln bereitstellen und erneuern
 
@@ -151,7 +169,7 @@ So erneuern Sie die Karte:
 Die Adresse des Kachelservers steht in `PUBLIC_TILE_SERVER_URL`. Fehlt sie, zeigt die Karte stattdessen die Kacheln von OpenStreetMap aus dem Internet.
 
 ::: warning
-Fehlt die Kacheldatei, startet der Dienst `tileserver` immer wieder neu, und die Hintergrundkarte bleibt leer. `docker compose ps` zeigt ihn dann als „Restarting“.
+Fehlt die Kacheldatei, startet der Dienst `tileserver` immer wieder neu; `docker compose ps` zeigt ihn dann als „Restarting“. Die Karte zeigt in dieser Zeit die Kacheln von OpenStreetMap aus dem Internet und bleibt nur leer, wenn auch diese nicht erreichbar sind. Der Ausfall fällt in der Weboberfläche deshalb kaum auf.
 :::
 
 ## 28.7 Häufige Störungen und ihre Behebung
@@ -162,10 +180,10 @@ Fehlt die Kacheldatei, startet der Dienst `tileserver` immer wieder neu, und die
 | Anmeldung in der Weboberfläche führt sofort zurück zur Anmeldeseite | `COOKIE_DOMAIN` passt nicht zu den Adressen | `COOKIE_DOMAIN` auf die gemeinsame Domain mit führendem Punkt setzen |
 | Anmeldung im Administrationsbereich endet mit „403“ | Adresse des Administrationsbereichs fehlt in `CSRF_TRUSTED_ORIGINS` | ergänzen, `docker compose up -d` |
 | WebDAV oder die Dienste des QGIS-Servers antworten auf jede Anmeldung mit „400“ | `files.`- oder `qgis.`-Adresse fehlt in `DJANGO_ALLOWED_HOSTS` | ergänzen, `docker compose up -d` |
-| Hintergrundkarte leer, `tileserver` startet ständig neu | Kacheldatei fehlt oder `config.json` nennt einen falschen Namen | siehe Abschnitt [Kartenkacheln](#_28-6-kartenkacheln-bereitstellen-und-erneuern) |
+| Hintergrundkarte zeigt die Kacheln von OpenStreetMap statt der eigenen oder bleibt leer, `tileserver` startet ständig neu | Kacheldatei fehlt oder `config.json` nennt einen falschen Namen | siehe Abschnitt [Kartenkacheln](#_28-6-kartenkacheln-bereitstellen-und-erneuern) |
 | WMS-Layer zeigt veraltete Bilder | Zwischenspeicher des WMS-Proxys | `docker compose exec nginx sh -c 'rm -rf /var/cache/nginx/wms/*'` |
 | WMS-Quellen mit Anmeldung liefern nichts mehr | `FIELD_ENCRYPTION_KEY` geändert | alten Schlüssel wiederherstellen oder Passwörter neu eingeben |
-| Neue Daten erscheinen in der Karte erst nach einer halben Minute, im Dashboard nach Minuten | Zwischenspeicher, gewollt | abwarten, siehe Abschnitt [Gleichzeitiges Arbeiten mit der Weboberfläche](./26-netzdaten-in-qgis-bearbeiten.md#_26-3-gleichzeitiges-arbeiten-mit-der-weboberflache) |
+| Neue Daten erscheinen in der Karte erst nach einer halben Minute, in bisher leeren Kartenbereichen nach bis zu zehn Minuten, im Dashboard nach Minuten | Zwischenspeicher, gewollt | abwarten, siehe Abschnitt [Gleichzeitiges Arbeiten mit der Weboberfläche](./26-netzdaten-in-qgis-bearbeiten.md#_26-3-gleichzeitiges-arbeiten-mit-der-weboberflache) |
 
 ::: info
 Der Administrationsbereich und der WebDAV-Zugang sind aus dem ganzen Internet erreichbar. Wer sie auf das eigene Netz oder das VPN beschränken will, ergänzt in `Caddyfile.production` bei der jeweiligen Adresse eine Sperre nach Absender-IP; ein Beispiel steht dort beim Administrationsbereich als Kommentar.
