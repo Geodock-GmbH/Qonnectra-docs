@@ -215,11 +215,20 @@
   mask: var(--note-icon) center / contain no-repeat;
 }
 
-.vp-doc .custom-block.info p,
-.vp-doc .custom-block.warning p,
-.vp-doc .custom-block.danger p {
+/* Everything inside the box goes into the text column. Naming only <p> here
+   left a list without a column, and the grid then put it into the 20 px icon
+   column - one letter per line. */
+.vp-doc .custom-block.info > *,
+.vp-doc .custom-block.warning > *,
+.vp-doc .custom-block.danger > * {
   grid-column: 2;
   margin: 0;
+}
+
+.vp-doc .custom-block.info > :is(ul, ol),
+.vp-doc .custom-block.warning > :is(ul, ol),
+.vp-doc .custom-block.danger > :is(ul, ol) {
+  margin: 4px 0;
 }
 
 .vp-doc .custom-block.info .custom-block-title,
