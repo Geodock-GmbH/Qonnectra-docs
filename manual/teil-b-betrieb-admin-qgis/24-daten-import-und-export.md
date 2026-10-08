@@ -52,5 +52,5 @@ Nach einer Übernahme an der Weboberfläche vorbei – aus QGIS oder direkt in d
 :::
 
 ::: info
-Die Weboberfläche zeigt neue Daten nicht überall sofort. Die Kartenkacheln hält der Server bis zu 30 Sekunden vor, die Auswertungen im Dashboard bis zu fünf Minuten, siehe Kapitel [Dashboard](../teil-a-anwenderhandbuch/04-dashboard.md). Wer nach einer Übernahme sofort prüft, sieht womöglich noch den alten Stand.
+Die Weboberfläche zeigt neue Daten nicht überall sofort. Kartenkacheln mit Inhalt hält der Server bis zu 30 Sekunden vor, leere Kacheln bis zu zehn Minuten; die Auswertungen im Dashboard bis zu fünf Minuten, siehe Kapitel [Dashboard](../teil-a-anwenderhandbuch/04-dashboard.md). Wurde ein Kartenausschnitt angesehen, solange er noch leer war, bleiben die übernommenen Objekte dort deshalb bis zu zehn Minuten unsichtbar – gerade bei der Erstbefüllung.
 :::

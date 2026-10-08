@@ -15,7 +15,7 @@ Ein Projekt legen Sie mit „QGIS Projekt hinzufügen“ an:
 - „QGIS Projektdatei“ – die Datei aus QGIS, `.qgs` oder `.qgz`.
 - Unter „Feature-Dateien“ – trotz der Beschriftung Datendateien, die das Projekt neben der Datenbank braucht, etwa ein Plan als `.dxf` oder ein Gebiet als `.geojson`.
 
-Das Projekt erstellen Sie in QGIS am Arbeitsplatz, mit Layern aus der Datenbank von Qonnectra, siehe Kapitel [QGIS-Arbeitsplatz einrichten](./25-qgis-arbeitsplatz-einrichten.md). Beim Hochladen stellt Qonnectra die Layer auf den PostgreSQL-Dienst des Servers um: Layer, die auf GeoPackage-Dateien verweisen, zeigen danach auf die gleichnamige Tabelle der Datenbank, Layer aus hochgeladenen Datendateien auf deren Ablage auf dem Server. Anschließend prüft es das Projekt und meldet das Ergebnis über dem Formular.
+Das Projekt erstellen Sie in QGIS am Arbeitsplatz, mit Layern aus der Datenbank von Qonnectra, siehe Kapitel [QGIS-Arbeitsplatz einrichten](./25-qgis-arbeitsplatz-einrichten.md). Layer aus der Datenbank müssen dafür schon vor dem Hochladen den PostgreSQL-Dienst `qonnectra` verwenden, siehe Abschnitt [Verbindung zur PostGIS-Datenbank](./25-qgis-arbeitsplatz-einrichten.md#_25-2-verbindung-zur-postgis-datenbank-und-zu-den-diensten). Qonnectra lässt sie beim Hochladen unverändert, und eine Verbindung über Host, Benutzername und Passwort, wie sie am Arbeitsplatz über das VPN eingerichtet ist, erreicht der Server nicht. Umgestellt werden nur Layer, die auf GeoPackage-Dateien verweisen – sie zeigen danach über den Dienst auf die gleichnamige Tabelle der Datenbank –, und Layer aus hochgeladenen Datendateien, die danach auf deren Ablage auf dem Server zeigen. Anschließend prüft es das Projekt und meldet das Ergebnis über dem Formular.
 
 ![Screenshot des Formulars eines QGIS-Projekts mit Hervorhebung der Meldungen nach dem Hochladen oben](/images/manual/teil-b/qgis_project_messages.jpg)
 
@@ -37,7 +37,7 @@ Der QGIS-Server bietet jedes hinterlegte Projekt über diese Dienste an:
 
 - **WMS** – Kartenbilder, zum Anzeigen.
 - **WFS** – die Objekte selbst mit ihren Attributen, zum Abfragen und Weiterverarbeiten.
-- **WMTS** – Kartenbilder in Kacheln, unter derselben Adresse wie der WMS mit `SERVICE=WMTS`.
+- **WMTS** – Kartenbilder in Kacheln, unter derselben Adresse wie der WMS mit `SERVICE=WMTS`, für die Layer und Gruppen, die in den Projekteigenschaften von QGIS unter „QGIS-Server“ → „WMTS“ freigegeben sind.
 - **OGC API Features** – die Objekte als GeoJSON über eine REST-Schnittstelle.
 
 Die Adressen eines Projekts stehen in seinem Formular unter „Zugriffs-URLs“.
@@ -51,7 +51,7 @@ Die Adressen eines Projekts stehen in seinem Formular unter „Zugriffs-URLs“.
 „WFS3-URL (OGC API Features)“ ist ein Pfad auf der Adresse der Schnittstelle, etwa `https://api.ihre-domain.de/api/v1/wfs3/netzdokumentation/`.
 
 ::: info
-Die Dienste liefern, was das QGIS-Projekt enthält, mit dessen Filtern und Stilen. Soll eine Stelle nur ein Projekt oder nur bestimmte Layer sehen, hinterlegen Sie dafür ein eigenes QGIS-Projekt, das nur diese enthält.
+Die Dienste liefern, was das QGIS-Projekt enthält, mit dessen Filtern und Stilen. Ein eigenes, reduziertes QGIS-Projekt für eine Stelle schränkt deren Zugriff jedoch nicht ein: Jedes aktive Konto kann über den Parameter `MAP` jedes hinterlegte Projekt abrufen, siehe Abschnitt [Authentifizierung der Dienste](#_27-3-authentifizierung-der-dienste).
 :::
 
 ## 27.3 Authentifizierung der Dienste
@@ -59,7 +59,7 @@ Die Dienste liefern, was das QGIS-Projekt enthält, mit dessen Filtern und Stile
 Die Dienste verlangen eine Anmeldung mit Benutzername und Passwort eines Qonnectra-Kontos. In QGIS tragen Sie beide in der WMS- oder WFS-Verbindung unter „Authentifizierung“ als „Basic“ ein. Ohne Anmeldung antwortet der Server mit „401“.
 
 ::: warning
-Die Dienste kennen keine Rollen. Jedes aktive Konto sieht jedes hinterlegte QGIS-Projekt mit allen Layern, auch ein Konto der Rolle „Viewer“ und eines ohne Gruppe. Einschränken lässt sich das nur über den Inhalt der Projekte, siehe den Hinweis in Abschnitt [Angebotene Dienste](#_27-2-angebotene-dienste-wms-wfs-wmts-ogc-api-features).
+Die Dienste kennen keine Rollen. Jedes aktive Konto sieht jedes hinterlegte QGIS-Projekt mit allen Layern, auch ein Konto der Rolle „Viewer“ und eines ohne Gruppe. Was in keinem hinterlegten Projekt enthalten ist, liefern die Dienste nicht; einschränken lässt sich der Zugriff nur so, für alle Konten zugleich.
 :::
 
 Für eine Stelle, die die Dienste dauerhaft abrufen soll, etwa das GIS einer Kommune, legen Sie ein eigenes Konto ohne Gruppe an. Es öffnet die Dienste, sieht aber in der Weboberfläche keine Daten, siehe Abschnitt [Benutzende und Gruppen anlegen](./19-rollen-und-rechte.md#_19-1-benutzende-und-gruppen-anlegen).
@@ -74,7 +74,7 @@ Eine Quelle gehört zu genau einem Projekt. Ihre Felder:
 - „WMS-URL“ – die Adresse des Dienstes, mit festen Parametern wie `MAP` darin.
 - „Reihenfolge“ und „Aktiv“.
 - Unter „Authentifizierung“ „Benutzer“ und „Passwort“, falls der Dienst eine Anmeldung verlangt. Das Passwort wird verschlüsselt gespeichert.
-- Unter „PDF-Export“ die „Attribution“ – der Quellenvermerk, den die Lizenz des Dienstes verlangt. Ohne ihn erscheint der Dienst nicht in PDF-Exporten.
+- Unter „PDF-Export“ die „Attribution“ – der Quellenvermerk, den die Lizenz des Dienstes verlangt. Ohne ihn erscheint der Dienst im PDF ohne Quellenvermerk.
 
 Beim Speichern einer neuen Quelle oder einer geänderten Adresse fragt Qonnectra die Layer des Dienstes ab und listet sie darunter auf. Je Layer legen Sie fest, ob er „Aktiviert“ ist, in welcher „Reihenfolge“ er steht, ab und bis zu welcher Zoomstufe er erscheint und wie deckend er ist – die Spalte „Transparenz“ meint die Deckkraft: 1 ist undurchsichtig.
 
@@ -97,9 +97,3 @@ Die Karte fragt externe Dienste nicht selbst ab, sondern über Qonnectra. Dieser
 ::: warning
 Ändert sich der Inhalt des externen Dienstes, zeigt die Karte bis zu 30 Tage lang die alten Bilder. Soll ein neuer Stand sofort sichtbar sein, muss der Betrieb den Zwischenspeicher leeren, siehe Abschnitt [Häufige Störungen und ihre Behebung](./28-betrieb-der-instanz.md#_28-7-haufige-storungen-und-ihre-behebung).
 :::
-
-Der Zwischenspeicher lässt sich vorab füllen, damit auch der erste Aufruf schnell ist: Der Befehl `warm_wms_cache` ruft die Kartenbilder aller aktiven Quellen für die Zoomstufen 10 bis 14 ab. Der Betrieb führt ihn aus:
-
-```bash
-docker compose exec backend python manage.py warm_wms_cache
-```

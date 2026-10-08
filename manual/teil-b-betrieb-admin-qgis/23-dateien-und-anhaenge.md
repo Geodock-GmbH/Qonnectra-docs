@@ -17,7 +17,7 @@ Eine hochgeladene Datei landet unter diesem Pfad:
 
 Die Anhänge einer Wohneinheit liegen im Ordner ihrer Adresse.
 
-Welche Ordnernamen gelten, legen die „Speicherpräferenzen“ fest. Es gibt genau einen Eintrag; sein Feld „Folder structure“ ordnet jeder Objektart und jeder Kategorie einen Ordner zu.
+Welche Ordnernamen gelten, legen die „Speicherpräferenzen“ fest. Es gibt genau einen Eintrag; sein Feld „Folder structure“ ordnet jeder Objektart und jeder Kategorie einen Ordner zu. Für Kabel enthält der mitgelieferte Eintrag keine Zuordnung; ihre Anhänge liegen deshalb ohne Kategorieordner direkt im Ordner des Kabels unter `cables`.
 
 ![Screenshot der Speicherpräferenzen mit der Zuordnung von Objektarten und Kategorien zu Ordnern im Feld „Folder structure“ in der Mitte](/images/manual/teil-b/admin_storage_preferences.jpg)
 
@@ -25,11 +25,11 @@ Welche Ordnernamen gelten, legen die „Speicherpräferenzen“ fest. Es gibt ge
 Eine geänderte Ordnerstruktur gilt nur für Dateien, die danach hochgeladen werden. Vorhandene Dateien bleiben, wo sie sind, und ihre Einträge verweisen weiter dorthin. Wer die Struktur ändert, hat danach zwei Ordnungen nebeneinander.
 :::
 
-Benennen Sie in der Weboberfläche ein Rohr, einen Netzknoten, eine Adresse oder eine Wohneinheit um, oder bekommt eine Trasse eine neue ID, verschiebt Qonnectra den Ordner mit. Ein Umbenennen in QGIS bewegt nichts, und auch ein umbenanntes Kabel oder Gebiet behält seinen Ordner; die Anhänge bleiben trotzdem erreichbar, nur der Ordnername passt nicht mehr.
+Benennen Sie in der Weboberfläche oder im Administrationsbereich ein Rohr, ein Kabel, einen Netzknoten, eine Adresse oder eine Wohneinheit um, oder bekommt eine Trasse eine neue ID, verschiebt Qonnectra den Ordner mit. Ein Umbenennen in QGIS bewegt nichts, und auch ein umbenanntes Gebiet behält seinen Ordner; die Anhänge bleiben trotzdem erreichbar, nur der Ordnername passt nicht mehr.
 
 ## 23.2 Dateitypkategorien
 
-Die **Dateitypkategorien** ordnen jeder Dateiendung eine Kategorie zu, etwa `jpg` den Fotos oder `pdf` den Dokumenten. Sie stehen unter „Dateitypkategorien“, eine Zeile je Endung mit „Kategorie“ und „Beschreibung“.
+Die **Dateitypkategorien** ordnen jeder Dateiendung eine Kategorie zu, etwa `jpg` den Fotos oder `pdf` den Dokumenten. Sie stehen unter „Dateitypkategorien“, eine Zeile je Endung in der Form „jpg → photos“; die „Beschreibung“ zeigt erst das Formular einer Zeile.
 
 ![Screenshot der Liste der Dateitypkategorien mit Endung und Kategorie je Zeile im Inhaltsbereich](/images/manual/teil-b/admin_file_type_categories.jpg)
 
@@ -82,5 +82,5 @@ Zum Verschieben:
 ![Screenshot des Formulars zum Verschieben verwaister Dateien mit der Liste der ausgewählten Dateien oben und dem Ziel darunter](/images/manual/teil-b/admin_move_files.jpg)
 
 ::: warning
-Die gewöhnliche Aktion „Ausgewählte … löschen“ fehlt in dieser Liste mit Absicht: Sie würde nur die Einträge entfernen und die Dateien als unauffindbaren Rest im Ablageordner lassen. Löschen Sie Anhänge deshalb immer über die Aktion für verwaiste Dateien oder im Reiter „Anhänge“.
+Die gewöhnliche Aktion „Ausgewählte … löschen“ fehlt in dieser Liste mit Absicht: Sie würde nur die Einträge entfernen und die Dateien als unauffindbaren Rest im Ablageordner lassen. Die Schaltfläche „Löschen“ im Formular einer einzelnen Feature-Datei gibt es dagegen weiterhin, und sie tut genau das: Der Eintrag verschwindet, die Datei bleibt zurück. Löschen Sie Anhänge deshalb immer über die Aktion für verwaiste Dateien oder im Reiter „Anhänge“.
 :::
