@@ -953,8 +953,8 @@ if [ "$APP_USER_OK" -eq 1 ]; then
     ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
 
 Playwright logs in with the application account, so that the images show the
-view of ordinary users; only the chapters 19-24 (administration) use the
-superuser."
+view of ordinary users; only the chapters 19-24, 27 and 28 (administration,
+Logs) use the superuser."
 else
 	LOGIN_SECTION="Login (Django superuser): ${DJANGO_SUPERUSER_USERNAME} / ${DJANGO_SUPERUSER_PASSWORD}
 

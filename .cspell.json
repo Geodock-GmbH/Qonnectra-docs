@@ -125,7 +125,8 @@
   "ignorePaths": [
     ".git/**/*",
     ".cspell.json",
-    "scripts/qonnectra-demo-data/testprojekt-export.json"
+    "scripts/qonnectra-demo-data/testprojekt-export.json",
+    "playwright/fixtures/**"
   ],
   "overrides": [
     {

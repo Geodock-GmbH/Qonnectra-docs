@@ -11,12 +11,16 @@ import { localAdminUrl, localAppUrl } from './playwright/local-app'
 import { APP_TIME_ZONE } from './playwright/stable-dates'
 
 /**
- * Specs of the chapters 19-24 (part B, administration area). They are the only
- * ones that log in as Django superuser; everything else uses the account
- * without administration rights. Matched on the file name, because the chapter
- * number is part of it (tests/<NN>-<chapter-slug>.spec.ts).
+ * Specs of the chapters 19-24, 27 and 28 (part B). They are the only ones that
+ * log in as Django superuser; everything else uses the account without
+ * administration rights. 19-24 and 27 show the administration area, 28 the
+ * Logs - a view the app has as well (/admin/logs), but only for `is_staff`
+ * accounts, and the account without administration rights is bounced to the
+ * map there. Matched on the file name, because the chapter number is part of
+ * it (tests/<NN>-<chapter-slug>.spec.ts). 25 and 26 have no spec: QGIS is a
+ * desktop application and the two chapters carry no images.
  */
-const ADMIN_SPECS = /[\\/](19|20|21|22|23|24)-[^\\/]*\.spec\.ts$/
+const ADMIN_SPECS = /[\\/](19|2[0-4]|27|28)-[^\\/]*\.spec\.ts$/
 
 export default defineConfig({
   testDir: './tests',
@@ -128,8 +132,8 @@ export default defineConfig({
       dependencies: ['setup'],
     },
     {
-      // The chapters 19-24 of part B show the Django administration, which no
-      // account without administration rights can open. Splitting them off by
+      // The chapters 19-24, 27 and 28 of part B show the Django administration
+      // and the Logs, which no account without administration rights can open. Splitting them off by
       // chapter number keeps a plain `pnpm test:e2e` covering both parts in one
       // run, each spec with the account its chapter needs. Otherwise it is
       // "chromium": images and recordings, selected against
