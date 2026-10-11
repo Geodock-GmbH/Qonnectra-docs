@@ -409,6 +409,14 @@ opened menu – the chapter gets no video of it in addition.
 - Clicking an image opens a lightbox (`vitepress-plugin-lightbox`) – details may
   therefore be small in the 512 px rendering, but have to be legible in the
   original.
+- Diagrams (part C only) as a ```` ```mermaid ```` fence in the chapter. The
+  fence is turned into `<MermaidDiagram>` (`markdown.config` in
+  `.vitepress/config.ts`, component in `.vitepress/theme/MermaidDiagram.vue`),
+  which renders it in the browser and again on a switch to dark mode. There is
+  no lightbox for diagrams, so they have to be legible at the width of the text
+  column (around 690 px): prefer `flowchart TB`, one edge per connection, labels
+  of a few words – a diagram that needs zooming has too much in it. Node labels
+  are German like the prose; service, file and variable names stay as they are.
 
 ## Local Qonnectra instance for reproducible captures
 
