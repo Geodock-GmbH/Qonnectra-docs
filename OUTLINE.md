@@ -518,5 +518,5 @@ and what the other side is left with.
 | 19.2, 19.3 ↔ 31.8, 32.3, 33.8, 36.2: model and route rights | **19** – what the rights mean for whoever administers them | 31.8 describes the models, 32.3 where the backend enforces them (and which endpoints only check the login), 33.8 the route check in the frontend, 36.2 how a new route gets one. None restates the access levels. |
 | 27.3 ↔ 32.1: authentication of the map services | **27.3** – which login a client has to send | 32.1 explains the mechanism (`forward_auth`, Basic auth, the WMS token). |
 | 23.4 ↔ 35.3: WebDAV | **23.4** – how the media folder is reached | 35.3 describes the Caddy side. |
-| 22.1–22.4 ↔ 31.8: project-related settings | **22** – what each setting does | 31.8 names the models and how they are stored. |
+| 22.1–22.4 ↔ 31.1, 31.8: project-related settings | **22** – what each setting does | 31.1 and 31.8 name the models and how they are stored, and link. |
 | 3.8, 24.2 ↔ 32.5: exports | **3.8 / 24.2** – the exports as the interfaces offer them | 32.5 lists the endpoints behind them and the ones with no interface (GeoJSON feature export). |
