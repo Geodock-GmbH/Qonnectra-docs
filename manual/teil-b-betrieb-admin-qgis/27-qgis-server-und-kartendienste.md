@@ -62,7 +62,7 @@ Die Dienste verlangen eine Anmeldung mit Benutzername und Passwort eines Qonnect
 Die Dienste kennen keine Rollen. Jedes aktive Konto sieht jedes hinterlegte QGIS-Projekt mit allen Layern, auch ein Konto der Rolle „Viewer“ und eines ohne Gruppe. Was in keinem hinterlegten Projekt enthalten ist, liefern die Dienste nicht; einschränken lässt sich der Zugriff nur so, für alle Konten zugleich.
 :::
 
-Für eine Stelle, die die Dienste dauerhaft abrufen soll, etwa das GIS einer Kommune, legen Sie ein eigenes Konto ohne Gruppe an. Es öffnet die Dienste, sieht aber in der Weboberfläche keine Daten, siehe Abschnitt [Benutzende und Gruppen anlegen](./19-rollen-und-rechte.md#_19-1-benutzende-und-gruppen-anlegen).
+Für eine Stelle, die die Dienste dauerhaft abrufen soll, etwa das GIS einer Kommune, legen Sie ein eigenes Konto ohne Gruppe an. Für die Dienste braucht es keine Gruppe, siehe Abschnitt [Benutzende und Gruppen anlegen](./19-rollen-und-rechte.md#_19-1-benutzende-und-gruppen-anlegen).
 
 ## 27.4 Externe WMS-Quellen als Hintergrund einbinden
 

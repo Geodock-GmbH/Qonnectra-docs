@@ -31,7 +31,7 @@ Konten pflegen Sie unter „Authentifizierung und Autorisierung“ → „Benutz
 ![Screenshot des Benutzerformulars im Administrationsbereich mit Hervorhebung der drei Status-Felder und der Gruppen unten im Abschnitt „Berechtigungen“](/images/manual/teil-b/permission_user_form.jpg)
 
 ::: warning
-Ein Konto ohne Gruppe kann sich anmelden und sieht alle Menüpunkte, aber keine Daten: Ohne Gruppe hat es auf keine Objektart ein Recht, und jede Ansicht scheitert beim Laden. Wählen Sie die Gruppe deshalb gleich beim Anlegen.
+Ein Konto ohne Gruppe kann sich anmelden und sieht alle Menüpunkte, hat aber auf keine Objektart ein Recht, und die Ansichten scheitern beim Laden. Wählen Sie die Gruppe deshalb gleich beim Anlegen.
 :::
 
 Gehört ein Konto mehreren Gruppen an, gilt je Objektart die höchste Stufe, die eine seiner Gruppen vergibt. Ein Konto in „Viewer“ und „Editor“ darf also bearbeiten.
