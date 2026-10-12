@@ -24,6 +24,8 @@ uv run pytest
 
 Die Tests brauchen eine echte PostgreSQL-Datenbank mit PostGIS; eine SQLite-Datenbank genügt nicht, weil Geometrien, Trigger und `pg_trgm` im Spiel sind. Die Verbindung kommt wie beim Entwicklungsserver aus `deployment/.env` und der Shell, siehe Abschnitt [Backend starten](./30-entwicklungsumgebung.md#_30-2-backend-starten). pytest-django legt daneben eine Testdatenbank `test_<DB_NAME>` an; das Konto aus `DB_USER` braucht dafür das Recht, Datenbanken anzulegen. Der Container aus Abschnitt [Backend starten](./30-entwicklungsumgebung.md#_30-2-backend-starten) legt `POSTGRES_USER` als Superuser an und erfüllt das.
 
+Der Lauf, aus dem die Zahl in der Tabelle oben stammt, nutzte die Python-Pakete des Backend-Images, nicht die aus `uv.lock`, siehe Abschnitt [Technologiestack](./29-architekturueberblick.md#_29-2-technologiestack).
+
 `--reuse-db` steht in den Voreinstellungen: Die Testdatenbank bleibt zwischen zwei Läufen bestehen, und ein Lauf beginnt ohne erneute Migration. Nach einer neuen Migration rufen Sie pytest einmal mit `--create-db` auf, sonst laufen die Tests gegen den alten Stand der Tabellen.
 
 `pytest.ini` deklariert die Marker `slow`, `integration` und `unit`, kein Test setzt sie aber; `-m integration` wählt deshalb nichts aus. Teile wählen Sie über den Pfad oder mit `-k`. `--strict-markers` lässt außer den eingebauten Markern von pytest keine anderen als die deklarierten zu. Die Abdeckung misst pytest-cov, eingestellt in `backend/pyproject.toml` (`[tool.coverage.*]`): `uv run pytest --cov` in `backend/`.

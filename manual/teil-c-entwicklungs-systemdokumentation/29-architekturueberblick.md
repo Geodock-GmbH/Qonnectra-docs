@@ -88,6 +88,10 @@ Holt das Backend die Fähigkeiten eines WMS von der eigenen `QGIS_DOMAIN`, schre
 
 Die Versionen sind die der Sperrdateien (`backend/uv.lock`, `frontend/package-lock.json`) und der Container-Images zum Stand des Handbuchs.
 
+::: warning
+Das Image des Backends hält sich nicht an `backend/uv.lock`. Sein Dockerfile installiert mit `pip install .` die jeweils neuesten Versionen innerhalb der Grenzen aus `backend/pyproject.toml`; was im Container läuft, hängt deshalb vom Tag des Builds ab. Ein im Oktober 2026 gebautes Image enthielt etwa Django 5.2.17, Django REST Framework 3.18.1 und gunicorn 26.2.0 statt der Versionen der Tabelle. Die Tabelle gilt für die Entwicklungsumgebung, die `uv sync` aus der Sperrdatei einrichtet. Das Frontend baut dagegen mit `npm ci` genau nach `package-lock.json`.
+:::
+
 **Backend**
 
 | Baustein | Version | Aufgabe |
