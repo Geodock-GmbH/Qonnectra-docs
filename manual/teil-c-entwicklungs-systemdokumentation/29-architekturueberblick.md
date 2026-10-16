@@ -162,7 +162,7 @@ frontend/
   tests/e2e/         Playwright-Tests
 deployment/
   docker-compose.yml       Produktion
-  docker-compose.dev.yml   Entwicklung mit lokalem HTTPS
+  docker-compose.dev.yml   Entwicklung mit lokalem HTTPS (startet nicht, siehe 30.4)
   Caddyfile, Caddyfile.production
   nginx/, postgres/, qgis/, tiles/, caddy/, wireguard/, backup/
 .github/workflows/   CI des Frontends, Playwright, release-please

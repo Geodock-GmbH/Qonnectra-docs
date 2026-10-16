@@ -29,7 +29,7 @@ Die Daten liegen in Docker-Volumes: die Datenbank in `qonnectra_postgres_data_pr
 
 Die Einstellungen stehen in der Datei `deployment/.env`. Die vollständige Liste beschreibt Kapitel [Bereitstellung und Infrastruktur](../teil-c-entwicklungs-systemdokumentation/35-bereitstellung-und-infrastruktur.md); im laufenden Betrieb werden vor allem diese angefasst:
 
-- **Adressen** – `APP_DOMAIN`, `API_DOMAIN`, `ADMIN_DOMAIN`, `FILES_DOMAIN`, `QGIS_DOMAIN`, `TILE_SERVER_DOMAIN`. Jede Adresse muss außerdem in `DJANGO_ALLOWED_HOSTS` stehen, die Adressen von Weboberfläche und Administrationsbereich zusätzlich in `CSRF_TRUSTED_ORIGINS`.
+- **Adressen** – `APP_DOMAIN`, `API_DOMAIN`, `ADMIN_DOMAIN`, `FILES_DOMAIN`, `QGIS_DOMAIN`, `TILE_SERVER_DOMAIN`. Die Adressen von Schnittstelle, Administrationsbereich, Dateien und QGIS-Server müssen außerdem in `DJANGO_ALLOWED_HOSTS` stehen, dazu der interne Name `backend`; die Adressen von Weboberfläche und Administrationsbereich zusätzlich in `CSRF_TRUSTED_ORIGINS`, siehe Abschnitt [Referenz der Umgebungsvariablen](../teil-c-entwicklungs-systemdokumentation/35-bereitstellung-und-infrastruktur.md#_35-7-referenz-der-umgebungsvariablen).
 - **`COOKIE_DOMAIN`** – die gemeinsame Domain aller Adressen mit führendem Punkt, etwa `.ihre-domain.de`. Die Anmeldung gilt über sie für alle Adressen.
 - **`PUBLIC_DOCUMENTATION_URL`** – der Link „Dokumentation“ in Kopfzeile und Navigationsleiste; leer blendet ihn aus.
 - **`QGIS_SERVER_VERSION`** – die Version des QGIS-Servers, für die Warnung beim Hochladen von QGIS-Projekten.

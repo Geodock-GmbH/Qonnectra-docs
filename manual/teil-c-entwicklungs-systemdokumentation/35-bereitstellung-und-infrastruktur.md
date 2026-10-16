@@ -32,7 +32,7 @@ Alle Pfade sind relativ zum Wurzelverzeichnis des Repositorys, alle Befehle lauf
    chmod 600 .env
    ```
 
-   Drei Stellen der Vorlage führen beim ersten Start in Fehler:
+   Drei Stellen der Vorlage führen zu Fehlern:
 
    - `COOKIE_DOMAIN = .your-domain.com` steht mit Leerzeichen um das Gleichheitszeichen. Schreiben Sie `COOKIE_DOMAIN=.ihre-domain.de`; die Skripte der Sicherung lesen die Datei sonst nicht.
    - `DJANGO_ALLOWED_HOSTS` enthält die Platzhalter `BACKEND_SERVICE_NAME`, `QGIS_SERVER_SERVICE_NAME` und `CADDY_SERVICE_NAME`. Ersetzen Sie sie durch `backend` – unter diesem Namen fragt das Frontend das Backend im Docker-Netz an – und lassen Sie die beiden anderen weg.
@@ -124,7 +124,7 @@ Solange `deployment/postgres/Dockerfile` pgRouting aus dem nicht mehr gepflegten
 
 Jeder Adressblock bindet zusätzlich alle Dateien `*.caddy` aus einem eigenen Ordner unter `deployment/caddy/extra/` ein – `api/`, `admin/`, `app/`, `files/`, `qgis/`, `tileserver/` –, dazu `sites/` für ganz eigene Adressen. Der Ordner steht nicht unter Versionskontrolle. Eigene Regeln gehören dorthin statt in `Caddyfile.production`; sie überstehen damit jede Aktualisierung.
 
-Ein Beispiel ist die Datei `deployment/caddy/extra/admin/intern.caddy`; sie beschränkt den Administrationsbereich auf die öffentlichen Adressen des eigenen Netzes. `203.0.113.0/24` ist ein Platzhalter aus dem Dokumentationsbereich:
+Legen Sie dort z. B. die Datei `deployment/caddy/extra/admin/intern.caddy` an; sie beschränkt den Administrationsbereich auf die öffentlichen Adressen des eigenen Netzes. `203.0.113.0/24` ist ein Platzhalter aus dem Dokumentationsbereich:
 
 ```text
 @extern not remote_ip 203.0.113.0/24
@@ -167,8 +167,9 @@ BEGIN
     SELECT tablename FROM pg_tables
     WHERE schemaname = 'public'
       AND (tablename LIKE 'auth\_%' OR tablename LIKE 'django\_%' OR tablename LIKE 'token\_blacklist\_%'
+           OR tablename LIKE 'authtoken\_%'
            OR tablename IN ('model_permission', 'route_permission', 'user_settings', 'wms_source',
-                            'api_historicalwmssource', 'log_entry'))
+                            'api_historicalwmssource', 'wms_layer', 'api_historicalwmslayer', 'log_entry'))
   LOOP
     EXECUTE format('REVOKE ALL ON public.%I FROM %I', t, 'qgis_user');
   END LOOP;
@@ -176,13 +177,20 @@ END $$;
 SQL
 ```
 
-Ersetzen Sie `qgis_user` durch den Wert von `QGIS_DB_USER`. Danach kann der Benutzer Trassen, Netzknoten und alle übrigen Netzdaten weiter lesen und schreiben, ebenso die Auswahllisten, aber keine Konten, Gruppen, Rechte, Sitzungen, Benutzereinstellungen, WMS-Quellen und Protokolle mehr.
+Ersetzen Sie `qgis_user` durch den Wert von `QGIS_DB_USER`. Danach kann der Benutzer Trassen, Netzknoten und alle übrigen Netzdaten weiter lesen und schreiben, ebenso die Auswahllisten, aber keine Konten, Gruppen, Rechte, Sitzungen, Benutzereinstellungen, WMS-Quellen und Protokolle mehr. Lesbar bleibt auch die Leitungsauskunft (`pipeline_record`) mit Namen und Telefonnummern der anfragenden Stellen; wird sie in QGIS nicht gebraucht, nehmen Sie `pipeline_record`, `pipeline_inquiry_area`, `api_historicalpipelinerecord` und `api_historicalpipelineinquiryarea` in die Liste auf.
 
 ::: warning
 Neue Tabellen, die eine spätere Version mit ihren Migrationen anlegt, bekommt der QGIS-Benutzer wieder mit allen Rechten. Führen Sie den Befehl deshalb nach jeder Aktualisierung erneut aus, siehe Abschnitt [Aktualisierung auf eine neue Version](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md#_28-3-aktualisierung-auf-eine-neue-version).
 :::
 
-**WireGuard** bringt die QGIS-Arbeitsplätze in das Netz der Datenbank. Der Dienst legt beim Start für jeden Namen in `WIREGUARD_PEERS` einen Zugang an, als Datei `deployment/wireguard/peer_<name>/peer_<name>.conf`; im VPN hat der Server die Adresse `10.13.13.1`. Damit Anfragen an diese Adresse die Datenbank erreichen, braucht die Konfiguration des Servers eine Weiterleitung des Ports 5432 an den Container `db`, die nicht automatisch entsteht. Die Zeilen `PostUp` und `PostDown` dafür stehen in `deployment/wireguard/README.md`. Tragen Sie sie aber in die Vorlage `wireguard/templates/server.conf` ein, nicht wie dort beschrieben in `wireguard/wg_confs/wg0.conf`: Der Dienst erzeugt `wg0.conf` aus der Vorlage neu, sobald sich `WIREGUARD_PEERS`, `WIREGUARD_SERVERURL` oder `WIREGUARD_PORT` ändern, und eine Weiterleitung nur in `wg0.conf` ginge dabei verloren.
+**WireGuard** bringt die QGIS-Arbeitsplätze in das Netz der Datenbank. Der Dienst legt beim Start für jeden Namen in `WIREGUARD_PEERS` einen Zugang an, als Datei `deployment/wireguard/peer_<name>/peer_<name>.conf`; im VPN hat der Server die Adresse `10.13.13.1`. Damit Anfragen an diese Adresse die Datenbank erreichen, braucht die Konfiguration des Servers eine Weiterleitung des Ports 5432 an den Container `db`, die nicht automatisch entsteht. Die Zeilen `PostUp` und `PostDown` dafür stehen in `deployment/wireguard/README.md`, das sie nur in `wireguard/wg_confs/wg0.conf` einträgt. Der Dienst erzeugt `wg0.conf` aber aus der Vorlage `wireguard/templates/server.conf` neu, sobald sich `WIREGUARD_PEERS`, `WIREGUARD_SERVERURL` oder `WIREGUARD_PORT` ändern, und eine Weiterleitung nur in `wg0.conf` ginge dabei verloren. Tragen Sie die Zeilen deshalb an beiden Stellen ein: in `wg0.conf` wie im README beschrieben, damit sie sofort gilt, und in die Vorlage. In der Vorlage schreiben Sie jedes `$` als `\$`. Der Dienst wertet sie beim Erzeugen als Shell-Text aus; ohne Maskierung stünde in der fertigen `wg0.conf` statt der Adresse der Datenbank eine leere Zeichenkette, und das VPN startet nicht:
+
+```ini
+PostUp = DB_IP=\$(getent hosts db | awk '{print \$1}'); iptables -A FORWARD -i %i -j ACCEPT; iptables -A FORWARD -o %i -j ACCEPT; iptables -t nat -A POSTROUTING -o eth+ -j MASQUERADE; iptables -t nat -A PREROUTING -i %i -p tcp --dport 5432 -j DNAT --to-destination \$DB_IP:5432
+PostDown = DB_IP=\$(getent hosts db | awk '{print \$1}'); iptables -D FORWARD -i %i -j ACCEPT; iptables -D FORWARD -o %i -j ACCEPT; iptables -t nat -D POSTROUTING -o eth+ -j MASQUERADE; iptables -t nat -D PREROUTING -i %i -p tcp --dport 5432 -j DNAT --to-destination \$DB_IP:5432
+```
+
+Starten Sie den Dienst danach mit `docker compose restart wireguard` neu.
 
 Geben Sie jeder Person einen eigenen Zugang, behandeln Sie die Zugangsdateien wie Passwörter und entfernen Sie Zugänge, die nicht mehr gebraucht werden.
 
@@ -253,7 +261,7 @@ Alle Variablen stehen in `deployment/.env`; Docker Compose reicht sie an die Die
 | `DEFAULT_SRID` | `25832` | Koordinatenbezugssystem, siehe Abschnitt [Geometriemodelle und SRID](./31-datenmodell-des-backends.md#_31-2-geometriemodelle-und-srid) | nie |
 | `QGIS_PG_SERVICE_NAME` | `qonnectra` | Name des PostgreSQL-Dienstes in `pg_service.conf`, auch für QGIS Server | Neustart; hinterlegte Projekte müssen den Namen verwenden |
 | `QGIS_SERVER_VERSION` | leer | Version für die Warnung beim Hochladen, passend zum Image von QGIS Server | Neustart |
-| `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL`, `DJANGO_SUPERUSER_PASSWORD` | – | erstes Superuser-Konto | nur vor dem ersten Start wirksam |
+| `DJANGO_SUPERUSER_USERNAME`, `DJANGO_SUPERUSER_EMAIL`, `DJANGO_SUPERUSER_PASSWORD` | – | erstes Superuser-Konto | bei jedem Start geprüft: legt das Konto an, solange es keines mit diesem Benutzernamen gibt, siehe 28.2 |
 
 **Datenbank und QGIS Server**
 

@@ -68,7 +68,7 @@ Eine globale Vorgabe für die Rechteprüfung gibt es nicht (`DEFAULT_PERMISSION_
 | `POST`, `PUT`, `PATCH` | `edit` |
 | `DELETE` | `full` |
 
-Das Modell ergibt sich aus dem `ViewSet`. Gehört ein Konto mehreren Gruppen an, gilt die höchste Stufe; ein Konto ohne Gruppe hat auf kein Modell ein Recht und bekommt 403. Ein Superuser wird nicht geprüft. Was die Stufen für die Verwaltung bedeuten, beschreibt Abschnitt [Modellrechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-2-modellrechte-zugriff-je-datenmodell). Die Rechte eines Kontos hält jeder Prozess des Backends fünf Minuten vor. Signale leeren nur den Zwischenspeicher des Prozesses, der eine Änderung speichert; eine geänderte Stufe greift deshalb erst nach bis zu fünf Minuten überall. `GET /api/v1/auth/permissions/` liefert die zusammengeführten Modell- und Routenrechte des angemeldeten Kontos; die Weboberfläche richtet danach ihre Schaltflächen und ihre Navigationsleiste aus.
+Das Modell ergibt sich aus dem `ViewSet`. Gehört ein Konto mehreren Gruppen an, gilt die höchste Stufe; ein Konto ohne Gruppe hat auf kein Modell ein Recht und bekommt 403. Ein Superuser wird nicht geprüft. Was die Stufen für die Verwaltung bedeuten, beschreibt Abschnitt [Modellrechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-2-modellrechte-zugriff-je-datenmodell). Die zusammengeführten Rechte eines Kontos hält jeder Prozess des Backends fünf Minuten vor. Signale leeren diesen Zwischenspeicher, sobald sich `model_permission`, `route_permission` oder die Gruppen eines Kontos ändern – aber nur in dem Prozess, der die Änderung speichert; eine geänderte Stufe greift deshalb erst nach bis zu fünf Minuten überall. `GET /api/v1/auth/permissions/` liefert die zusammengeführten Modell- und Routenrechte des angemeldeten Kontos; die Weboberfläche richtet danach ihre Schaltflächen und ihre Navigationsleiste aus.
 
 Modellrechte prüfen die `ViewSet`s der Fachobjekte; welche Objektarten ein Modellrecht haben, listet Abschnitt [Modellrechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-2-modellrechte-zugriff-je-datenmodell).
 
@@ -90,11 +90,11 @@ Die Form der Antwort hängt also am Endpunkt; prüfen Sie sie im Schema.
 
 **Filter.** Django-Filter ist nicht im Einsatz. Die Endpunkte lesen ihre Filter selbst aus den Abfrageparametern, und welche ein Endpunkt kennt, steht nur in seinem Code und in seiner Beschreibung im Schema. Die häufigsten:
 
-- `project` – die Nummer des Projekts. Fast jede Liste erwartet diesen Parameter; ohne ihn liefern viele Listen die Objekte aller Projekte. Beim Anlegen steht das Projekt im Rumpf, bei den Auswertungen als `project_id`.
+- `project` – die Nummer des Projekts. Fast jede Liste erwartet diesen Parameter; ohne ihn liefern viele Listen die Objekte aller Projekte. Beim Anlegen steht das Projekt im Rumpf; auch die Auswertungen erwarten meist `project`, nur `routing/` und `fault-simulation/` heißen den Wert `project_id`.
 - `flag` – die Nummer eines Kennzeichens.
 - Verweise auf übergeordnete Objekte, etwa `uuid_conduit` für die Mikrorohre eines Rohrs oder `uuid_node` für die Struktur eines Netzknotens.
 
-**Suche.** Der Parameter `search` gehört zu den Zusatzaktionen `…/all/` und zu `trace-search/`. In `address/all/`, `node/all/` und `area/all/` sowie bei Adressen und Netzknoten in `trace-search/` sucht er mit einer Ähnlichkeitssuche (`TrigramWordSimilarity` aus `pg_trgm`, `backend/apps/api/search.py`). Die Adresssuche zerlegt den Begriff in Wörter und vergleicht sie mit Straße, Ort, Postleitzahl und Ortsteil; Treffer sind nach Ähnlichkeit sortiert. Rohre, Kabel, Trassen, Wohneinheiten und Leitungsauskünfte suchen dagegen mit einem einfachen Teilstring-Vergleich über mehrere Spalten.
+**Suche.** Der Parameter `search` gehört zu den Zusatzaktionen `…/all/`, zu `trace-search/` und zu den Listen `pipeline-records/` und `logs/`. In `address/all/`, `node/all/` und `area/all/` sowie bei Adressen und Netzknoten in `trace-search/` sucht er mit einer Ähnlichkeitssuche (`TrigramWordSimilarity` aus `pg_trgm`, `backend/apps/api/search.py`). Die Adresssuche zerlegt den Begriff in Wörter und vergleicht sie mit Straße, Ort, Postleitzahl und Ortsteil; Treffer sind nach Ähnlichkeit sortiert. Rohre, Kabel, Trassen, Wohneinheiten und Leitungsauskünfte suchen dagegen mit einem einfachen Teilstring-Vergleich über mehrere Spalten.
 
 ::: info
 Bei gleicher Ähnlichkeit ist die Reihenfolge der Treffer nicht festgelegt; zwei gleiche Anfragen können gleich bewertete Treffer in unterschiedlicher Reihenfolge liefern. Wer über die Seiten einer Suche blättert, kann deshalb Treffer doppelt sehen oder verpassen.
@@ -122,7 +122,7 @@ Einige Eigenheiten, die beim Aufruf auffallen:
 
 - `routing/` erwartet `project_id` und `tolerance` als Liste mit einem Element (`"project_id": [2]`), entgegen dem Schema, das einfache Zahlen angibt: Der Endpunkt liest jeweils das erste Element. Fehlt einer der beiden Werte, scheitert er mit 500.
 - `fiber-trace/` nimmt genau einen der Parameter `fiber_id`, `cable_id`, `node_id`, `address_id`, `residential_unit_id`. Mit `include_geometry` liefert er den Weg als Geometrie, `geometry_mode` und `orient_geometry` steuern, wie er zusammengesetzt wird.
-- `dashboard/statistics/` hält sein Ergebnis fünf Minuten je Projekt und Kennzeichen vor, und zwar im Arbeitsspeicher des jeweiligen Prozesses. Jeder Worker von gunicorn hat seinen eigenen Stand.
+- `dashboard/statistics/` hält sein Ergebnis bis zu fünf Minuten im Arbeitsspeicher vor. Jeder Worker von gunicorn hat seinen eigenen Stand.
 
 Import und Export:
 

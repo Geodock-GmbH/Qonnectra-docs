@@ -28,7 +28,7 @@ Der Lauf, aus dem die Zahl in der Tabelle oben stammt, nutzte die Python-Pakete 
 
 `--reuse-db` steht in den Voreinstellungen: Die Testdatenbank bleibt zwischen zwei Läufen bestehen, und ein Lauf beginnt ohne erneute Migration. Nach einer neuen Migration rufen Sie pytest einmal mit `--create-db` auf, sonst laufen die Tests gegen den alten Stand der Tabellen.
 
-`pytest.ini` deklariert die Marker `slow`, `integration` und `unit`, kein Test setzt sie aber; `-m integration` wählt deshalb nichts aus. Teile wählen Sie über den Pfad oder mit `-k`. `--strict-markers` lässt außer den eingebauten Markern von pytest keine anderen als die deklarierten zu. Die Abdeckung misst pytest-cov, eingestellt in `backend/pyproject.toml` (`[tool.coverage.*]`): `uv run pytest --cov` in `backend/`.
+`pytest.ini` deklariert neben `django_db` von pytest-django die Marker `slow`, `integration` und `unit`, kein Test setzt sie aber; `-m integration` wählt deshalb nichts aus. Teile wählen Sie über den Pfad oder mit `-k`. `--strict-markers` lässt außer den eingebauten Markern von pytest keine anderen als die deklarierten zu. Die Abdeckung misst pytest-cov, eingestellt in `backend/pyproject.toml` (`[tool.coverage.*]`): `uv run pytest --cov` in `backend/`.
 
 ::: info
 `backend/README.md` nennt Testdateien, die es nicht mehr gibt (`test_models.py`). Maßgeblich ist der Inhalt von `backend/apps/api/tests/`.
