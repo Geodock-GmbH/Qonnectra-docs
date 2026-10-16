@@ -136,7 +136,7 @@ Die wichtigsten dieser Listen:
 - **Phase** – der Bauabschnitt einer Trasse.
 - **Netzebene** – die Stufe des Objekts im Netzaufbau, üblicherweise „Netzebene 1“ bis „Netzebene 4“. Rohr, Netzknoten und Kabel tragen sie.
 - **Firmen** – eine gemeinsame Liste für die drei Rollen „Eigentümer“, „Baufirma“ und „Hersteller“. Zu jeder Firma lassen sich Anschrift, Telefonnummer und E-Mail-Adresse hinterlegen.
-- **Oberfläche** und **Bauart** einer Trasse. Bei der Oberfläche ist zusätzlich vermerkt, ob sie versiegelt ist – davon hängt die Wertermittlung ab, siehe Kapitel [Wertermittlung](./09-wertermittlung.md).
+- **Oberfläche** und **Bauart** einer Trasse. Bei der Oberfläche ist zusätzlich vermerkt, ob sie versiegelt ist.
 - **Rohrtyp**, **Kabeltyp**, **Netzknotentyp** und **Komponententyp** mit den Angaben, aus denen Qonnectra Mikrorohre, Fasern und Ports erzeugt.
 - die Farblisten für Mikrorohre und Fasern, die Statuslisten für Mikrorohre und Fasern, der **Ausbaustatus** einer Adresse, **Typ** und **Status** einer Wohneinheit, der **Gebietstyp** und der **Container-Typ**.
 

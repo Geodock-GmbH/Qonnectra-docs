@@ -29,7 +29,7 @@ headings) and every string quoted from the German app (selectors, UI labels).
 4. The account follows from the chapter number, not from a switch. Part A
    (chapters 1–18) uses the account **without** administration rights
    (`APP_USER_*`, group „Editor“), because it describes the view of ordinary
-   users. The chapters 19–24 run in the Playwright project `chromium-admin`
+   users. The chapters 19–24, 27 and 28 run in the Playwright project `chromium-admin`
    (`ADMIN_SPECS` in `playwright.config.ts`) as Django superuser against
    `https://admin.qonnectra.localhost` (`ADMIN_DOMAIN`) – the Django
    administration, not the app route `/admin/logs`, which is the only `/admin/`
@@ -90,10 +90,10 @@ of 2 has no effect there.
   **plus** the Django session the administration needs). Neither is reusable
   across runs (the access token lives 15 minutes and refresh tokens are rotated
   with a blacklist).
-- Images of the chapters 19–24 that show user accounts use the placeholder
+- Images of the chapters 19–24, 27 and 28 that show user accounts use the placeholder
   accounts from `playwright/admin-users.ts` („Erika“, „Max“, „Moritz
   Mustermann“), never the accounts of the instance.
-- Videos of the chapters 19–24 run in `chromium-admin` like their images, with
+- Videos of the chapters 19–24, 27 and 28 run in `chromium-admin` like their images, with
   the superuser state, and are covered by `tests/captures.lock` the same way.
 
 ## Determinism
@@ -125,13 +125,13 @@ Screenshots have to be pixel-identical on a repeated run:
   (`playwright/stable-dates.ts`) rewrites API responses on their way into the
   page; the Django admin renders its pages on the server, so nothing passes
   through a route that could be patched. Candidates that change from run to
-  run: the „Letzte Aktionen“ ("Recent actions") box on the index page (filled
+  run: the „Neueste Aktionen“ ("Recent actions") box on the index page (filled
   by whatever the run created, including `admin-users.ts`), „Letzte Anmeldung“
   and „Mitglied seit“ ("Last login", "Date joined") on the user form, the date
   filters and date columns of list views, and auto-increment IDs of records the
   run created. Avoid these views,
   crop them out, or pick a list without such columns. For every image of the
-  chapters 19–24, check the capture for dates, times and IDs, and run the
+  chapters 19–24, 27 and 28, check the capture for dates, times and IDs, and run the
   spec twice and compare (`pnpm screenshots:publish --dry-run` reports every
   image as changed or unchanged).
 
@@ -210,7 +210,7 @@ Report afterwards: specs produced, files produced and published, and whether
 
 **Warn about unstable dates, every time.** If any capture shows a date, time or
 ID that the backend produced and the spec could not freeze – in the chapters
-19–24 that is the rule, not the exception – put a separate warning at the top
+19–24, 27 and 28 that is the rule, not the exception – put a separate warning at the top
 of the report: which image, which value, and whether the second run changed it.
 CI compares every published image with a fresh capture, so such an image fails
 the job on the next day. Do not publish it silently.

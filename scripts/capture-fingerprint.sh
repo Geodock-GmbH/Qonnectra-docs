@@ -122,10 +122,26 @@ playwright_version() {
 # only, bare specifiers are packages - from every root given, and prints one
 # line per root: "<root>\t<file> <file> ...", the files sorted and including
 # the root. One node process for all roots.
+#
+# Data files count too, when a module names them the way the helpers in
+# playwright/ do: `new URL('./fixtures/x.qgs', import.meta.url)`. Without it a
+# changed fixture - the QGIS project chapter 27 uploads - would leave the spec
+# that uploads it matching the lock. Only files of the repo count: local-app.ts
+# names local-app/deployment/.env the same way, and that file holds secrets
+# generated per machine, so hashing it would make every spec stale everywhere
+# else.
 trace_imports() {
 	node - "$@" <<'JS'
 const fs = require('fs')
 const path = require('path')
+const { execFileSync } = require('child_process')
+
+const repoFiles = new Set(
+  execFileSync('git', ['ls-files', '-co', '--exclude-standard'], { encoding: 'utf8' })
+    .split('\n')
+    .filter(Boolean)
+    .map((file) => path.resolve(file)),
+)
 
 const resolve = (from, spec) => {
   const base = path.resolve(path.dirname(from), spec)
@@ -140,9 +156,14 @@ const trace = (file, seen) => {
   seen.add(file)
   const source = fs.readFileSync(file, 'utf8')
   const imports = /^[ \t]*(?:import|export)\b[^"';]*?\bfrom[ \t]+["'](\.{1,2}\/[^"']+)["']/gm
+  const dataFiles = /\bnew URL\([ \t]*["'](\.{1,2}\/[^"']+)["'][ \t]*,[ \t]*import\.meta\.url[ \t]*\)/g
   for (const match of source.matchAll(imports)) {
     const dependency = resolve(file, match[1])
     if (dependency) trace(dependency, seen)
+  }
+  for (const match of source.matchAll(dataFiles)) {
+    const dependency = resolve(file, match[1])
+    if (dependency && repoFiles.has(dependency)) seen.add(dependency)
   }
   return seen
 }

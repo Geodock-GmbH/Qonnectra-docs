@@ -178,6 +178,10 @@ Bei vielen Dateien hilft das Feld „Dateien suchen...“ oberhalb der Liste. Si
 
 ![](/videos/map_attachment.webm)
 
+::: danger
+Laden Sie keine zweite Datei mit demselben Namen an dasselbe Objekt hoch. Qonnectra meldet dann einen Fehler, hat die vorhandene Datei zu diesem Zeitpunkt aber schon durch die neue ersetzt; ihr bisheriger Inhalt ist verloren. Geben Sie Fotos und Protokollen eindeutige Namen, etwa mit Datum.
+:::
+
 ## 3.8 Exportformate im Überblick
 
 Qonnectra hat keinen Menüpunkt „Export“. Daten verlassen die Anwendung dort, wo sie auch angezeigt werden, jeweils in dem Format, das zum Inhalt passt:

@@ -212,7 +212,8 @@ QGIS. Assumes part A.
 
 - 20.1 Zugang, Aufbau und Abgrenzung zur Weboberfläche
 - 20.2 Suchen, Filtern und Massenbearbeitung
-- 20.3 Was im Administrationsbereich nicht gepflegt werden sollte
+- 20.3 Änderungsverlauf eines Objekts einsehen
+- 20.4 Was im Administrationsbereich nicht gepflegt werden sollte
 
 ### 21. Projekte und Stammdaten pflegen
 
@@ -242,14 +243,13 @@ QGIS. Assumes part A.
 - 23.2 Dateitypkategorien
 - 23.3 Größen- und Formatgrenzen
 - 23.4 Zugriff auf die Medien über WebDAV
+- 23.5 Verwaiste Dateien finden, verschieben und löschen
 
 ### 24. Daten importieren und exportieren
 
 - 24.1 Excel-Import der Rohre: Vorlage und Pflichtspalten
 - 24.2 GeoPackage-Schema herunterladen
-- 24.3 Feature-Export als GeoJSON
-- 24.4 Auskunftsexport und Netzknoten-Export
-- 24.5 Erst- und Massenbefüllung eines Projekts
+- 24.3 Erst- und Massenbefüllung eines Projekts
 
 ### 25. QGIS-Arbeitsplatz einrichten
 
@@ -321,7 +321,7 @@ English there anyway.
 - 32.1 Authentifizierung: JWT, Cookies, Token-Rotation
 - 32.2 Aufbau der Endpunkte und Namenskonventionen
 - 32.3 Paginierung, Filter und Suche
-- 32.4 Fachliche Endpunkte: Routing, Faserweg, Signalanalyse, Störung, Wertermittlung, Statistik
+- 32.4 Fachliche Endpunkte: Routing, Faserweg, Signalanalyse, Störung, Wertermittlung, Statistik, Feature-Export
 - 32.5 Vektor-Tile-Endpunkte
 - 32.6 OpenAPI-Schema und Swagger-UI
 - 32.7 Fehlerbehandlung und Statuscodes
@@ -413,13 +413,34 @@ are still missing inside a written chapter carry the same sentence.
   styling, labelling). 25 and 26 were cut down to three resp. four sections for
   that reason. Chapter 27 is not affected: hinterlegte QGIS-Projekte and
   external WMS sources are maintained in Qonnectra, so it gets its screenshots
-  from the administration area like 19-24.
-- The chapters 19-24 show `/admin/*` and are the only ones that log in as Django
-  superuser. They are split off into the Playwright project `chromium-admin`
-  (`ADMIN_SPECS` in `playwright.config.ts`), which uses `admin-auth-state.json`;
-  the setup project writes both states on every run. So a plain `pnpm test:e2e`
-  still covers everything, and no part A image can be retaken with the wrong
-  account.
+  from the administration area like 19-24. Chapter 28 shows the Logs, which
+  only `is_staff` accounts can open - in the app under `/admin/logs` as well
+  as in the administration area.
+- The chapters 19-24, 27 and 28 show `/admin/*` or views only the superuser
+  can open, and are the only ones that log in as Django superuser. They are
+  split off into the Playwright project `chromium-admin` (`ADMIN_SPECS` in
+  `playwright.config.ts`), which uses `admin-auth-state.json`; the setup
+  project writes both states on every run. So a plain `pnpm test:e2e` still
+  covers everything, and no part A image can be retaken with the wrong account.
+- The demo project brings nothing for four of the administration pages: no WMS
+  source, no QGIS project, no GeoPackage schema configuration and no saved user
+  settings (`/admin/api/wmssource/`, `qgisproject/`, `geopackageschemaconfig/`,
+  `usersettings/` are empty lists after the import). The specs of the chapters
+  22, 24 and 27 create what their images show for the length of the run and
+  remove it again, like the placeholder accounts. The QGIS project they upload
+  is a hand-written minimal `.qgs` in `playwright/fixtures/` with one PostGIS
+  layer over the service connection of the stack - a test input, not a
+  published artefact, and the local QGIS Server is at the same time the WMS
+  source of 27.4, so no image depends on a server outside the stack.
+- Chapter 20 got a section of its own for the change history
+  (`SimpleHistoryAdmin` on eleven models: trench, conduit, cable, node,
+  address, residential unit, area, flags, projects, pipeline record and
+  inquiry area, container type), chapter 23 one for the orphaned attachments
+  (filter „Verwaist“, actions „verschieben“ and „löschen“ of the Feature-Dateien
+  page) - both are administration features with no counterpart in the web
+  application. Chapter 24 lost two sections: the GeoJSON feature export is an
+  API endpoint without a surface in either interface and moved to 32.4, and
+  the exports of the web application are already listed in 3.8.
 - The instance knows only two accounts, both belonging to whoever set it up.
   `playwright/admin-users.ts` creates three recognisable placeholder accounts for
   the length of a capture run - one per shipped group (Admin, Editor, Viewer) -
@@ -459,3 +480,8 @@ and what the other side is left with.
 | 1.2.1, 1.5, 3.3, 11.4 ↔ chapter 17: settings that other chapters trigger | **17** explains what the values mean and what they do | 1.2.1, 1.5, 3.3 and 11.4 name only the occasion („der Eintrag „Trasse“ lässt sich aufklappen, sobald …“) and link to 17. |
 | 4.8.1 ↔ 2.6: what a Kennzeichen is | **2.6** – it is a term of the data model, not a dashboard feature | 4.8.1 keeps only the negative statement that the dashboard has no flag filter, and links to 2.6. Move the definition when chapter 2 is written. |
 | Error messages spread over all chapters ↔ chapter 18 | **the chapter where the error occurs** – a message is most useful next to the action that causes it | 18 stays a collection page: it groups the recurring cases (session expired, missing rights, empty map or chart) and links *back* into the chapters. It does not become the only place an error is mentioned. |
+| 21.1 ↔ 22.1–22.3: Netzschema-Einstellungen, Rohrabzweig-Einstellungen and Kostensätze appear as inlines of the project form **and** as administration pages of their own | **22.1–22.3** – what each setting means, what it does in part A and what happens while it is missing | 21.1 shows the project form, names the three inlines as the place to fill them in when a project is created, and links. |
+| 22.4 ↔ 24.2 ↔ 26.4: the GeoPackage schema | **22.4** configures (which layers), **24.2** downloads (admin action, API URL, what the empty file contains), **26.4** uses it in the field and brings the data back | Each of the three names its own step and links to the other two. |
+| 27.4 ↔ 3.3 (and 19.6): external WMS sources | **27.4** – source, credentials, layers, zoom range, and the `wmssource` right nobody has by default | 3.3 keeps the one note that the legend group is missing without the right, and links. 19.6 names the missing right among the four and links to 27.4 for what it unlocks. |
+| 28.2 ↔ 35.6: environment variables | **35.6** – the complete reference | 28.2 names only what an operator touches in running operation, and the pitfalls of the rest: domains and allowed hosts, cookie domain, documentation link, QGIS Server version, WireGuard peers, the encryption key and the database passwords that must not change, `DEFAULT_SRID`, and which variables need a rebuild of the frontend. 28.6 adds the tile server URL. Links to 35.6 for everything else. |
+| 20.2 ↔ 24.3, 26.3: the repair actions of the administration (microducts for empty conduits, fibers for empty cables, cable lengths, trench IDs, auto-link of micropipes, orphaned files) | **20.2** – lists them once, with what each one does | 24.3 and 26.3 name the occasion („nach einem Import aus QGIS …“) and link. 23.5 owns the orphaned files. |

@@ -11,7 +11,7 @@
 //                         that the images show the interface the way ordinary
 //                         users see it.
 // - admin-auth-state.json Django superuser, always. Used by the project
-//                         "chromium-admin" for the chapters 19-24 of part B,
+//                         "chromium-admin" for the chapters 19-24, 27 and 28 of part B,
 //                         which show the administration area on {$ADMIN_DOMAIN}.
 //                         Only the superuser can open that area at all.
 //
@@ -184,7 +184,7 @@ async function djangoAdminSessionCookies(
  * Logs in as `loginRole` and writes the state to `stateFile`.
  *
  * `withAdminSession` additionally logs in to the Django administration, so that
- * the state opens {$ADMIN_DOMAIN} as well - needed for the chapters 19-24.
+ * the state opens {$ADMIN_DOMAIN} as well - needed for the chapters 19-24, 27 and 28.
  */
 async function storeLoggedInState(
   browser: Browser,
@@ -346,7 +346,7 @@ setup('Anmelden und Zustand speichern', async ({ browser, request }) => {
 setup('Als Administration anmelden und Zustand speichern', async ({ browser, request }) => {
   setup.info().annotations.push({
     type: 'Login',
-    description: 'Django superuser for the chapters 19-24 (administration area)',
+    description: 'Django superuser for the chapters 19-24, 27 and 28 (administration area, Logs)',
   })
 
   await storeLoggedInState(browser, request, 'admin', AUTH_STATE.admin, true)

@@ -73,10 +73,10 @@ function requiredNew(env: Record<string, string>, key: string): string {
  * The two accounts of the instance.
  *
  * - `user`: account without administration rights (group "Editor"). Every
- *   spec outside the chapters 19-24, because the manual describes the view of
+ *   spec outside the chapters 19-24, 27 and 28, because the manual describes the view of
  *   ordinary users - the superuser additionally sees the "Logs" menu entry and
  *   bypasses every permission check.
- * - `admin`: Django superuser. Only for the chapters 19-24, which show the
+ * - `admin`: Django superuser. Only for the chapters 19-24, 27 and 28, which show the
  *   administration area that stays hidden from everyone else (`/admin/*`).
  */
 export type Role = 'user' | 'admin'
@@ -96,7 +96,7 @@ export interface LocalApp extends Credentials {
    * Administration area, e.g. https://admin.qonnectra.localhost - the origin
    * only, the Django admin itself sits below `/admin/`.
    *
-   * A separate origin, not a path of the frontend: the chapters 19-24 describe
+   * A separate origin, not a path of the frontend: the chapters 19-24 and 27 describe
    * the Django administration, which Caddy routes to the backend on this domain
    * (`{$ADMIN_DOMAIN}` in Caddyfile.production.local). The frontend knows
    * exactly one route below `/admin/`, namely `/admin/logs`, and answers
@@ -109,8 +109,8 @@ export interface LocalApp extends Credentials {
 /**
  * Credentials of a named role.
  *
- * The setup project needs both in the same run: every chapter outside 19-24
- * logs in as `user`, the chapters 19-24 with `/admin/*` as `admin` (see
+ * The setup project needs both in the same run: every chapter outside 19-24,
+ * 27 and 28 logs in as `user`, those chapters as `admin` (see
  * playwright/auth.setup.ts).
  */
 export function credentialsFor(selected: Role): Credentials {
@@ -176,7 +176,7 @@ export function localAppUrl(): string {
   }
 }
 
-/** Like localAppUrl(), but for the administration area (chapters 19-24). */
+/** Like localAppUrl(), but for the administration area (chapters 19-24, 27 and 28). */
 export function localAdminUrl(): string {
   try {
     return localApp().adminUrl
