@@ -216,7 +216,7 @@ Der Trigger auf `trench_conduit_connect` löscht mehr als die Verbindungen des b
 
 - Ein neues Rohr bekommt seine Mikrorohre, ein neues Kabel seine Fasern, jeweils aus der Farbzuordnung seines Typs. Ein späterer Wechsel des Typs ändert an beiden nichts.
 - Wird ein Kabel mit einem Mikrorohr verknüpft oder davon gelöst, berechnet das Backend `length` neu, über das Routing in `routing.py`. Ändern sich die Reserven, rechnet es `length_total` nach.
-- Ändert sich der Name eines Netzknotens, Rohrs oder Kabels bzw. die Kennung einer Trasse, Adresse oder Wohneinheit, zieht der Ordner ihrer Anhänge mit um. Beim Kabel überschreibt der neue Name außerdem den Text aller seiner Beschriftungen im Netzschema (`cable_label`).
+- Ändert sich der Name eines Netzknotens, Rohrs oder Kabels, die Kennung einer Trasse oder Wohneinheit bzw. die Anschrift einer Adresse, zieht der Ordner ihrer Anhänge mit um. Beim Kabel überschreibt der neue Name außerdem den Text aller seiner Beschriftungen im Netzschema (`cable_label`).
 - Änderungen an Rechten leeren den Zwischenspeicher der Rechte, siehe Abschnitt [Rechte-, Einstellungs- und Verlaufsmodelle](#_31-8-rechte-einstellungs-und-verlaufsmodelle).
 
 Signale laufen nur, wenn Django speichert – über die Schnittstelle, den Administrationsbereich oder `manage.py shell`. Die Folgen für das Arbeiten in QGIS beschreibt Abschnitt [Gleichzeitiges Arbeiten mit der Weboberfläche](../teil-b-betrieb-admin-qgis/26-netzdaten-in-qgis-bearbeiten.md#_26-3-gleichzeitiges-arbeiten-mit-der-weboberflache), die Aktionen, die Fehlendes nachziehen, Abschnitt [Suchen, Filtern und Massenbearbeitung](../teil-b-betrieb-admin-qgis/20-administrationsbereich.md#_20-2-suchen-filtern-und-massenbearbeitung).

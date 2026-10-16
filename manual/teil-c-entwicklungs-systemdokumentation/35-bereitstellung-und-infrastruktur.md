@@ -34,7 +34,7 @@ Alle Pfade sind relativ zum Wurzelverzeichnis des Repositorys, alle Befehle lauf
 
    Drei Stellen der Vorlage führen zu Fehlern:
 
-   - `COOKIE_DOMAIN = .your-domain.com` steht mit Leerzeichen um das Gleichheitszeichen. Schreiben Sie `COOKIE_DOMAIN=.ihre-domain.de`; die Skripte der Sicherung lesen die Datei sonst nicht.
+   - `COOKIE_DOMAIN = .your-domain.com` steht mit Leerzeichen um das Gleichheitszeichen. Schreiben Sie `COOKIE_DOMAIN=.ihre-domain.de`; die Wiederherstellung (`restore.sh`) liest die Datei als Shell-Skript ein und bricht sonst ab.
    - `DJANGO_ALLOWED_HOSTS` enthält die Platzhalter `BACKEND_SERVICE_NAME`, `QGIS_SERVER_SERVICE_NAME` und `CADDY_SERVICE_NAME`. Ersetzen Sie sie durch `backend` – unter diesem Namen fragt das Frontend das Backend im Docker-Netz an – und lassen Sie die beiden anderen weg.
    - `API_URL` und `PUBLIC_API_URL` sind nur beschrieben, nicht ausgefüllt: `API_URL=http://backend:8000/api/v1/` und `PUBLIC_API_URL=https://api.ihre-domain.de/api/v1/`.
 

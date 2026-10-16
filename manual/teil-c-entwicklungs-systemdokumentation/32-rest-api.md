@@ -92,9 +92,9 @@ Die Form der Antwort hängt also am Endpunkt; prüfen Sie sie im Schema.
 
 - `project` – die Nummer des Projekts. Fast jede Liste erwartet diesen Parameter; ohne ihn liefern viele Listen die Objekte aller Projekte. Beim Anlegen steht das Projekt im Rumpf; auch die Auswertungen erwarten meist `project`, nur `routing/` und `fault-simulation/` heißen den Wert `project_id`.
 - `flag` – die Nummer eines Kennzeichens.
-- Verweise auf übergeordnete Objekte, etwa `uuid_conduit` für die Mikrorohre eines Rohrs oder `uuid_node` für die Struktur eines Netzknotens.
+- Verweise auf übergeordnete Objekte, etwa `uuid_conduit` für die Mikrorohre eines Rohrs oder `node` für die Struktur eines Netzknotens.
 
-**Suche.** Der Parameter `search` gehört zu den Zusatzaktionen `…/all/`, zu `trace-search/` und zu den Listen `pipeline-records/` und `logs/`. In `address/all/`, `node/all/` und `area/all/` sowie bei Adressen und Netzknoten in `trace-search/` sucht er mit einer Ähnlichkeitssuche (`TrigramWordSimilarity` aus `pg_trgm`, `backend/apps/api/search.py`). Die Adresssuche zerlegt den Begriff in Wörter und vergleicht sie mit Straße, Ort, Postleitzahl und Ortsteil; Treffer sind nach Ähnlichkeit sortiert. Rohre, Kabel, Trassen, Wohneinheiten und Leitungsauskünfte suchen dagegen mit einem einfachen Teilstring-Vergleich über mehrere Spalten.
+**Suche.** Der Parameter `search` gehört zu den Zusatzaktionen `…/all/`, zu `trace-search/` und zu den Listen `pipeline-records/` und `logs/`. In `address/all/`, `node/all/` und `area/all/` sowie bei Adressen und Netzknoten in `trace-search/` sucht er mit einer Ähnlichkeitssuche (`TrigramWordSimilarity` aus `pg_trgm`, `backend/apps/api/search.py`). Die Adresssuche zerlegt den Begriff in Wörter und vergleicht sie mit Straße, Ort, Postleitzahl und Ortsteil; Treffer sind nach Ähnlichkeit sortiert. Rohre, Kabel und Leitungsauskünfte suchen dagegen mit einem einfachen Teilstring-Vergleich über mehrere Spalten, Trassen und Wohneinheiten nur in ihrer Kennung.
 
 ::: info
 Bei gleicher Ähnlichkeit ist die Reihenfolge der Treffer nicht festgelegt; zwei gleiche Anfragen können gleich bewertete Treffer in unterschiedlicher Reihenfolge liefern. Wer über die Seiten einer Suche blättert, kann deshalb Treffer doppelt sehen oder verpassen.
