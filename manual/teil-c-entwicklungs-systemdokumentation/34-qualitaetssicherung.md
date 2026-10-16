@@ -1,14 +1,14 @@
 # 34. Qualitätssicherung
 
-Dieses Kapitel beschreibt die Tests, Prüfwerkzeuge und automatischen Abläufe des Repositorys: was es gibt, wie Sie es ausführen und was davon bei jedem Commit läuft. Die Zahlen stammen aus einem Lauf gegen die Veröffentlichung, die das Handbuch beschreibt.
+Dieses Kapitel beschreibt die Tests, Prüfwerkzeuge und automatischen Abläufe des Repositorys: was es gibt, wie Sie es ausführen und was davon bei jedem Commit läuft.
 
-| Ebene | Werkzeug | Umfang | In der CI |
-|---|---|---|---|
-| Backend | pytest mit pytest-django und factory_boy | 1114 Tests, alle bestanden | nein |
-| Frontend | Vitest | 1940 Tests in 179 Dateien, alle bestanden | ja |
-| End-to-End | Playwright | 99 Tests in 13 Dateien, je in drei Browsern | nur von Hand |
-| Typen | svelte-check | ohne Befund | ja |
-| Formatierung und Linting | Prettier, ESLint, ruff | mit Befunden, siehe Abschnitt [Linting, Formatierung und Typprüfung](#_34-4-linting-formatierung-und-typprufung) | nein |
+| Ebene | Werkzeug | In der CI |
+|---|---|---|
+| Backend | pytest mit pytest-django und factory_boy | nein |
+| Frontend | Vitest | ja |
+| End-to-End | Playwright | nur von Hand |
+| Typen | svelte-check | ja |
+| Formatierung und Linting | Prettier, ESLint, ruff | nein |
 
 ## 34.1 Backend-Tests
 
@@ -95,9 +95,9 @@ uv run ruff check .
 uv run ruff format --check .
 ```
 
-Eine andere Version von ruff findet andere Dinge: Mit der gesperrten Version 0.11.4 meldet `ruff check` zum Stand des Handbuchs einen Befund, mit einer aktuellen mehrere hundert. Typprüfung für Python (mypy o. ä.) und pre-commit-Hooks gibt es nicht.
+Eine andere Version von ruff findet andere Dinge: Eine aktuellere als die gesperrte meldet deutlich mehr Befunde. Typprüfung für Python (mypy o. ä.) und pre-commit-Hooks gibt es nicht.
 
-Zum Stand des Handbuchs ist nur svelte-check ohne Befund. ESLint meldet rund 200 Fehler, Prettier zwei Dateien, die Paraglide selbst in `project.inlang/` erzeugt, und `ruff format --check` 32 Dateien im Backend, die es anders formatieren würde. Keines dieser Werkzeuge läuft in der CI; ein neuer Befund fällt dort nicht auf. Prüfen Sie Ihre eigenen Änderungen deshalb vor dem Commit selbst, und formatieren Sie nur die geänderten Dateien – `npx prettier --write <Datei>`, `uv run ruff format <Datei>` –, damit der Diff nicht fremde Stellen umformatiert.
+Der bestehende Code ist nicht frei von Befunden: ESLint meldet Fehler, Prettier beanstandet Dateien, die Paraglide selbst in `project.inlang/` erzeugt, und `ruff format --check` würde Dateien im Backend anders formatieren. Keines dieser Werkzeuge läuft in der CI; ein neuer Befund fällt dort nicht auf. Prüfen Sie Ihre eigenen Änderungen deshalb vor dem Commit selbst, und formatieren Sie nur die geänderten Dateien – `npx prettier --write <Datei>`, `uv run ruff format <Datei>` –, damit der Diff nicht fremde Stellen umformatiert.
 
 In VS Code formatiert `.vscode/settings.json` beim Speichern Python mit ruff, JavaScript mit Prettier und Svelte mit der Svelte-Erweiterung, sofern die Erweiterungen installiert sind; für TypeScript legt die Datei keinen Formatierer fest.
 
