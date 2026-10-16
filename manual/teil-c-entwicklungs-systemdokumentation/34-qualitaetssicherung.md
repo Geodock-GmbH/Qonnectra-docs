@@ -95,7 +95,7 @@ uv run ruff check .
 uv run ruff format --check .
 ```
 
-Eine andere Version von ruff findet andere Dinge: Eine aktuellere als die gesperrte meldet deutlich mehr Befunde. Typprüfung für Python (mypy o. ä.) und pre-commit-Hooks gibt es nicht.
+Typprüfung für Python (mypy o. ä.) und pre-commit-Hooks gibt es nicht.
 
 Der bestehende Code ist nicht frei von Befunden: ESLint meldet Fehler, Prettier beanstandet Dateien, die Paraglide selbst in `project.inlang/` erzeugt, und `ruff format --check` würde Dateien im Backend anders formatieren. Keines dieser Werkzeuge läuft in der CI; ein neuer Befund fällt dort nicht auf. Prüfen Sie Ihre eigenen Änderungen deshalb vor dem Commit selbst, und formatieren Sie nur die geänderten Dateien – `npx prettier --write <Datei>`, `uv run ruff format <Datei>` –, damit der Diff nicht fremde Stellen umformatiert.
 
