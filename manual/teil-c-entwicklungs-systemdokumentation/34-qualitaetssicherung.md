@@ -1,6 +1,6 @@
 # 34. Qualitätssicherung
 
-Dieses Kapitel beschreibt die Tests, Prüfwerkzeuge und automatischen Abläufe des Repositorys: was es gibt, wie Sie es ausführen und was davon bei jedem Commit läuft. Die Zahlen stammen aus einem Lauf gegen den Stand, auf dem das Handbuch beruht, Commit `aa28575`.
+Dieses Kapitel beschreibt die Tests, Prüfwerkzeuge und automatischen Abläufe des Repositorys: was es gibt, wie Sie es ausführen und was davon bei jedem Commit läuft. Die Zahlen stammen aus einem Lauf gegen die Veröffentlichung, die das Handbuch beschreibt.
 
 | Ebene | Werkzeug | Umfang | In der CI |
 |---|---|---|---|

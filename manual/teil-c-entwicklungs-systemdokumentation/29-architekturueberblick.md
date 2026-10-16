@@ -2,7 +2,7 @@
 
 Dieses Kapitel beschreibt, aus welchen Teilen Qonnectra besteht, welchen Weg eine Anfrage durch sie nimmt und wo im Repository was liegt. Es ist der Einstieg in Teil C; die folgenden Kapitel vertiefen je einen Teil. Welche Dienste eine Installation betreibt und wofür, steht bereits in Kapitel [Betrieb der Instanz](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md) – dieses Kapitel setzt die Tabelle dort voraus und wiederholt sie nicht.
 
-Die Angaben beziehen sich auf den Stand des Repositorys, gegen den das Handbuch geschrieben ist: `main` vom 11.09.2026, Commit `aa28575`. Die Anwendung meldet sich mit der Version 1.7.0, der letzten Veröffentlichung davor.
+Die Angaben beziehen sich auf die jeweils aktuelle Veröffentlichung von Qonnectra.
 
 ## 29.1 Komponenten und Weg einer Anfrage
 
