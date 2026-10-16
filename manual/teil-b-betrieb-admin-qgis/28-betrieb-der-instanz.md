@@ -19,7 +19,7 @@ Qonnectra läuft als Gruppe von Docker-Containern, beschrieben in `docker-compos
 | `qgis-server` | die Kartendienste, siehe Kapitel [QGIS-Server und Kartendienste](./27-qgis-server-und-kartendienste.md) |
 | `tileserver` | die Hintergrundkarte, siehe Abschnitt [Kartenkacheln bereitstellen und erneuern](#_28-6-kartenkacheln-bereitstellen-und-erneuern) |
 | `pg-error-parser` | liest die Fehler der Datenbank mit und schreibt sie in die Protokolle, siehe Abschnitt [Protokolle auswerten](#_28-5-protokolle-auswerten) |
-| `wireguard` | das VPN für den direkten Datenbankzugang aus QGIS; startet immer und öffnet nach außen den UDP-Port 51820 (`WIREGUARD_PORT`), auch wenn kein QGIS-Arbeitsplatz ihn nutzt |
+| `wireguard` | das VPN für den direkten Datenbankzugang aus QGIS; startet immer und öffnet nach außen den UDP-Port 51820 (`WIREGUARD_PORT`), auch wenn kein QGIS-Arbeitsplatz ihn nutzt; abschaltbar, siehe Abschnitt [Datenbank, PostGIS und Datenbankzugang](../teil-c-entwicklungs-systemdokumentation/35-bereitstellung-und-infrastruktur.md#_35-4-datenbank-postgis-und-datenbankzugang) |
 
 Nach außen hat eine Installation sechs Adressen, je eine für die Weboberfläche (`app.`), die Schnittstelle (`api.`), den Administrationsbereich (`admin.`), den WebDAV-Zugang (`files.`), den QGIS-Server (`qgis.`) und die Hintergrundkarte (`tiles.`).
 
@@ -29,7 +29,7 @@ Die Daten liegen in Docker-Volumes: die Datenbank in `qonnectra_postgres_data_pr
 
 Die Einstellungen stehen in der Datei `deployment/.env`. Die vollständige Liste beschreibt Kapitel [Bereitstellung und Infrastruktur](../teil-c-entwicklungs-systemdokumentation/35-bereitstellung-und-infrastruktur.md); im laufenden Betrieb werden vor allem diese angefasst:
 
-- **Adressen** – `APP_DOMAIN`, `API_DOMAIN`, `ADMIN_DOMAIN`, `FILES_DOMAIN`, `QGIS_DOMAIN`, `TILE_SERVER_DOMAIN`. Jede Adresse muss außerdem in `DJANGO_ALLOWED_HOSTS` stehen, die Adressen von Weboberfläche und Administrationsbereich zusätzlich in `CSRF_TRUSTED_ORIGINS`.
+- **Adressen** – `APP_DOMAIN`, `API_DOMAIN`, `ADMIN_DOMAIN`, `FILES_DOMAIN`, `QGIS_DOMAIN`, `TILE_SERVER_DOMAIN`. Die Adressen von Schnittstelle, Administrationsbereich, Dateien und QGIS-Server müssen außerdem in `DJANGO_ALLOWED_HOSTS` stehen, dazu der interne Name `backend`; die Adressen von Weboberfläche und Administrationsbereich zusätzlich in `CSRF_TRUSTED_ORIGINS`, siehe Abschnitt [Referenz der Umgebungsvariablen](../teil-c-entwicklungs-systemdokumentation/35-bereitstellung-und-infrastruktur.md#_35-7-referenz-der-umgebungsvariablen).
 - **`COOKIE_DOMAIN`** – die gemeinsame Domain aller Adressen mit führendem Punkt, etwa `.ihre-domain.de`. Die Anmeldung gilt über sie für alle Adressen.
 - **`PUBLIC_DOCUMENTATION_URL`** – der Link „Dokumentation“ in Kopfzeile und Navigationsleiste; leer blendet ihn aus.
 - **`QGIS_SERVER_VERSION`** – die Version des QGIS-Servers, für die Warnung beim Hochladen von QGIS-Projekten.
@@ -79,6 +79,7 @@ Qonnectra wird aus dem Quellcode gebaut. Eine Aktualisierung:
    ```
 
 5. Prüfen Sie mit `docker compose ps`, dass alle Dienste laufen, und melden Sie sich in der Weboberfläche und im Administrationsbereich an.
+6. Ist ein Datenbankbenutzer für QGIS eingerichtet, beschränken Sie ihn erneut, siehe Abschnitt [Datenbank, PostGIS und Datenbankzugang](../teil-c-entwicklungs-systemdokumentation/35-bereitstellung-und-infrastruktur.md#_35-4-datenbank-postgis-und-datenbankzugang).
 
 Beim Start bringt das Backend die Datenbank selbst auf den neuen Stand. Bis dahin antworten Weboberfläche und Schnittstelle mit Fehlern; das dauert je nach Umfang der Änderungen einige Minuten.
 
@@ -186,5 +187,5 @@ Fehlt die Kacheldatei, startet der Dienst `tileserver` immer wieder neu; `docker
 | Neue Daten erscheinen in der Karte erst nach einer halben Minute, in bisher leeren Kartenbereichen nach bis zu zehn Minuten, im Dashboard nach Minuten | Zwischenspeicher, gewollt | abwarten, siehe Abschnitt [Gleichzeitiges Arbeiten mit der Weboberfläche](./26-netzdaten-in-qgis-bearbeiten.md#_26-3-gleichzeitiges-arbeiten-mit-der-weboberflache) |
 
 ::: info
-Der Administrationsbereich und der WebDAV-Zugang sind aus dem ganzen Internet erreichbar. Wer sie auf das eigene Netz oder das VPN beschränken will, ergänzt in `Caddyfile.production` bei der jeweiligen Adresse eine Sperre nach Absender-IP; ein Beispiel steht dort beim Administrationsbereich als Kommentar.
+Der Administrationsbereich und der WebDAV-Zugang sind aus dem ganzen Internet erreichbar. Wer sie auf die Adressen des eigenen Netzes beschränken will, ergänzt eine Sperre nach Absender-IP in `deployment/caddy/extra/`, wo sie jede Aktualisierung übersteht, siehe Abschnitt [Reverse Proxy](../teil-c-entwicklungs-systemdokumentation/35-bereitstellung-und-infrastruktur.md#_35-3-reverse-proxy-caddy-und-nginx). Das VPN hilft dabei nicht; Anfragen an diese Adressen laufen weiter über das Internet.
 :::

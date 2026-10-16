@@ -71,6 +71,19 @@ export default defineConfig({
       dangerLabel: 'Achtung'
     },
     config: (md) => {
+      // Diagrams of part C are ```mermaid fences, so they stay text in the
+      // chapter and nobody draws an image by hand. The fence becomes a
+      // component that renders it in the browser (.vitepress/theme/
+      // MermaidDiagram.vue); the source travels URI-encoded so that quotes and
+      // arrows survive the attribute.
+      const fence = md.renderer.rules.fence!
+      md.renderer.rules.fence = (tokens, idx, options, env, self) => {
+        const token = tokens[idx]
+        if (token.info.trim() === 'mermaid') {
+          return `<MermaidDiagram code="${encodeURIComponent(token.content)}" />`
+        }
+        return fence(tokens, idx, options, env, self)
+      }
       md.use(lightbox, {})
       md.use(html5Media, {
         messages: {

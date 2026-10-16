@@ -60,10 +60,12 @@ Um Liste und Karte abzugleichen, schalten Sie in der Legende die Beschriftungen 
 
 ### 11.2.3 Zuordnung löschen
 
-Über das Papierkorb-Symbol am rechten Rand einer Zeile heben Sie eine Zuordnung wieder auf. Gelöscht wird dabei nur die Verbindung zwischen Rohr und Trassensegment – beide selbst bleiben erhalten.
+Über das Papierkorb-Symbol am rechten Rand einer Zeile heben Sie eine Zuordnung wieder auf. Rohr und Trassensegment selbst bleiben erhalten.
 
 ::: danger
 Das Löschen erfolgt ohne Rückfrage: Der Eintrag verschwindet mit dem Klick, und rückgängig machen lässt sich das nicht.
+
+Hatte das Rohr in diesem Trassensegment Mikrorohrverbindungen, löscht Qonnectra mit der Zuordnung alle Mikrorohrverbindungen, die von diesem Segment ausgehen – auch die anderer Rohre. Prüfen Sie danach die Rohrverzweigung an den Netzknoten an beiden Enden des Segments, siehe Kapitel [Rohrverzweigung](./12-rohrverzweigung.md).
 :::
 
 ::: warning
