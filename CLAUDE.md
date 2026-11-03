@@ -213,6 +213,11 @@ sentences the chapter exists for.
   short, describe what is specific to Qonnectra and link to the official QGIS
   documentation for what QGIS itself documents. Chapter 27 is not affected –
   QGIS projects and external WMS sources are maintained in Qonnectra.
+  Part C (chapters 29–36) carries no screenshots either – what it describes is
+  code, configuration and services, not views. It shows structure as Mermaid
+  diagrams in the Markdown (architecture in 29.1, ER overview in 31), and it
+  describes the safe setup of an installation, never the weaknesses of an
+  unpatched one (`OUTLINE.md`, notes on part C).
 - Bullet lists for options/properties, **numbered** lists only for genuine
   step-by-step procedures.
 - Notes as VitePress containers, closed with `:::`, in three escalating levels:
@@ -404,6 +409,14 @@ opened menu – the chapter gets no video of it in addition.
 - Clicking an image opens a lightbox (`vitepress-plugin-lightbox`) – details may
   therefore be small in the 512 px rendering, but have to be legible in the
   original.
+- Diagrams (part C only) as a ```` ```mermaid ```` fence in the chapter. The
+  fence is turned into `<MermaidDiagram>` (`markdown.config` in
+  `.vitepress/config.ts`, component in `.vitepress/theme/MermaidDiagram.vue`),
+  which renders it in the browser and again on a switch to dark mode. There is
+  no lightbox for diagrams, so they have to be legible at the width of the text
+  column (around 690 px): prefer `flowchart TB`, one edge per connection, labels
+  of a few words – a diagram that needs zooming has too much in it. Node labels
+  are German like the prose; service, file and variable names stay as they are.
 
 ## Local Qonnectra instance for reproducible captures
 

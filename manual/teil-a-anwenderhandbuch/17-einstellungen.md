@@ -25,7 +25,7 @@ Unter „Einstellungen synchronisieren“ stehen zwei Schaltflächen: „In Kont
 Gespeichert wird dabei mehr als diese Seite: Qonnectra nimmt alle persönlichen Voreinstellungen mit, die es im Browser ablegt. Dazu gehören
 
 - die Navigationsleiste mit ihren zugeklappten Gruppen und ausgeblendeten Einträgen, siehe Abschnitt [Navigationsleiste anpassen](./01-erste-schritte.md#_1-5-navigationsleiste-anpassen),
-- der Hell- und Dunkelmodus samt der Darstellung der Hintergrundkarte, siehe Abschnitt [Sprache, Hell- und Dunkelmodus](./01-erste-schritte.md#_1-4-sprache-hell-und-dunkelmodus-versionsanzeige-und-dokumentation),
+- die helle oder dunkle Darstellung der Hintergrundkarte,
 - alle Farben und Formen aus den Abschnitten [Kartendarstellung](#_17-4-kartendarstellung-trassenfarbe-trassen-darstellung-highlight-farbe) und [Stile](#_17-5-stile-fur-netzknotentypen-adressen-und-gebietstypen),
 - die Legende der Karte: ein- und ausgeblendete Layer, Beschriftungen und die Transparenz der Hintergrundkarte, siehe Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster),
 - die Breite der Info-Box, siehe Abschnitt [Die Info-Box](./03-wiederkehrende-bedienelemente.md#_3-6-die-info-box-mit-ihren-reitern),
@@ -60,7 +60,7 @@ Der Abschnitt „UI“ enthält einen einzigen Schalter, „Sidebar“. Er besti
 Diesen Schalter gibt es nur hier. In der Navigationsleiste selbst können Sie Gruppen zuklappen und einzelne Einträge ausblenden, sie aber nicht auf Symbole verkleinern, siehe Abschnitt [Navigationsleiste anpassen](./01-erste-schritte.md#_1-5-navigationsleiste-anpassen).
 :::
 
-Die Umschaltung zwischen Hell- und Dunkelmodus steht nicht in den Einstellungen, sondern als Symbol in der Kopfzeile, siehe Abschnitt [Sprache, Hell- und Dunkelmodus, Versionsanzeige und Dokumentation](./01-erste-schritte.md#_1-4-sprache-hell-und-dunkelmodus-versionsanzeige-und-dokumentation). Zu den Angaben, die in Ihr Konto übertragen werden, gehört sie trotzdem.
+Die Umschaltung zwischen Hell- und Dunkelmodus steht nicht in den Einstellungen, sondern als Symbol in der Kopfzeile, siehe Abschnitt [Sprache, Hell- und Dunkelmodus, Versionsanzeige und Dokumentation](./01-erste-schritte.md#_1-4-sprache-hell-und-dunkelmodus-versionsanzeige-und-dokumentation). Mit dem Konto wandert sie nicht: „Aus Konto laden“ lässt den Modus des Browsers, wie er ist.
 
 ## 17.4 Kartendarstellung: Trassenfarbe, Trassen-Darstellung, Highlight-Farbe
 
