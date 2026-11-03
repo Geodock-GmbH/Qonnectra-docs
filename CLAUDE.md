@@ -80,7 +80,7 @@ The manual is split into three parts (target audiences see `manual/index.md`):
 ## The chapter structure
 
 `OUTLINE.md` in the repo root is the binding outline: three levels (part,
-chapter, section), derived from the pinned app (`main` of 2026-09-11). It also holds the
+chapter, section), derived from the pinned app (v1.8.0). It also holds the
 mapping from the old numbering to the new one and is excluded from the VitePress
 build (`srcExclude`). **Which sections a chapter has is decided there, not while
 writing** – a chapter that needs a section the outline does not have gets the
