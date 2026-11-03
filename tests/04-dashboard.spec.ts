@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process'
 
 import { expect, request, test, type Locator, type Page } from '../playwright/test'
 
-import { CHART_BLUE, countDarkPixels, measureBars } from '../playwright/dashboard-charts'
+import { countDarkPixels, measureBars, seriesColour } from '../playwright/dashboard-charts'
 import { localApp } from '../playwright/local-app'
 import {
   crop16by10,
@@ -14,6 +14,7 @@ import {
 import { stableUnitsByTypeOrder } from '../playwright/stable-dashboard'
 import { appDateInDays, CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
 import { projectPath, projectUrl } from '../playwright/project'
+import { remoteUrl } from '../playwright/remote-functions'
 
 // Screenshots for chapter "4. Dashboard" in the manual
 // (manual/teil-a-anwenderhandbuch/04-dashboard.md). Produces all images of the
@@ -129,14 +130,17 @@ async function chartsSettled(page: Page) {
 /**
  * Content area of the active tab: the centred column with the cards
  * (`space-y-6 max-w-6xl mx-auto`). All six tabs use the same structure
- * (+page.svelte as well as TrenchStatistics, ConduitStatistics, NodeStatistics,
- * AddressStatistics, AreaStatistics).
+ * (OverviewTab, TrenchStatistics, ConduitStatistics, NodeStatistics,
+ * AddressStatistics, AreaStatistics), and only the active one is rendered.
+ * Since v1.8.0 it sits one level deeper, below the field „Kennzeichen“ and a
+ * wrapper that fades while the figures reload; the field is left out of the
+ * cut-out, the chapter describes it in section 4.8.1.
  *
  * Deliberately not `.tab-content`: that spans the full width and would leave
  * nothing dimmed on the left and right.
  */
 function contentArea(page: Page): Locator {
-  return page.locator('.tab-content > div.space-y-6.max-w-6xl.mx-auto')
+  return page.locator('.tab-content div.space-y-6.max-w-6xl.mx-auto')
 }
 
 /** Tab bar above the content area (Skeleton tabs, Tabs.svelte). */
@@ -423,11 +427,11 @@ test('4.2 Kurzhinweis auf einem Balken', async ({ page }) => {
   const chart = card(page, 'Gesamtlänge pro Oberfläche')
   const canvas = chart.locator('canvas')
 
-  const bars = await measureBars(canvas, CHART_BLUE)
+  const bars = await measureBars(canvas, await seriesColour(canvas))
   expect(
     bars.length,
-    'No bar in #0ea5e9 was found in the chart "Gesamtlänge pro Oberfläche" - ' +
-      'is the colour in TrenchStatistics.svelte still the same?',
+    'No bar in the series colour was found in the chart "Gesamtlänge pro ' +
+      'Oberfläche" - does Chart.svelte still draw with readChartTheme().series?',
   ).toBeGreaterThan(0)
 
   const withoutTooltip = await countDarkPixels(canvas)
@@ -469,9 +473,10 @@ test('4.3 Auswertungen im Reiter „Rohre"', async ({ page }) => {
 // deadlines. Between two consecutive runs the chart reordered itself without
 // anyone having touched the app.
 //
-// Rewriting the response is not available here: the dashboard is loaded by
-// +page.server.ts inside the container, so the request never passes Playwright
-// (unlike the attachment dates, see playwright/stable-dates.ts). Five nodes
+// Rewriting the response does not help here, although the statistics pass
+// through the browser since v1.8.0 (playwright/remote-functions.ts): the
+// backend sends only the five nodes it picked, and which five is the part left
+// to chance - no reordering on the way can bring back the other 42. Five nodes
 // therefore get a date of their own - the same device the warranty card above
 // already uses for its deadlines - and it is reverted afterwards.
 
@@ -549,11 +554,13 @@ test.describe('Netzknoten', () => {
 test('4.5 Diagramme im Reiter „Adressen"', async ({ page }) => {
   // „Wohneinheiten nach Typ“ has three types tied at one unit, which the
   // backend returns in an order of chance (playwright/stable-dashboard.ts).
-  // Sorting them needs the page data to pass through the browser, hence the
-  // way in through the navigation bar instead of openDashboard().
   const sortedArrays = await stableUnitsByTypeOrder(page)
-  await openDashboardFromNavigation(page)
-  expect(sortedArrays(), 'unitsByType did not pass through the browser - it would keep the order of chance').toBeGreaterThan(0)
+  await openDashboard(page)
+  expect(
+    sortedArrays(),
+    'unitsByType did not pass through the remote function getDashboardStatistics ' +
+      '- the chart would keep the order of chance',
+  ).toBeGreaterThan(0)
   await openTab(page, 'Adressen', 'Adressen nach Ort')
 
   const spotlightOff = await spotlight(page, contentArea(page))
@@ -575,28 +582,6 @@ test('4.6 Karten und Diagramme im Reiter „Gebiete"', async ({ page }) => {
 // minutes (see clearDashboardCache()). All images above are therefore taken
 // beforehand - they show the card "Gewährleistung" in its empty state, the way
 // the demo data leave it.
-/**
- * Opens the dashboard the way a user does, through the navigation bar.
- *
- * `page.goto(projectPath('/dashboard'))` renders the page on the server, and its data -
- * `+page.server.ts` fetching `dashboard/statistics/` - never leaves the
- * container. Reached from inside the app, SvelteKit fetches the same data as
- * `__data.json` from the browser, and only then can it be rewritten. The
- * detour over /settings is just some light page to start from; the map would
- * load its tiles for nothing.
- */
-async function openDashboardFromNavigation(page: Page) {
-  await page.goto('/settings')
-  await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
-
-  await expect(page).toHaveURL(projectUrl('/dashboard'))
-  await expect(page.getByRole('heading', { name: 'Trassenstatistik' })).toBeVisible()
-  await expect(page.getByText('km Gesamtlänge')).toBeVisible()
-  await page.waitForLoadState('networkidle')
-
-  await disableAnimations(page)
-  await moveCursorAway(page)
-}
 
 /** `CAPTURE_DATE` plus `days`, in the format of the API. */
 function captureDeadline(days: number): string {
@@ -631,7 +616,7 @@ test.describe('Gewährleistung', () => {
     // correct in itself and comes out the same in every run.
     const displayDates = await replaceInResponses(
       page,
-      '**/__data.json*',
+      remoteUrl('getDashboardStatistics'),
       Object.fromEntries(
         DEADLINES_IN_DAYS.map((days, index) => [seededDeadlines[index], captureDeadline(days)]),
       ),
@@ -642,16 +627,16 @@ test.describe('Gewährleistung', () => {
     // therefore still answer and the card stay empty - hence several attempts
     // instead of a single load.
     for (let attempt = 1; attempt <= 8; attempt++) {
-      await openDashboardFromNavigation(page)
+      await openDashboard(page)
       if ((await entries().count()) === DEADLINES_IN_DAYS.length) break
       await page.waitForTimeout(1500)
     }
 
     expect(
       displayDates(),
-      'No deadline was rewritten in the page data. Does SvelteKit still deliver ' +
-        'the load data of the dashboard as __data.json? Without the rewrite the ' +
-        'image carries the day of the run.',
+      'No deadline was rewritten in the statistics. Does the dashboard still ' +
+        'load them through the remote function getDashboardStatistics? Without ' +
+        'the rewrite the image carries the day of the run.',
     ).toBeGreaterThan(0)
 
     await expect(
