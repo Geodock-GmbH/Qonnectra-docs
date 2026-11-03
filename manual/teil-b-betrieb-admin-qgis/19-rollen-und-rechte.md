@@ -199,7 +199,7 @@ Eine einzelne Zeile ergänzen Sie im Formular der Gruppe oder über die Liste:
 2. Wählen Sie die „Gruppe“ und unter „Modellname“ die Objektart, siehe Abschnitt [Modellrechte](#_19-2-modellrechte-zugriff-je-datenmodell).
 3. Wählen Sie die „Zugriffsebene“ und klicken Sie auf „Sichern“.
 
-![Screenshot des Formulars „Modell-Zugriffsrecht hinzufügen“ mit der Gruppe „Viewer“, dem Modellnamen „wmssource“ und der Zugriffsebene „Nur Ansehen“ oben im Formular](/images/manual/teil-b/permission_model_add.jpg)
+![Screenshot des Formulars „Modell-Zugriffsrecht hinzufügen“ mit einer eigenen Gruppe „Auskunft“, dem Modellnamen „wmssource“ und der Zugriffsebene „Nur Ansehen“ oben im Formular](/images/manual/teil-b/permission_model_add.jpg)
 
 Für eine Rolle, die fast überall dieselbe Stufe hat, genügt eine Zeile „\* (jedes Modell ohne eigene Zeile)“ und je eine Zeile für die Ausnahmen.
 

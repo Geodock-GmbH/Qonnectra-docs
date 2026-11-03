@@ -107,7 +107,7 @@ Das Löschen erfolgt ohne Rückfrage und ist nicht widerrufbar. Der Bereich vers
 :::
 
 ::: warning
-Löschen setzt das Recht dazu voraus. Fehlt es Ihrem Konto, bleibt der Bereich stehen und Qonnectra meldet „Sie sind nicht berechtigt, diese Aktion durchzuführen.“ – Zeichnen, Ändern und Umbenennen sind davon nicht betroffen. Welche Rolle was darf, beschreibt Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md).
+Löschen setzt das Recht dazu voraus. Fehlt es Ihrem Konto, bleibt der Bereich stehen und Qonnectra meldet „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“ – Zeichnen, Ändern und Umbenennen sind davon nicht betroffen. Welche Rolle was darf, beschreibt Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md).
 :::
 
 Über „Zurück“ gelangen Sie in die Detailansicht des Datensatzes.
@@ -157,5 +157,5 @@ Mit dem Datensatz verschwinden alle seine Auskunftsbereiche. Ein bereits erzeugt
 :::
 
 ::: warning
-Auch für den Datensatz gilt: Ohne das Recht zum Löschen bleibt er nach der Bestätigung stehen, und Qonnectra meldet „Sie sind nicht berechtigt, diese Aktion durchzuführen.“ Ändern und Speichern sind davon nicht betroffen.
+Auch für den Datensatz gilt: Ohne das Recht zum Löschen bleibt er nach der Bestätigung stehen, und Qonnectra meldet „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“ Ändern und Speichern sind davon nicht betroffen.
 :::
