@@ -84,7 +84,7 @@ Sind für Ihr Benutzerkonto keine Projekte freigegeben, erscheint anstelle des F
 
 Jede Ansicht, die zu einem Projekt gehört, trägt dieses Projekt in ihrer Adresse in der Adresszeile des Browsers. Ein Lesezeichen oder ein Link, den Ihnen jemand schickt, öffnet deshalb immer das Projekt, in dem er entstanden ist – unabhängig davon, welches Projekt Sie zuletzt ausgewählt hatten. Die Projektauswahl in der Kopfzeile folgt dem Link.
 
-Das zuletzt gewählte Projekt merkt sich jeder Browser für sich. Nach der Anmeldung öffnet Qonnectra die Karte dieses Projekts; darf Ihr Konto die Karte nicht öffnen, die erste Ansicht der Navigationsleiste, die es öffnen darf.
+Das zuletzt gewählte Projekt merkt sich jeder Browser für sich. Nach der Anmeldung öffnet Qonnectra die Karte dieses Projekts. Hat Ihr Konto keinen Zugriff auf die Karte, öffnet sich stattdessen die oberste Ansicht der Navigationsleiste, für die Sie berechtigt sind.
 
 ::: info
 Leitungsauskunft, Faserweg und Einstellungen gehören zu keinem Projekt. Dort wechselt die Projektauswahl die Ansicht nicht, sondern legt nur fest, mit welchem Projekt Sie weiterarbeiten – im Faserweg etwa, in welchem Projekt gesucht wird, und in der Leitungsauskunft, zu welchem Projekt eine neue Auskunft gehört.

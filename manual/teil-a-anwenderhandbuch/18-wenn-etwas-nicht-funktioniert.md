@@ -72,7 +72,7 @@ Die Anmeldung gilt für den ganzen Browser. Melden Sie sich in einem Reiter ab, 
 Was Sie sehen und ändern dürfen, hängt an der Rolle Ihres Kontos, siehe Abschnitt [Warum manche Menüpunkte fehlen: Berechtigungen](./01-erste-schritte.md#_1-7-warum-manche-menupunkte-fehlen-berechtigungen). Fehlende Rechte zeigen sich auf drei Arten, und nur eine davon sagt es Ihnen auch:
 
 1. **Der Menüpunkt fehlt.** Ein Bereich, den dieses Handbuch beschreibt, steht nicht in der Navigationsleiste.
-2. **Die Anwendung springt weg.** Rufen Sie eine gesperrte Ansicht direkt auf – über ein Lesezeichen oder einen Link –, landen Sie ohne jede Meldung in der Karte, oder, wenn auch die gesperrt ist, in der ersten Ansicht der Navigationsleiste, die Ihr Konto öffnen darf. Das sieht aus, als hätte der Link nicht funktioniert.
+2. **Die Anwendung springt weg.** Rufen Sie eine gesperrte Ansicht direkt auf – über ein Lesezeichen oder einen Link –, landen Sie ohne jede Meldung in der Karte. Ist auch die Karte für Ihr Konto gesperrt, landen Sie in der obersten Ansicht der Navigationsleiste, für die Sie berechtigt sind. Das sieht aus, als hätte der Link nicht funktioniert.
 3. **Die Aktion scheitert.** Der Button ist da, die Rückfrage kommt, und danach erscheint die Meldung „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“ Die Daten bleiben unverändert.
 
 ![Screenshot einer Adresse mit Hervorhebung der Meldung „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“](/images/manual/teil-a/error_permission.jpg)

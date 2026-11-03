@@ -123,7 +123,7 @@ Einige Seiten, die die Ansichten öffnen, haben einen eigenen Schlüssel unter d
 
 Umfassen mehrere Zeilen eine Seite, entscheidet die genaueste: Ist `/address` gesperrt und `/address/unit` erlaubt, öffnen sich die Wohneinheiten, die Liste der Adressen nicht. Widersprechen sich gleich genaue Zeilen, auch aus verschiedenen Gruppen eines Kontos, gewinnt „Erlaubt“.
 
-Eine gesperrte Seite verschwindet aus der Navigationsleiste. Wird sie trotzdem aufgerufen, etwa über ein Lesezeichen, leitet die Weboberfläche ohne Meldung zur Karte um oder, ist auch die gesperrt, zur ersten Seite der Navigationsleiste, die das Konto öffnen darf, siehe Abschnitt [Fehlende Rechte erkennen](../teil-a-anwenderhandbuch/18-wenn-etwas-nicht-funktioniert.md#_18-3-fehlende-rechte-erkennen). Ist keine erlaubt, erscheint die Seite „Kein Zugriff“.
+Eine gesperrte Seite verschwindet aus der Navigationsleiste. Wird sie trotzdem aufgerufen, etwa über ein Lesezeichen, leitet die Weboberfläche ohne Meldung zur Karte um. Ist auch die Karte gesperrt, leitet sie zur obersten Seite der Navigationsleiste um, die das Konto öffnen darf, siehe Abschnitt [Fehlende Rechte erkennen](../teil-a-anwenderhandbuch/18-wenn-etwas-nicht-funktioniert.md#_18-3-fehlende-rechte-erkennen). Ist keine Seite erlaubt, erscheint die Seite „Kein Zugriff“.
 
 ::: warning
 Eine Gruppe, die mit `/*` alles erlaubt, hebt die Sperre einer genaueren Zeile in einer anderen Gruppe desselben Kontos nicht auf. Ist `/valuation` für „Viewer“ gesperrt, bleibt die Wertermittlung für ein Konto in „Viewer“ und einer Gruppe mit `/*` gesperrt.

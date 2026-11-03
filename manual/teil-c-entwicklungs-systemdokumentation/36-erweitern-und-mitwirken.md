@@ -33,7 +33,7 @@ Ein Pflichtfeld ohne Vorgabewert in der Datenbank lässt jedes Einfügen aus QGI
 - ein Eintrag in `GEOPACKAGE_LAYER_CONFIG` in `backend/apps/api/services.py`, wenn die Tabelle im GeoPackage-Schema erscheinen soll,
 - eine **Datenmigration, die die Modellrechte anlegt**.
 
-Der letzte Punkt wird am leichtesten vergessen. `RoleBasedPermission` liest das Recht unter dem Modellnamen in Kleinbuchstaben (`_meta.model_name`) aus `model_permission`. Fehlt dort eine Zeile, gilt die Zeile `*` der Gruppe; hat sie auch die nicht, hat die Gruppe die Stufe `none`, und ihre Konten bekommen 403 – auch beim Lesen, siehe Abschnitt [Eigene Rollen anlegen und Rechte ergänzen](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-6-eigene-rollen-anlegen-und-rechte-erganzen). Die Migrationen `0068` und `0078` zeigen das Muster, hier als vollständige Migration:
+Der letzte Punkt wird am leichtesten vergessen. `RoleBasedPermission` liest das Recht unter dem Modellnamen in Kleinbuchstaben (`_meta.model_name`) aus `model_permission`. Fehlt dort eine Zeile, gilt die Zeile `*` der Gruppe. Fehlt auch diese, hat die Gruppe die Stufe `none`, und ihre Konten bekommen 403 – auch beim Lesen, siehe Abschnitt [Eigene Rollen anlegen und Rechte ergänzen](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-6-eigene-rollen-anlegen-und-rechte-erganzen). Die Migrationen `0068` und `0078` zeigen das Muster, hier als vollständige Migration:
 
 ```python
 from django.db import migrations
