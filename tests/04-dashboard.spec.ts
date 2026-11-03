@@ -13,6 +13,7 @@ import {
 } from '../playwright/manual-shots'
 import { stableUnitsByTypeOrder } from '../playwright/stable-dashboard'
 import { appDateInDays, CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "4. Dashboard" in the manual
 // (manual/teil-a-anwenderhandbuch/04-dashboard.md). Produces all images of the
@@ -41,14 +42,13 @@ const CHAPTER = '04-dashboard'
 /**
  * Opens the dashboard of the test project and waits until the figures are in.
  *
- * `/dashboard` redirects to `/dashboard/2` - the 2 is the test project (cookie
- * `selected-project`, set in playwright/auth.setup.ts). That is checked
- * explicitly: without the cookie the app showed the project "Default" and every
- * number in the image would be a different one.
+ * The project is part of the path (playwright/project.ts). The URL is checked
+ * anyway: a redirect to the landing page would put figures of another view or
+ * project into the image.
  */
 async function openDashboard(page: Page) {
-  await page.goto('/dashboard')
-  await expect(page).toHaveURL(/\/dashboard\/2(\/|$)/)
+  await page.goto(projectPath('/dashboard'))
+  await expect(page).toHaveURL(projectUrl('/dashboard'))
 
   await expect(page.getByRole('heading', { name: 'Trassenstatistik' })).toBeVisible()
   await expect(page.getByText('km Gesamtlänge')).toBeVisible()
@@ -578,7 +578,7 @@ test('4.6 Karten und Diagramme im Reiter „Gebiete"', async ({ page }) => {
 /**
  * Opens the dashboard the way a user does, through the navigation bar.
  *
- * `page.goto('/dashboard')` renders the page on the server, and its data -
+ * `page.goto(projectPath('/dashboard'))` renders the page on the server, and its data -
  * `+page.server.ts` fetching `dashboard/statistics/` - never leaves the
  * container. Reached from inside the app, SvelteKit fetches the same data as
  * `__data.json` from the browser, and only then can it be rewritten. The
@@ -589,7 +589,7 @@ async function openDashboardFromNavigation(page: Page) {
   await page.goto('/settings')
   await page.getByRole('link', { name: 'Dashboard', exact: true }).click()
 
-  await expect(page).toHaveURL(/\/dashboard\/2(\/|$)/)
+  await expect(page).toHaveURL(projectUrl('/dashboard'))
   await expect(page.getByRole('heading', { name: 'Trassenstatistik' })).toBeVisible()
   await expect(page.getByText('km Gesamtlänge')).toBeVisible()
   await page.waitForLoadState('networkidle')

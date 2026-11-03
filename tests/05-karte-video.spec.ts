@@ -20,6 +20,7 @@ import {
   videoPath,
 } from '../playwright/manual-videos'
 import { freezeDates } from '../playwright/stable-dates'
+import { projectPath } from '../playwright/project'
 
 const CHAPTER = '05-karte'
 
@@ -140,7 +141,7 @@ test('3.7 Anhänge hinzufügen und bearbeiten', async ({ page, context }) => {
   //    context along the way. The actual recording page is therefore up within
   //    a fraction of a second - Playwright records a page from its creation, and
   //    a long page load would end up in the video.
-  await page.goto('/map')
+  await page.goto(projectPath('/map'))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   const mapArea = (await page.locator('div.map').boundingBox())!
@@ -168,15 +169,14 @@ test('3.7 Anhänge hinzufügen und bearbeiten', async ({ page, context }) => {
 
   await capture.addInitScript(
     (a) => {
-      localStorage.setItem('mapCenter', JSON.stringify(a.centre))
-      localStorage.setItem('mapZoom', JSON.stringify(a.zoom))
+      localStorage.setItem('mapView:2', JSON.stringify({ zoom: a.zoom, center: a.centre }))
       // The info box starts at its default; widening it is part of the video.
       localStorage.setItem('drawerWidth', '400')
     },
     { centre: mapCentre, zoom: VIDEO_ZOOM },
   )
 
-  await capture.goto('/map')
+  await capture.goto(projectPath('/map'))
   await expect(capture.locator('div.map canvas').first()).toBeVisible()
   await capture.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.

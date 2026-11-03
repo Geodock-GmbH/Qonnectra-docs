@@ -23,6 +23,7 @@
 import { expect, test, type Page } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { projectPath } from '../playwright/project'
 
 const CHAPTER = '18-wenn-etwas-nicht-funktioniert'
 
@@ -62,7 +63,7 @@ const LEAD_IN = 1.0
  * describes, not at the page load.
  */
 async function openUnits(page: Page) {
-  await page.goto(`/address/2/${ADDRESS.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}`))
   await expect(page.getByRole('heading', { name: ADDRESS.title, level: 1 })).toBeVisible()
   await page.waitForLoadState('networkidle')
   // The small map in "Standort" is built in onMount; while it is still coming
@@ -105,7 +106,7 @@ test('18.3 Aktion ohne Recht', async ({ page, context }) => {
   // Warm-up page. It fills the HTTP cache of the context, so that the actual
   // recording page is up within a fraction of a second - Playwright records a
   // page from its creation, and a long page load would end up in the video.
-  await page.goto(`/address/2/${ADDRESS.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}`))
   await expect(page.getByRole('heading', { name: ADDRESS.title, level: 1 })).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()

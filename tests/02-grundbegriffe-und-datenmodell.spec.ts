@@ -15,6 +15,7 @@ import {
   shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "2. Grundbegriffe und Datenmodell" in the manual
 // (manual/teil-a-anwenderhandbuch/02-grundbegriffe-und-datenmodell.md).
@@ -102,7 +103,7 @@ const NODE = 'St-V02'
  *
  * The view is set through `addInitScript`, i.e. before every load of the
  * document. The obvious route - load, set `localStorage`, reload - has a race
- * condition: the app writes `mapCenter`/`mapZoom` back on every `moveend`, and
+ * condition: the app writes the map view (`mapView:2`) back on every `moveend`, and
  * if that write-back lands between setting and reloading the seed is gone
  * again and the map starts at the overview.
  */
@@ -114,8 +115,7 @@ async function openMapView(
 ) {
   await page.addInitScript(
     (a) => {
-      localStorage.setItem('mapCenter', JSON.stringify(a.view.center))
-      localStorage.setItem('mapZoom', JSON.stringify(a.view.zoom))
+      localStorage.setItem('mapView:2', JSON.stringify({ zoom: a.view.zoom, center: a.view.center }))
       localStorage.setItem('drawerWidth', String(a.width))
     },
     { view, width: drawerWidth },
@@ -139,8 +139,8 @@ async function openConduits(page: Page, drawerWidth = DRAWER_WIDTH) {
     localStorage.setItem('drawerWidth', String(width))
   }, drawerWidth)
 
-  await page.goto('/conduit')
-  await expect(page).toHaveURL(/\/conduit\/2(\/|$)/)
+  await page.goto(projectPath('/conduit'))
+  await expect(page).toHaveURL(projectUrl('/conduit'))
   await expect(page.locator('table tbody tr').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
 
@@ -187,7 +187,12 @@ async function selectAtCentre(page: Page, expected: string) {
     [0, 8],
   ]) {
     await map.click({ position: { x: box.width / 2 + dx, y: box.height / 2 + dy } })
-    if ((await title.isVisible()) && (await title.textContent()) === expected) break
+    // toHaveText and not textContent(): the title carries the whitespace of
+    // its template and arrives after the details have loaded (v1.8.0).
+    const hit = await expect(title)
+      .toHaveText(expected, { timeout: 3000 })
+      .then(() => true, () => false)
+    if (hit) break
   }
 
   await expect(
@@ -268,13 +273,13 @@ async function apiContext(credentials: {
 // ---------------------------------------------------------------------------
 
 test('2. Objektarten in der Karte', async ({ page }) => {
-  await openMapView(page, '/map', VIEW.objects)
+  await openMapView(page, projectPath('/map'), VIEW.objects)
   await shoot(page, CHAPTER, 'model_objects')
 })
 
 test('2.1 Mikrorohre eines Rohrs', async ({ page }) => {
   test.setTimeout(120_000)
-  await openMapView(page, '/house-connections', VIEW.trench, MICRODUCT_DRAWER_WIDTH)
+  await openMapView(page, projectPath('/house-connections'), VIEW.trench, MICRODUCT_DRAWER_WIDTH)
   await selectAtCentre(page, TRENCH)
 
   const drawer = page.locator('[data-drawer]')
@@ -298,8 +303,8 @@ test('2.2 Bündel und Fasern eines Kabels', async ({ page }) => {
     localStorage.setItem('drawerWidth', String(width))
   }, DRAWER_WIDTH)
 
-  await page.goto('/network-schema')
-  await expect(page).toHaveURL(/\/network-schema\/2(\/|$)/)
+  await page.goto(projectPath('/network-schema'))
+  await expect(page).toHaveURL(projectUrl('/network-schema'))
   // The cable is an edge of the diagram; its label is what is clicked.
   await expect(page.getByText(CABLE, { exact: true })).toBeVisible()
   await page.waitForLoadState('networkidle')
@@ -327,7 +332,7 @@ test('2.2 Bündel und Fasern eines Kabels', async ({ page }) => {
 })
 
 test('2.4 Wohneinheiten einer Adresse', async ({ page }) => {
-  await page.goto(`/address/2/${ADDRESS.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}`))
   await expect(page.getByRole('heading', { name: ADDRESS.title })).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.waitForTimeout(1500)
@@ -348,7 +353,7 @@ test('2.4 Wohneinheiten einer Adresse', async ({ page }) => {
 })
 
 test('2.5 Gebiete und Gebietstypen', async ({ page }) => {
-  await openMapView(page, '/map', VIEW.areas)
+  await openMapView(page, projectPath('/map'), VIEW.areas)
 
   // Expanding the entry is what the image is about: the sub-entries are the
   // area types the instance knows.
@@ -613,7 +618,7 @@ test.describe('Komponente mit Ports', () => {
 
   test('2.3 Ports einer Komponente', async ({ page }) => {
     test.setTimeout(120_000)
-    await openMapView(page, '/map', VIEW.node)
+    await openMapView(page, projectPath('/map'), VIEW.node)
     await selectAtCentre(page, NODE)
 
     const drawer = page.locator('[data-drawer]')

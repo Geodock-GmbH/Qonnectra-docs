@@ -429,19 +429,18 @@ local instance, so that they can be regenerated when the app changes.
   it through the **production** compose file. Idempotent, may be run any number
   of times.
 - The app is **pinned to a commit**, `QONNECTRA_REF` at the top of the script,
-  currently **`aa28575`** (the tip of `main` on 2026-09-11) – not the default
-  branch. Every image of the manual has to show the same version; unpinned, a CI
-  run and a laptop built two different apps and the images differed without
-  anyone being able to see why. An existing `local-app/` is switched to the
-  pinned commit on the next run; if it carries uncommitted changes the script
-  stops instead (`--reset-checkout` throws the checkout away).
-  A commit and not the tag `v1.7.0`, because part A was surveyed and written
-  against that state and describes what it does: the edit mode of the cable
-  labels (chapter 14.4, „Kabel bearbeiten“) came with app PR #88 **after** the
-  v1.7.0 release, and against the tag the chapter describes an app that is not
-  there. The app reports **1.7.0** in its header either way – that is the
-  version of the last release, not of the checkout, so the number in a
-  screenshot says nothing about which commit produced it.
+  currently **`e3a7139`** (the release commit of v1.8.0, 2026-09-29) – not the
+  default branch. Every image of the manual has to show the same version;
+  unpinned, a CI run and a laptop built two different apps and the images
+  differed without anyone being able to see why. An existing `local-app/` is
+  switched to the pinned commit on the next run; if it carries uncommitted
+  changes the script stops instead (`--reset-checkout` throws the checkout away).
+  A commit and not a tag: until v1.8.0 the manual described a state of `main`
+  no release carried (the edit mode of the cable labels, app PR #88, came
+  after v1.7.0), and a tag can be moved where a commit cannot. The version in
+  the header is that of the last release, not of the checkout, so the number
+  in a screenshot only says which commit produced it when the pin is a
+  release commit, as it is now.
   Raising the pin is its own piece of work, not a side effect: bump
   `QONNECTRA_REF`, regenerate the screenshots, go through what changed in the
   app, and update the commit in this file and in `OUTLINE.md`.
@@ -469,8 +468,8 @@ local instance, so that they can be regenerated when the app changes.
 - Demo data: project **„Testprojekt“** from
   `scripts/qonnectra-demo-data/testprojekt-export.json`, imported automatically
   during setup. Select it in the top left after logging in. It always gets the
-  primary key **2** – the Playwright setup pins `selected-project=2`, so a
-  re-import must not hand out a new id (`PROJECT_ID` in
+  primary key **2** – every spec opens `/project/2/…` (`projectPath()` in
+  `playwright/project.ts`), so a re-import must not hand out a new id (`PROJECT_ID` in
   `import_geodock_export.py`).
 - The export is pulled with `scripts/qonnectra-demo-data/fetch_geodock_export.py`
   against app.geodock.de; credentials go into `scripts/qonnectra-demo-data/.env`
@@ -608,11 +607,18 @@ longer read.
   own account; the Django session in `admin-auth-state.json` lives for two
   weeks and is left alone. Without it everything after the first quarter of an
   hour lands on the login page.
-- The setup pins the state the images depend on: cookie `selected-project=2`
-  („Testprojekt“; a UI login would write `1` = „Default“) as well as
-  `PARAGLIDE_LOCALE=de`, `mode=light`, `basemapTheme`, `mapCenter` and `mapZoom`
-  in `localStorage`. The map has no auto-fit – without `mapCenter`/`mapZoom`
-  (EPSG:3857) it starts at zoom 2 in the Atlantic.
+- The setup pins the state the images depend on: cookie `last-project=2`
+  („Testprojekt“; it decides where `/` lands and which project the global views
+  default to) as well as `PARAGLIDE_LOCALE=de`, `mode=light`, `basemapTheme` and
+  the map view `mapView:2` (`{ zoom, center }`, EPSG:3857) in `localStorage`.
+  The map has no auto-fit – without the view it starts at zoom 2 in the
+  Atlantic. A `#map=z/x/y` hash in the address wins over the stored view.
+- **Every project view carries the project in its path** since v1.8.0:
+  `/project/2/map`, `/project/2/address/<uuid>`; the old paths (`/map`,
+  `/conduit/2`) answer with a 404. Specs build them with `projectPath()` and
+  check them with `projectUrl()` from `playwright/project.ts`. Leitungsauskunft
+  (`/pipeline-records`), Faserweg (`/trace/<type>/<uuid>`), `/settings` and
+  `/admin/logs` are global and keep their paths.
 - One spec per manual chapter: `tests/<NN>-<chapter-slug>.spec.ts` with a comment
   naming the chapter it belongs to (see `tests/05-karte.spec.ts`). The chapter
   slug stays German because it mirrors the manual's file name. Videos of a
@@ -742,7 +748,8 @@ longer read.
   state: the images of the login page sit in a `test.describe` block with
   `test.use({ storageState: { cookies: [], origins: [] } })`, the images of the
   interface next to it in the normal logged-in state. The app redirects
-  logged-in calls of `/login` to `/map`.
+  logged-in calls of `/login` to the map of the remembered project
+  (`/project/2/map`).
 - `workers: 1` and `fullyParallel: false` are deliberate: all specs share one
   instance including project selection and map position.
 - **Test inputs that are not code** sit in `playwright/fixtures/` – currently
@@ -920,7 +927,7 @@ looking for a race in the spec.
   tiles OpenLayers creates two, in the OSM raster fallback one. So use
   `page.locator('div.map canvas').first()`.
 - Always set the map position through `page.addInitScript()`, not through
-  "load, set `localStorage`, reload". The app writes `mapCenter` and `mapZoom`
+  "load, set `localStorage`, reload". The app writes the view (`mapView:2`)
   back on every `moveend`; if that lands between setting and reloading, the seed
   is gone and the map starts at the overview. Tests that click on a particular
   spot then hit nothing and the info box does not open (symptom: `#drawer-title`
@@ -951,20 +958,21 @@ looking for a race in the spec.
 
 **The app (context for selectors and routes)**
 
-SvelteKit + Skeleton, `main` as of 2026-09-11 (commit `aa28575`) – the state the
-setup pins the checkout to, see `QONNECTRA_REF` above. The header shows
-**v1.7.0**, the last release before it. The
+SvelteKit + Skeleton, v1.8.0 (commit `e3a7139`) – the state the setup pins
+the checkout to, see `QONNECTRA_REF` above. Data goes through SvelteKit
+remote functions (`src/lib/remote/**`), and the address is the state: project
+in the path, map view in the hash, the object in the info box in the query. The
 navigation bar is sorted into groups; the labels are short and only
 unambiguous together with their group (group „Rohr“ → „Verwaltung“ =
-Rohrverwaltung). This order is the order of the chapters 4–17. Routes and
-labels:
+Rohrverwaltung). This order is the order of the chapters 4–17. Routes (below
+`/project/<id>` unless marked global) and labels:
 
 | Group (`id`) | Route → Label | Chapter |
 |---|---|---|
 | „Info“ (`main`) | `/dashboard` „Dashboard“, `/map` „Karte“ | 4, 5 |
-| „Funktionen“ (`procedure`) | `/fault-simulation` „Störungsanalyse“, `/post-compaction` „Nachverdichtung“, `/pipeline-records` „Leitungsauskunft“, `/valuation` „Wertermittlung“ | 6–9 |
+| „Funktionen“ (`procedure`) | `/fault-simulation` „Störungsanalyse“, `/post-compaction` „Nachverdichtung“, `/pipeline-records` (global) „Leitungsauskunft“, `/valuation` „Wertermittlung“ | 6–9 |
 | „Rohr“ (`infrastructure`) | `/conduit` „Verwaltung“, `/trench` „Zuordnung“, `/pipe-branch` „Verzweigung“, `/house-connections` „Mikrorohre“ | 10–13 |
-| „Kabel“ (`cable`) | `/network-schema` „Netzschema“, `/trace` „Faserweg“ | 14, 15 |
+| „Kabel“ (`cable`) | `/network-schema` „Netzschema“, `/trace` (global) „Faserweg“ | 14, 15 |
 | „Gebäude“ (`address`) | `/address` „Adressen“ | 16 |
 
 Below them sits a footer under the heading „System“ – not a group of its own but
@@ -972,8 +980,10 @@ Below them sits a footer under the heading „System“ – not a group of its o
 external link „Dokumentation“ from `PUBLIC_DOCUMENTATION_URL`. The footer is
 never hidden by the customize controls. Plus `/login` without a navigation bar.
 
-Which entries appear depends on the permissions (`canAccessRoute`); as superuser
-all are visible. With the default capture account (group „Editor“) „Logs“ is
+Which entries appear depends on the permissions (`canAccessRoute`, keyed by the
+path without project and parameters, `permissionKeyFor()` in
+`src/lib/config/routes.ts`); as superuser all are visible. A locked page
+redirects to the first page the account may open, or to `/no-access`. With the default capture account (group „Editor“) „Logs“ is
 missing from the footer, which then consists of „Einstellungen“ and
 „Dokumentation“. `/admin/*` is the only blocked path; everything without its own
 `RoutePermission` entry counts as allowed.

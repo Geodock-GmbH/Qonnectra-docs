@@ -24,6 +24,7 @@ import { expect, request, test, type APIRequestContext, type Locator, type Page 
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, drag, pointAt, postProcessVideo, showCursor, typeText, videoPath } from '../playwright/manual-videos'
+import { projectPath, projectUrl } from '../playwright/project'
 
 const CHAPTER = '14-netzschema'
 
@@ -316,8 +317,8 @@ async function handlePoint(
  * returned page carries the replica cursor.
  */
 async function openSchema(page: Page, { unlock = true }: { unlock?: boolean } = {}) {
-  await page.goto('/network-schema')
-  await expect(page).toHaveURL(/\/network-schema\/2(\/|$)/)
+  await page.goto(projectPath('/network-schema'))
+  await expect(page).toHaveURL(projectUrl('/network-schema'))
   await expect(page.locator('.svelte-flow__node')).toHaveCount(6)
   await expect(cableLabel(page, PATH_CABLE)).toBeVisible()
   await page.waitForLoadState('networkidle')
@@ -366,7 +367,7 @@ async function saveVideo(
  * and a long page load would end up in the video.
  */
 async function warmUp(page: Page) {
-  await page.goto('/network-schema')
+  await page.goto(projectPath('/network-schema'))
   await expect(page.locator('.svelte-flow__node').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()

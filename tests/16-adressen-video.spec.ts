@@ -22,6 +22,7 @@ import { expect, request, test, type APIRequestContext, type Page } from '../pla
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, pointAt, postProcessVideo, showCursor, typeText, videoPath } from '../playwright/manual-videos'
+import { projectPath } from '../playwright/project'
 
 const CHAPTER = '16-adressen'
 
@@ -139,7 +140,7 @@ test.afterEach(restoreDemoUnits)
  * describes, not at the page load.
  */
 async function openUnits(page: Page) {
-  await page.goto(`/address/2/${ADDRESS.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}`))
   await expect(page.getByRole('heading', { name: ADDRESS.title, level: 1 })).toBeVisible()
   await page.waitForLoadState('networkidle')
   // The small map in "Standort" is built in onMount; while it is still coming
@@ -184,7 +185,7 @@ test('16.3 Wohneinheit hinzufügen', async ({ page, context }) => {
   // Warm-up page. It fills the HTTP cache of the context, so that the actual
   // recording page is up within a fraction of a second - Playwright records a
   // page from its creation, and a long page load would end up in the video.
-  await page.goto(`/address/2/${ADDRESS.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}`))
   await expect(page.getByRole('heading', { name: ADDRESS.title, level: 1 })).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()

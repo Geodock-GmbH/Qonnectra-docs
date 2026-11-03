@@ -20,6 +20,7 @@ import { expect, request, test, type APIRequestContext, type Locator, type Page 
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { projectPath, projectUrl } from '../playwright/project'
 
 const CHAPTER = '12-rohrverzweigung'
 
@@ -199,8 +200,8 @@ function microductDot(node: Locator, number: number): Locator {
  * load. Only the returned page carries the replica cursor.
  */
 async function openCanvas(page: Page) {
-  await page.goto('/pipe-branch')
-  await expect(page).toHaveURL(/\/pipe-branch\/2(\/|$)/)
+  await page.goto(projectPath('/pipe-branch'))
+  await expect(page).toHaveURL(projectUrl('/pipe-branch'))
   await page.waitForLoadState('networkidle')
 
   await showCursor(page)
@@ -256,7 +257,7 @@ async function dragAlong(page: Page, waypoints: Array<{ x: number; y: number }>)
  * from its creation, and a long page load would end up in the video.
  */
 async function warmUp(page: Page) {
-  await page.goto('/pipe-branch')
+  await page.goto(projectPath('/pipe-branch'))
   await expect(page.getByPlaceholder('Rohrverzweigung auswählen', { exact: true })).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()

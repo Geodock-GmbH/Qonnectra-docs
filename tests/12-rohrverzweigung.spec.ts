@@ -7,6 +7,7 @@ import {
   shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "12. Rohrverzweigung" in the manual
 // (manual/teil-a-anwenderhandbuch/12-rohrverzweigung.md). Produces all images of
@@ -89,11 +90,11 @@ function canvasNode(page: Page, trenchId: string, conduit: string): Locator {
 
 /** Opens the pipe branch of the test project. */
 async function openPipeBranch(page: Page) {
-  await page.goto('/pipe-branch')
+  await page.goto(projectPath('/pipe-branch'))
 
-  // `/pipe-branch` redirects to `/pipe-branch/<project>` - the 2 is the test
-  // project (cookie `selected-project`, set in playwright/auth.setup.ts).
-  await expect(page).toHaveURL(/\/pipe-branch\/2(\/|$)/)
+  // The project is part of the path (playwright/project.ts); the check catches
+  // a redirect to the landing page.
+  await expect(page).toHaveURL(projectUrl('/pipe-branch'))
   await expect(propertiesCard(page)).toBeVisible()
   await page.waitForLoadState('networkidle')
 

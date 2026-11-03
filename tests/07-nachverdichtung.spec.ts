@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page } from '../playwright/test'
 
 import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
 import { stableSearchOrder } from '../playwright/stable-search'
+import { projectPath } from '../playwright/project'
 
 // Screenshots for chapter "7. Nachverdichtung" in the manual
 // (manual/teil-a-anwenderhandbuch/07-nachverdichtung.md). Produces all images
@@ -38,7 +39,7 @@ async function openPostCompaction(page: Page) {
   // The hits of "Toft 1" all score the same and come back in an order of
   // Postgres' choosing; see playwright/stable-search.ts.
   await stableSearchOrder(page)
-  await page.goto('/post-compaction')
+  await page.goto(projectPath('/post-compaction'))
   await expect(page.getByRole('heading', { name: 'Nachverdichtung' })).toBeVisible()
   await page.waitForLoadState('networkidle')
 

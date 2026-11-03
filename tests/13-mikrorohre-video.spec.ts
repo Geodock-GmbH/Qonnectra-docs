@@ -17,6 +17,7 @@ import { expect, request, test, type APIRequestContext, type Page } from '../pla
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { projectPath, projectUrl } from '../playwright/project'
 
 const CHAPTER = '13-mikrorohre'
 
@@ -197,8 +198,8 @@ async function mapPoint(page: Page, coordinate: number[]): Promise<{ x: number; 
  * cursor.
  */
 async function openTable(page: Page) {
-  await page.goto('/house-connections')
-  await expect(page).toHaveURL(/\/house-connections\/2(\/|$)/)
+  await page.goto(projectPath('/house-connections'))
+  await expect(page).toHaveURL(projectUrl('/house-connections'))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.
@@ -250,7 +251,7 @@ test('13.4 Hausanschluss zuordnen', async ({ page, context }) => {
   // Warm-up page. It fills the HTTP cache of the context, so that the actual
   // recording page is up within a fraction of a second - Playwright records a
   // page from its creation, and a long page load would end up in the video.
-  await page.goto('/house-connections')
+  await page.goto(projectPath('/house-connections'))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()
@@ -260,8 +261,7 @@ test('13.4 Hausanschluss zuordnen', async ({ page, context }) => {
 
   await capture.addInitScript(
     (state) => {
-      localStorage.setItem('mapCenter', JSON.stringify(state.view.center))
-      localStorage.setItem('mapZoom', JSON.stringify(state.view.zoom))
+      localStorage.setItem('mapView:2', JSON.stringify({ zoom: state.view.zoom, center: state.view.center }))
       localStorage.setItem('drawerWidth', JSON.stringify(state.drawerWidth))
     },
     { view: VIEW, drawerWidth: DRAWER_WIDTH },

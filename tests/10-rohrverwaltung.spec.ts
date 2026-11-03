@@ -15,6 +15,7 @@ import {
   spotlight,
 } from '../playwright/manual-shots'
 import { freezeDates } from '../playwright/stable-dates'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "10. Rohrverwaltung" in the manual
 // (manual/teil-a-anwenderhandbuch/10-rohrverwaltung.md). Produces all images of
@@ -91,10 +92,9 @@ const PDF = Buffer.from(
  * Opens the conduit management of the test project and waits until the table is
  * there.
  *
- * `/conduit` redirects to `/conduit/2` - the 2 is the test project (cookie
- * `selected-project`, set in playwright/auth.setup.ts). That is checked
- * explicitly: without the cookie the app shows the project "Default", which has
- * no conduits at all, and every image would be of an empty table.
+ * The project is part of the path (playwright/project.ts). The URL is checked
+ * anyway: a locked or renamed route redirects to the landing page, and every
+ * image would show the wrong view.
  *
  * `drawerWidth` seeds the width of the info box. It is persisted per browser
  * (`drawerWidth` in localStorage) and shared with the map, so without seeding
@@ -109,8 +109,8 @@ async function openConduits(page: Page, drawerWidth = 400) {
     localStorage.removeItem('conduit-form-defaults')
   }, drawerWidth)
 
-  await page.goto('/conduit')
-  await expect(page).toHaveURL(/\/conduit\/2(\/|$)/)
+  await page.goto(projectPath('/conduit'))
+  await expect(page).toHaveURL(projectUrl('/conduit'))
 
   await expect(page.locator('table tbody tr').first()).toBeVisible()
   await expect(

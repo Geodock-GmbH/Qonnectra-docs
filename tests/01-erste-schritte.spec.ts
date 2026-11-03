@@ -8,6 +8,7 @@ import {
   shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "1. Erste Schritte" in the manual
 // (manual/teil-a-anwenderhandbuch/01-erste-schritte.md). Produces all
@@ -69,8 +70,8 @@ test.describe('Angemeldet', () => {
 
   /** Opens the dashboard of the test project and waits until the numbers are in. */
   async function openDashboard(page: Page) {
-    await page.goto('/dashboard')
-    await expect(page).toHaveURL(/\/dashboard\/2(\/|$)/)
+    await page.goto(projectPath('/dashboard'))
+    await expect(page).toHaveURL(projectUrl('/dashboard'))
 
     await expect(page.getByRole('heading', { name: 'Trassenstatistik' })).toBeVisible()
     await expect(page.getByText('km Gesamtlänge')).toBeVisible()
@@ -195,8 +196,8 @@ test.describe('Mobil', () => {
 
   /** Opens the dashboard and waits until the cards are in. */
   async function openMobileDashboard(page: Page) {
-    await page.goto('/dashboard')
-    await expect(page).toHaveURL(/\/dashboard\/2(\/|$)/)
+    await page.goto(projectPath('/dashboard'))
+    await expect(page).toHaveURL(projectUrl('/dashboard'))
     await expect(page.getByRole('heading', { name: 'Trassenstatistik' })).toBeVisible()
     await page.waitForLoadState('networkidle')
 

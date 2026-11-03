@@ -7,6 +7,7 @@ import {
   spotlight,
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
+import { projectPath } from '../playwright/project'
 
 // Screenshots for chapter "9. Wertermittlung" in the manual
 // (manual/teil-a-anwenderhandbuch/09-wertermittlung.md). Produces all images
@@ -33,7 +34,7 @@ const AREA = 'Cluster 01'
 
 /** Opens the valuation with the state it starts in: "Gesamt", no result. */
 async function openValuation(page: Page) {
-  await page.goto('/valuation')
+  await page.goto(projectPath('/valuation'))
   await expect(page.getByRole('button', { name: 'Berechnen' })).toBeVisible({ timeout: 30_000 })
   await expect(page.locator('div.map canvas').first()).toBeVisible({ timeout: 30_000 })
   await page.waitForLoadState('networkidle')

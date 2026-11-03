@@ -234,7 +234,7 @@ async function openSeededRecord(page: Page) {
  * Corners of the area drawn for the images, in CSS pixels of the viewport.
  *
  * Hard-coded and not measured: the map position is seeded by
- * playwright/auth.setup.ts (mapCenter/mapZoom), so the same pixel always hits
+ * playwright/auth.setup.ts (`mapView:2`), so the same pixel always hits
  * the same place. The four points frame the western cluster of addresses of the
  * demo data - small enough that objects stay outside the area, which is what
  * makes the highlighting readable in the first place.

@@ -21,6 +21,7 @@
 import { expect, test, type Page } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { projectPath } from '../playwright/project'
 
 const CHAPTER = '09-wertermittlung'
 
@@ -36,7 +37,7 @@ test.use({ video: { mode: 'on', size: { width: 1792, height: 1120 } } })
  * viewport.
  *
  * Hard-coded and not measured: the map position is seeded by
- * playwright/auth.setup.ts (mapCenter/mapZoom), so the same pixel always hits
+ * playwright/auth.setup.ts (`mapView:2`), so the same pixel always hits
  * the same area. Which of the two an unchecked point belongs to is not obvious
  * from the map - the spec therefore checks after every click that the intended
  * area is the one that got ticked.
@@ -63,7 +64,7 @@ const LEAD_IN = 1.0
 
 /** Opens the valuation and waits for the map tiles. */
 async function openValuation(page: Page) {
-  await page.goto('/valuation')
+  await page.goto(projectPath('/valuation'))
   await expect(page.getByRole('button', { name: 'Berechnen' })).toBeVisible({ timeout: 30_000 })
   await expect(page.locator('div.map canvas').first()).toBeVisible({ timeout: 30_000 })
   await page.waitForLoadState('networkidle')
