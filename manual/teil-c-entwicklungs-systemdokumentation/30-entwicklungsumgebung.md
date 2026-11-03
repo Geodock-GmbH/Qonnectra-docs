@@ -79,7 +79,7 @@ Die Schnittstelle antwortet dann unter `http://localhost:8000/api/v1/`, der Admi
 - Die **Swagger-Oberfläche** unter `/api/v1/docs/` und das Schema unter `/api/v1/schema/` gibt es nur mit `DEBUG`, ebenso die im Browser bedienbare Schnittstelle von Django REST Framework, siehe Abschnitt [OpenAPI-Schema und Typgenerierung](./32-rest-api.md#_32-7-openapi-schema-und-typgenerierung).
 - Die **Stylesheets des Administrationsbereichs** liefert `runserver` nur mit `DEBUG` aus.
 
-`CORS_ALLOWED_ORIGINS` muss die Adresse des Frontends nennen, weil der Browser Kacheln, Suchtreffer und Speichervorgänge direkt beim Backend auf einem anderen Port anfragt; die Vorlage trägt dort die Adressen eines Servers ein, und der Browser verweigert die Antworten.
+`CORS_ALLOWED_ORIGINS` muss die Adresse des Frontends nennen, weil der Browser Kacheln, WMS-Quellen und Anhänge direkt beim Backend auf einem anderen Port anfragt; die Vorlage trägt dort die Adressen eines Servers ein, und der Browser verweigert die Antworten.
 
 `USE_COOKIE_DOMAIN_MIDDLEWARE=False` sorgt dafür, dass die Anmelde-Cookies ohne Domain gesetzt werden. Mit der Domain aus der Vorlage verwirft der Browser sie auf `localhost`, und die Anmeldung scheitert, ohne dass eine Meldung erscheint.
 
@@ -110,9 +110,9 @@ In VS Code liegen dieselben Schritte als Aufgaben in `.vscode/tasks.json` („Dj
    npm run dev
    ```
 
-Die Weboberfläche läuft dann unter `http://localhost:5173`. Melden Sie sich mit dem Konto aus Schritt 5 des vorigen Abschnitts an; ausgewählt ist danach das Projekt „Default“, das `load_initial_data` anlegt.
+Die Weboberfläche läuft dann unter `http://localhost:5173`. Melden Sie sich mit dem Konto aus Schritt 5 des vorigen Abschnitts an; die Anmeldung führt auf die Karte des Projekts „Default“, das `load_initial_data` anlegt.
 
-Die Anmeldung läuft über die Formularaktion des Frontends: Sie übernimmt die Cookies aus der Antwort des Backends und setzt sie selbst für `localhost`. Weil Cookies nicht an den Port gebunden sind, schickt der Browser sie auch an `localhost:8000`. Sie tragen das Attribut `Secure`, das Chromium und Firefox auf `localhost` auch ohne HTTPS akzeptieren.
+Die Anmeldung läuft über eine Remote Function des Frontends (`login` in `src/lib/remote/auth/login.remote.ts`): Sie übernimmt die Cookies aus der Antwort des Backends und setzt sie selbst für `localhost`. Weil Cookies nicht an den Port gebunden sind, schickt der Browser sie auch an `localhost:8000`. Sie tragen das Attribut `Secure`, das Chromium und Firefox auf `localhost` auch ohne HTTPS akzeptieren.
 
 ## 30.4 Varianten der Docker-Compose-Dateien
 
@@ -170,10 +170,6 @@ services:
 ```
 :::
 
-::: warning
-Sind `QGIS_DB_USER` und `QGIS_DB_PASSWORD` gesetzt, bricht der allererste Start der Datenbank mit einem leeren Volume ab: `deployment/postgres/init.sh` greift auf Tabellen zu, die erst die Migrationen des Backends anlegen. Starten Sie die Dienste erneut; ein Volume, das bereits initialisiert ist, durchläuft das Skript nicht noch einmal. Was danach für den QGIS-Benutzer zu tun ist, beschreibt Abschnitt [Datenbank, PostGIS und Datenbankzugang](./35-bereitstellung-und-infrastruktur.md#_35-4-datenbank-postgis-und-datenbankzugang).
-:::
-
 ## 30.5 Lokales HTTPS und Zertifikate
 
 Mit `tls internal` stellt Caddy die Zertifikate über eine eigene Zertifizierungsstelle aus, die es beim ersten Start anlegt. Der Browser kennt sie nicht und warnt bei jeder der sechs Adressen. Machen Sie ihr Wurzelzertifikat dem Rechner bekannt; es liegt im Volume `caddy_data`:
@@ -207,7 +203,7 @@ Die Zertifizierungsstelle lebt im Volume `caddy_data`. Wird es gelöscht, etwa m
 
 Qonnectra bringt keine Beispieldaten mit, wohl aber die Stammdaten, ohne die keine Ansicht funktioniert. Es gibt zwei Quellen:
 
-- **Migrationen** legen die drei Gruppen „Admin“, „Editor“ und „Viewer“ mit ihren Modell- und Routenrechten an (Migrationen `0058`, `0068`, `0071`). Sie sind nach `migrate` immer da. Was die Gruppen dürfen, beschreibt Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md).
+- **Migrationen** legen die drei Gruppen „Admin“, „Editor“ und „Viewer“ mit ihren Modell- und Routenrechten an (Migrationen `0058`, `0068`, `0071`, `0078`). Sie sind nach `migrate` immer da. Was die Gruppen dürfen, beschreibt Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md).
 - **`load_initial_data`** lädt die Fixtures aus `backend/apps/api/fixtures/`:
   - das Projekt „Default“ und das Kennzeichen „Default“, beide mit der Nummer 1, samt Netzschema- und Rohrverzweigungs-Einstellungen für dieses Projekt,
   - Status, Phasen, Netzebenen, Oberflächen, Bauarten und Firmen,
