@@ -51,21 +51,17 @@ QONNECTRA_REPO_URL="https://github.com/Geodock-GmbH/Qonnectra.git"
 # noticing: the images simply differed and it looked like the capture pipeline
 # was unreliable.
 #
-# A commit, not a tag, and deliberately so: the manual was surveyed and written
-# against the state of `main` of 2026-09-11, and part A describes features that
-# no release carries yet - the edit mode of the cable labels in chapter 14
-# („Kabel bearbeiten“, app PR #88) arrived after v1.7.0. Pinning to v1.7.0
-# instead would take those sections out of the app. The app still reports 1.7.0
-# in its header; the release after it will carry the state pinned here.
-#
-# aa28575 is the last commit of 2026-09-11. The four before it on that day are
-# backend and OpenAPI changes and cannot move a pixel of the interface.
+# A commit, not a tag. Until v1.8.0 the manual was written against a state of
+# `main` that no release carried (the edit mode of the cable labels in chapter
+# 14, app PR #88, arrived after v1.7.0), and a tag can be moved where a commit
+# cannot. e3a7139 is the release commit of v1.8.0 (2026-09-29), so the app now
+# reports the version it is built from.
 #
 # Raising it is a deliberate step, not a side effect of running the setup
 # again: bump the commit here, regenerate the screenshots, and go through what
 # changed in the app. Overridable via QONNECTRA_REF for a look at another
 # version - the result must not be committed.
-QONNECTRA_REF="${QONNECTRA_REF:-aa2857516278cc5d2d0fe1f27fc255bedcc4bcc0}"
+QONNECTRA_REF="${QONNECTRA_REF:-e3a713946f7d3ff923bed80f1514614a1cc5d849}"
 
 # Persistent local dev CA. Deliberately lives OUTSIDE local-app/ (which gets
 # cloned/deleted) and outside this repo (it contains a private key), so that it
