@@ -35,7 +35,11 @@ Sobald ein Ergebnis angezeigt wird, nimmt die Karte keine Klicks mehr an. Um ein
 Mit „Simulation starten“ teilt sich die Ansicht: Oben bleibt die Karte, unten erscheint das Ergebnis. In dessen Kopfzeile stehen die Trassen-ID und die Bauart der getroffenen Trasse, daneben die Buttons „CSV exportieren“ und „Zurücksetzen“.
 
 ::: info
-Die Auswertung verfolgt jede einzelne Faser jedes betroffenen Kabels und braucht dafür je nach Umfang des Netzes einige Sekunden bis zu einer Minute. Solange dreht sich ein Ladezeichen im Button; warten Sie es ab, ein zweiter Klick beschleunigt nichts. Scheitert die Auswertung, erscheint am unteren Bildschirmrand die Meldung „Fehler bei der Simulation“ und die Ansicht bleibt unverändert.
+Die Auswertung verfolgt jede einzelne Faser jedes betroffenen Kabels und braucht dafür je nach Umfang des Netzes einige Sekunden bis zu einer Minute. Solange steht am Schadenspunkt ein Ladezeichen.
+:::
+
+::: warning
+Scheitert die Auswertung, erscheint am unteren Bildschirmrand die Meldung „Fehler bei der Simulation“. Der Schadenspunkt bleibt aber gesetzt: Die Karte nimmt keine Klicks mehr an, und „Zurücksetzen“ gibt es nicht, weil kein Ergebnis angezeigt wird. Auch Neuladen hilft nicht, es startet dieselbe Auswertung erneut. Kehren Sie mit der Zurück-Funktion des Browsers zur Auswahl des Schadenspunkts zurück.
 :::
 
 Darunter liegen zwei Listen, die beim Öffnen des Ergebnisses **zugeklappt** sind; ein Klick auf ihre Überschrift klappt sie auf und wieder zu. Hinter der Überschrift steht in Klammern die Anzahl der Einträge, die Sie also auch ohne Aufklappen ablesen können:

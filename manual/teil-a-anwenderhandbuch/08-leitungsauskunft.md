@@ -41,7 +41,7 @@ Der Button „+ Erstellen“ über der Tabelle öffnet das Formular für eine ne
 „Erstellen“ legt den Datensatz an, meldet „Leitungsauskunft-Datensatz erfolgreich erstellt“ und wechselt direkt in dessen Detailansicht. Über „Zurück“ verlassen Sie das Formular ohne zu speichern.
 
 ::: info
-Das Feld „Projekt“ ist nicht bearbeitbar: Eine neue Auskunft entsteht immer im Projekt, das oben links in der Kopfzeile gewählt ist, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln). Wechseln Sie das Projekt, bevor Sie das Formular öffnen, wenn die Anfrage einen anderen Bestand betrifft. Nachträglich lässt sich das Projekt nicht mehr ändern.
+Das Feld „Projekt“ ist nicht bearbeitbar: Eine neue Auskunft entsteht immer im Projekt, das oben links in der Kopfzeile gewählt ist, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln). Betrifft die Anfrage einen anderen Bestand, wechseln Sie das Projekt vor dem Klick auf „Erstellen“; das Feld folgt der Auswahl auch bei geöffnetem Formular. Nachträglich lässt sich das Projekt nicht mehr ändern.
 :::
 
 ::: warning
@@ -145,10 +145,6 @@ Der Export ist eine Momentaufnahme und wird nirgends gespeichert. Ändert sich d
 In der Detailansicht sind alle Felder bis auf „Projekt“ bearbeitbar. „Speichern“ übernimmt die Änderungen und meldet „Leitungsauskunft-Datensatz erfolgreich aktualisiert“.
 
 ![Screenshot Detailansicht einer Auskunft mit Hervorhebung der Buttons „Löschen“ und „Speichern“](/images/manual/teil-a/records_detail.jpg)
-
-::: warning
-Die beiden Kombinationsfelder „Art der Arbeit“ und „Grund der Anfrage“ zeigen in der Detailansicht „-“, auch wenn der Datensatz Werte enthält. Was tatsächlich gespeichert ist, lesen Sie in den entsprechenden Spalten der Tabelle ab. Die Werte gehen dadurch nicht verloren: „Speichern“ behält sie, solange Sie die Felder nicht anfassen. Wählen Sie einen Eintrag aus, ersetzt er den bisherigen Wert.
-:::
 
 „Löschen“ fragt mit „Löschen bestätigen“ nach; erst der Klick auf „Löschen“ in diesem Fenster führt es aus. Danach zeigt Qonnectra wieder die Tabelle.
 

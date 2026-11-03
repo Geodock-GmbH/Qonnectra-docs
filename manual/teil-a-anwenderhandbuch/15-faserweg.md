@@ -33,7 +33,7 @@ Die Suche ist fehlertolerant und sucht nach Ähnlichkeit: „Toft 1“ liefert a
 :::
 
 ::: info
-Denselben Faserweg erreichen Sie aus anderen Ansichten heraus über die Schaltfläche „Folgen“ – an einem Netzknoten und einer Adresse in der Karte (siehe Abschnitt [Von der Karte in den Faserweg wechseln](./05-karte.md#_5-7-von-der-karte-in-den-faserweg-wechseln)), an einem Kabel und einer Faser in der Kabelübersicht einer Trasse und an einer aufgelegten Faser im Netzschema (siehe Abschnitt [Spleiße und Ports](./14-netzschema.md#_14-8-spleiße-und-ports)).
+Denselben Faserweg erreichen Sie aus anderen Ansichten heraus über die Schaltfläche „Folgen“ – an einem Netzknoten und einer Adresse in der Karte (siehe Abschnitt [Von der Karte in den Faserweg wechseln](./05-karte.md#_5-7-von-der-karte-in-den-faserweg-wechseln)) sowie an einem Kabel und einer Faser in der Kabelübersicht einer Trasse.
 :::
 
 ## 15.2 Weg lesen: Kabelpfad, Spleiße, Containerpfad

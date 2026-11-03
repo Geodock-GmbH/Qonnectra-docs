@@ -89,7 +89,7 @@ Eine Zeile, die weniger erlaubt, schränkt nur ihre eigene Gruppe ein. Steht ein
 Sieben weitere Zeilen bringt Qonnectra mit, sie wirken aber nicht: `projects`, `flags`, `containertype`, `typeofwork`, `requestreason`, `qgisproject` und `logentry`. Dasselbe gilt für alle übrigen Einträge, die das Feld „Modellname“ zur Auswahl anbietet, etwa die Stammdaten. Projekte, Kennzeichen, Container-Typen und die Auswahllisten der Leitungsauskunft sind wie alle übrigen Stammdaten – Status, Rohrtypen, Firmen – für jedes angemeldete Konto lesbar und lassen sich nur im Administrationsbereich ändern. Wer die Systemprotokolle lesen darf, regeln „Mitarbeiter-Status“ und Routenrecht, siehe Abschnitt [Superuser gegenüber Gruppenmitgliedschaft](#_19-4-superuser-gegenuber-gruppenmitgliedschaft).
 
 ::: warning
-Eine geänderte Zugriffsebene greift nicht sofort. Qonnectra hält die Rechte eines Kontos bis zu fünf Minuten zwischengespeichert. Die Navigationsleiste zeigt die neuen Rechte zwar beim nächsten Seitenaufruf, eine Aktion kann in dieser Zeit aber noch mit dem alten Recht gelingen oder scheitern.
+Eine geänderte Zugriffsebene greift nicht sofort. Qonnectra hält die Rechte eines Kontos bis zu fünf Minuten zwischengespeichert. Die Navigationsleiste zeigt die neuen Rechte erst, wenn das Konto die Seite neu lädt, und auch dann mit bis zu 30 Sekunden Verzögerung. Eine Aktion kann in dieser Zeit noch mit dem alten Recht gelingen oder scheitern.
 :::
 
 ## 19.3 Routenrechte: Zugriff je Menüpunkt

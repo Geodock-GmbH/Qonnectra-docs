@@ -49,7 +49,7 @@ Es gibt drei Zustände, und nur zwei davon sind gewollt:
 ::: warning
 Wer die Einstellungen anlegt und das Feld leer lässt, sperrt die Rohrverzweigung für das Projekt, und die Weboberfläche sagt nicht warum. Wählen Sie mindestens einen Typ aus, oder löschen Sie die Einstellungen wieder.
 
-Eine neue Installation steht für das Projekt „Default“ genau in diesem Zustand: Sie bringt leere Rohrabzweig- und Netzschema-Einstellungen mit. Wählen Sie dort Typen aus, bevor das Projekt genutzt wird.
+Eine neue Installation steht für das Projekt „Default“ genau in diesem Zustand: Sie bringt leere Rohrabzweig-Einstellungen mit. Wählen Sie dort Typen aus, bevor das Projekt genutzt wird. Die Netzschema-Einstellungen von „Default“ sind ebenfalls leer, tragen aber schon den Haken „Konfiguriert“; das Netzschema zeigt dort also ohne Warnung alle Netzknoten, siehe Abschnitt [Netzschema-Einstellungen](#_22-1-netzschema-einstellungen).
 :::
 
 ## 22.3 Kostensätze der Wertermittlung

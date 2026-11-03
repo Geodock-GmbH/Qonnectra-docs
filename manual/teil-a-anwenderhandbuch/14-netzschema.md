@@ -303,7 +303,7 @@ Unter den Kabeln steht der Abschnitt „Adressen“, und zwar nur dann, wenn dem
 
 Eine **Wohneinheit** aus diesem Abschnitt belegt einen Port genauso wie eine Faser. So dokumentieren Sie, welche Wohneinheit an welchem Port hängt – der Faserweg zeigt sie später als Ziel, siehe Abschnitt [Betroffene Adressen und Wohneinheiten](./15-faserweg.md#_15-5-betroffene-adressen-und-wohneinheiten).
 
-Jede belegte Zelle trägt beim Zeigen mit der Maus drei Schaltflächen: „Folgen“ öffnet den Faserweg dieser Faser (siehe Kapitel [Faserweg](./15-faserweg.md)) und zeigt anschließend in der Zelle eine Zusammenfassung („2 Spleisse · 1 Adresse“), „Löschen“ nimmt die Faser vom Port, und bei zusammengeführten Ports kommt „Trennen“ hinzu.
+Jede belegte Zelle trägt beim Zeigen mit der Maus drei Schaltflächen: „Folgen“ zeigt in der Zelle eine Zusammenfassung des Faserwegs dieser Faser („2 Spleisse · 1 Adresse“), ein zweiter Klick blendet sie wieder aus; den vollständigen Weg zeigt das Kapitel [Faserweg](./15-faserweg.md), „Löschen“ nimmt die Faser vom Port, und bei zusammengeführten Ports kommt „Trennen“ hinzu.
 
 **Ports zusammenführen**
 
@@ -318,7 +318,7 @@ Auf eine Seite eines Ports gehört immer nur eine Faser. Wenn mehrere Fasern in 
 Die zusammengeführten Ports stehen danach als eine Zelle mit dem Bereich („1-3“) und teilen sich eine Faser. „Trennen“ löst die Gruppe wieder auf. Das Symbol in der Spaltenüberschrift beendet den Auswahlmodus, ohne etwas zusammenzuführen.
 
 ::: warning
-Zusammenführen geht nur auf einer Seite und nur bei lückenlos aufeinanderfolgenden Ports. Andernfalls meldet Qonnectra „Ports von verschiedenen Seiten können nicht zusammengeführt werden“ beziehungsweise – englisch – „Ports must be consecutive (e.g., 1-2-3, not 1-3)“. Auch andere Meldungen dieser Tabelle sind teils englisch, etwa „No available ports“, wenn ab der Zelle kein freier Port mehr folgt.
+Zusammenführen geht nur auf einer Seite und nur bei lückenlos aufeinanderfolgenden Ports. Andernfalls meldet Qonnectra „Ports von verschiedenen Seiten können nicht zusammengeführt werden“ beziehungsweise „Ports müssen aufeinanderfolgend sein (z. B. 1-2-3, nicht 1-3)“.
 :::
 
 ::: info
@@ -370,5 +370,5 @@ Kopieren Sie in QGIS einen Netzknoten, bekommt die Kopie eine eigene Position au
 :::
 
 ::: info
-Mittelpunkt und Maßstab legt Qonnectra mit dem ersten Netzknoten eines Projekts fest. Beide stehen in den Netzschema-Einstellungen, siehe Kapitel [Projektbezogene Konfiguration](../teil-b-betrieb-admin-qgis/22-projektbezogene-konfiguration.md); der Maßstab lässt sich dort nur ändern, solange noch kein Netzknoten des Projekts eine Position hat.
+Den Mittelpunkt legt Qonnectra mit dem ersten Netzknoten eines Projekts fest, der Maßstab hat einen festen Vorgabewert. Beide stehen in den Netzschema-Einstellungen, siehe Kapitel [Projektbezogene Konfiguration](../teil-b-betrieb-admin-qgis/22-projektbezogene-konfiguration.md); der Maßstab lässt sich dort nur ändern, solange noch kein Netzknoten des Projekts eine Position hat.
 :::

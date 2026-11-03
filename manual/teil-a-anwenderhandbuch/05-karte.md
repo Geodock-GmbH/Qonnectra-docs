@@ -81,7 +81,7 @@ Enthält die Trasse keine Rohre, steht im Fenster „Keine Leerrohre in diesem G
 Im Reiter „Aktionen“ eines Netzknotens führen „Slot-Konfiguration anzeigen“ und „Struktur anzeigen“ zu dessen innerem Aufbau. Beide öffnen ein eigenes Fenster über der Karte, das sich wie das Grabenprofil verschieben und in der Größe ändern lässt.
 
 ::: warning
-Beide Fenster öffnen mittig und sind gleich groß, und „Netzknotenstruktur“ liegt immer über „Netzknoten-Konfiguration“ – unabhängig davon, welches Sie zuerst geöffnet haben. Sobald die Struktur offen ist, verdeckt sie die Konfiguration vollständig; diese ist nicht geschlossen, sondern nur nicht zu sehen. Ziehen Sie das obere Fenster an seiner Titelzeile beiseite, dann liegen beide nebeneinander; ein Klick auf ein Fenster holt es nach vorn.
+Beide Fenster öffnen mittig und sind gleich groß. Das zuletzt geöffnete liegt oben und verdeckt das andere vollständig; dieses ist nicht geschlossen, sondern nur nicht zu sehen. Ziehen Sie das obere Fenster an seiner Titelzeile beiseite, dann liegen beide nebeneinander; ein Klick auf ein Fenster holt es nach vorn.
 
 Erst dann sehen Sie auch, was „Struktur anzeigen“ in der Konfiguration bewirkt: Es schaltet das bereits geöffnete Strukturfenster auf die gewählte Seite um, holt es aber nicht nach vorn.
 :::
@@ -121,7 +121,7 @@ Der Faserweg wird dabei sofort für das ausgewählte Objekt ermittelt: von einem
 Beide Schaltflächen verlassen die Karte. Mit der Zurück-Funktion des Browsers kehren Sie zum selben Ausschnitt mit derselben Info-Box zurück, über den Menüpunkt „Karte“ zum selben Ausschnitt ohne Info-Box.
 
 ::: info
-Lässt sich zu dem gewählten Objekt kein Faserweg ermitteln, etwa weil noch kein Kabel angeschlossen ist, zeigt die Ansicht „Faserweg“ statt eines Ergebnisses eine Fehlermeldung.
+Lässt sich zu dem gewählten Objekt kein Faserweg ermitteln, etwa weil noch kein Kabel angeschlossen ist, zeigt die Ansicht „Faserweg“ zwar das gewählte Objekt, statt des Baums aber nur „Keine Wegdaten verfügbar“.
 :::
 
 ## 5.8 Anhänge an einem Kartenobjekt

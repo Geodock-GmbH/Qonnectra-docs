@@ -110,10 +110,6 @@ Bei den Auswertungen kommen zwei weitere Ursachen dazu:
 - **Das Dashboard zeigt alte Zahlen.** Die Kennzahlen werden bis zu fünf Minuten zwischengespeichert; frisch erfasste Daten erscheinen verzögert, siehe Kapitel [Dashboard](./04-dashboard.md).
 - **Es fehlen Spleiße.** Störungsanalyse, Netzschema und Faserweg rechnen über die Faserverbindungen. Sind für den betrachteten Bereich keine angelegt, ist das Ergebnis leer, obwohl Kabel vorhanden sind, siehe Kapitel [Störungsanalyse](./06-stoerungsanalyse.md) und [Faserweg](./15-faserweg.md).
 
-::: warning
-Eine Tabelle, die „Keine Ergebnisse gefunden“ zeigt, obwohl Sie nichts gefiltert haben und Daten vorhanden sein müssten, kann auch eine gestörte Verbindung zum Server bedeuten: Qonnectra unterscheidet an dieser Stelle nicht zwischen „nichts gefunden“ und „nicht geladen“. Laden Sie die Seite einmal neu, bevor Sie weitersuchen.
-:::
-
 ## 18.5 Was das Support-Team von Ihnen braucht
 
 Je genauer die Meldung, desto schneller die Antwort. Halten Sie fest:

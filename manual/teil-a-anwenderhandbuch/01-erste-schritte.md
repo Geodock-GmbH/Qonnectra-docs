@@ -13,7 +13,7 @@ Qonnectra wird über einen Webbrowser bedient; eine Installation auf Ihrem Rechn
 Zum Abmelden klicken Sie in der Kopfzeile rechts auf „Abmelden“.
 
 ::: info
-Stimmen Benutzername oder Passwort nicht, erscheint am unteren Bildschirmrand kurz die Meldung „Fehler beim Anmelden“ und Sie bleiben auf der Anmeldeseite. Prüfen Sie in diesem Fall die Groß- und Kleinschreibung.
+Stimmen Benutzername oder Passwort nicht, erscheint am unteren Bildschirmrand kurz die Meldung „Fehler beim Anmelden“ und Sie bleiben auf der Anmeldeseite. Unter dem Formular steht zusätzlich der Grund in englischer Sprache, etwa „Invalid credentials.“, bei einem gesperrten Konto „Account is inactive.“. Prüfen Sie in diesem Fall die Groß- und Kleinschreibung.
 :::
 
 ### 1.1.1 Noch keine Zugangsdaten?
@@ -130,12 +130,12 @@ Qonnectra lässt sich auch auf einem Tablet oder Smartphone bedienen. Unterhalb 
 
 ![Screenshot des Dashboards auf einem Smartphone mit Hervorhebung der Leiste am unteren Bildschirmrand](/images/manual/teil-a/login_mobile_bar.jpg){.small}
 
-„Mehr“ öffnet ein Menü mit allen übrigen Menüpunkten, gegliedert nach denselben Gruppen wie die Navigationsleiste am Rechner. Darunter stehen der Bereich „System“ mit „Einstellungen“ und, sofern hinterlegt, „Dokumentation“ sowie die Umschaltung zwischen „DE“ und „EN“. Ein Tippen neben das Menü schließt es wieder.
+„Mehr“ öffnet ein Menü mit den übrigen Menüpunkten, gegliedert nach denselben Gruppen wie die Navigationsleiste am Rechner. Darunter stehen der Bereich „System“ mit „Einstellungen“ und, sofern hinterlegt, „Dokumentation“ sowie die Umschaltung zwischen „DE“ und „EN“. Ein Tippen neben das Menü schließt es wieder.
 
 ![Screenshot des geöffneten Menüs „Weitere Seiten“ auf einem Smartphone mit den Gruppen „Funktionen“, „Rohr“ und „Kabel“](/images/manual/teil-a/login_mobile_more.jpg){.small}
 
 ::: info
-Ausgeblendete Einträge und zugeklappte Gruppen aus Abschnitt [Navigationsleiste anpassen](#_1-5-navigationsleiste-anpassen) wirken sich hier nicht aus: Das Menü „Mehr“ enthält immer alle Menüpunkte, für die Ihr Konto berechtigt ist.
+Das Menü „Mehr“ passen Sie an wie die Navigationsleiste am Rechner, siehe Abschnitt [Navigationsleiste anpassen](#_1-5-navigationsleiste-anpassen): Ein Tippen auf einen Gruppennamen klappt die Gruppe zu, das Symbol mit den Schiebereglern neben der Überschrift „Weitere Seiten“ blendet Einträge aus und wieder ein. Fehlt im Menü ein Eintrag, ist er ausgeblendet oder seine Gruppe zugeklappt. Die Leiste am unteren Bildschirmrand zeigt dagegen immer „Dashboard“ und „Karte“.
 :::
 
 Die Kopfzeile wird unterhalb von etwa 640 Pixeln auf das Nötigste gekürzt: Projektauswahl, „Hell-/Dunkelmodus umschalten“ und „Abmelden“ bleiben stehen, die Versionsanzeige, die Sprachumschaltung, die „Dokumentation“ und der Verweis auf GitHub entfallen. Sprache und Dokumentation erreichen Sie stattdessen über „Mehr“.

@@ -103,7 +103,7 @@ Das Löschen erfolgt ohne Rückfrage.
 :::
 
 ::: warning
-Das Löschen setzt die Zugriffsstufe „Vollzugriff“ voraus; die Berechtigung zum Bearbeiten genügt dafür nicht. Fehlt sie, verschwindet die Verbindung zwar von der Arbeitsfläche, und Qonnectra meldet „Verbindung erfolgreich gelöscht“ – gelöscht ist sie damit aber nicht. Laden Sie den Netzknoten erneut, ist sie wieder da. Wenden Sie sich in diesem Fall an Ihre Administration.
+Das Löschen setzt die Zugriffsstufe „Vollzugriff“ voraus; die Berechtigung zum Bearbeiten genügt dafür nicht. Fehlt sie, verschwindet die Verbindung kurz von der Arbeitsfläche, kehrt dann zurück, und es erscheint „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“ Wenden Sie sich in diesem Fall an Ihre Administration.
 :::
 
 ## 12.4 Arbeitsfläche: Anordnen, Zoomen, Sperren

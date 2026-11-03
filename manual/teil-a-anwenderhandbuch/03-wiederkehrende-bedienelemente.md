@@ -81,7 +81,7 @@ Nicht jeder Eintrag bietet alle Möglichkeiten: Beim Eintrag „Rohr“ steht au
 Der Eintrag „Trasse“ lässt sich zusätzlich aufklappen, sobald Sie unter „Einstellungen“ die „Trassen-Darstellung“ von „Einzelne Farbe“ auf „Nach Oberfläche“ oder „Nach Bauart“ umgestellt haben. Sie schalten dann die einzelnen Oberflächen oder Bauarten getrennt, siehe Kapitel [Einstellungen](./17-einstellungen.md).
 
 ::: warning
-Hat Ihre Administration für das Projekt externe Kartendienste (WMS) hinterlegt, stehen diese unterhalb der aufgeführten Einträge als eigene, aufklappbare Gruppe. Sichtbar wird die Gruppe aber nur, wenn Ihr Konto die Kartendienste lesen darf. Die mitgelieferten Rollen enthalten dieses Recht; eine Rolle, die Ihre Administration selbst angelegt hat, möglicherweise nicht. Fehlt es, bleibt die Gruppe ohne Meldung aus, und die Karte zeigt ausschließlich die Layer von Qonnectra selbst; die Hintergrundkarte ist davon nicht betroffen. Ihre Administration kann das Recht nachtragen, siehe Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md); das Einrichten der Dienste selbst beschreibt Kapitel [QGIS-Server und Kartendienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md).
+Hat Ihre Administration für das Projekt externe Kartendienste (WMS) hinterlegt, steht jeder davon als eigener, aufklappbarer Eintrag zwischen „Gebiet“ und „OpenStreetMap“. Sichtbar werden diese Einträge aber nur, wenn Ihr Konto die Kartendienste lesen darf. Die mitgelieferten Rollen enthalten dieses Recht; eine Rolle, die Ihre Administration selbst angelegt hat, möglicherweise nicht. Fehlt es, fehlen die Einträge ohne Meldung, und die Karte zeigt ausschließlich die Layer von Qonnectra selbst; die Hintergrundkarte ist davon nicht betroffen. Ihre Administration kann das Recht nachtragen, siehe Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md); das Einrichten der Dienste selbst beschreibt Kapitel [QGIS-Server und Kartendienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md).
 :::
 
 ::: warning
@@ -103,11 +103,16 @@ Mit „Auf Ausdehnung zoomen“ beim Eintrag „Adresse“ gelangen Sie in den B
 Ein Klick in die Karte wählt das Objekt darunter aus. Zwei Eigenheiten des Netzbestands machen das schwerer, als es klingt: Trassen sind nur wenige Pixel breit und laufen an Netzknoten zusammen, und die Fläche eines Projektgebiets liegt unter dem gesamten Netz. Innerhalb eines Gebiets trifft ein Klick deshalb leicht dessen Fläche, die daraufhin die ganze Karte in der Auswahlfarbe überdeckt.
 
 ::: warning
-Treffen Sie nicht das gewünschte Objekt, zoomen Sie weiter in die Karte hinein oder blenden Sie den Layer „Gebiet“ in der Legende vorübergehend aus. In den verkleinerten Karten der Nachverdichtung und der Adressdetails ist das nicht möglich, weil sie keine Legende haben.
+Treffen Sie nicht das gewünschte Objekt, zoomen Sie weiter in die Karte hinein oder blenden Sie den Layer „Gebiet“ in der Legende vorübergehend aus. Die verkleinerten Karten der Nachverdichtung und der Adressdetails wählen per Klick nichts aus und zeigen keine Gebiete.
 :::
 
 ::: info
-Zwei Ansichten verwenden den Klick für etwas anderes und öffnen deshalb keine Info-Box: In der Leitungsauskunft zeichnen und ändern Sie damit die Auskunftsbereiche, siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md), in der Wertermittlung wählen Sie damit ein Gebiet an oder ab, siehe Kapitel [Wertermittlung](./09-wertermittlung.md).
+Einige Ansichten verwenden den Klick für etwas anderes und öffnen deshalb keine Info-Box:
+
+- In der Störungsanalyse setzen Sie damit den Schadenspunkt, siehe Kapitel [Störungsanalyse](./06-stoerungsanalyse.md).
+- In der Leitungsauskunft zeichnen und ändern Sie damit die Auskunftsbereiche, siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md).
+- In der Wertermittlung wählen Sie damit ein Gebiet an oder ab, siehe Kapitel [Wertermittlung](./09-wertermittlung.md).
+- In der Rohrzuordnung ordnen Sie damit ein Trassensegment zu, siehe Kapitel [Rohrzuordnung](./11-rohrzuordnung.md).
 :::
 
 ## 3.4 Objekte in der Karte suchen
