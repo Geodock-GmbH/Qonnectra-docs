@@ -128,6 +128,8 @@ pnpm test:e2e tests/05-karte.spec.ts   # named specs, stale or not
 
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
 scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
+scripts/stop-local-qonnectra.sh             # stop it (it does not start on boot by itself)
+scripts/stop-local-qonnectra.sh --down      # stop and remove the containers, data stays
 scripts/install-local-ca.sh                 # import the dev CA once per machine
 scripts/build-map-tiles.sh <osm-pbf-url>    # build a new map tile set (only to move the pin)
 scripts/qonnectra-demo-data/fetch_geodock_export.py --out scripts/qonnectra-demo-data/testprojekt-export.json
@@ -820,7 +822,7 @@ longer read.
   mounted `/data`).
   Map images therefore show the real vector base map in light mode. If the
   `.mbtiles` is missing (run with `--skip-tiles`, download failed), the
-  `tileserver` runs in a restart loop and the map falls back to OSM raster tiles.
+  `tileserver` exits and the map falls back to OSM raster tiles.
 - The tile set is **pinned by name and checksum** (`TILE_ID`, `TILE_SHA256` at
   the top of the setup script). A local file that does not match the checksum is
   replaced by the release asset, and a downloaded one that does not match stops

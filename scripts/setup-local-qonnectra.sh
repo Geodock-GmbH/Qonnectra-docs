@@ -78,8 +78,7 @@ CA_KEY="$CA_DIR/root.key"
 CA_NAME="Qonnectra Local Dev CA"
 
 # Map tiles (.mbtiles) for the tileserver. The app deliberately ships none, but
-# tileserver-gl exits immediately without them and, thanks to
-# "restart: always", ends up in an endless loop - the map would then fall back
+# tileserver-gl exits immediately without them - the map would then fall back
 # to OSM raster tiles instead of showing the real vector base map.
 #
 # Like the dev CA, the tiles live OUTSIDE local-app/ (which gets cloned/deleted)
@@ -162,9 +161,8 @@ Usage: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
                     --reset.
                     Also the way out when the checkout sits on another version
                     and cannot be switched because of local changes.
-  --skip-tiles      Do not download map tiles. The tileserver then runs into a
-                    restart loop without data and the map falls back to OSM
-                    raster tiles.
+  --skip-tiles      Do not download map tiles. The tileserver then exits
+                    without data and the map falls back to OSM raster tiles.
   -h, --help        Show this help.
 
 The app is built from the pinned commit $QONNECTRA_REF. All images of the
@@ -682,8 +680,9 @@ fi
 # --- Create docker-compose.override.yml -------------------------------------
 #
 # Adjustments to the production compose: point Caddy at the Caddyfile generated
-# above with "tls internal", hand the backend the capture account, and build the
-# db image against the PGDG archive (see the comment at "db" below). The nginx
+# above with "tls internal", hand the backend the capture account, build the
+# db image against the PGDG archive (see the comment at "db" below), and turn
+# off "restart: always" (see the comment at the top of the generated file). The nginx
 # and qgis-server commands in docker-compose.yml are already correct (unlike in
 # docker-compose.dev.yml).
 
@@ -692,6 +691,11 @@ cat >"$DEPLOY_DIR/docker-compose.override.yml" <<EOF
 # Generated automatically by scripts/setup-local-qonnectra.sh - local
 # adjustment to docker-compose.yml (production) for *.qonnectra.localhost
 # instead of real domains with Let's Encrypt certificates.
+#
+# Every service gets restart: "no" in place of the "restart: always" of
+# docker-compose.yml: a local instance for captures has no business starting on
+# every boot. scripts/stop-local-qonnectra.sh stops it, the setup script brings
+# it up again.
 services:
   # docker-compose.yml lists the environment of the backend one by one and
   # reads no env_file - the APP_USER_* values therefore have to be added here.
@@ -701,6 +705,7 @@ services:
   # stay unresolved: Compose fills them in from .env on startup, so this file
   # contains no password.
   backend:
+    restart: "no"
     environment:
       - APP_USER_USERNAME=\${APP_USER_USERNAME}
       - APP_USER_EMAIL=\${APP_USER_EMAIL}
@@ -715,6 +720,7 @@ services:
   # Dockerfile, one sed in front. The fix belongs upstream; local-app/ is never
   # patched from here.
   db:
+    restart: "no"
     build:
       dockerfile: !reset null
       dockerfile_inline: |
@@ -724,6 +730,7 @@ services:
             apt-get install -y --no-install-recommends postgresql-17-pgrouting && \\
             rm -rf /var/lib/apt/lists/*
   caddy:
+    restart: "no"
     volumes:
       - ./Caddyfile.production.local:/etc/caddy/Caddyfile:ro
       - ./caddy/extra:/etc/caddy/extra:ro
@@ -733,6 +740,18 @@ services:
       - caddy_config:/config
       - ./logs:/var/log/caddy
       - media_volume:/media:ro
+  backend-wms:
+    restart: "no"
+  qgis-server:
+    restart: "no"
+  pg-error-parser:
+    restart: "no"
+  frontend:
+    restart: "no"
+  nginx:
+    restart: "no"
+  tileserver:
+    restart: "no"
 EOF
 
 COMPOSE=(docker compose -f "$DEPLOY_DIR/docker-compose.yml" -f "$DEPLOY_DIR/docker-compose.override.yml")
@@ -1009,8 +1028,8 @@ $CA_SECTION
 
 $TILES_SECTION
 
-Stopping the stack:
-  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml down
+Stopping the stack (the containers do not start on boot by themselves):
+  $REPO_ROOT/scripts/stop-local-qonnectra.sh
 
 Run the script again to rebuild/restart the stack (secrets/DB are kept as long
 as local-app/deployment/.env is not deleted). For a rebuild with an empty
