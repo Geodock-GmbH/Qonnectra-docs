@@ -38,7 +38,7 @@ Diese Adresse tragen Sie in QGIS als neue WMS- oder WFS-Verbindung ein. Als Anme
 Wie eine PostgreSQL-Verbindung in QGIS angelegt wird, beschreibt die QGIS-Dokumentation im Kapitel [PostGIS-Layer](https://docs.qgis.org/latest/de/docs/user_manual/managing_data_source/opening_data.html#creating-a-stored-connection).
 
 ::: warning
-Der Datenbankbenutzer für QGIS darf in allen Tabellen lesen, anlegen, ändern und löschen, auch in denen der Benutzerkonten und der Rechte. Die Rollen aus Kapitel [Rollen und Rechte](./19-rollen-und-rechte.md) gelten für ihn nicht. Wer diese Zugangsdaten hat, kann jede Trasse jedes Projekts löschen und jedem Konto Administrationsrechte geben – sie kommen einem Administrationszugang gleich. Geben Sie sie nur an Personen, denen Sie auch die Administration der Installation anvertrauen.
+Der Datenbankbenutzer für QGIS darf in allen Tabellen lesen, anlegen, ändern und löschen, in allen Projekten. Gesperrt sind ihm nur die Tabellen der Benutzerkonten, Gruppen, Sitzungen und Rechte sowie die gespeicherten Benutzereinstellungen. Die Rollen aus Kapitel [Rollen und Rechte](./19-rollen-und-rechte.md) gelten für ihn nicht. Wer diese Zugangsdaten hat, kann jede Trasse jedes Projekts löschen und die Leitungsauskünfte mit den Kontaktdaten der anfragenden Stellen lesen. Geben Sie sie nur an Personen, die in QGIS bearbeiten sollen.
 :::
 
 ::: info

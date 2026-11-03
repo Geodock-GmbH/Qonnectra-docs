@@ -206,7 +206,7 @@ QGIS. Assumes part A.
 - 19.3 Routenrechte: Zugriff je Menüpunkt
 - 19.4 Superuser gegenüber Gruppenmitgliedschaft
 - 19.5 Typische Rollenprofile: Betrachten, Bearbeiten, Verwalten
-- 19.6 Rechte, die keine mitgelieferte Rolle enthält
+- 19.6 Eigene Rollen anlegen und Rechte ergänzen
 
 ### 20. Der Administrationsbereich
 
@@ -474,24 +474,23 @@ are still missing inside a written chapter carry the same sentence.
   the length of a capture run - one per shipped group (Admin, Editor, Viewer) -
   and removes them again afterwards. Without them 19.1 and 19.5 would have
   nothing to show but an empty group membership.
-- Four models have a `RoleBasedPermission` but no seeded `ModelPermission` row
-  (`nodetrenchselection`, `nodeslotclipnumber`, `nodeslotdivider`, `wmssource`),
-  so every account except a Django superuser gets 403 on them – reading
-  included. Section 19.6 is where that is explained, together with the way out:
-  `model_name` is a free text field, so the administration can add the missing
-  row per group. Chapter 27.4 needs the same fact for `wmssource`, which is the
-  reason WMS sources are maintained in the administration area and not through
-  the API; `wmslayer` is seeded normally.
-- Part A treats those four by how visible they are. 12.2 keeps the trench
-  selection, because the button and its (lying) success message are in front of
-  the reader, and links to 19.6. 3.3 and 7.2 keep the WMS group of the legend for
-  the opposite reason: the group is missing without any message, so the note is
-  what tells the reader that the layers are not simply absent from the project.
-  Clip number and divider in the slot grid are deliberately absent from 14.7 –
-  they hang off an unannounced click resp. double-click, are pure labelling and
-  do nothing for any shipped role. When chapter 18 is written, „Fehler beim
-  Speichern der Clip-Nummer“ and „Fehler beim Erstellen der Trennlinie“ belong
-  in 18.1/18.3 as messages, without advertising the feature again.
+- Up to v1.7, four models had a `RoleBasedPermission` but no seeded
+  `ModelPermission` row (`nodetrenchselection`, `nodeslotclipnumber`,
+  `nodeslotdivider`, `wmssource`). Since v1.8.0 migration `0078` seeds them for
+  the groups named Admin/Editor/Viewer (full/edit/view), keeping rows set by
+  hand; groups of their own still lack them. Section 19.6 now covers creating a
+  role (the group form copies all rows of another group, „Berechtigungen
+  übernehmen von“), the `*` row and that upgrade gap; `model_name` is a
+  dropdown, so a typo can no longer create a row without effect.
+- Part A no longer warns about those four for the shipped roles. 12.2
+  describes that the trench selection is remembered per node (trenches, not
+  single conduits); 3.3 keeps one sentence that the WMS group of the legend is
+  missing without any message for a role of one's own that lacks `wmssource`.
+  Clip number and divider in the slot grid are still absent from 14.7 – they
+  hang off an unannounced click resp. double-click and are pure labelling. Since
+  v1.8.0 the shipped roles may use them, so they are a candidate for 14.7; when
+  that happens, „Fehler beim Speichern der Clip-Nummer“ and „Fehler beim
+  Erstellen der Trennlinie“ belong in 18.1/18.3 as messages.
 
 ## Who owns what: decisions taken before the chapters were written
 
@@ -510,7 +509,7 @@ and what the other side is left with.
 | Error messages spread over all chapters ↔ chapter 18 | **the chapter where the error occurs** – a message is most useful next to the action that causes it | 18 stays a collection page: it groups the recurring cases (session expired, missing rights, empty map or chart) and links *back* into the chapters. It does not become the only place an error is mentioned. |
 | 21.1 ↔ 22.1–22.3: Netzschema-Einstellungen, Rohrabzweig-Einstellungen and Kostensätze appear as inlines of the project form **and** as administration pages of their own | **22.1–22.3** – what each setting means, what it does in part A and what happens while it is missing | 21.1 shows the project form, names the three inlines as the place to fill them in when a project is created, and links. |
 | 22.4 ↔ 24.2 ↔ 26.4: the GeoPackage schema | **22.4** configures (which layers), **24.2** downloads (admin action, API URL, what the empty file contains), **26.4** uses it in the field and brings the data back | Each of the three names its own step and links to the other two. |
-| 27.4 ↔ 3.3 (and 19.6): external WMS sources | **27.4** – source, credentials, layers, zoom range, and the `wmssource` right nobody has by default | 3.3 keeps the one note that the legend group is missing without the right, and links. 19.6 names the missing right among the four and links to 27.4 for what it unlocks. |
+| 27.4 ↔ 3.3 (and 19.2, 19.6): external WMS sources | **27.4** – source, credentials, layers, zoom range, and the `wmssource` right | 3.3 keeps the one note that the legend group is missing without the right, and links. 19.2 lists `wmssource` with the other models and links to 27.4; 19.6 names the upgrade gap for groups of one's own. |
 | 28.2 ↔ 35.7: environment variables | **35.7** – the complete reference | 28.2 names only what an operator touches in running operation, and the pitfalls of the rest: domains and allowed hosts, cookie domain, documentation link, QGIS Server version, WireGuard peers, the encryption key and the database passwords that must not change, `DEFAULT_SRID`, and which variables need a rebuild of the frontend. 28.6 adds the tile server URL. Links to 35.7 for everything else. |
 | 20.2 ↔ 24.3, 26.3: the repair actions of the administration (microducts for empty conduits, fibers for empty cables, cable lengths, trench IDs, auto-link of micropipes, orphaned files) | **20.2** – lists them once, with what each one does | 24.3 and 26.3 name the occasion („nach einem Import aus QGIS …“) and link. 23.5 owns the orphaned files. |
 | 28.1 ↔ 29.1, 35.2: the services of an installation | **28.1** – the table of services and what each one does | 29.1 follows a request through them (subdomains, server-side rendering vs. browser calls, login hops, tiles and WMS); 35.2–35.6 describe how each one is built and configured. Neither repeats the table. |

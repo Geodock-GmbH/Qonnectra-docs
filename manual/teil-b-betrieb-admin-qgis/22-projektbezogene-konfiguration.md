@@ -4,23 +4,34 @@ Drei Ansichten der Weboberfläche hängen von Einstellungen ab, die je Projekt i
 
 Die drei Projekteinstellungen pflegen Sie am bequemsten im Formular des Projekts unter „Api“ → „Projekte“, wo sie unter den Feldern des Projekts stehen, siehe Abschnitt [Projekte anlegen und Vorbelegungen setzen](./21-projekte-und-stammdaten.md#_21-1-projekte-anlegen-und-vorbelegungen-setzen). Jede hat außerdem eine eigene Liste: „Netzwerkschema“, „Rohrverzweigung“ und „Wertermittlungssätze“.
 
-Die Projektliste zeigt in drei Spalten, was eingerichtet ist: „Ausgeschlossene Netzknotentypen“ und „Netzknotentypen“ aus den Netzschema-Einstellungen, „Rohrverzweigungs-Typen“ aus den Rohrabzweig-Einstellungen. Die Spalte „Netzknotentypen“ meint die Typen mit der Schaltfläche „Subnetz öffnen“. „Keine“ oder „Keine konfiguriert“ heißt, die Einstellung ist angelegt, aber leer; „Nicht konfiguriert“ heißt, sie fehlt ganz. Der Unterschied ist wichtig, siehe Abschnitt [Einstellungen der Rohrverzweigung](#_22-2-einstellungen-der-rohrverzweigung).
+Die Projektliste zeigt in drei Spalten, was eingerichtet ist: „Ausgeschlossene Netzknotentypen“ und „Netzknotentypen“ aus den Netzschema-Einstellungen, „Rohrverzweigungs-Typen“ aus den Rohrabzweig-Einstellungen. Die Spalte „Netzknotentypen“ meint die Typen mit der Schaltfläche „Subnetz öffnen“. „Keine“ oder „Keine konfiguriert“ heißt, die Einstellung ist angelegt, aber leer. „Nicht konfiguriert“ heißt bei den Rohrabzweig-Einstellungen, sie fehlen ganz; bei den Netzschema-Einstellungen steht es auch, solange der Haken „Konfiguriert“ fehlt, siehe Abschnitt [Netzschema-Einstellungen](#_22-1-netzschema-einstellungen). Der Unterschied ist wichtig, siehe Abschnitt [Einstellungen der Rohrverzweigung](#_22-2-einstellungen-der-rohrverzweigung).
 
 ![Screenshot der Liste der Projekte im Administrationsbereich mit Hervorhebung der drei Spalten zu den Projekteinstellungen rechts](/images/manual/teil-b/admin_project_list.jpg)
 
 ## 22.1 Netzschema-Einstellungen
 
-Die **Netzschema-Einstellungen** legen fest, welche Netzknoten das Netzschema eines Projekts zeigt, siehe Kapitel [Netzschema](../teil-a-anwenderhandbuch/14-netzschema.md). Sie haben zwei Auswahlfelder:
+Die **Netzschema-Einstellungen** legen fest, welche Netzknoten das Netzschema eines Projekts zeigt und wo neue Netzknoten darin erscheinen, siehe Kapitel [Netzschema](../teil-a-anwenderhandbuch/14-netzschema.md). Sie haben zwei Auswahlfelder:
 
 - „Ausgeschlossene Netzknotentypen“ – Netzknoten dieser Typen erscheinen nicht im Schema. Üblich sind die Hausanschlüsse, deren Zahl das Schema unübersichtlich machen würde.
 - „Kindansicht aktivierte Netzknotentypen“ – an Netzknoten dieser Typen erscheint die Schaltfläche „Subnetz öffnen“, siehe Abschnitt [Subnetz eines Netzknotens](../teil-a-anwenderhandbuch/14-netzschema.md#_14-9-subnetz-eines-netzknotens). Der Hilfetext unter dem Feld nennt die Schaltfläche „Hausanschlusskabel-Schema öffnen“; gemeint ist „Subnetz öffnen“.
 
 ![Screenshot der Netzschema-Einstellungen eines Projekts mit Hervorhebung der beiden Auswahlfelder untereinander](/images/manual/teil-b/admin_schema_settings.jpg)
 
-Markieren Sie einen Typ in der linken Liste und verschieben Sie ihn mit dem Pfeil nach rechts.
+Markieren Sie einen Typ in der linken Liste und verschieben Sie ihn mit dem Pfeil nach rechts. Setzen Sie danach den Haken bei „Konfiguriert“. Er ändert an der Auswahl nichts, sondern bestätigt nur, dass sie eingerichtet ist.
 
-::: info
-Fehlen die Netzschema-Einstellungen, meldet das Netzschema beim Öffnen „Die Netzschema-Einstellungen sind für dieses Projekt nicht konfiguriert. Bitte konfigurieren Sie diese im Admin-Bereich.“, zeigt alle Netzknoten des Projekts, und „Subnetz öffnen“ erscheint nirgends. Sind sie angelegt, aber leer, gilt dasselbe ohne die Meldung.
+::: warning
+Solange „Konfiguriert“ fehlt, warnt das Netzschema bei jedem Öffnen: „Die Netzschema-Einstellungen sind für dieses Projekt nicht konfiguriert, daher werden alle Knoten inklusive Hausanschlüsse im Schema platziert. Bitte schließen Sie Knotentypen aus und setzen Sie "Konfiguriert" im Admin-Bereich.“ Die Meldung erscheint auch dann, wenn schon Typen ausgeschlossen sind und das Schema sie tatsächlich ausblendet. Umgekehrt bringt ein Haken bei leerer Auswahl die Meldung zum Schweigen, und das Schema zeigt weiter alle Netzknoten.
+:::
+
+Fehlen die Netzschema-Einstellungen ganz oder sind beide Auswahlfelder leer, zeigt das Netzschema alle Netzknoten des Projekts, und „Subnetz öffnen“ erscheint nirgends. Ganz fehlen sie nur bis zum ersten Netzknoten: Mit ihm legt Qonnectra die Einstellungen selbst an, leer und ohne „Konfiguriert“.
+
+Die übrigen drei Felder bestimmen, wo ein neuer Netzknoten im Netzschema erscheint. Qonnectra setzt ihn nach seiner Lage in der Karte:
+
+- „Canvas Mittelpunkt X“ und „Canvas Mittelpunkt Y“ – die Koordinaten, die im Netzschema am Ursprung liegen. Qonnectra übernimmt sie vom ersten Netzknoten des Projekts; ändern lassen sie sich nicht.
+- „Canvas Maßstab“ – Einheiten des Netzschemas je Meter in der Karte, vorgegeben ist 0,5. Ein größerer Wert zieht die Netzknoten weiter auseinander.
+
+::: warning
+Den „Canvas Maßstab“ können Sie nur ändern, solange das Projekt keinen Netzknoten hat; danach ist das Feld gesperrt, damit neue Netzknoten zu den vorhandenen passen. Legen Sie die Netzschema-Einstellungen deshalb gleich mit dem Projekt an, siehe Abschnitt [Projekte anlegen und Vorbelegungen setzen](./21-projekte-und-stammdaten.md#_21-1-projekte-anlegen-und-vorbelegungen-setzen), wenn Sie einen anderen Maßstab brauchen.
 :::
 
 ## 22.2 Einstellungen der Rohrverzweigung
