@@ -364,7 +364,7 @@ test('10.7 Reiter „Anhänge"', async ({ page }) => {
     const dialog = page.waitForEvent('filechooser')
     await drawer.getByRole('button', { name: 'Dateien auswählen', exact: true }).click()
     await (await dialog).setFiles({ name: FILE, mimeType: 'application/pdf', buffer: PDF })
-    await drawer.getByRole('button', { name: /^Upload/ }).click()
+    await drawer.getByRole('button', { name: /^\d+ Datei(en)? hochladen$/ }).click()
 
     // Files are sorted into folders by their kind; a PDF lands in "documents".
     const folder = drawer.getByText('documents (1)')

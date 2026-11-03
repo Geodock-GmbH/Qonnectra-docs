@@ -26,6 +26,15 @@ import { projectPath, projectUrl } from '../playwright/project'
 // Publish to public/images/ with: pnpm screenshots:publish 18-wenn-etwas-nicht-funktioniert
 const CHAPTER = '18-wenn-etwas-nicht-funktioniert'
 
+/**
+ * The message of a refused action. Since v1.8.0 every view that writes through
+ * a remote function maps a 403 to `message_error_permission_denied`
+ * (src/lib/remote/shared/remote-error.ts); it replaced „Sie sind nicht
+ * berechtigt, diese Aktion durchzuführen.“
+ */
+const PERMISSION_DENIED =
+  'Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.'
+
 /** The address the two message images are taken of, as in tests/16-adressen.spec.ts. */
 const ADDRESS = { uuid: '613504f0-d3a3-48e5-9a83-b886b51f8345', title: 'Toft 15', units: 5 }
 
@@ -129,7 +138,7 @@ test('18.3 Meldung über das fehlende Recht', async ({ page }) => {
   await page.getByRole('button', { name: 'Löschen', exact: true }).last().click()
 
   await expect(
-    page.getByText('Sie sind nicht berechtigt, diese Aktion durchzuführen.'),
+    page.getByText(PERMISSION_DENIED),
   ).toBeVisible()
   // Nothing was deleted - that is the statement of the section.
   await expect(rows).toHaveCount(ADDRESS.units)

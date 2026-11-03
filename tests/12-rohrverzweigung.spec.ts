@@ -7,6 +7,7 @@ import {
   shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { clearTrenchSelection } from '../playwright/pipe-branch-seeds'
 import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "12. Rohrverzweigung" in the manual
@@ -24,9 +25,12 @@ import { projectPath, projectUrl } from '../playwright/project'
 // The videos of the chapter sit in tests/12-rohrverzweigung-video.spec.ts -
 // test.use({ video: ... }) is only allowed at file level.
 //
-// None of the images here changes data: the lasso selection of
-// pipe_branch_auto_connect stops short of the button that would create the
-// connections. Only the video spec writes, and it cleans up after itself.
+// No image here creates connections: the lasso selection of
+// pipe_branch_auto_connect stops short of the button that would create them.
+// What "Auf Canvas laden" does write since v1.8.0 is the trench selection of
+// the node; it is cleared before and after every test
+// (playwright/pipe-branch-seeds.ts), so each one starts from the canvas of the
+// demo data.
 //
 // Publish to public/images/ with: pnpm screenshots:publish 12-rohrverzweigung
 const CHAPTER = '12-rohrverzweigung'
@@ -88,6 +92,12 @@ function canvasNode(page: Page, trenchId: string, conduit: string): Locator {
     .filter({ hasText: new RegExp(`${conduit}(?!a)`) })
 }
 
+test.beforeEach(() => clearTrenchSelection(NODE))
+test.afterEach(() => clearTrenchSelection(NODE))
+
+/** Conduit circles of the demo data's saved canvas: the two with connections. */
+const CONNECTED_CONDUIT_COUNT = 2
+
 /** Opens the pipe branch of the test project. */
 async function openPipeBranch(page: Page) {
   await page.goto(projectPath('/pipe-branch'))
@@ -103,12 +113,23 @@ async function openPipeBranch(page: Page) {
 }
 
 /**
- * Picks NODE, which opens the trench window by itself, and waits until it holds
- * the trenches of the demo data.
+ * Picks NODE, opens the trench window and waits until it holds the trenches of
+ * the demo data.
+ *
+ * Since v1.8.0 the node lands in the path (`/pipe-branch/node/<uuid>`), and its
+ * canvas opens on what was saved for it: the saved trenches plus every conduit
+ * that carries a connection. The window only opens by itself for a node where
+ * that is nothing. NODE has the three connections of the demo data, so it
+ * opens on the canvas with their two conduits, and the window is opened
+ * through „Grabenauswahl bearbeiten“.
  */
 async function selectNode(page: Page) {
   await page.getByPlaceholder('Rohrverzweigung auswählen', { exact: true }).click()
   await page.getByRole('option', { name: NODE, exact: true }).click()
+
+  await expect(page).toHaveURL(projectUrl('/pipe-branch/node'))
+  await expect(page.locator('.svelte-flow__node')).toHaveCount(CONNECTED_CONDUIT_COUNT)
+  await page.getByRole('button', { name: 'Grabenauswahl bearbeiten', exact: true }).click()
 
   await expect(
     page.getByText(`${TRENCHES.length} Trassen in der Nähe gefunden`),
@@ -129,7 +150,9 @@ async function loadCanvas(page: Page, { all = true }: { all?: boolean } = {}) {
   if (all) await page.getByRole('button', { name: 'Alle auswählen' }).click()
   await page.getByRole('button', { name: 'Auf Canvas laden' }).click()
 
-  await expect(page.locator('.svelte-flow__node')).toHaveCount(all ? CANVAS_NODE_COUNT : 2)
+  await expect(page.locator('.svelte-flow__node')).toHaveCount(
+    all ? CANVAS_NODE_COUNT : CONNECTED_CONDUIT_COUNT,
+  )
   await expect(
     page.locator('.svelte-flow__edge'),
     'The connections of the demo data are missing from the canvas. Has a video ' +
@@ -137,7 +160,12 @@ async function loadCanvas(page: Page, { all = true }: { all?: boolean } = {}) {
       'through the API.',
   ).toHaveCount(DEMO_CONNECTION_COUNT)
 
-  // `fitView` runs as an animation after the nodes are in the DOM.
+  // The canvas fits its view only when it mounts (`fitView` on SvelteFlow in
+  // PipeBranchCanvas.svelte). Since v1.8.0 it mounts on the two conduits with
+  // connections, and the five loaded afterwards spill over its edges - a lasso
+  // clamped to the pane then misses a circle's centre. "Fit View" does what
+  // the mount did in v1.7; it runs as an animation.
+  await page.getByRole('button', { name: 'Fit View', exact: true }).click()
   await page.waitForTimeout(1200)
   await moveCursorAway(page)
 }

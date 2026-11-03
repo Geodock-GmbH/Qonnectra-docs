@@ -8,15 +8,18 @@ import {
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
 import { projectPath } from '../playwright/project'
+import { remoteArgument, remoteUrl } from '../playwright/remote-functions'
+import { CAPTURE_DATE } from '../playwright/stable-dates'
 
 // Screenshots for chapter "9. Wertermittlung" in the manual
 // (manual/teil-a-anwenderhandbuch/09-wertermittlung.md). Produces all images
 // of the chapter; the video sits in tests/09-wertermittlung-video.spec.ts.
 //
-// Nothing here writes to the database: "Berechnen" posts to
-// /valuation/calculate/, but the endpoint only computes and stores nothing
-// (calculate_valuation() in the backend). Which is also why the chapter has no
-// clean-up.
+// Nothing here writes to the database: since v1.8.0 the view calculates by
+// itself on opening and after every change of the selection (remote function
+// `calculateValuation`), and the endpoint behind it only computes and stores
+// nothing (calculate_valuation() in the backend). Which is also why the
+// chapter has no clean-up.
 //
 // Publish to public/images/ with: pnpm screenshots:publish 09-wertermittlung
 const CHAPTER = '09-wertermittlung'
@@ -32,10 +35,37 @@ const CHAPTER = '09-wertermittlung'
  */
 const AREA = 'Cluster 01'
 
-/** Opens the valuation with the state it starts in: "Gesamt", no result. */
+/**
+ * The year the projection starts from. "Jahr Bauabschluss" defaults to the
+ * current year of the browser (`defaultBaseYear()` in valuationRequest.ts), so
+ * valuation_year and valuation_projection would change on every New Year. The
+ * input lives in the URL since v1.8.0 (`?baseYear=`), and the spec names the
+ * year of CAPTURE_DATE there - the field shows the same value a user sees in
+ * that year, and the image stays the same in the next.
+ */
+const BASE_YEAR = new Date(CAPTURE_DATE).getFullYear()
+
+/** The status line the panel shows while a calculation runs. */
+function calculating(page: Page): Locator {
+  return page.getByText('Berechne …')
+}
+
+/** Waits until the result of the current selection is shown. */
+async function resultShown(page: Page) {
+  await expect(page.getByRole('cell', { name: 'Gesamtinvestition' })).toBeVisible({
+    timeout: 60_000,
+  })
+  await expect(calculating(page)).toHaveCount(0)
+  await page.waitForLoadState('networkidle')
+}
+
+/**
+ * Opens the valuation with the state it starts in: "Gesamt", and - there is no
+ * button to start it any more - the result for the whole project.
+ */
 async function openValuation(page: Page) {
-  await page.goto(projectPath('/valuation'))
-  await expect(page.getByRole('button', { name: 'Berechnen' })).toBeVisible({ timeout: 30_000 })
+  await page.goto(`${projectPath('/valuation')}?baseYear=${BASE_YEAR}`)
+  await resultShown(page)
   await expect(page.locator('div.map canvas').first()).toBeVisible({ timeout: 30_000 })
   await page.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.
@@ -47,22 +77,26 @@ async function openValuation(page: Page) {
 
 /**
  * Ticks AREA in the list. That takes the tick off "Gesamt (ganzes Projekt)" by
- * itself and outlines the area in the map.
+ * itself, outlines the area in the map and recalculates.
+ *
+ * The result table of the whole project stays on screen until the new one
+ * arrives, so "Gesamtinvestition" alone says nothing about which selection it
+ * belongs to. The spec therefore waits for the calculation restricted to an
+ * area to come back first.
  */
 async function selectArea(page: Page) {
+  const areaResult = page.waitForResponse((response) => {
+    if (!remoteUrl('calculateValuation').test(response.url())) return false
+    const argument = remoteArgument(response.url()) as { areaUuids?: unknown[] } | undefined
+    return (argument?.areaUuids?.length ?? 0) > 0
+  })
+
   await areaCheckbox(page).check()
   await expect(gesamtCheckbox(page)).not.toBeChecked()
+  await areaResult
+  await resultShown(page)
   // The outline is drawn into the map, not into the DOM.
   await page.waitForTimeout(1200)
-  await moveCursorAway(page)
-}
-
-/** Runs the calculation and waits for the result table. */
-async function calculate(page: Page) {
-  await page.getByRole('button', { name: 'Berechnen' }).click()
-  await expect(page.getByRole('cell', { name: 'Gesamtinvestition' })).toBeVisible({
-    timeout: 60_000,
-  })
   await moveCursorAway(page)
 }
 
@@ -215,7 +249,6 @@ test('9.2 Jahr des Bauabschlusses und jährlicher Korrekturwert', async ({ page 
 test('9.4 Ergebnis lesen', async ({ page }) => {
   await openValuation(page)
   await selectArea(page)
-  await calculate(page)
 
   await shoot(page, CHAPTER, 'valuation_result')
 })
@@ -223,7 +256,6 @@ test('9.4 Ergebnis lesen', async ({ page }) => {
 test('9.5 Kennzahlen', async ({ page }) => {
   await openValuation(page)
   await selectArea(page)
-  await calculate(page)
 
   // The two KPI cards sit in a grid of their own directly below the table.
   const kpis = page.locator('div.grid-cols-2').filter({ hasText: 'Kosten pro Hausanschluss' })
@@ -235,7 +267,6 @@ test('9.5 Kennzahlen', async ({ page }) => {
 test('9.6 Zukunftsabhängige Wertermittlung', async ({ page }) => {
   await openValuation(page)
   await selectArea(page)
-  await calculate(page)
 
   // The projection sits at the bottom of the control panel and is out of sight
   // until the panel is scrolled - which is what section 9.6 points out.

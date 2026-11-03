@@ -225,7 +225,7 @@ test('3.7 Anhänge hinzufügen und bearbeiten', async ({ page, context }) => {
   await (await dialog).setFiles({ name: FILE, mimeType: 'application/pdf', buffer: PDF })
   await capture.waitForTimeout(1200)
 
-  await click(capture, infobox.getByRole('button', { name: /^Upload/ }))
+  await click(capture, infobox.getByRole('button', { name: /^\d+ Datei(en)? hochladen$/ }))
   const folder = infobox.getByText(/documents \(\d+\)/)
   await expect(folder).toBeVisible({ timeout: 20_000 })
   await capture.waitForTimeout(1200)

@@ -20,6 +20,7 @@ import { expect, request, test, type APIRequestContext, type Locator, type Page 
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { clearTrenchSelection } from '../playwright/pipe-branch-seeds'
 import { projectPath, projectUrl } from '../playwright/project'
 
 const CHAPTER = '12-rohrverzweigung'
@@ -159,6 +160,11 @@ async function restoreDemoConnections() {
 test.beforeEach(restoreDemoConnections)
 test.afterEach(restoreDemoConnections)
 
+// "Auf Canvas laden" saves the trench selection of the node since v1.8.0, and
+// the next visit would open on it (playwright/pipe-branch-seeds.ts).
+test.beforeEach(() => clearTrenchSelection(NODE))
+test.afterEach(() => clearTrenchSelection(NODE))
+
 // ---------------------------------------------------------------------------
 // Building blocks of the recording
 // ---------------------------------------------------------------------------
@@ -210,6 +216,11 @@ async function openCanvas(page: Page) {
   // selection are a precondition of both sections, not part of what they show.
   await page.getByPlaceholder('Rohrverzweigung auswählen', { exact: true }).click()
   await page.getByRole('option', { name: NODE, exact: true }).click()
+  // NODE carries connections, so since v1.8.0 it opens on the canvas with
+  // their two conduits; the trench window is opened by hand.
+  await expect(page).toHaveURL(projectUrl('/pipe-branch/node'))
+  await expect(page.locator('.svelte-flow__node')).toHaveCount(2)
+  await page.getByRole('button', { name: 'Grabenauswahl bearbeiten', exact: true }).click()
   await expect(page.getByRole('heading', { name: 'Trassen auswählen' })).toBeVisible()
 
   await page.getByRole('button', { name: 'Alle auswählen' }).click()
@@ -218,7 +229,12 @@ async function openCanvas(page: Page) {
   await expect(page.locator('.svelte-flow__node')).toHaveCount(5)
   await expect(page.locator('.svelte-flow__edge')).toHaveCount(DEMO_CONNECTIONS.length)
 
-  // `fitView` runs as an animation after the nodes are in the DOM.
+  // The canvas fits its view only when it mounts (`fitView` on SvelteFlow in
+  // PipeBranchCanvas.svelte), and since v1.8.0 it mounts on the two conduits
+  // with connections; the five loaded afterwards spill over its edges. "Fit
+  // View" restores the ring the videos are laid out for. Still before
+  // demoStart, so it is cut away with the rest; it runs as an animation.
+  await page.getByRole('button', { name: 'Fit View', exact: true }).click()
   await page.waitForTimeout(1500)
 }
 

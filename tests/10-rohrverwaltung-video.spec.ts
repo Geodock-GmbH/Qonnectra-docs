@@ -216,17 +216,19 @@ test('10.2 Rohr hinzufügen', async ({ page, context }) => {
 
   // The list behind the dialog is checked without a role: while the modal is
   // open, the design system marks everything behind it as `aria-hidden`, and
-  // `getByRole('cell')` finds nothing there.
-  await expect(capture.locator('table tbody tr').first()).toContainText(CONDUIT)
+  // `getByRole('cell')` finds nothing there. Since v1.8.0 the new conduit
+  // takes its alphabetical place in the list instead of the top row.
+  const newRow = capture.locator('table tbody tr').filter({ hasText: CONDUIT })
+  await expect(newRow).toHaveCount(1)
   await capture.waitForTimeout(2500)
 
-  // 6. Close the dialog; the video ends on the new conduit at the top of the
-  //    list.
+  // 6. Close the dialog; the video ends on the new conduit at its place in
+  //    the list.
   await click(capture, dialog.getByRole('button', { name: 'Schließen', exact: true }), {
     duration: 500,
   })
   await expect(dialog).toBeHidden()
-  await expect(capture.locator('table tbody tr').first()).toContainText(CONDUIT)
+  await expect(newRow).toBeVisible()
 
   // Out of the way, so that the last frame shows no hover state on the button.
   await pointAt(capture, { x: 700, y: 700 }, { duration: 500 })

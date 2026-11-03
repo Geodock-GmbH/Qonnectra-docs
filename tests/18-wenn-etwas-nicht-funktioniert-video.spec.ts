@@ -27,6 +27,15 @@ import { projectPath } from '../playwright/project'
 
 const CHAPTER = '18-wenn-etwas-nicht-funktioniert'
 
+/**
+ * The message of a refused action. Since v1.8.0 every view that writes through
+ * a remote function maps a 403 to `message_error_permission_denied`
+ * (src/lib/remote/shared/remote-error.ts); it replaced „Sie sind nicht
+ * berechtigt, diese Aktion durchzuführen.“
+ */
+const PERMISSION_DENIED =
+  'Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.'
+
 // Recording size = viewport from playwright.config.ts. Without it Playwright
 // scales the video down until it fits into 800 x 800, and the crop would be
 // blurry. Chromium's screencast delivers CSS pixels, so the deviceScaleFactor
@@ -151,7 +160,7 @@ test('18.3 Aktion ohne Recht', async ({ page, context }) => {
 
   // 3. The refusal - and the row stays where it was.
   await expect(
-    capture.getByText('Sie sind nicht berechtigt, diese Aktion durchzuführen.'),
+    capture.getByText(PERMISSION_DENIED),
   ).toBeVisible({ timeout: 20_000 })
   await expect(rows).toHaveCount(ADDRESS.units)
 
@@ -160,7 +169,7 @@ test('18.3 Aktion ohne Recht', async ({ page, context }) => {
   // second thing the chapter says about it.
   await pointAt(capture, { x: 620, y: 1075 }, { duration: 600 })
   await expect(
-    capture.getByText('Sie sind nicht berechtigt, diese Aktion durchzuführen.'),
+    capture.getByText(PERMISSION_DENIED),
   ).toBeHidden({ timeout: 20_000 })
   await capture.waitForTimeout(1200)
 

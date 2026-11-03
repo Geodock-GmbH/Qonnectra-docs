@@ -7,10 +7,11 @@
 // level - inside a test.describe group Playwright rejects it ("forces a new
 // worker"). The still images of the chapter live in tests/16-adressen.spec.ts.
 //
-// The flow is movement, not state: after "Speichern" the window stays open with
-// the entries still in it, while the table behind it has already grown by a row.
-// That is what section 16.3 warns about, and a still image cannot show it - it
-// would look exactly like the window before saving.
+// The flow is movement, not state: the window is filled in, "Speichern" closes
+// it, and the table has grown by a row whose "Wohneinheit-ID" Qonnectra filled
+// in by itself. Up to v1.7 the window stayed open with the entries still in
+// it after saving, which is what this recording used to show; since v1.8.0
+// (ResidentialUnitModal.svelte) a successful save closes and empties it.
 //
 // The recording creates a residential unit and removes it again, before and
 // after every run. Its values are the placeholders from CLAUDE.md; the
@@ -227,30 +228,28 @@ test('16.3 Wohneinheit hinzufügen', async ({ page, context }) => {
   await typeText(capture, NEW_UNIT.side)
   await capture.waitForTimeout(500)
 
-  // 3. Save. The row appears in the table behind, Qonnectra confirms - and the
-  //    window stays open with the entries still in it.
+  // 3. Save. Qonnectra confirms, the window closes, and the row appears in the
+  //    table.
   await click(capture, dialog.getByRole('button', { name: 'Speichern' }), { duration: 800 })
   await expect(capture.getByText('Wohneinheit erfolgreich erstellt')).toBeVisible({
     timeout: 20_000,
   })
-  await expect(rows).toHaveCount(DEMO_UNITS.length + 1)
   await expect(
-    capture.locator('#modal-floor'),
-    'The window closed after saving. If the app was changed here, section 16.3 ' +
-      'of the manual and this recording need to be redone.',
-  ).toHaveValue(NEW_UNIT.floor)
+    dialog,
+    'The window stayed open after saving. If the app was changed here, section ' +
+      '16.3 of the manual and this recording need to be redone.',
+  ).toBeHidden()
+  await expect(rows).toHaveCount(DEMO_UNITS.length + 1)
 
   // The new row makes the page longer, and the table would end below the lower
-  // edge. Scrolling after it happens behind the backdrop of the window, which
-  // blurs everything there anyway - the picture only clears again when the
-  // window closes, and then the row is in frame.
-  await capture.locator('main').evaluate((main) => main.scrollTo(0, main.scrollHeight))
-  await capture.waitForTimeout(1500)
-
-  // 4. Close the window - the step the section asks for so that no second
-  //    residential unit is created.
-  await click(capture, dialog.getByRole('button', { name: 'Schließen' }), { duration: 800 })
-  await expect(dialog).toBeHidden()
+  // edge. Scrolled with the wheel, the way a user brings it into view - the
+  // cursor is over the page after the click on "Speichern".
+  await capture.waitForTimeout(600)
+  for (let step = 0; step < 4; step++) {
+    await capture.mouse.wheel(0, 120)
+    await capture.waitForTimeout(80)
+  }
+  await capture.waitForTimeout(800)
 
   // Out of the way, so that the last frames show no hover state on a row, and
   // long enough to end on the state that stays: the new row in the table.
