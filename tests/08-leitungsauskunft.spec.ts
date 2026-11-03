@@ -212,9 +212,8 @@ async function openDemoRecord(page: Page) {
  *
  * Section 8.5 works with it and not with the demo record: that one carries no
  * contact data, so its detail view would show three cards of empty fields. The
- * seeded record has them filled and shows in addition what the section warns
- * about - "Art der Arbeit" and "Grund der Anfrage" stay at "-" although the
- * record has both.
+ * seeded record has them filled, "Art der Arbeit" and "Grund der Anfrage"
+ * included.
  */
 async function openSeededRecord(page: Page) {
   await page.goto(`/pipeline-records/${uuidsToRemove[0]}`)

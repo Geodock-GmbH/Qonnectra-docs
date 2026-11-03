@@ -10,7 +10,7 @@ f45d4aa92d6bedfe  tests/05-karte.spec.ts
 a59952e94fa9707a  tests/07-nachverdichtung-video.spec.ts
 5e13ad81050c8f9c  tests/07-nachverdichtung.spec.ts
 036d8a15863c72f1  tests/08-leitungsauskunft-video.spec.ts
-ae347f4bd0053b13  tests/08-leitungsauskunft.spec.ts
+4d3a7be02d5f460d  tests/08-leitungsauskunft.spec.ts
 d308d4b29d008cd9  tests/09-wertermittlung-video.spec.ts
 608048a4aa4cdf16  tests/09-wertermittlung.spec.ts
 90e4553c3eec69a8  tests/10-rohrverwaltung-video.spec.ts
