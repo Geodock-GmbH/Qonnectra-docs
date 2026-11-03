@@ -20,7 +20,7 @@ Was verfolgt wird, hängt vom Einstiegspunkt ab:
 - **Netzknoten** – alle Fasern, die durch ihn laufen.
 - **Kabel** – alle Fasern des Kabels.
 - **Wohneinheit** – die Faser, die auf dem Port dieser Wohneinheit liegt.
-- **Faser** – genau diese eine Faser. Nur dieser Einstieg kennt die Signalanalyse (siehe Abschnitt [Signalquelle, Signalreichweite und Unterbrechungen](#_15-4-signalquelle-signalreichweite-und-unterbrechungen)) und die Karte (siehe Abschnitt [Geometrie](#_15-6-geometrie-modus-ausrichtung-geojson-download)).
+- **Faser** – genau diese eine Faser. Nur dieser Einstieg kennt den „Startpunkt“ (siehe Abschnitt [Weg lesen](#_15-2-weg-lesen-kabelpfad-spleiße-containerpfad)) und die Signalanalyse (siehe Abschnitt [Signalquelle, Signalreichweite und Unterbrechungen](#_15-4-signalquelle-signalreichweite-und-unterbrechungen)).
 
 Der Reiter „Faser“ verlangt zwei Schritte: Suchen Sie zuerst das Kabel („Wählen Sie ein Kabel, um dessen Fasern anzuzeigen“). Danach steht das gewählte Kabel mit Kabeltyp und Faserzahl oben, darunter seine Bündel. Klappen Sie ein Bündel auf, stehen dessen Fasern mit „#“ und „Farbe“ darin; „Folgen“ startet die Verfolgung.
 
@@ -38,15 +38,11 @@ Denselben Faserweg erreichen Sie aus anderen Ansichten heraus über die Schaltfl
 
 ## 15.2 Weg lesen: Kabelpfad, Spleiße, Containerpfad
 
-Das Ergebnis ist immer gleich aufgebaut: „Statistiken“, „Einstiegspunkt“, „Kabelinfrastruktur“ und „Faserwege“. „Zurück“ oben links führt zur Auswahl des Einstiegspunkts.
+Das Ergebnis ist immer gleich aufgebaut: „Einstiegspunkt“, „Kabelinfrastruktur“ und „Faserwege“, beim Einstieg über eine Faser zusätzlich „Startpunkt“. „Zurück“ oben links führt zur Auswahl des Einstiegspunkts.
 
-![Screenshot des Ergebnisses eines Faserwegs für eine Adresse mit Statistiken, Einstiegspunkt, Kabelinfrastruktur und der Tabelle der Faserwege](/images/manual/teil-a/trace_result.jpg)
+![Screenshot des Ergebnisses eines Faserwegs für eine Adresse mit Einstiegspunkt, Kabelinfrastruktur und der Tabelle der Faserwege](/images/manual/teil-a/trace_result.jpg)
 
-Die **Statistiken** zählen, was auf dem Weg liegt: „Fasern“, „Netzknoten“, „Spleiss“, „Kabel“, „Gräben“, „Adressen“ und „Wohneinheiten“. „Verzweigungen“ zählt nicht, sondern steht auf „Ja“ oder „Nein“, je nachdem, ob sich der Weg irgendwo aufteilt.
-
-::: warning
-Die Statistiken summieren über alle gefundenen Wege. Jeder Weg bringt seine Kabel, Netzknoten und Trassen erneut mit, sodass bei vielen Fasern Zahlen zustande kommen, die weit über dem liegen, was das Projekt überhaupt enthält – ein Netzknoten mit einigen hundert Fasern meldet leicht mehrere tausend Gräben. Als Größenordnung sind die Werte brauchbar, als Anzahl nicht.
-:::
+Einstiegspunkt, Modus und Optionen stehen in der Adresse der Ansicht. Ein Lesezeichen oder ein weitergegebener Link öffnet deshalb dasselbe Ergebnis, und die Zurück-Funktion des Browsers führt zum vorigen Faserweg.
 
 Der **Einstiegspunkt** wiederholt, wonach gesucht wurde, mit der Art des Objekts als Kennzeichnung davor.
 
@@ -54,11 +50,15 @@ Die **Kabelinfrastruktur** nennt je Kabel des Weges, wo es liegt. Aufgeklappt st
 
 Unter **„Faserwege“** steht der Weg selbst – als Baum, wenn Sie von einer Faser aus gesucht haben, und sonst als Tabelle.
 
+**Startpunkt**
+
+Beim Einstieg über eine Faser liest Qonnectra den Weg von einem seiner beiden Enden her: Jede Faser steht darin einmal, in der Reihenfolge, in der der Weg sie durchläuft. Von welchem Ende aus, wählen Sie unter „Startpunkt“. Die Liste nennt die Endknoten des Weges mit dem Hinweis „Kabelanfang“ oder „Kabelende“; die Voreinstellung ist mit „(Standard)“ gekennzeichnet. Die Faser, von der Sie ausgegangen sind, trägt im Baum die Kennzeichnung „Einstiegspunkt“.
+
 **Der Baum**
 
 Jede Station des Weges beginnt mit der Faser („F1“), dem Kabel und dessen Kabeltyp, und wenn der Weg dort über einen Spleiß weitergeht, mit dem Netzknoten dahinter. Darunter stehen die beiden Endknoten des Kabels und die Farbpunkte von Faser und Bündel.
 
-![Screenshot des Ergebnisses eines Faserwegs für eine Faser mit Hervorhebung des Baums und der geöffneten Details](/images/manual/teil-a/trace_tree.jpg)
+![Screenshot des Ergebnisses eines Faserwegs für eine Faser mit Hervorhebung des Baums und der aufgeklappten Details einer Station](/images/manual/teil-a/trace_tree.jpg)
 
 „Details“ klappt die Angaben zur Station auf:
 
@@ -68,10 +68,10 @@ Jede Station des Weges beginnt mit der Faser („F1“), dem Kabel und dessen Ka
 - **„Kabelpfad“** – Anfang und Ende des Kabels mit „START“ und „ENDE“, dazu die Adressen dieser Netzknoten, sofern sie eine haben.
 - **„Adresse“** und **„Wohneinheit“** – das Ziel, siehe Abschnitt [Betroffene Adressen und Wohneinheiten](#_15-5-betroffene-adressen-und-wohneinheiten).
 
-Jeder Spleiß rückt die nächste Station eine Stufe ein. Teilt sich der Weg – etwa hinter einem Splitter –, stehen mehrere Stationen auf derselben Stufe, und die Statistik meldet „Verzweigungen: Ja“.
+Jeder Spleiß rückt die nächste Station eine Stufe ein. Teilt sich der Weg – etwa hinter einem Splitter –, stehen mehrere Stationen auf derselben Stufe.
 
 ::: info
-Die Schaltflächen im Baum tun zwei verschiedene Dinge. Faser, Kabel, Netzknoten und Adresse in den ersten Zeilen einer Station **markieren** das Objekt in der Karte des Faserwegs. Die steht nur dann neben dem Ergebnis, wenn Sie von einer Faser aus eingestiegen sind und „Geometrie einbeziehen“ angekreuzt haben, siehe Abschnitt [Geometrie](#_15-6-geometrie-modus-ausrichtung-geojson-download); ohne sie bewirken diese Schaltflächen nichts. Die Netzknoten- und Adress-Schaltflächen **in den Details** – unter „Endpunkt“, „Kabelpfad“ und „Adresse:“ – starten dagegen einen neuen Faserweg von diesem Objekt aus.
+Die Schaltflächen im Baum tun zwei verschiedene Dinge. Faser, Kabel, Netzknoten und Adresse in den ersten Zeilen einer Station **markieren** das Objekt in der Karte des Faserwegs. Die steht nur dann neben dem Ergebnis, wenn Sie „Geometrie einbeziehen“ angekreuzt haben, siehe Abschnitt [Geometrie](#_15-6-geometrie-modus-ausrichtung-geojson-download); ohne sie bewirken diese Schaltflächen nichts. Die Netzknoten- und Adress-Schaltflächen **in den Details** – unter „Endpunkt“, „Kabelpfad“ und „Adresse:“ – starten dagegen einen neuen Faserweg von diesem Objekt aus, und zwar ohne „Geometrie einbeziehen“.
 :::
 
 **Die Tabelle**
@@ -80,7 +80,11 @@ Bei allen anderen Einstiegspunkten kommen viele Wege zusammen, und „Faserwege�
 
 ![Screenshot des Ergebnisses eines Faserwegs für einen Netzknoten mit Hervorhebung der gefilterten Tabelle und einer aufgeklappten Zeile](/images/manual/teil-a/trace_paths_table.jpg)
 
-Das Feld darüber filtert nach Fasernummer, Kabelname und Ziel; rechts darin steht, wie viele Wege der Filter übrig lässt („144 / 696“). Der Pfeil am rechten Rand einer Zeile klappt den Baum dieses Weges auf – denselben, den der Faser-Einstieg für sich allein zeigt. Unter der Tabelle steht die Zahl der gefilterten Wege.
+Das Feld darüber filtert nach Fasernummer, Kabelname und Ziel; rechts darin steht, wie viele Wege der Filter übrig lässt („144 / 696“). Der Pfeil am rechten Rand einer Zeile klappt den Baum dieses Weges auf – denselben, den der Faser-Einstieg für sich allein zeigt. Unter der Tabelle steht die Zahl der gefilterten Fasern.
+
+::: info
+In der Tabelle und in den aufgeklappten Bäumen markiert keine Schaltfläche etwas in der Karte: Faser, Kabel, Netzknoten, Adresse und Wohneinheit starten dort jeweils einen neuen Faserweg von diesem Objekt aus, ohne „Geometrie einbeziehen“.
+:::
 
 ## 15.3 Modus „Weg“ und Modus „Signalanalyse“
 
@@ -123,7 +127,7 @@ Im Modus „Signalanalyse“ stehen dieselben Angaben, zusätzlich mit „Kein S
 Wohneinheiten erscheinen nur, wenn sie im Netzschema auf einen Port gelegt wurden, siehe Abschnitt [Spleiße und Ports](./14-netzschema.md#_14-8-spleiße-und-ports). Adressen erscheinen auch ohne das – über den Netzknoten, an dem das Kabel endet, sofern diesem eine Adresse zugeordnet ist.
 
 ::: info
-„Adressen: 0“ und „Wohneinheiten: 0“ bedeuten also nicht, dass niemand versorgt wird, sondern dass auf diesem Weg nichts dokumentiert ist, was ein Ziel wäre. Bei einem Zubringerkabel zwischen zwei Verteilern ist das der Normalfall.
+Ein Weg ohne Adresse und Wohneinheit bedeutet also nicht, dass niemand versorgt wird, sondern dass auf diesem Weg nichts dokumentiert ist, was ein Ziel wäre. Bei einem Zubringerkabel zwischen zwei Verteilern ist das der Normalfall.
 :::
 
 ## 15.6 Geometrie: Modus, Ausrichtung, GeoJSON-Download
@@ -140,7 +144,7 @@ Der **„Modus“** bestimmt, wie die Linien gebildet werden:
 
 **„Nach Kabelrichtung ausrichten“** dreht die Segmente so, dass sie vom Anfangs- zum Endknoten verlaufen. Ohne diese Option behalten sie die Richtung, in der die Trasse erfasst wurde.
 
-Beim Einstieg über eine Faser rückt das Ergebnis daraufhin nach links, und rechts daneben steht die Karte mit dem Weg.
+Das Ergebnis rückt daraufhin nach links, und rechts daneben steht die Karte mit dem Weg – bei einer Faser mit ihrem einen Weg, bei den übrigen Einstiegspunkten mit allen gefundenen Wegen.
 
 ![Screenshot des Ergebnisses eines Faserwegs mit der Karte rechts und der Schaltfläche „GeoJSON herunterladen“](/images/manual/teil-a/trace_map.jpg)
 
@@ -153,7 +157,7 @@ Karte und Baum sind miteinander verbunden: Ein Klick auf einen Netzknoten, eine 
 :::
 
 ::: info
-Die Karte erscheint ausschließlich beim Einstieg über eine Faser. Bei allen anderen Einstiegspunkten wirkt die Option nur auf den Download und auf die Angaben unter „Kabelinfrastruktur“.
+Die Option wirkt außerdem auf den Download und auf die Angaben unter „Kabelinfrastruktur“, etwa die Markierung „GEO“ an den Trassen.
 :::
 
 ## 15.7 Über alle Projekte suchen

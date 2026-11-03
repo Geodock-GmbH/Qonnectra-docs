@@ -12,7 +12,7 @@ Vier Objektarten haben eine Lage im Raum und erscheinen deshalb in der Karte: di
 
 Eine **Trasse** ist ein einzelner Grabenabschnitt mit einer eigenen Trassen-ID, etwa „TR-W55WVN3“. Sie ist die kleinste Baueinheit des Netzes: Alle Angaben einer Trasse gelten für ihre gesamte Länge – wo Bauart, Oberfläche oder Verlegetiefe wechseln, sind es zwei Trassen. Die Trassen-ID ist innerhalb eines Projekts eindeutig. Dieses Handbuch nennt eine einzelne Trasse dort **Trassensegment**, wo es auf die Abgrenzung ankommt – vor allem in der Rohrzuordnung, siehe Kapitel [Rohrzuordnung](./11-rohrzuordnung.md).
 
-An einer Trasse hinterlegt sind unter anderem Oberfläche, Bauart, Verlegetiefe, Status, Phase, Eigentümer, Baufirma und Datum sowie die Ja-Nein-Angaben „Hausanschluss“, „Eigenleistung“ und „Förderstatus“, nach denen das Dashboard auswertet (siehe Kapitel [Dashboard](./04-dashboard.md)).
+An einer Trasse hinterlegt sind unter anderem Oberfläche, Bauart, Verlegetiefe, Status, Phase, Eigentümer, Baufirma und Datum sowie die Ja-Nein-Angaben „Hausanschluss“, „Eigenleistung“ und „Förderstatus“, nach denen das Dashboard auswertet (siehe Kapitel [Dashboard](./04-dashboard.md)). „Förderstatus“ tragen auch Rohr, Netzknoten und Kabel; wo er nicht eingetragen ist, steht in deren Formularen „Unbekannt“.
 
 ::: info
 Die Länge einer Trasse geben Sie nicht ein – Qonnectra berechnet sie aus der Geometrie. Gezeichnet werden Trassen in QGIS, siehe Kapitel [Netzdaten in QGIS bearbeiten](../teil-b-betrieb-admin-qgis/26-netzdaten-in-qgis-bearbeiten.md).
@@ -109,19 +109,16 @@ Das **Kennzeichen** ist eine zweite Ordnungsebene neben dem Projekt. Trasse, Roh
 
 ![Screenshot der Rohrverwaltung mit Hervorhebung der Spaltenüberschrift „Kennzeichen“ und ihres Suchfeldes rechts in der Tabelle](/images/manual/teil-a/model_flag.jpg)
 
-Eingrenzen können Sie den Bestand darüber an zwei Stellen:
+Eingrenzen können Sie den Bestand darüber an drei Stellen:
 
+- im Dashboard über das Feld „Kennzeichen“, das alle Kennzahlen und Diagramme einschränkt, siehe Abschnitt [Nach Kennzeichen filtern](./04-dashboard.md#_4-8-1-nach-kennzeichen-filtern)
 - in der Rohrzuordnung über die Auswahl „Kennzeichen“, die die Rohrliste einschränkt, siehe Abschnitt [Nach Kennzeichen eingrenzen](./11-rohrzuordnung.md#_11-6-nach-kennzeichen-eingrenzen)
 - in der Rohrverwaltung und bei den Adressen über das Suchfeld unter der Spalte „Kennzeichen“, siehe Abschnitt [Tabellen](./03-wiederkehrende-bedienelemente.md#_3-1-tabellen-suche-spaltenfilter-sortierung-seitenwechsel)
 
 Auch der Excel-Import von Rohren führt eine Spalte „Kennzeichen“. Sie darf in keiner Zeile leer bleiben, sonst scheitert der gesamte Import, siehe Abschnitt [Excel-Import](./10-rohrverwaltung.md#_10-5-excel-import-vorlage-ablauf-fehlermeldungen).
 
 ::: warning
-Das Kennzeichen ist kein Projekt. Objekte mit unterschiedlichen Kennzeichen gehören weiterhin zum selben Projekt und erscheinen gemeinsam in der Karte, im Dashboard und in allen Auswertungen. Nur wo eine Ansicht ausdrücklich ein Kennzeichen anbietet, wirkt es als Filter.
-:::
-
-::: info
-Das Dashboard gehört nicht dazu, siehe Abschnitt [Nach Kennzeichen filtern](./04-dashboard.md#_4-8-1-nach-kennzeichen-filtern).
+Das Kennzeichen ist kein Projekt. Objekte mit unterschiedlichen Kennzeichen gehören weiterhin zum selben Projekt und erscheinen gemeinsam in der Karte und in allen Auswertungen. Nur wo eine Ansicht ausdrücklich ein Kennzeichen anbietet, wirkt es als Filter.
 :::
 
 ## 2.7 Stammdaten: Status, Phase, Netzebene, Firmen

@@ -1,10 +1,10 @@
 # 4. Dashboard
 
-Das **Dashboard** ist die zentrale Übersichtsseite von Qonnectra. Es fasst den dokumentierten Netzbestand eines Projekts in Kennzahlen und Diagrammen zusammen, damit Sie den Ausbauzustand ohne Umweg über Listen oder die Karte erfassen können. Nach der Anmeldung ist das Dashboard die Startansicht; später erreichen Sie es über die linke Navigationsleiste in der Gruppe „Info“ durch Klicken auf den Menüpunkt „Dashboard“.
+Das **Dashboard** ist die zentrale Übersichtsseite von Qonnectra. Es fasst den dokumentierten Netzbestand eines Projekts in Kennzahlen und Diagrammen zusammen, damit Sie den Ausbauzustand ohne Umweg über Listen oder die Karte erfassen können. Sie erreichen es über die linke Navigationsleiste in der Gruppe „Info“ durch Klicken auf den Menüpunkt „Dashboard“.
 
 ![Screenshot Dashboard](/images/manual/teil-a/dashboard.jpg)
 
-Alle Auswertungen beziehen sich auf das Projekt, das oben links in der Kopfzeile ausgewählt ist (siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln)), und sind ausschließlich zur Ansicht bestimmt: Werte lassen sich hier nicht bearbeiten, eine Exportfunktion gibt es nicht.
+Alle Auswertungen beziehen sich auf das Projekt, das oben links in der Kopfzeile ausgewählt ist (siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln)), und sind ausschließlich zur Ansicht bestimmt: Werte lassen sich hier nicht bearbeiten, eine Exportfunktion gibt es nicht. Über das Feld „Kennzeichen“ oben rechts grenzen Sie alle Auswertungen zusätzlich auf ein Kennzeichen ein, siehe Abschnitt [Nach Kennzeichen filtern](#_4-8-1-nach-kennzeichen-filtern).
 
 Unterhalb der Kopfzeile stehen sechs Reiter (Tabs): „Übersicht“ mit den Kennzahlen aller Datenbereiche auf einen Blick sowie „Trasse“, „Rohre“, „Netzknoten“, „Adressen“ und „Gebiete“ mit den Auswertungen des jeweiligen Bereichs. Alle Auswertungen werden beim Öffnen des Dashboards gemeinsam geladen, der Wechsel zwischen den Reitern lädt also keine Daten nach.
 
@@ -119,10 +119,16 @@ Die Karte ist keine vollständige Liste aller Gewährleistungsfristen des Projek
 
 ### 4.8.1 Nach Kennzeichen filtern
 
-Einen Filter nach Kennzeichen gibt es im Dashboard nicht: Seine Kennzahlen, Diagramme und Karten beziehen sich immer auf den gesamten Bestand des ausgewählten Projekts.
+Das Feld „Kennzeichen“ über der Inhaltsfläche grenzt alle Reiter auf einmal ein: Kennzahlen, Diagramme, die Abdeckung der Gebiete und die Gewährleistungsfristen beziehen sich dann nur noch auf die Objekte mit diesem Kennzeichen, siehe Abschnitt [Kennzeichen als projektweiter Filter](./02-grundbegriffe-und-datenmodell.md#_2-6-kennzeichen-als-projektweiter-filter). „Alle Kennzeichen“ hebt die Eingrenzung wieder auf.
 
-::: info
-Brauchen Sie die Auswertung eines einzelnen Kennzeichens, grenzen Sie in der jeweiligen Ansicht ein. Welche das anbieten, nennt Abschnitt [Kennzeichen als projektweiter Filter](./02-grundbegriffe-und-datenmodell.md#_2-6-kennzeichen-als-projektweiter-filter).
+Das gewählte Kennzeichen steht in der Adresse der Ansicht und bleibt bei einem Projektwechsel erhalten. Ein Lesezeichen oder weitergegebener Link öffnet das Dashboard deshalb mit demselben Filter.
+
+::: warning
+Über die Navigationsleiste öffnet das Dashboard immer mit „Alle Kennzeichen“, auch wenn Sie zuvor eingegrenzt hatten. Prüfen Sie das Feld, bevor Sie Zahlen weitergeben.
+:::
+
+::: warning
+Eine Ausnahme macht die Karte „Wohneinheiten-Abdeckung“ im Reiter „Gebiete“: Ihr Gesamtwert zählt auch mit Kennzeichen alle Wohneinheiten des Projekts, der Wert innerhalb der Gebiete nur die des Kennzeichens. Der Anteil in Prozent fällt mit Kennzeichen deshalb zu niedrig aus.
 :::
 
 ### 4.8.2 Wie aktuell die Werte sind

@@ -154,7 +154,7 @@ Audience: users of the web application, without prior GIS knowledge. Chapters
 - 14.8 Spleiße und Ports
 - 14.9 Subnetz eines Netzknotens
 - 14.10 Anzeigeoptionen: Einrasten, Kabelrichtungs-Animation
-- 14.11 Kartenkoordinaten mit dem Schema synchronisieren
+- 14.11 Wie Netzknoten auf die Zeichenfläche kommen
 
 ### 15. Faserweg
 

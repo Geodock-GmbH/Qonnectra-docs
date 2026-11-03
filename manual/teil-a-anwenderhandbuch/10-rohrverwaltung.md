@@ -8,7 +8,7 @@ Welche Rohre die Tabelle enthält, hängt von dem Projekt ab, das oben links in 
 
 ## 10.1 Rohrliste durchsuchen und filtern
 
-Zu jedem Rohr zeigt die Tabelle die Spalten „Name“, „Rohrtyp“, „Schutzrohr“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Datum“ und „Kennzeichen“. Das Suchfeld für den gesamten Bestand steht oben neben „Rohr hinzufügen“.
+Zu jedem Rohr zeigt die Tabelle die Spalten „Name“, „Rohrtyp“, „Schutzrohr“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Datum“, „Kennzeichen“ und „Förderstatus“. „Förderstatus“ zeigt „Ja“ oder „Nein“ und bleibt leer, solange nichts eingetragen ist. Das Suchfeld für den gesamten Bestand steht oben neben „Rohr hinzufügen“.
 
 Sortierung, Suche, Spaltenfilter und Seitenwechsel funktionieren wie in Abschnitt [Tabellen](./03-wiederkehrende-bedienelemente.md#_3-1-tabellen-suche-spaltenfilter-sortierung-seitenwechsel) beschrieben.
 
@@ -20,7 +20,7 @@ Klicken Sie auf „Rohr hinzufügen“. Es öffnet sich ein Dialog mit denselben
 
 ![Screenshot des Dialogs „Rohr hinzufügen“ mit den Eingabefeldern für ein neues Rohr](/images/manual/teil-a/conduit_add.jpg)
 
-Nach dem Klick auf „Speichern“ bleibt der Dialog geöffnet und behält alle eingetragenen Werte. So legen Sie mehrere gleichartige Rohre nacheinander an, indem Sie nur den Namen ändern. Über „Schließen“ verlassen Sie den Dialog. Das neue Rohr steht zunächst oben in der Tabelle; beim nächsten Laden der Seite sortiert es sich alphabetisch ein.
+Nach dem Klick auf „Speichern“ bleibt der Dialog geöffnet und behält alle eingetragenen Werte. So legen Sie mehrere gleichartige Rohre nacheinander an, indem Sie nur den Namen ändern. Über „Schließen“ verlassen Sie den Dialog. Die Tabelle aktualisiert sich mit jedem gespeicherten Rohr; das neue Rohr steht dabei an seiner alphabetischen Stelle und damit nicht unbedingt auf der Seite, die Sie gerade sehen.
 
 ![](/videos/conduit_add.webm)
 
@@ -38,8 +38,10 @@ Im Reiter „Eigenschaften“ ändern Sie die Angaben des ausgewählten Rohrs. D
 
 ![Screenshot Rohrverwaltung mit Hervorhebung der Info-Box zum Bearbeiten eines Rohrs im Reiter „Eigenschaften“](/images/manual/teil-a/conduit_properties.jpg)
 
-::: info
-Die Auswahlfelder – „Rohrtyp“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“ und „Kennzeichen“ – sind beim Öffnen leer, auch wenn das Rohr dort Werte hat. Die aktuellen Werte lesen Sie in der Tabelle ab. Ein leeres Auswahlfeld löscht beim Speichern nichts: Überschrieben wird nur, was Sie tatsächlich auswählen.
+Die Felder zeigen beim Öffnen die aktuellen Werte des Rohrs. „Förderstatus“ bietet „Unbekannt“, „Ja“ und „Nein“; mit „Unbekannt“ nehmen Sie einen eingetragenen Förderstatus wieder zurück.
+
+::: warning
+Für die übrigen Auswahlfelder und das Datum gibt es diesen Weg nicht: Ein geleertes Feld löscht beim Speichern nichts, der bisherige Wert bleibt stehen. Ersetzen können Sie einen Wert, entfernen nicht.
 :::
 
 ::: danger
@@ -60,7 +62,7 @@ Der Status jedes Mikrorohrs steht auf „Intakt“, solange nichts anderes einge
 
 ## 10.5 Excel-Import: Vorlage, Ablauf, Fehlermeldungen
 
-Oben rechts finden Sie zwei Schaltflächen für die Arbeit mit Excel-Dateien. „Vorlage“ lädt eine Excel-Datei mit den Spalten „Name“, „Typ“, „Schutzrohr“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Datum“, „Projekt“ und „Kennzeichen“ herunter. „Excel Import“ öffnet die Dateiauswahl; sobald Sie eine Datei gewählt haben, startet der Import ohne weitere Rückfrage.
+Oben rechts finden Sie zwei Schaltflächen für die Arbeit mit Excel-Dateien. „Vorlage“ lädt eine Excel-Datei mit den Spalten „Name“, „Typ“, „Schutzrohr“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Datum“, „Projekt“, „Kennzeichen“ und „Förderstatus“ herunter. Die Spalten mit festen Werten bieten in Excel eine Auswahlliste mit den Werten, die es in Qonnectra gerade gibt, „Förderstatus“ die Auswahl „Ja“ oder „Nein“. „Excel Import“ öffnet die Dateiauswahl; sobald Sie eine Datei gewählt haben, startet der Import ohne weitere Rückfrage.
 
 ![Screenshot Rohrverwaltung mit Hervorhebung der Schaltflächen „Excel Import“ und „Vorlage“ oben rechts](/images/manual/teil-a/conduit_excel.jpg)
 
@@ -72,6 +74,7 @@ Für die Datei gilt:
 - Zu welchem Projekt ein Rohr gehört, entscheidet die Spalte „Projekt“ – nicht das Projekt, das in der Kopfzeile ausgewählt ist.
 - Die Werte in „Typ“, „Status“, „Netzebene“, „Eigentümer“, „Baufirma“, „Hersteller“, „Projekt“ und „Kennzeichen“ müssen in Qonnectra bereits vorhanden sein und genauso geschrieben werden wie dort.
 - Bleibt die Spalte „Typ“ leer, entsteht das Rohr ohne Mikrorohre.
+- „Förderstatus“ darf leer bleiben; das Rohr gilt dann als „Unbekannt“. Neben „Ja“ und „Nein“ versteht der Import auch „yes“, „no“, „true“, „false“, „1“ und „0“.
 
 ::: info
 Der Import prüft andere Pflichtangaben als der Dialog „Rohr hinzufügen“, der Name, Rohrtyp und Kennzeichen verlangt (siehe Abschnitt [Rohr hinzufügen](#_10-2-rohr-hinzufugen)). Zeilenweise geprüft wird hier nur der Name; „Typ“ dürfen Sie bewusst leer lassen, wenn das Rohr keine Mikrorohre haben soll.
@@ -86,7 +89,7 @@ Der Import ist ein Alles-oder-nichts-Vorgang: Ist eine einzige Zeile fehlerhaft,
 :::
 
 ::: info
-Nach einem erfolgreichen Import nennt die Meldung die Anzahl der übernommenen Rohre; die Tabelle aktualisiert sich anschließend von selbst.
+Nach einem erfolgreichen Import nennt die Meldung die Anzahl der übernommenen Rohre („12 Rohre erfolgreich importiert.“); die Tabelle aktualisiert sich anschließend von selbst.
 :::
 
 ## 10.6 Rohr löschen

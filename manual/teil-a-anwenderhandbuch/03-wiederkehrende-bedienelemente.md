@@ -30,6 +30,8 @@ Eine Seite umfasst 50 Datensätze. Unter der Tabelle stehen links die Gesamtzahl
 Sortierung und Spaltenfilter wirken nur auf die angezeigte Seite. Bei mehr als einer Seite bleibt ein Datensatz von einer anderen Seite außen vor – auch wenn er alphabetisch an erster Stelle stünde. Für den gesamten Bestand ist das Suchfeld über der Tabelle zuständig; nur dadurch ändert sich auch die Gesamtzahl.
 :::
 
+Suchbegriff und Seite stehen in der Adresse der Ansicht: Ein Neuladen, ein Lesezeichen oder ein weitergegebener Link zeigt dieselbe Trefferliste auf derselben Seite. Spaltenfilter und Sortierung gehören nicht dazu und sind danach wieder leer.
+
 Welche Spalten eine Tabelle hat, nennt das Kapitel zu der jeweiligen Ansicht.
 
 ## 3.2 Auswahllisten und Kombinationsfelder
@@ -60,7 +62,7 @@ Die Nachverdichtung und die Detailansicht einer Adresse enthalten ebenfalls eine
 Der Faserweg zeigt neben seinem Ergebnis eine eigene Karte, die nicht das hier beschriebene Kartenfenster ist: Sie zeichnet ausschließlich den ermittelten Weg, und Suche, Legende, Transparenzregler und Messen fehlen. Ein Klick wählt darin ein Element des Wegs aus. Beschrieben wird sie in Kapitel [Faserweg](./15-faserweg.md).
 :::
 
-Mit dem Mausrad oder dem Touchpad zoomen Sie in die Karte hinein und heraus, mit gedrückter linker Maustaste verschieben Sie den Kartenausschnitt.
+Mit dem Mausrad oder dem Touchpad zoomen Sie in die Karte hinein und heraus, mit gedrückter linker Maustaste verschieben Sie den Kartenausschnitt. Jedes Kartenfenster merkt sich den Ausschnitt je Projekt und öffnet beim nächsten Mal wieder dort; wie das genau funktioniert, beschreibt Abschnitt [Kartenausschnitt, Zoomstufe und gespeicherte Position](./05-karte.md#_5-1-kartenausschnitt-zoomstufe-und-gespeicherte-position).
 
 Links unten finden Sie den Regler „Transparenz“, mit dem Sie die **Transparenz** der Hintergrundkarte anpassen können. Dies ist hilfreich, um Netzdaten besser sichtbar zu machen.
 
@@ -79,7 +81,7 @@ Nicht jeder Eintrag bietet alle Möglichkeiten: Beim Eintrag „Rohr“ steht au
 Der Eintrag „Trasse“ lässt sich zusätzlich aufklappen, sobald Sie unter „Einstellungen“ die „Trassen-Darstellung“ von „Einzelne Farbe“ auf „Nach Oberfläche“ oder „Nach Bauart“ umgestellt haben. Sie schalten dann die einzelnen Oberflächen oder Bauarten getrennt, siehe Kapitel [Einstellungen](./17-einstellungen.md).
 
 ::: warning
-Hat Ihre Administration für das Projekt externe Kartendienste (WMS) hinterlegt, stehen diese unterhalb der aufgeführten Einträge als eigene, aufklappbare Gruppe. Sichtbar wird die Gruppe aber nur, wenn Ihr Konto die Kartendienste lesen darf, und dieses Recht ist in keiner der mitgelieferten Rollen enthalten, auch nicht in „Admin“. Fehlt es, bleibt die Gruppe ohne Meldung aus, und die Karte zeigt ausschließlich die Layer von Qonnectra selbst; die Hintergrundkarte ist davon nicht betroffen. Ihre Administration kann das Recht nachtragen, siehe Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md); das Einrichten der Dienste selbst beschreibt Kapitel [QGIS-Server und Kartendienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md).
+Hat Ihre Administration für das Projekt externe Kartendienste (WMS) hinterlegt, stehen diese unterhalb der aufgeführten Einträge als eigene, aufklappbare Gruppe. Sichtbar wird die Gruppe aber nur, wenn Ihr Konto die Kartendienste lesen darf. Die mitgelieferten Rollen enthalten dieses Recht; eine Rolle, die Ihre Administration selbst angelegt hat, möglicherweise nicht. Fehlt es, bleibt die Gruppe ohne Meldung aus, und die Karte zeigt ausschließlich die Layer von Qonnectra selbst; die Hintergrundkarte ist davon nicht betroffen. Ihre Administration kann das Recht nachtragen, siehe Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md); das Einrichten der Dienste selbst beschreibt Kapitel [QGIS-Server und Kartendienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md).
 :::
 
 ::: warning
@@ -158,7 +160,9 @@ Wenn Sie ein Objekt auswählen, öffnet sich am rechten Rand die **Info-Box**. S
 
 Die Angaben im Reiter „Eigenschaften“ sind je nach Ansicht nur zur Information oder bearbeitbar – in der Karte lesen Sie sie, in der Rohrverwaltung ändern Sie sie. Im Reiter „Aktionen“ finden Sie weiterführende Ansichten zum ausgewählten Objekt. Der Reiter „Anhänge“ ist überall dort bearbeitbar, wo es ihn gibt, siehe Abschnitt [Anhänge hochladen, ansehen und löschen](#_3-7-anhange-hochladen-ansehen-und-loschen).
 
-Ist die Info-Box zu schmal, ziehen Sie sie am linken Rand über den Griff „Größe der Seitenleiste ändern“ breiter. Über das Kreuz „Seitenleiste schließen“ schließen Sie sie.
+Ist die Info-Box zu schmal, ziehen Sie sie am linken Rand über den Griff „Größe der Seitenleiste ändern“ breiter. Über das Kreuz „Seitenleiste schließen“ oder die Taste Esc schließen Sie sie.
+
+In der Karte, der Rohrverwaltung, den Mikrorohren und dem Netzschema stehen das geöffnete Objekt und der gewählte Reiter in der Adresse der Ansicht. Ein weitergegebener Link öffnet deshalb dieselbe Info-Box, und die Zurück-Funktion des Browsers schließt eine Info-Box, die Sie gerade geöffnet haben, statt die Ansicht zu verlassen.
 
 ::: info
 Die Anwendung nennt die Info-Box in diesen beiden Beschriftungen „Seitenleiste“ – dasselbe Wort, das sie in „Seitenleiste anpassen“ für die Navigationsleiste am linken Rand verwendet (siehe Abschnitt [Navigationsleiste anpassen](./01-erste-schritte.md#_1-5-navigationsleiste-anpassen)). Gemeint sind zwei verschiedene Dinge; dieses Handbuch nennt die Anzeige am rechten Rand durchgehend Info-Box.
@@ -170,13 +174,19 @@ Die eingestellte Breite gilt für alle Ansichten mit einer Info-Box, nicht nur f
 
 ## 3.7 Anhänge hochladen, ansehen und löschen
 
-Zu Kartenobjekten, Rohren und Adressen können Sie Dateien ablegen; der Reiter „Anhänge“ steht deshalb bei allen diesen Objektarten zur Verfügung. Zum Hinzufügen klicken Sie im Bereich „Dateien hochladen“ auf „Dateien auswählen“ oder ziehen die Datei auf die Fläche „Dateien auswählen oder hierher ziehen“. Die maximale Dateigröße beträgt 50 MB.
+Zu Kartenobjekten, Rohren und Adressen können Sie Dateien ablegen; der Reiter „Anhänge“ steht deshalb bei allen diesen Objektarten zur Verfügung. Zum Hinzufügen klicken Sie im Bereich „Dateien hochladen“ auf „Dateien auswählen“ oder ziehen die Dateien auf die Fläche „Dateien auswählen oder hierher ziehen“. Die maximale Dateigröße beträgt 50 MB.
 
-Vorhandene Dateien stehen darunter im Bereich „Hochgeladene Dateien“, zusammengefasst in Ordnern mit der Anzahl dahinter, z. B. „documents (1)“. Die Ordnernamen kommen aus der Ablagestruktur und sind deshalb englisch. Klicken Sie auf einen Ordner, um ihn aufzuklappen – erst dann werden die einzelnen Dateien sichtbar. Zeigen Sie anschließend mit der Maus auf eine Datei, erscheinen rechts neben dem Dateinamen die Schaltflächen „Herunterladen“, „Umbenennen“ und „Datei löschen“; beim Löschen bestätigen Sie die Rückfrage.
+Damit sind die Dateien erst ausgewählt, noch nicht hochgeladen: Sie stehen unter der Fläche, und darunter erscheint die Schaltfläche „1 Datei hochladen“ bzw. „3 Dateien hochladen“. Erst ein Klick darauf überträgt sie; während der Übertragung steht dort „Wird hochgeladen...“, danach meldet Qonnectra „Dateien erfolgreich hochgeladen“. Wechseln Sie vorher zu einem anderen Objekt, wird nichts hochgeladen.
 
-Bei vielen Dateien hilft das Feld „Dateien suchen...“ oberhalb der Liste. Sind die Schaltflächen nicht sichtbar, ist Ihr Fenster zu schmal: Scrollen Sie in der Info-Box nach rechts oder ziehen Sie sie breiter.
+Vorhandene Dateien stehen darunter im Bereich „Hochgeladene Dateien“, zusammengefasst in Ordnern mit der Anzahl dahinter, z. B. „documents (1)“. Die Ordnernamen kommen aus der Ablagestruktur und sind deshalb englisch. Klicken Sie auf einen Ordner, um ihn aufzuklappen – erst dann werden die einzelnen Dateien sichtbar. Zeigen Sie anschließend mit der Maus auf eine Datei, erscheinen rechts neben dem Dateinamen die Schaltflächen „Herunterladen“, „Umbenennen“ und „Datei löschen“; beim Löschen bestätigen Sie die Rückfrage. Auf einem Tablet oder Smartphone tippen Sie die Datei an, die Schaltflächen stehen dann unter ihrem Namen.
+
+Bei vielen Dateien hilft das Feld „Dateien suchen...“ oberhalb der Liste.
 
 ![](/videos/map_attachment.webm)
+
+::: warning
+Steht anstelle des Bereichs „Dateien hochladen“ die Meldung „Datei-Upload konnte nicht geladen werden.“, hat Qonnectra die Angaben für das Hochladen nicht vom Server erhalten. „Erneut versuchen“ lädt sie noch einmal; die vorhandenen Dateien darunter sind davon nicht betroffen.
+:::
 
 ::: danger
 Laden Sie keine zweite Datei mit demselben Namen an dasselbe Objekt hoch. Qonnectra meldet dann einen Fehler, hat die vorhandene Datei zu diesem Zeitpunkt aber schon durch die neue ersetzt; ihr bisheriger Inhalt ist verloren. Geben Sie Fotos und Protokollen eindeutige Namen, etwa mit Datum.

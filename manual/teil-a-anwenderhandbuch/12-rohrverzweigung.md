@@ -40,9 +40,7 @@ Rohre, die an diesem Netzknoten bereits Mikrorohrverbindungen haben, sind mit �
 Das Fenster spricht von „Trassen“, die Schaltfläche daneben von der „Grabenauswahl“. Gemeint ist beides Mal dasselbe: die Trassen rund um den Netzknoten.
 :::
 
-::: warning
-Qonnectra meldet „Trassenauswahl erfolgreich gespeichert“, merkt sich die Auswahl aber nicht. Kehren Sie später zu demselben Netzknoten zurück, ist wieder nur ausgewählt, was dort bereits Verbindungen hat; die übrigen Rohre stellen Sie erneut zusammen. Verloren geht dabei nichts – die gespeicherten Mikrorohrverbindungen bleiben erhalten.
-:::
+Qonnectra meldet „Trassenauswahl erfolgreich gespeichert“ und merkt sich die Auswahl je Netzknoten, allerdings nur die Trassen, nicht die einzelnen Rohre. Kehren Sie später zu demselben Netzknoten zurück, sind alle Rohre der gespeicherten Trassen ausgewählt, dazu jedes Rohr, das dort bereits Verbindungen hat. Haben Sie aus einer Trasse nur einzelne Rohre übernommen, wählen Sie die übrigen erneut ab.
 
 ## 12.3 Mikrorohre verbinden und Auto-Verbindung
 

@@ -39,7 +39,7 @@ Beides sind einmalige Vorgänge, keine laufende Synchronisierung: Qonnectra glei
 :::
 
 ::: info
-Nicht mitgenommen werden die Sprache der Oberfläche, der zuletzt betrachtete Kartenausschnitt und das ausgewählte Projekt. Sprache und Projekt stellen Sie in der Kopfzeile jedes Mal neu ein, siehe Abschnitt [Aufbau der Oberfläche](./01-erste-schritte.md#_1-2-aufbau-der-oberflache).
+Nicht mitgenommen werden die Sprache der Oberfläche, das zuletzt gewählte Projekt, die Kartenausschnitte und Lage und Größe der Fenster im Netzschema. Diese Angaben merkt sich jeder Browser für sich, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln).
 :::
 
 ::: warning

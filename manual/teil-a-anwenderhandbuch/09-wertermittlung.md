@@ -4,7 +4,7 @@ Die **Wertermittlung** rechnet aus, was ein Netz gekostet hat oder heute kosten 
 
 ![Screenshot Wertermittlung mit der Karte links und dem Bedienfeld rechts](/images/manual/teil-a/valuation.jpg)
 
-Links liegt die Karte, rechts das Bedienfeld mit der Gebietsauswahl, den Eingaben für die Fortschreibung und dem Button „Berechnen“. Das Ergebnis erscheint unter dem Button im selben Feld. Gerechnet wird ausschließlich; am Datenbestand ändert die Wertermittlung nichts, und das Ergebnis wird nicht gespeichert.
+Links liegt die Karte, rechts das Bedienfeld mit der Gebietsauswahl und den Eingaben für die Fortschreibung; darunter erscheint im selben Feld das Ergebnis. Eine Schaltfläche zum Starten gibt es nicht: Qonnectra rechnet beim Öffnen der Ansicht und nach jeder Änderung der Auswahl von selbst, währenddessen steht dort „Berechne …“. Gerechnet wird ausschließlich; am Datenbestand ändert die Wertermittlung nichts, und das Ergebnis wird nicht gespeichert.
 
 Die Karte verhält sich wie in Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster) beschrieben, mit einer Ausnahme: Ein Klick wählt hier kein Objekt aus und öffnet keine Info-Box, sondern schaltet ein Gebiet in der Auswahl an oder ab, siehe Abschnitt [Gebiet oder Gesamtprojekt wählen](#_9-1-gebiet-oder-gesamtprojekt-wahlen).
 
@@ -26,7 +26,13 @@ Die gewählten Gebiete umrandet die Karte orange. Umgekehrt geht es genauso: Ein
 
 ![](/videos/valuation_area_select.webm)
 
-Ist weder „Gesamt“ noch ein Gebiet gewählt, bleibt „Berechnen“ ausgeschaltet und darunter steht der Hinweis „Wähle ein Ausbaugebiet oder „Gesamt“, um die Wertermittlung zu starten.“
+Nehmen Sie das Häkchen bei „Gesamt (ganzes Projekt)“ weg, ohne ein Gebiet anzuhaken, verschwindet das Ergebnis, und an seiner Stelle steht der Hinweis „Wähle ein Ausbaugebiet oder „Gesamt“, um die Wertermittlung zu starten.“
+
+Die Auswahl steht zusammen mit den beiden Eingaben aus Abschnitt [Jahr des Bauabschlusses und jährlicher Korrekturwert](#_9-2-jahr-des-bauabschlusses-und-jahrlicher-korrekturwert) in der Adresse der Ansicht. Ein Lesezeichen oder ein weitergegebener Link zeigt deshalb dieselbe Wertermittlung, und zwei Browser-Tabs mit verschiedenen Gebieten lassen sich nebeneinander vergleichen.
+
+::: warning
+Mehr als 40 Gebiete passen nicht in die Adresse. Haken Sie mehr an, rechnet Qonnectra trotzdem, meldet aber „Zu viele Gebiete für einen teilbaren Link; die Auswahl bleibt auf dieser Seite.“ Ein Link oder Lesezeichen enthält dann nur den Stand vor dem 41. Gebiet, und ein Neuladen der Seite verwirft die übrige Auswahl.
+:::
 
 ::: info
 Sind für das Projekt keine Gebiete hinterlegt, steht anstelle der Liste „Keine Ausbaugebiete für dieses Projekt vorhanden.“ Über „Gesamt (ganzes Projekt)“ können Sie dann trotzdem rechnen.
@@ -37,11 +43,7 @@ Neben der Projektauswahl in der Kopfzeile liegt in dieser Ansicht die Schaltflä
 :::
 
 ::: info
-Beim Umschalten dieser Schaltfläche wird die Auswahl auf „Gesamt“ zurückgesetzt und ein vorhandenes Ergebnis verworfen.
-:::
-
-::: danger
-Ein Projektwechsel räumt dagegen nichts auf: Das Ergebnis des vorherigen Projekts bleibt im Bedienfeld stehen, und die Häkchen bleiben auf Gebieten, die es im neuen Projekt nicht gibt. Die Ansicht zeigt dann eine Aufstellung, die nicht zum Projekt in der Kopfzeile gehört – ohne jeden Hinweis darauf, und selbst dann, wenn für das neue Projekt gar keine Kostensätze hinterlegt sind. Rechnen Sie nach einem Projektwechsel neu, bevor Sie das Ergebnis lesen oder weitergeben.
+Das Umschalten dieser Schaltfläche und ein Projektwechsel setzen die Auswahl auf „Gesamt“ zurück; das Ergebnis gilt danach dem ganzen Projekt aus der Kopfzeile. Ein Projektwechsel setzt außerdem die beiden Eingaben für die Fortschreibung auf ihre Voreinstellung zurück.
 :::
 
 ## 9.2 Jahr des Bauabschlusses und jährlicher Korrekturwert
@@ -56,11 +58,11 @@ Der Bereich „Zukunftsabhängige Wertermittlung“ enthält die beiden Eingaben
 Beide Eingaben wirken ausschließlich auf die Tabelle in Abschnitt [Zukunftsabhängige Wertermittlung](#_9-6-zukunftsabhangige-wertermittlung). Die Gesamtinvestition und die beiden Kennzahlen bleiben davon unberührt.
 
 ::: info
-Nach einer Änderung müssen Sie **nicht** erneut auf „Berechnen“ klicken: Solange ein Ergebnis angezeigt wird, rechnet Qonnectra die Fortschreibung bei jeder Eingabe sofort neu.
+Eine Änderung übernimmt Qonnectra, sobald Sie das Feld verlassen oder Enter drücken; die Fortschreibung rechnet dann sofort neu. Solange der Cursor noch im Feld steht, zeigt die Tabelle den alten Wert.
 :::
 
 ::: warning
-Die beiden leeren Felder verhalten sich unterschiedlich. Ohne „Jahr Bauabschluss“ verschwindet die Tabelle der Fortschreibung ganz. Ohne „Jährlicher Korrekturwert (%)“ bleibt sie stehen und rechnet mit 0 %: Alle Jahre stehen dann auf demselben Netzwert und die Spalte „Steigerung“ auf 0,00 €. Das ist keine Aussage über die Wertentwicklung, sondern nur ein fehlender Wert – lassen Sie das Feld nicht leer, wenn Sie die Tabelle weitergeben.
+Ein geleertes Feld gilt nicht als 0, sondern als Voreinstellung: Qonnectra rechnet dann mit dem laufenden Jahr bzw. mit 2,5 %. Für eine Fortschreibung ohne Veränderung tragen Sie ausdrücklich 0 ein.
 :::
 
 ## 9.3 Woher die Kostensätze kommen
@@ -75,7 +77,7 @@ Jeder Kostensatz besteht aus einem Namen – dem **Kostenbereich** –, einem Be
 Zusätzlich ist an den Kostensätzen vermerkt, welche davon einen Hausanschluss darstellen. Daraus entsteht die Kennzahl „Kosten pro Hausanschluss“, siehe Abschnitt [Kennzahlen](#_9-5-kennzahlen-kosten-pro-meter-und-pro-hausanschluss).
 
 ::: warning
-Sind für das Projekt keine Kostensätze hinterlegt, bleibt „Berechnen“ ausgeschaltet und darüber steht „Keine Kostensätze konfiguriert. Bitte im Adminbereich anlegen.“ Die Wertermittlung setzt damit – wie die Rohrverzweigung, siehe Kapitel [Rohrverzweigung](./12-rohrverzweigung.md) – eine Vorarbeit der Administration voraus und ist ohne sie nicht benutzbar.
+Sind für das Projekt keine Kostensätze hinterlegt, steht über dem Ergebnis „Keine Kostensätze konfiguriert. Bitte im Adminbereich anlegen.“, und das Ergebnis bleibt ohne Kostenbereiche. Die Wertermittlung setzt damit – wie die Rohrverzweigung, siehe Kapitel [Rohrverzweigung](./12-rohrverzweigung.md) – eine Vorarbeit der Administration voraus und ist ohne sie nicht benutzbar.
 :::
 
 ::: warning
@@ -84,7 +86,7 @@ Ein Kostensatz mit der Einheit „Stück“, dem kein Netzknotentyp zugeordnet i
 
 ## 9.4 Ergebnis lesen: Kostenbereich, Menge, Einheitspreis, Gesamtinvestition
 
-„Berechnen“ ermittelt die Mengen und stellt das Ergebnis unter dem Button dar. Die Tabelle hat vier Spalten:
+Das Ergebnis beginnt mit einer Tabelle mit vier Spalten:
 
 - **„Kostenbereich“** – der Name des Kostensatzes.
 - **„Kosten (EP)“** – der Einheitspreis, dahinter die Einheit („/ Stück“ oder „/ pro Meter“).
@@ -104,7 +106,7 @@ Gezählt wird der Bestand, wie er in Qonnectra erfasst ist. Fehlende Trassenlän
 :::
 
 ::: warning
-Ein neuer Klick auf „Berechnen“ ersetzt das angezeigte Ergebnis. Ein Vergleich zweier Gebiete nebeneinander ist in der Ansicht nicht möglich – notieren Sie das erste Ergebnis, bevor Sie das zweite rechnen.
+Jede Änderung der Gebietsauswahl ersetzt das angezeigte Ergebnis. Für einen Vergleich zweier Gebiete öffnen Sie die Wertermittlung in einem zweiten Browser-Tab, siehe Abschnitt [Gebiet oder Gesamtprojekt wählen](#_9-1-gebiet-oder-gesamtprojekt-wahlen).
 :::
 
 ## 9.5 Kennzahlen: Kosten pro Meter und pro Hausanschluss

@@ -8,10 +8,12 @@ Bewegung, Legende, Transparenz und Suche funktionieren wie in Kapitel [Wiederkeh
 
 ## 5.1 Kartenausschnitt, Zoomstufe und gespeicherte Position
 
-Qonnectra merkt sich den letzten Kartenausschnitt. Wenn Sie die Karte erneut öffnen, sehen Sie wieder die Stelle, an der Sie zuletzt gearbeitet haben.
+Qonnectra merkt sich den letzten Kartenausschnitt je Projekt und Browser. Wenn Sie die Karte eines Projekts erneut öffnen, sehen Sie wieder die Stelle, an der Sie dort zuletzt gearbeitet haben. Ein Projekt, dessen Karte Sie in diesem Browser noch nie geöffnet haben, zeigt sie auf die Ausdehnung seiner Trassen eingepasst. Das gilt für jedes Kartenfenster, siehe Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster).
+
+In der Karte, der Rohrzuordnung, den Mikrorohren, der Störungsanalyse und der Wertermittlung steht der Ausschnitt außerdem in der Adresse der Ansicht, in der Karte zusammen mit dem Objekt, dessen Info-Box geöffnet ist. Ein kopierter Link öffnet deshalb denselben Ausschnitt mit demselben ausgewählten Objekt – für jede Person, die ihn aufruft, und in einem zweiten Browser-Tab genauso. Enthält ein Link nur das Objekt und keinen Ausschnitt, rückt die Karte das Objekt ins Bild.
 
 ::: warning
-Das gilt auch über einen Projektwechsel hinweg: Wählen Sie bei geöffneter Karte ein anderes Projekt, bleibt der Ausschnitt stehen und die Karte springt **nicht** in das Gebiet des neuen Projekts. Sie sehen dann unter Umständen eine leere Karte, obwohl das Projekt Daten hat. Holen Sie sich die Daten mit „Auf Ausdehnung zoomen“ beim Legendeneintrag „Adresse“ ins Bild, siehe Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster).
+Wählen Sie bei geöffneter Karte ein anderes Projekt, bleibt der Ausschnitt stehen und die Karte springt **nicht** in das Gebiet des neuen Projekts – auch nicht an die Stelle, die sie sich für dieses Projekt gemerkt hat. Sie sehen dann unter Umständen eine leere Karte, obwohl das Projekt Daten hat. Holen Sie sich die Daten mit „Auf Ausdehnung zoomen“ beim Legendeneintrag „Adresse“ ins Bild, siehe Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster).
 :::
 
 Die Beschränkung auf das gewählte Projekt heben Sie in der Karte über die Schaltfläche „Alle Projekte anzeigen“ neben der Projektauswahl vorübergehend auf; die Karte zeichnet dann den Bestand aller Projekte, für die Sie berechtigt sind, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln).
@@ -30,7 +32,7 @@ Wenn Sie ein Objekt (z. B. eine Trasse oder einen Netzknoten) auf der Karte ankl
 - Netzknoten und Adresse: „Eigenschaften“, „Aktionen“, „Anhänge“
 - Gebiet: „Eigenschaften“, „Anhänge“
 
-Die Angaben im Reiter „Eigenschaften“ sind hier nicht bearbeitbar, sondern dienen als Informationsquelle. Bearbeiten können Sie in der Karte ausschließlich den Reiter „Anhänge“, siehe Abschnitt [Anhänge an einem Kartenobjekt](#_5-8-anhange-an-einem-kartenobjekt).
+Die Angaben im Reiter „Eigenschaften“ sind hier nicht bearbeitbar, sondern dienen als Informationsquelle. Leere Angaben lässt die Info-Box weg; „Förderstatus“ etwa steht bei Trassen und Netzknoten nur, wenn er eingetragen ist. Bearbeiten können Sie in der Karte ausschließlich den Reiter „Anhänge“, siehe Abschnitt [Anhänge an einem Kartenobjekt](#_5-8-anhange-an-einem-kartenobjekt).
 
 ![Screenshot Karte mit Hervorhebung eines ausgewählten Objekts und der Anzeige der Details in der Info-Box rechts](/images/manual/teil-a/map_selected_object.jpg)
 
@@ -112,14 +114,14 @@ Aus der Karte heraus sind beide Fenster reine Anzeigen. Angelegt und verändert 
 
 ## 5.7 Von der Karte in den Faserweg wechseln
 
-Im Reiter „Aktionen“ eines Netzknotens oder einer Adresse springt „Folgen“ in die Ansicht „Faserweg“, siehe Kapitel [Faserweg](./15-faserweg.md).
+Im Reiter „Aktionen“ eines Netzknotens oder einer Adresse springt „Folgen“ in die Ansicht „Faserweg“, siehe Kapitel [Faserweg](./15-faserweg.md). Darüber steht bei einer Adresse und bei einem Netzknoten, dem eine Adresse zugeordnet ist, „Adresse anzeigen“; es öffnet die Detailseite dieser Adresse, siehe Kapitel [Adressen](./16-adressen.md).
 
 Der Faserweg wird dabei sofort für das ausgewählte Objekt ermittelt: von einem Netzknoten aus für alle Fasern, die durch ihn laufen, von einer Adresse aus für die Fasern der dort angeschlossenen Netzknoten und Wohneinheiten. Dieselbe Schaltfläche „Folgen“ finden Sie im Reiter „Kabelübersicht“ an jedem Kabel und an jeder einzelnen Faser, siehe Abschnitt [Rohrübersicht und Kabelübersicht einer Trasse](#_5-4-rohrubersicht-und-kabelubersicht-einer-trasse).
 
-„Folgen“ verlässt die Karte. Über die Zurück-Funktion des Browsers oder den Menüpunkt „Karte“ kehren Sie zurück; der Kartenausschnitt bleibt erhalten, die Info-Box öffnet sich nicht erneut.
+Beide Schaltflächen verlassen die Karte. Mit der Zurück-Funktion des Browsers kehren Sie zum selben Ausschnitt mit derselben Info-Box zurück, über den Menüpunkt „Karte“ zum selben Ausschnitt ohne Info-Box.
 
 ::: info
-Lässt sich zu dem gewählten Objekt kein Faserweg ermitteln, etwa weil noch kein Kabel angeschlossen ist, zeigt die Ansicht „Faserweg“ statt eines Ergebnisses eine Fehlermeldung mit der Kennung des Objekts.
+Lässt sich zu dem gewählten Objekt kein Faserweg ermitteln, etwa weil noch kein Kabel angeschlossen ist, zeigt die Ansicht „Faserweg“ statt eines Ergebnisses eine Fehlermeldung.
 :::
 
 ## 5.8 Anhänge an einem Kartenobjekt

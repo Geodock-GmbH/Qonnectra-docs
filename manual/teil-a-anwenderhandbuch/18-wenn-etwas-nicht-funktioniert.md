@@ -31,13 +31,17 @@ Vor dem Löschen und vor dem Neuvergeben einer ID fragt Qonnectra in einem klein
 
 Steht in einer Tabelle oder einem Abschnitt ein Satz wie „Keine Ergebnisse gefunden“, „Keine Daten verfügbar“ oder „Keine Standortdaten verfügbar“, ist das keine Fehlermeldung: An dieser Stelle gibt es nichts anzuzeigen. Das kann an einem Filter liegen, an einem leeren Projekt oder an fehlenden Stammdaten, siehe Abschnitt [Karte oder Diagramm bleibt leer](#_18-4-karte-oder-diagramm-bleibt-leer).
 
-**Die Wartemeldung**
+**Ladeanzeigen**
 
-Beim Wechsel in eine andere Ansicht legt sich kurz ein Fenster mit „Laden...“ und „Bitte warten...“ über die Oberfläche; beim Netzschema steht dort „Netzwerkschema synchronisiert...“. Bleibt es stehen, statt nach ein paar Sekunden zu verschwinden, kommt die Ansicht nicht zustande. Laden Sie die Seite neu; bleibt es dabei, siehe Abschnitt [Was das Support-Team von Ihnen braucht](#_18-5-was-das-support-team-von-ihnen-braucht).
+Dauert der Wechsel in eine andere Ansicht länger als einen Augenblick, läuft am oberen Bildschirmrand ein schmaler Balken; beim Netzschema steht darunter „Netzschema wird geladen...“. Die bisherige Ansicht bleibt dabei bedienbar. Innerhalb einer Ansicht stehen an der Stelle von Tabellen, Diagrammen und Karten graue Platzhalter, bis deren Daten da sind. Läuft der Balken weiter, statt nach ein paar Sekunden zu verschwinden, kommt die Ansicht nicht zustande. Laden Sie die Seite neu; bleibt es dabei, siehe Abschnitt [Was das Support-Team von Ihnen braucht](#_18-5-was-das-support-team-von-ihnen-braucht).
+
+**Ein Bereich lässt sich nicht laden**
+
+Kann ein Teil einer Ansicht nicht geladen werden, steht an seiner Stelle ein roter Kasten mit der Ursache, oft „Fehler beim Laden der Daten“, und der Schaltfläche „Erneut versuchen“. Der Rest der Ansicht bleibt benutzbar. „Erneut versuchen“ lädt nur diesen Teil nach und ist bei einer kurzen Störung der Verbindung der schnellste Weg.
 
 **Die Fehlerseite**
 
-Führt eine Adresse ins Leere, ersetzt Qonnectra die Ansicht durch eine Seite mit einer Zahl – dem HTTP-Statuscode – und darunter einem kurzen englischen Text, etwa der 404 mit „Not Found“. „Zurück zur Startseite“ bringt Sie in die Anwendung zurück.
+Führt eine Adresse ins Leere, ersetzt Qonnectra die Ansicht durch eine Seite mit einer Zahl – dem HTTP-Statuscode – und darunter einem kurzen englischen Text, etwa der 404 mit „Not Found“ oder, bei einem Projekt, das für Ihr Konto nicht freigegeben ist, „Project not found“. „Zurück zur Startseite“ bringt Sie in die Anwendung zurück.
 
 ![Screenshot der Fehlerseite mit der Statusnummer 404, dem Text „Not Found“ und der Schaltfläche „Zurück zur Startseite“](/images/manual/teil-a/error_not_found.jpg)
 
@@ -53,31 +57,31 @@ Stimmen Benutzername oder Passwort nicht, bleiben Sie auf der Anmeldeseite und Q
 
 **Die Sitzung ist abgelaufen**
 
-Ihre Anmeldung verlängert sich, solange Sie mit Qonnectra arbeiten. Liegt die Anwendung dagegen länger als eine Woche ungenutzt, ist sie abgelaufen: Der nächste Klick bringt Sie auf die Anmeldeseite. Melden Sie sich dort erneut an.
-
-::: warning
-Nach der erneuten Anmeldung landen Sie auf dem Dashboard, nicht auf der Seite, auf der Sie vorher waren. Notieren Sie sich vorher, wo Sie gearbeitet haben.
-:::
+Ihre Anmeldung verlängert sich von selbst, solange Qonnectra in einem Browser-Tab geöffnet ist. Abgelaufen ist sie erst, wenn die Anwendung länger als eine Woche nicht geöffnet war – etwa, weil der Rechner so lange ausgeschaltet war. Qonnectra meldet dann „Sitzung abgelaufen“ mit dem Satz „Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.“ und wechselt zur Anmeldeseite. Nach der erneuten Anmeldung sind Sie wieder auf der Seite, auf der Sie zuletzt waren, mit demselben Projekt und demselben geöffneten Objekt.
 
 ::: danger
-Läuft die Sitzung ab, während ein Formular offen steht, scheitert „Speichern“ mit der gewöhnlichen Fehlermeldung, und beim erneuten Anmelden gehen die Eingaben verloren. Kopieren Sie längere Texte vorher heraus.
+Nicht gespeicherte Eingaben überstehen das nicht: Der Wechsel zur Anmeldeseite verwirft ein offenes Formular ohne Rückfrage. Kopieren Sie längere Texte heraus, bevor Sie einen Rechner mit offenem Formular längere Zeit verlassen.
 :::
 
 **Abmelden wirkt überall**
 
-Die Anmeldung gilt für den ganzen Browser. Melden Sie sich in einem Reiter ab, sind auch die übrigen Reiter abgemeldet; der nächste Klick darin führt auf die Anmeldeseite.
+Die Anmeldung gilt für den ganzen Browser. Melden Sie sich in einem Reiter ab, sind auch die übrigen Reiter abgemeldet; spätestens der nächste Klick darin führt auf die Anmeldeseite, ggf. mit der Meldung „Sitzung abgelaufen“.
 
 ## 18.3 Fehlende Rechte erkennen
 
 Was Sie sehen und ändern dürfen, hängt an der Rolle Ihres Kontos, siehe Abschnitt [Warum manche Menüpunkte fehlen: Berechtigungen](./01-erste-schritte.md#_1-7-warum-manche-menupunkte-fehlen-berechtigungen). Fehlende Rechte zeigen sich auf drei Arten, und nur eine davon sagt es Ihnen auch:
 
 1. **Der Menüpunkt fehlt.** Ein Bereich, den dieses Handbuch beschreibt, steht nicht in der Navigationsleiste.
-2. **Die Anwendung springt weg.** Rufen Sie eine gesperrte Adresse direkt auf – über ein Lesezeichen oder einen Link –, landen Sie ohne jede Meldung in der Karte. Das sieht aus, als hätte der Link nicht funktioniert.
-3. **Die Aktion scheitert.** Der Button ist da, die Rückfrage kommt, und danach erscheint die Meldung „Sie sind nicht berechtigt, diese Aktion durchzuführen.“ Die Daten bleiben unverändert.
+2. **Die Anwendung springt weg.** Rufen Sie eine gesperrte Ansicht direkt auf – über ein Lesezeichen oder einen Link –, landen Sie ohne jede Meldung in der Karte, oder, wenn auch die gesperrt ist, in der ersten Ansicht der Navigationsleiste, die Ihr Konto öffnen darf. Das sieht aus, als hätte der Link nicht funktioniert.
+3. **Die Aktion scheitert.** Der Button ist da, die Rückfrage kommt, und danach erscheint die Meldung „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“ Die Daten bleiben unverändert.
 
-![Screenshot einer Adresse mit Hervorhebung der Meldung „Sie sind nicht berechtigt, diese Aktion durchzuführen.“](/images/manual/teil-a/error_permission.jpg)
+![Screenshot einer Adresse mit Hervorhebung der Meldung „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“](/images/manual/teil-a/error_permission.jpg)
 
 ![](/videos/error_permission.webm)
+
+Einige ältere Stellen melden fehlende Rechte noch mit ihrer gewöhnlichen Fehlermeldung, etwa „Fehler beim Löschen der Struktur“ im Netzschema, siehe Kapitel [Netzschema](./14-netzschema.md).
+
+Darf Ihr Konto überhaupt keine Ansicht öffnen, zeigt Qonnectra nach der Anmeldung nur die Seite „Kein Zugriff“ mit dem Satz „Deinem Konto ist noch keine Rolle zugewiesen, die eine Seite freigibt. Wende dich an deine Administration.“ Ihre Administration muss Ihrem Konto dann eine Rolle zuweisen.
 
 Die Rechte sind nach Objektart und Stufe vergeben – ansehen, bearbeiten, löschen. Der häufigste Fall in der Praxis ist deshalb nicht ein gesperrter Bereich, sondern ein fehlendes Löschrecht: Mit der mitgelieferten Rolle „Editor“ dürfen Sie alle Fachdaten anlegen und ändern, aber nichts davon löschen. Welche Rollen es gibt und was sie umfassen, beschreibt Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md).
 
@@ -89,8 +93,8 @@ Ein fehlendes Recht kann sich auch als vollständig fehlender Inhalt zeigen, ohn
 
 Eine leere Karte ist selten ein Defekt. Gehen Sie die Ursachen der Reihe nach durch:
 
-1. **Das falsche Projekt.** Die Projektauswahl in der Kopfzeile bestimmt, was jede Ansicht zeigt. Prüfen Sie sie zuerst, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln).
-2. **Der Kartenausschnitt liegt woanders.** Die Karte rückt nicht von selbst auf die Daten, sondern öffnet sich dort, wo Sie sie zuletzt verlassen haben – nach einem Projektwechsel also womöglich hunderte Kilometer entfernt. Klappen Sie die Legende auf und wählen Sie beim Eintrag „Adresse“ „Auf Ausdehnung zoomen“, siehe Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster).
+1. **Das falsche Projekt.** Die Projektauswahl in der Kopfzeile bestimmt, was jede Ansicht zeigt. Prüfen Sie sie zuerst – vor allem, wenn Sie über einen Link oder ein Lesezeichen gekommen sind: Der öffnet das Projekt, in dem er entstanden ist, nicht Ihr zuletzt gewähltes, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln).
+2. **Der Kartenausschnitt liegt woanders.** Wechseln Sie das Projekt bei geöffneter Karte, bleibt der Ausschnitt stehen und liegt womöglich hunderte Kilometer von den Daten des neuen Projekts entfernt, siehe Abschnitt [Kartenausschnitt, Zoomstufe und gespeicherte Position](./05-karte.md#_5-1-kartenausschnitt-zoomstufe-und-gespeicherte-position). Klappen Sie die Legende auf und wählen Sie beim Eintrag „Adresse“ „Auf Ausdehnung zoomen“, siehe Abschnitt [Das Kartenfenster](./03-wiederkehrende-bedienelemente.md#_3-3-das-kartenfenster).
 3. **Der Layer ist ausgeblendet.** Ein- und ausgeblendete Layer merkt sich der Browser über die Sitzung hinaus. Was Sie gestern ausgeblendet haben, fehlt heute noch.
 4. **Die Zoomstufe reicht nicht.** Beschriftungen und externe Kartendienste erscheinen erst ab einer bestimmten Zoomstufe. Zoomen Sie weiter hinein.
 5. **Ein Recht fehlt.** Siehe Abschnitt [Fehlende Rechte erkennen](#_18-3-fehlende-rechte-erkennen).
@@ -117,9 +121,9 @@ Je genauer die Meldung, desto schneller die Antwort. Halten Sie fest:
 - **Den Wortlaut der Meldung**, am besten als Bildschirmfoto der ganzen Ansicht.
 - **Was Sie getan haben**, Schritt für Schritt bis zu dem Punkt, an dem es schiefging, und was Sie stattdessen erwartet hatten.
 - **Das Projekt und das Objekt**, an dem es passiert ist – mit Adress-ID, Trassen-ID oder Rohrname, nicht nur „eine Adresse in Musterstadt“.
-- **Die Adresse aus der Adresszeile des Browsers**. Sie enthält die Ansicht und das Objekt und ist deshalb oft die hilfreichste Angabe überhaupt.
+- **Die Adresse aus der Adresszeile des Browsers**. Sie enthält Projekt, Ansicht und Objekt, in der Karte auch den Ausschnitt, und ist deshalb oft die hilfreichste Angabe überhaupt.
 - **Datum und ungefähre Uhrzeit.** Die Anwendung schreibt Fehler von sich aus in das Protokoll des Servers; mit der Uhrzeit findet Ihre Administration den passenden Eintrag, siehe Kapitel [Betrieb der Instanz](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md).
-- **Die Versionsnummer** aus der Kopfzeile, z. B. „v1.7.0“, sowie Browser und Betriebssystem.
+- **Die Versionsnummer** aus der Kopfzeile, z. B. „v1.8.0“, sowie Browser und Betriebssystem.
 
 ![Screenshot der Kopfzeile mit Hervorhebung der Projektauswahl links und der Versionsnummer rechts](/images/manual/teil-a/error_support_info.jpg)
 
