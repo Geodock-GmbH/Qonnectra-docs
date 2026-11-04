@@ -100,8 +100,11 @@ manual warns about many of them. Check **every** `::: info`, `::: warning` and
 
 ## 6. Republish and check
 
-1. `pnpm test:e2e --all`, then `pnpm screenshots:publish`. Use `--keep-videos`
-   only where a recording is unaffected.
+1. `scripts/setup-local-qonnectra.sh --reset`, then `pnpm test:e2e --all`, then
+   `pnpm screenshots:publish`. Use `--keep-videos` only where a recording is
+   unaffected. The reset is not optional: overlapping map symbols are drawn in
+   the physical row order of the database, which every run shifts, and CI
+   imports fresh (`CLAUDE.md`, „Draw order of overlapping map symbols“).
 2. Run every spec of chapters 19–24, 27, 28 twice and check its images for
    dates, times and IDs (`CLAUDE.md`, „Dates in the Django administration“).
 3. Look at a sample of the changed images.

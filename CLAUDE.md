@@ -127,7 +127,8 @@ pnpm test:e2e --all   # every spec
 pnpm test:e2e tests/05-karte.spec.ts   # named specs, stale or not
 
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
-scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
+scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild – required before
+                                            # publishing map images (see "Draw order of overlapping map symbols")
 scripts/stop-local-qonnectra.sh             # stop it (it does not start on boot by itself)
 scripts/stop-local-qonnectra.sh --down      # stop and remove the containers, data stays
 scripts/install-local-ca.sh                 # import the dev CA once per machine
@@ -900,6 +901,20 @@ looking for a race in the spec.
   (`openDashboardFromNavigation()`) and fails if nothing was sorted. The fix
   belongs upstream (`order_by("-count",
   "residential_unit_type__residential_unit_type")`).
+- **Draw order of overlapping map symbols.** The vector tile queries
+  (`ol_node_tiles`, `ol_address_tiles` and the rest in `views.py`) end in
+  `ST_AsMVT` without an `ORDER BY`, so the features of a tile come in the
+  physical row order of the table, and OpenLayers draws them in that order.
+  Every `UPDATE` moves a row to the end of the table – `tests/04-dashboard.spec.ts`
+  dates five nodes and reverts them on every run, and a local instance had
+  collected 268 updates on `node`. Where two node symbols overlap, the one on
+  top then differs from CI, which imports fresh on every run: `model_area` and
+  `map_address_detail` failed PR #29 that way, and after a reset they came out
+  byte-identical to the CI capture. Not interceptable – the tiles are binary
+  MVT. **Before publishing map images, reset the instance and run every spec:**
+  `scripts/setup-local-qonnectra.sh --reset`, then `pnpm test:e2e --all` and
+  `pnpm screenshots:publish`. Only that reproduces the order CI runs in. The
+  fix belongs upstream (an `ORDER BY` in the tile queries).
 - **Timestamps the backend sets.** `created_at`/`modified_at` are `auto_now_add`
   resp. `auto_now` on the models, so the backend discards any supplied value and
   `page.clock` (browser only) changes nothing. `freezeDates()` in
