@@ -195,6 +195,14 @@ sentences the chapter exists for.
   currently breaks, because the next edited sentence moves that boundary.
   `pnpm lint:gender` checks it.
 - Factual, no marketing tone, no emoji, no exclamation marks.
+- Plain sentences that read on the first pass. Every clause gets its own
+  verb; do not let a later clause borrow the verb of an earlier one, and do
+  not chain conditions with semicolons. „Nach der Anmeldung öffnet Qonnectra
+  die Karte dieses Projekts; darf Ihr Konto die Karte nicht öffnen, die erste
+  Ansicht der Navigationsleiste, die es öffnen darf.“ becomes two sentences:
+  „… öffnet Qonnectra die Karte dieses Projekts. Hat Ihr Konto keinen Zugriff
+  auf die Karte, öffnet sich stattdessen die oberste Ansicht der
+  Navigationsleiste, für die Sie berechtigt sind.“ The same goes for part C.
 - Explain what does **not** work and where users get stuck as well
   („Andernfalls gehen die Änderungen ohne Warnung verloren.“, „Wenn der Button
   nicht sichtbar ist, scrollen Sie im Feld nach unten.“).
@@ -443,7 +451,9 @@ local instance, so that they can be regenerated when the app changes.
   release commit, as it is now.
   Raising the pin is its own piece of work, not a side effect: bump
   `QONNECTRA_REF`, regenerate the screenshots, go through what changed in the
-  app, and update the commit in this file and in `OUTLINE.md`.
+  app, and update the commit in this file and in `OUTLINE.md`. The full
+  procedure, including the audit of every note block, is the skill
+  `qonnectra-update` (`.claude/skills/qonnectra-update/SKILL.md`).
   `QONNECTRA_REF=… ` looks at another version – images from such a run are not
   committed.
 - Reachable at `https://app.qonnectra.localhost` (admin:
@@ -1003,3 +1013,8 @@ UI texts: `local-app/frontend/messages/de.json`.
 - `manual-author` – new or extended manual chapters in the style above
 - `screenshot-automation` – write and run Playwright specs for screenshots/videos
 - `manual-review` – style, consistency and spelling check before committing
+
+## Skills
+
+- `qonnectra-update` – bring manual, specs and images up to a new Qonnectra
+  release (`/qonnectra-update`)
