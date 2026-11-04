@@ -82,10 +82,11 @@ from apps.api.models import (
 PROJECT_NAME = "Testprojekt"
 
 # The primary key the project gets locally, pinned deliberately: the Playwright
-# setup writes the cookie selected-project=2 (playwright/auth.setup.ts) and the
-# manual's URLs contain the id. Without pinning, a re-import with --force would
-# hand out the next free id after the delete - the project would still be there
-# and every capture run would nevertheless land in "Default".
+# setup pins project 2 (playwright/auth.setup.ts), and since v1.8.0 every
+# project page carries the id in its path (/project/2/map). Without pinning, a
+# re-import with --force would hand out the next free id after the delete - the
+# project would still be there and every capture run would nevertheless land in
+# "Default".
 # 2 is the value a fresh instance produces anyway: "Default" is created first
 # during setup and takes 1.
 PROJECT_ID = 2
@@ -448,6 +449,25 @@ class Command(BaseCommand):
                 )
             )
         Node.objects.bulk_create(nodes, batch_size=200)
+        # Since v1.8.0 the trigger tg_place_node_on_canvas computes canvas_x/y
+        # on every insert from the project's canvas center (taken from the
+        # first node inserted) and clears child_canvas_x/y - the exported
+        # layout of the network schema would be lost. The trigger fires on
+        # INSERT only, so the exported positions are written back here.
+        Node.objects.bulk_update(
+            [
+                Node(
+                    uuid=row["uuid"],
+                    canvas_x=row["canvas_x"],
+                    canvas_y=row["canvas_y"],
+                    child_canvas_x=row["child_canvas_x"],
+                    child_canvas_y=row["child_canvas_y"],
+                )
+                for row in data["node"]
+            ],
+            ["canvas_x", "canvas_y", "child_canvas_x", "child_canvas_y"],
+            batch_size=200,
+        )
         parent_updates = []
         for row in data["node"]:
             parent_uuid = uuid_of(row["parent_node"])
@@ -863,7 +883,32 @@ class Command(BaseCommand):
         )
 
         # --- Network schema settings (see the comment above) ----------------
-        schema_settings = NetworkSchemaSettings.objects.create(project=project)
+        # The node trigger has already created the row with the first node's
+        # position as canvas center. Re-anchor it on the center the exported
+        # layout was made with, the same vote migration 0076 runs: every
+        # placed node implies (geo - canvas / scale, Y flipped), the most
+        # common one wins. New nodes then land where the existing layout
+        # expects them. "configured" silences the hint the network schema
+        # shows until an administrator has set the excluded node types.
+        schema_settings, _created = NetworkSchemaSettings.objects.get_or_create(project=project)
+        scale = schema_settings.canvas_scale
+        votes = {}
+        for row in data["node"]:
+            if row["canvas_x"] is None or row["canvas_y"] is None:
+                continue
+            geom = point(row["geometry"])
+            center = (geom.x - row["canvas_x"] / scale, geom.y + row["canvas_y"] / scale)
+            key = (round(center[0], 1), round(center[1], 1))
+            count, first = votes.get(key, (0, center))
+            votes[key] = (count + 1, first)
+        if votes:
+            _count, (center_x, center_y) = max(
+                votes.values(), key=lambda vote: (vote[0], -vote[1][0], -vote[1][1])
+            )
+            schema_settings.canvas_center_x = center_x
+            schema_settings.canvas_center_y = center_y
+        schema_settings.configured = True
+        schema_settings.save()
         excluded_types = AttributesNodeType.objects.filter(
             node_type__in=NETWORK_SCHEMA_EXCLUDED_NODE_TYPES
         )

@@ -39,7 +39,7 @@ Beides sind einmalige Vorgänge, keine laufende Synchronisierung: Qonnectra glei
 :::
 
 ::: info
-Nicht mitgenommen werden die Sprache der Oberfläche, der zuletzt betrachtete Kartenausschnitt und das ausgewählte Projekt. Sprache und Projekt stellen Sie in der Kopfzeile jedes Mal neu ein, siehe Abschnitt [Aufbau der Oberfläche](./01-erste-schritte.md#_1-2-aufbau-der-oberflache).
+Nicht mitgenommen werden die Sprache der Oberfläche, das zuletzt gewählte Projekt, die Kartenausschnitte und Lage und Größe der Fenster im Netzschema. Diese Angaben merkt sich jeder Browser für sich, siehe Abschnitt [Projekt auswählen und wechseln](./01-erste-schritte.md#_1-3-projekt-auswahlen-und-wechseln).
 :::
 
 ::: warning
@@ -101,7 +101,7 @@ Die drei folgenden Abschnitte arbeiten gleich: Jeder zeigt eine Kachel je Eintra
 Über jedem der drei Abschnitte stehen zwei Schaltflächen: **„Zufällig“** würfelt für alle Kacheln des Abschnitts neue Werte aus – die Farbe und, wo es sie gibt, auch die Größe. Das hilft, Typen auseinanderzuhalten, die in der Karte derzeit gleich aussehen. **„Alle zurücksetzen“** stellt die Ausgangswerte wieder her. Beim Adressen-Stil heißt die zweite Schaltfläche „Zurücksetzen“, weil es dort nur eine Kachel gibt.
 
 ::: warning
-Jede Kachel lässt sich auch einzeln zurücksetzen. Die Schaltfläche dafür sitzt oben rechts in der Kachel, ist aber unsichtbar, solange Sie nicht mit der Maus auf die Kachel zeigen – erst dann blendet sie sich ein. Sie heißt „Zurücksetzen“, mit einer Ausnahme: In den „Oberflächen-Stilen“ steht dort unübersetzt „Reset“. Diesen Abschnitt sehen Sie nur, wenn die „Trassen-Darstellung“ auf „Nach Oberfläche“ steht, siehe Abschnitt [Kartendarstellung](#_17-4-kartendarstellung-trassenfarbe-trassen-darstellung-highlight-farbe).
+Jede Kachel lässt sich auch einzeln zurücksetzen. Die Schaltfläche dafür sitzt oben rechts in der Kachel, ist aber unsichtbar, solange Sie nicht mit der Maus auf die Kachel zeigen – erst dann blendet sie sich ein. Sie heißt „Zurücksetzen“.
 :::
 
 ![](/videos/settings_style_reset.webm)

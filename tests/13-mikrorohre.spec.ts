@@ -7,6 +7,7 @@ import {
   spotlight,
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "13. Mikrorohre" in the manual
 // (manual/teil-a-anwenderhandbuch/13-mikrorohre.md). Produces all images of the
@@ -120,7 +121,7 @@ interface OpenOptions {
  * info box (section 3.6 of the manual).
  *
  * The map view goes the same way and not via "load, set, reload": the app writes
- * `mapCenter`/`mapZoom` back on every `moveend`, and a write-back between
+ * the map view (`mapView:2`) back on every `moveend`, and a write-back between
  * setting and reloading would drop the seed - the map then starts at the
  * overview and a click aimed at a particular trench hits nothing.
  */
@@ -129,19 +130,17 @@ async function openMicroducts(page: Page, options: OpenOptions = {}) {
 
   await page.addInitScript(
     (state) => {
-      localStorage.setItem('mapCenter', JSON.stringify(state.view.center))
-      localStorage.setItem('mapZoom', JSON.stringify(state.view.zoom))
+      localStorage.setItem('mapView:2', JSON.stringify({ zoom: state.view.zoom, center: state.view.center }))
       localStorage.setItem('drawerWidth', JSON.stringify(state.drawerWidth))
     },
     { view, drawerWidth },
   )
 
-  await page.goto('/house-connections')
+  await page.goto(projectPath('/house-connections'))
 
-  // `/house-connections` redirects to `/house-connections/<project>` - the 2 is
-  // the test project (cookie `selected-project`, set in
-  // playwright/auth.setup.ts).
-  await expect(page).toHaveURL(/\/house-connections\/2(\/|$)/)
+  // The project is part of the path (playwright/project.ts); the check catches
+  // a redirect to the landing page.
+  await expect(page).toHaveURL(projectUrl('/house-connections'))
 
   // With a running tileserver (vector tiles) OpenLayers creates a second canvas,
   // without it (OSM raster fallback) only one - hence .first().

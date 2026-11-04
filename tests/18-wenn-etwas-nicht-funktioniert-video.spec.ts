@@ -23,8 +23,18 @@
 import { expect, test, type Page } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { projectPath } from '../playwright/project'
 
 const CHAPTER = '18-wenn-etwas-nicht-funktioniert'
+
+/**
+ * The message of a refused action. Since v1.8.0 every view that writes through
+ * a remote function maps a 403 to `message_error_permission_denied`
+ * (src/lib/remote/shared/remote-error.ts); it replaced „Sie sind nicht
+ * berechtigt, diese Aktion durchzuführen.“
+ */
+const PERMISSION_DENIED =
+  'Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.'
 
 // Recording size = viewport from playwright.config.ts. Without it Playwright
 // scales the video down until it fits into 800 x 800, and the crop would be
@@ -62,7 +72,7 @@ const LEAD_IN = 1.0
  * describes, not at the page load.
  */
 async function openUnits(page: Page) {
-  await page.goto(`/address/2/${ADDRESS.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}`))
   await expect(page.getByRole('heading', { name: ADDRESS.title, level: 1 })).toBeVisible()
   await page.waitForLoadState('networkidle')
   // The small map in "Standort" is built in onMount; while it is still coming
@@ -105,7 +115,7 @@ test('18.3 Aktion ohne Recht', async ({ page, context }) => {
   // Warm-up page. It fills the HTTP cache of the context, so that the actual
   // recording page is up within a fraction of a second - Playwright records a
   // page from its creation, and a long page load would end up in the video.
-  await page.goto(`/address/2/${ADDRESS.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}`))
   await expect(page.getByRole('heading', { name: ADDRESS.title, level: 1 })).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()
@@ -150,7 +160,7 @@ test('18.3 Aktion ohne Recht', async ({ page, context }) => {
 
   // 3. The refusal - and the row stays where it was.
   await expect(
-    capture.getByText('Sie sind nicht berechtigt, diese Aktion durchzuführen.'),
+    capture.getByText(PERMISSION_DENIED),
   ).toBeVisible({ timeout: 20_000 })
   await expect(rows).toHaveCount(ADDRESS.units)
 
@@ -159,7 +169,7 @@ test('18.3 Aktion ohne Recht', async ({ page, context }) => {
   // second thing the chapter says about it.
   await pointAt(capture, { x: 620, y: 1075 }, { duration: 600 })
   await expect(
-    capture.getByText('Sie sind nicht berechtigt, diese Aktion durchzuführen.'),
+    capture.getByText(PERMISSION_DENIED),
   ).toBeHidden({ timeout: 20_000 })
   await capture.waitForTimeout(1200)
 

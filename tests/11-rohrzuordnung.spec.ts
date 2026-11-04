@@ -8,6 +8,7 @@ import {
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
 import { waitForBaseMapSettled } from '../playwright/stable-map'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "11. Rohrzuordnung" in the manual
 // (manual/teil-a-anwenderhandbuch/11-rohrzuordnung.md). Produces all images of
@@ -98,7 +99,7 @@ interface OpenOptions {
  * be whatever the previous run left behind.
  *
  * The map view goes in the same way and not via "load, set, reload": the app
- * writes `mapCenter`/`mapZoom` back on every `moveend`, and a write-back
+ * writes the map view (`mapView:2`) back on every `moveend`, and a write-back
  * between setting and reloading would drop the seed - the map then starts at
  * the overview and a click aimed at a particular trench hits nothing.
  */
@@ -110,19 +111,17 @@ async function openAssignment(page: Page, options: OpenOptions = {}) {
       localStorage.setItem('selectedFlag', JSON.stringify([state.flagId]))
       localStorage.setItem('routingMode', JSON.stringify(state.routing))
       localStorage.setItem('showLinkedTrenches', JSON.stringify(state.linkedTrenches))
-      localStorage.setItem('mapCenter', JSON.stringify(state.view.center))
-      localStorage.setItem('mapZoom', JSON.stringify(state.view.zoom))
+      localStorage.setItem('mapView:2', JSON.stringify({ zoom: state.view.zoom, center: state.view.center }))
     },
     { flagId: FLAG_ID, routing, linkedTrenches, view },
   )
 
-  await page.goto('/trench')
+  await page.goto(projectPath('/trench'))
 
-  // `/trench` redirects to `/trench/<project>/<flag>` - the 2 is the test
-  // project (cookie `selected-project`, set in playwright/auth.setup.ts). Both
-  // are checked: without the cookie the app shows the project "Default", which
-  // holds no conduits at all.
-  await expect(page).toHaveURL(new RegExp(`/trench/2/${FLAG_ID}(/|$)`))
+  // `/project/2/trench` appends the preferred flag to the path. Both are
+  // checked: another flag selects other conduits, and a redirect to the
+  // landing page would capture the wrong view.
+  await expect(page).toHaveURL(projectUrl(`/trench/${FLAG_ID}`))
 
   // With a running tileserver (vector tiles) OpenLayers creates a second
   // canvas, without it (OSM raster fallback) only one - hence .first().

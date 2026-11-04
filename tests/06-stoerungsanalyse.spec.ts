@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from '../playwright/test'
 
 import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "6. Störungsanalyse" in the manual
 // (manual/teil-a-anwenderhandbuch/06-stoerungsanalyse.md). Produces all images
@@ -40,17 +41,16 @@ const TRENCH = 'TR-BNCKM6A'
  * fully drawn.
  *
  * The view is set through `addInitScript`, i.e. before every load of the
- * document - the app writes `mapCenter`/`mapZoom` back on every `moveend`, and
+ * document - the app writes the map view (`mapView:2`) back on every `moveend`, and
  * the route "load, set localStorage, reload" loses the seed to that write-back.
  */
 async function openFaultSimulation(page: Page, view = VIEW.overview) {
   await page.addInitScript((v) => {
-    localStorage.setItem('mapCenter', JSON.stringify(v.center))
-    localStorage.setItem('mapZoom', JSON.stringify(v.zoom))
+    localStorage.setItem('mapView:2', JSON.stringify({ zoom: v.zoom, center: v.center }))
   }, view)
 
-  await page.goto('/fault-simulation')
-  await expect(page).toHaveURL(/\/fault-simulation\/2(\/|$)/)
+  await page.goto(projectPath('/fault-simulation'))
+  await expect(page).toHaveURL(projectUrl('/fault-simulation'))
 
   // With a running tileserver (vector tiles) OpenLayers creates a second
   // canvas, without it (OSM raster fallback) only one - hence .first().

@@ -80,7 +80,7 @@ The manual is split into three parts (target audiences see `manual/index.md`):
 ## The chapter structure
 
 `OUTLINE.md` in the repo root is the binding outline: three levels (part,
-chapter, section), derived from the pinned app (`main` of 2026-09-11). It also holds the
+chapter, section), derived from the pinned app (v1.8.0). It also holds the
 mapping from the old numbering to the new one and is excluded from the VitePress
 build (`srcExclude`). **Which sections a chapter has is decided there, not while
 writing** – a chapter that needs a section the outline does not have gets the
@@ -127,7 +127,10 @@ pnpm test:e2e --all   # every spec
 pnpm test:e2e tests/05-karte.spec.ts   # named specs, stale or not
 
 scripts/setup-local-qonnectra.sh            # build/start the local Qonnectra instance
-scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild
+scripts/setup-local-qonnectra.sh --reset    # discard data + secrets, rebuild – required before
+                                            # publishing map images (see "Draw order of overlapping map symbols")
+scripts/stop-local-qonnectra.sh             # stop it (it does not start on boot by itself)
+scripts/stop-local-qonnectra.sh --down      # stop and remove the containers, data stays
 scripts/install-local-ca.sh                 # import the dev CA once per machine
 scripts/build-map-tiles.sh <osm-pbf-url>    # build a new map tile set (only to move the pin)
 scripts/qonnectra-demo-data/fetch_geodock_export.py --out scripts/qonnectra-demo-data/testprojekt-export.json
@@ -193,6 +196,14 @@ sentences the chapter exists for.
   currently breaks, because the next edited sentence moves that boundary.
   `pnpm lint:gender` checks it.
 - Factual, no marketing tone, no emoji, no exclamation marks.
+- Plain sentences that read on the first pass. Every clause gets its own
+  verb; do not let a later clause borrow the verb of an earlier one, and do
+  not chain conditions with semicolons. „Nach der Anmeldung öffnet Qonnectra
+  die Karte dieses Projekts; darf Ihr Konto die Karte nicht öffnen, die erste
+  Ansicht der Navigationsleiste, die es öffnen darf.“ becomes two sentences:
+  „… öffnet Qonnectra die Karte dieses Projekts. Hat Ihr Konto keinen Zugriff
+  auf die Karte, öffnet sich stattdessen die oberste Ansicht der
+  Navigationsleiste, für die Sie berechtigt sind.“ The same goes for part C.
 - Explain what does **not** work and where users get stuck as well
   („Andernfalls gehen die Änderungen ohne Warnung verloren.“, „Wenn der Button
   nicht sichtbar ist, scrollen Sie im Feld nach unten.“).
@@ -427,22 +438,23 @@ local instance, so that they can be regenerated when the app changes.
   it through the **production** compose file. Idempotent, may be run any number
   of times.
 - The app is **pinned to a commit**, `QONNECTRA_REF` at the top of the script,
-  currently **`aa28575`** (the tip of `main` on 2026-09-11) – not the default
-  branch. Every image of the manual has to show the same version; unpinned, a CI
-  run and a laptop built two different apps and the images differed without
-  anyone being able to see why. An existing `local-app/` is switched to the
-  pinned commit on the next run; if it carries uncommitted changes the script
-  stops instead (`--reset-checkout` throws the checkout away).
-  A commit and not the tag `v1.7.0`, because part A was surveyed and written
-  against that state and describes what it does: the edit mode of the cable
-  labels (chapter 14.4, „Kabel bearbeiten“) came with app PR #88 **after** the
-  v1.7.0 release, and against the tag the chapter describes an app that is not
-  there. The app reports **1.7.0** in its header either way – that is the
-  version of the last release, not of the checkout, so the number in a
-  screenshot says nothing about which commit produced it.
+  currently **`e3a7139`** (the release commit of v1.8.0, 2026-09-29) – not the
+  default branch. Every image of the manual has to show the same version;
+  unpinned, a CI run and a laptop built two different apps and the images
+  differed without anyone being able to see why. An existing `local-app/` is
+  switched to the pinned commit on the next run; if it carries uncommitted
+  changes the script stops instead (`--reset-checkout` throws the checkout away).
+  A commit and not a tag: until v1.8.0 the manual described a state of `main`
+  no release carried (the edit mode of the cable labels, app PR #88, came
+  after v1.7.0), and a tag can be moved where a commit cannot. The version in
+  the header is that of the last release, not of the checkout, so the number
+  in a screenshot only says which commit produced it when the pin is a
+  release commit, as it is now.
   Raising the pin is its own piece of work, not a side effect: bump
   `QONNECTRA_REF`, regenerate the screenshots, go through what changed in the
-  app, and update the commit in this file and in `OUTLINE.md`.
+  app, and update the commit in this file and in `OUTLINE.md`. The full
+  procedure, including the audit of every note block, is the skill
+  `qonnectra-update` (`.claude/skills/qonnectra-update/SKILL.md`).
   `QONNECTRA_REF=… ` looks at another version – images from such a run are not
   committed.
 - Reachable at `https://app.qonnectra.localhost` (admin:
@@ -467,8 +479,8 @@ local instance, so that they can be regenerated when the app changes.
 - Demo data: project **„Testprojekt“** from
   `scripts/qonnectra-demo-data/testprojekt-export.json`, imported automatically
   during setup. Select it in the top left after logging in. It always gets the
-  primary key **2** – the Playwright setup pins `selected-project=2`, so a
-  re-import must not hand out a new id (`PROJECT_ID` in
+  primary key **2** – every spec opens `/project/2/…` (`projectPath()` in
+  `playwright/project.ts`), so a re-import must not hand out a new id (`PROJECT_ID` in
   `import_geodock_export.py`).
 - The export is pulled with `scripts/qonnectra-demo-data/fetch_geodock_export.py`
   against app.geodock.de; credentials go into `scripts/qonnectra-demo-data/.env`
@@ -606,11 +618,18 @@ longer read.
   own account; the Django session in `admin-auth-state.json` lives for two
   weeks and is left alone. Without it everything after the first quarter of an
   hour lands on the login page.
-- The setup pins the state the images depend on: cookie `selected-project=2`
-  („Testprojekt“; a UI login would write `1` = „Default“) as well as
-  `PARAGLIDE_LOCALE=de`, `mode=light`, `basemapTheme`, `mapCenter` and `mapZoom`
-  in `localStorage`. The map has no auto-fit – without `mapCenter`/`mapZoom`
-  (EPSG:3857) it starts at zoom 2 in the Atlantic.
+- The setup pins the state the images depend on: cookie `last-project=2`
+  („Testprojekt“; it decides where `/` lands and which project the global views
+  default to) as well as `PARAGLIDE_LOCALE=de`, `mode=light`, `basemapTheme` and
+  the map view `mapView:2` (`{ zoom, center }`, EPSG:3857) in `localStorage`.
+  The map has no auto-fit – without the view it starts at zoom 2 in the
+  Atlantic. A `#map=z/x/y` hash in the address wins over the stored view.
+- **Every project view carries the project in its path** since v1.8.0:
+  `/project/2/map`, `/project/2/address/<uuid>`; the old paths (`/map`,
+  `/conduit/2`) answer with a 404. Specs build them with `projectPath()` and
+  check them with `projectUrl()` from `playwright/project.ts`. Leitungsauskunft
+  (`/pipeline-records`), Faserweg (`/trace/<type>/<uuid>`), `/settings` and
+  `/admin/logs` are global and keep their paths.
 - One spec per manual chapter: `tests/<NN>-<chapter-slug>.spec.ts` with a comment
   naming the chapter it belongs to (see `tests/05-karte.spec.ts`). The chapter
   slug stays German because it mirrors the manual's file name. Videos of a
@@ -740,7 +759,8 @@ longer read.
   state: the images of the login page sit in a `test.describe` block with
   `test.use({ storageState: { cookies: [], origins: [] } })`, the images of the
   interface next to it in the normal logged-in state. The app redirects
-  logged-in calls of `/login` to `/map`.
+  logged-in calls of `/login` to the map of the remembered project
+  (`/project/2/map`).
 - `workers: 1` and `fullyParallel: false` are deliberate: all specs share one
   instance including project selection and map position.
 - **Test inputs that are not code** sit in `playwright/fixtures/` – currently
@@ -820,7 +840,7 @@ longer read.
   mounted `/data`).
   Map images therefore show the real vector base map in light mode. If the
   `.mbtiles` is missing (run with `--skip-tiles`, download failed), the
-  `tileserver` runs in a restart loop and the map falls back to OSM raster tiles.
+  `tileserver` exits and the map falls back to OSM raster tiles.
 - The tile set is **pinned by name and checksum** (`TILE_ID`, `TILE_SHA256` at
   the top of the setup script). A local file that does not match the checksum is
   replaced by the release asset, and a downloaded one that does not match stops
@@ -881,6 +901,20 @@ looking for a race in the spec.
   (`openDashboardFromNavigation()`) and fails if nothing was sorted. The fix
   belongs upstream (`order_by("-count",
   "residential_unit_type__residential_unit_type")`).
+- **Draw order of overlapping map symbols.** The vector tile queries
+  (`ol_node_tiles`, `ol_address_tiles` and the rest in `views.py`) end in
+  `ST_AsMVT` without an `ORDER BY`, so the features of a tile come in the
+  physical row order of the table, and OpenLayers draws them in that order.
+  Every `UPDATE` moves a row to the end of the table – `tests/04-dashboard.spec.ts`
+  dates five nodes and reverts them on every run, and a local instance had
+  collected 268 updates on `node`. Where two node symbols overlap, the one on
+  top then differs from CI, which imports fresh on every run: `model_area` and
+  `map_address_detail` failed PR #29 that way, and after a reset they came out
+  byte-identical to the CI capture. Not interceptable – the tiles are binary
+  MVT. **Before publishing map images, reset the instance and run every spec:**
+  `scripts/setup-local-qonnectra.sh --reset`, then `pnpm test:e2e --all` and
+  `pnpm screenshots:publish`. Only that reproduces the order CI runs in. The
+  fix belongs upstream (an `ORDER BY` in the tile queries).
 - **Timestamps the backend sets.** `created_at`/`modified_at` are `auto_now_add`
   resp. `auto_now` on the models, so the backend discards any supplied value and
   `page.clock` (browser only) changes nothing. `freezeDates()` in
@@ -918,7 +952,7 @@ looking for a race in the spec.
   tiles OpenLayers creates two, in the OSM raster fallback one. So use
   `page.locator('div.map canvas').first()`.
 - Always set the map position through `page.addInitScript()`, not through
-  "load, set `localStorage`, reload". The app writes `mapCenter` and `mapZoom`
+  "load, set `localStorage`, reload". The app writes the view (`mapView:2`)
   back on every `moveend`; if that lands between setting and reloading, the seed
   is gone and the map starts at the overview. Tests that click on a particular
   spot then hit nothing and the info box does not open (symptom: `#drawer-title`
@@ -949,20 +983,21 @@ looking for a race in the spec.
 
 **The app (context for selectors and routes)**
 
-SvelteKit + Skeleton, `main` as of 2026-09-11 (commit `aa28575`) – the state the
-setup pins the checkout to, see `QONNECTRA_REF` above. The header shows
-**v1.7.0**, the last release before it. The
+SvelteKit + Skeleton, v1.8.0 (commit `e3a7139`) – the state the setup pins
+the checkout to, see `QONNECTRA_REF` above. Data goes through SvelteKit
+remote functions (`src/lib/remote/**`), and the address is the state: project
+in the path, map view in the hash, the object in the info box in the query. The
 navigation bar is sorted into groups; the labels are short and only
 unambiguous together with their group (group „Rohr“ → „Verwaltung“ =
-Rohrverwaltung). This order is the order of the chapters 4–17. Routes and
-labels:
+Rohrverwaltung). This order is the order of the chapters 4–17. Routes (below
+`/project/<id>` unless marked global) and labels:
 
 | Group (`id`) | Route → Label | Chapter |
 |---|---|---|
 | „Info“ (`main`) | `/dashboard` „Dashboard“, `/map` „Karte“ | 4, 5 |
-| „Funktionen“ (`procedure`) | `/fault-simulation` „Störungsanalyse“, `/post-compaction` „Nachverdichtung“, `/pipeline-records` „Leitungsauskunft“, `/valuation` „Wertermittlung“ | 6–9 |
+| „Funktionen“ (`procedure`) | `/fault-simulation` „Störungsanalyse“, `/post-compaction` „Nachverdichtung“, `/pipeline-records` (global) „Leitungsauskunft“, `/valuation` „Wertermittlung“ | 6–9 |
 | „Rohr“ (`infrastructure`) | `/conduit` „Verwaltung“, `/trench` „Zuordnung“, `/pipe-branch` „Verzweigung“, `/house-connections` „Mikrorohre“ | 10–13 |
-| „Kabel“ (`cable`) | `/network-schema` „Netzschema“, `/trace` „Faserweg“ | 14, 15 |
+| „Kabel“ (`cable`) | `/network-schema` „Netzschema“, `/trace` (global) „Faserweg“ | 14, 15 |
 | „Gebäude“ (`address`) | `/address` „Adressen“ | 16 |
 
 Below them sits a footer under the heading „System“ – not a group of its own but
@@ -970,8 +1005,10 @@ Below them sits a footer under the heading „System“ – not a group of its o
 external link „Dokumentation“ from `PUBLIC_DOCUMENTATION_URL`. The footer is
 never hidden by the customize controls. Plus `/login` without a navigation bar.
 
-Which entries appear depends on the permissions (`canAccessRoute`); as superuser
-all are visible. With the default capture account (group „Editor“) „Logs“ is
+Which entries appear depends on the permissions (`canAccessRoute`, keyed by the
+path without project and parameters, `permissionKeyFor()` in
+`src/lib/config/routes.ts`); as superuser all are visible. A locked page
+redirects to the first page the account may open, or to `/no-access`. With the default capture account (group „Editor“) „Logs“ is
 missing from the footer, which then consists of „Einstellungen“ and
 „Dokumentation“. `/admin/*` is the only blocked path; everything without its own
 `RoutePermission` entry counts as allowed.
@@ -991,3 +1028,8 @@ UI texts: `local-app/frontend/messages/de.json`.
 - `manual-author` – new or extended manual chapters in the style above
 - `screenshot-automation` – write and run Playwright specs for screenshots/videos
 - `manual-review` – style, consistency and spelling check before committing
+
+## Skills
+
+- `qonnectra-update` – bring manual, specs and images up to a new Qonnectra
+  release (`/qonnectra-update`)

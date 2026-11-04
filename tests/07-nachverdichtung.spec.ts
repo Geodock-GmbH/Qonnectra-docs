@@ -2,6 +2,8 @@ import { expect, test, type Locator, type Page } from '../playwright/test'
 
 import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
 import { stableSearchOrder } from '../playwright/stable-search'
+import { projectPath } from '../playwright/project'
+import { remoteArgument, remoteUrl } from '../playwright/remote-functions'
 
 // Screenshots for chapter "7. Nachverdichtung" in the manual
 // (manual/teil-a-anwenderhandbuch/07-nachverdichtung.md). Produces all images
@@ -33,12 +35,18 @@ const SEARCH_TERM = 'Toft 1'
 // id_address in scripts/qonnectra-demo-data/import_geodock_export.py).
 const ADDRESS_ID = '6XCTUWG'
 
+/**
+ * How many search responses stableSearchOrder() has sorted on the current
+ * page; set by openPostCompaction().
+ */
+let sortedSearches: () => number = () => 0
+
 /** Opens the post compaction view with an empty search. */
 async function openPostCompaction(page: Page) {
   // The hits of "Toft 1" all score the same and come back in an order of
   // Postgres' choosing; see playwright/stable-search.ts.
-  await stableSearchOrder(page)
-  await page.goto('/post-compaction')
+  sortedSearches = await stableSearchOrder(page)
+  await page.goto(projectPath('/post-compaction'))
   await expect(page.getByRole('heading', { name: 'Nachverdichtung' })).toBeVisible()
   await page.waitForLoadState('networkidle')
 
@@ -55,13 +63,18 @@ function results(page: Page): Locator {
   return page.locator('div.max-h-80')
 }
 
-/** The request the search field sends, 300 ms after the last keystroke. */
-const SEARCH_REQUEST = /\/api\/v1\/trace-search\/\?/
+/**
+ * The request the search field sends, 300 ms after the last keystroke: since
+ * v1.8.0 a call of the remote function `searchAddresses`, which asks the API's
+ * `trace-search/` on the server (playwright/remote-functions.ts).
+ */
+const SEARCH_REQUEST = remoteUrl('searchAddresses')
 
-/** Value of the `search` parameter of a request, or undefined for any other. */
+/** Term of a search request, or undefined for any other request. */
 function searchTermOf(url: string): string | undefined {
   if (!SEARCH_REQUEST.test(url)) return undefined
-  return new URL(url).searchParams.get('search') ?? undefined
+  const argument = remoteArgument(url) as { searchQuery?: unknown } | undefined
+  return typeof argument?.searchQuery === 'string' ? argument.searchQuery : undefined
 }
 
 /** How often the term is typed before search() gives up. */
@@ -105,7 +118,14 @@ async function search(page: Page, term = SEARCH_TERM) {
     })
     page.off('request', onRequest)
 
-    if (searches.length === 1) break
+    if (searches.length === 1) {
+      expect(
+        sortedSearches(),
+        'The hits did not pass through stableSearchOrder() - they would keep ' +
+          'the order of chance (playwright/stable-search.ts).',
+      ).toBeGreaterThan(0)
+      break
+    }
     if (attempt === SEARCH_ATTEMPTS) {
       throw new Error(
         `Search: ${SEARCH_ATTEMPTS} attempts, each sent more than one search (last: ${searches.join(' | ')}).`,
@@ -123,7 +143,12 @@ async function search(page: Page, term = SEARCH_TERM) {
 async function selectAddress(page: Page) {
   await results(page).getByRole('button').filter({ hasText: ADDRESS_ID }).click()
 
-  await expect(page.getByText(ADDRESS_ID, { exact: true })).toBeVisible({ timeout: 20_000 })
+  // Scoped to main: since v1.8.0 a second copy of the address values sits
+  // outside main (not in the accessibility tree), and a page-wide match fails
+  // on strict mode.
+  await expect(page.getByRole('main').getByText(ADDRESS_ID, { exact: true })).toBeVisible({
+    timeout: 20_000,
+  })
   await expect(page.locator('.map-container-compact canvas').first()).toBeVisible({
     timeout: 30_000,
   })

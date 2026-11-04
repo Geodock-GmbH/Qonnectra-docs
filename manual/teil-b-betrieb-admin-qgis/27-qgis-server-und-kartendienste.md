@@ -62,7 +62,7 @@ Die Dienste verlangen eine Anmeldung mit Benutzername und Passwort eines Qonnect
 Die Dienste kennen keine Rollen. Jedes aktive Konto sieht jedes hinterlegte QGIS-Projekt mit allen Layern, auch ein Konto der Rolle „Viewer“ und eines ohne Gruppe. Was in keinem hinterlegten Projekt enthalten ist, liefern die Dienste nicht; einschränken lässt sich der Zugriff nur so, für alle Konten zugleich.
 :::
 
-Für eine Stelle, die die Dienste dauerhaft abrufen soll, etwa das GIS einer Kommune, legen Sie ein eigenes Konto ohne Gruppe an. Für die Dienste braucht es keine Gruppe, siehe Abschnitt [Benutzende und Gruppen anlegen](./19-rollen-und-rechte.md#_19-1-benutzende-und-gruppen-anlegen).
+Für eine Stelle, die die Dienste dauerhaft abrufen soll, etwa das GIS einer Kommune, legen Sie ein eigenes Konto ohne Gruppe an. Für die Dienste braucht es keine Gruppe, und in der Weboberfläche öffnet ein solches Konto keine Seite, siehe Abschnitt [Benutzende und Gruppen anlegen](./19-rollen-und-rechte.md#_19-1-benutzende-und-gruppen-anlegen).
 
 ## 27.4 Externe WMS-Quellen als Hintergrund einbinden
 
@@ -83,7 +83,7 @@ Beim Speichern einer neuen Quelle oder einer geänderten Adresse fragt Qonnectra
 Die Aktion „Empfohlene Einstellungen scannen und anwenden“ setzt die minimale Zoomstufe jedes Layers nach dessen Ausdehnung, sodass ein großflächiger Dienst nicht schon in der Übersicht der Karte angefragt wird.
 
 ::: warning
-Die Gruppe erscheint in der Legende nur für Konten, die das Recht `wmssource` haben, und das hat keine mitgelieferte Rolle. Fügen Sie es den Gruppen hinzu, die den Dienst sehen sollen, siehe Abschnitt [Rechte, die keine mitgelieferte Rolle enthält](./19-rollen-und-rechte.md#_19-6-rechte-die-keine-mitgelieferte-rolle-enthalt). Ohne das Recht sieht nur das Superuser-Konto den Dienst.
+Die Gruppe erscheint in der Legende nur für Konten, die das Recht `wmssource` haben. Die drei mitgelieferten Rollen haben es; einer eigenen Gruppe fügen Sie es selbst hinzu, siehe Abschnitt [Eigene Rollen anlegen und Rechte ergänzen](./19-rollen-und-rechte.md#_19-6-eigene-rollen-anlegen-und-rechte-erganzen). Ohne das Recht fehlt die Gruppe ohne Hinweis.
 :::
 
 ::: info

@@ -4,6 +4,8 @@ Dieses Kapitel beschreibt die Schnittstelle des Backends: wie sich ein Programm 
 
 Die Schnittstelle liegt unter `https://<API_DOMAIN>/api/v1/`. Die Version steht im Pfad und wird über `NamespaceVersioning` von Django REST Framework ausgewertet; eine andere als `v1` gibt es nicht. Antworten sind JSON, sofern ein Endpunkt nicht ausdrücklich eine Datei liefert.
 
+Die Weboberfläche ruft die meisten Endpunkte nicht aus dem Browser auf, sondern über die Remote Functions ihres Servers, siehe Abschnitt [Komponenten und Weg einer Anfrage](./29-architekturueberblick.md#_29-1-komponenten-und-weg-einer-anfrage). Für das Backend macht das keinen Unterschied: Es sieht dieselben Anfragen mit demselben Zugangstoken.
+
 ## 32.1 Authentifizierung: JWT, Cookies, Token-Rotation
 
 Die Schnittstelle kennt drei Arten der Anmeldung, je nach Gegenüber.
@@ -68,9 +70,11 @@ Eine globale Vorgabe für die Rechteprüfung gibt es nicht (`DEFAULT_PERMISSION_
 | `POST`, `PUT`, `PATCH` | `edit` |
 | `DELETE` | `full` |
 
-Das Modell ergibt sich aus dem `ViewSet`. Gehört ein Konto mehreren Gruppen an, gilt die höchste Stufe; ein Konto ohne Gruppe hat auf kein Modell ein Recht und bekommt 403. Ein Superuser wird nicht geprüft. Was die Stufen für die Verwaltung bedeuten, beschreibt Abschnitt [Modellrechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-2-modellrechte-zugriff-je-datenmodell). Die zusammengeführten Rechte eines Kontos hält jeder Prozess des Backends fünf Minuten vor. Signale leeren diesen Zwischenspeicher, sobald sich `model_permission`, `route_permission` oder die Gruppen eines Kontos ändern – aber nur in dem Prozess, der die Änderung speichert; eine geänderte Stufe greift deshalb erst nach bis zu fünf Minuten überall. `GET /api/v1/auth/permissions/` liefert die zusammengeführten Modell- und Routenrechte des angemeldeten Kontos; die Weboberfläche richtet danach ihre Schaltflächen und ihre Navigationsleiste aus.
+Das Modell ergibt sich aus dem `queryset` des `ViewSet`s. Ein View ohne `queryset` nennt es in `permission_model`, etwa der Rohrimport (`conduit`). Wo die HTTP-Methode nicht zur Wirkung passt, legt `action_access_levels` die Stufe je Aktion fest, unabhängig von der Methode: `clear-port` der Spleiße löscht per `POST` und verlangt `full`, `scan_capabilities` der WMS-Quellen liest per `POST` und genügt mit `view`.
 
-Modellrechte prüfen die `ViewSet`s der Fachobjekte; welche Objektarten ein Modellrecht haben, listet Abschnitt [Modellrechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-2-modellrechte-zugriff-je-datenmodell).
+Die Stufe eines Kontos für ein Modell ergibt sich in zwei Schritten. Innerhalb einer Gruppe gilt die Zeile des Modells, und nur wenn sie fehlt, die Zeile `*` der Gruppe; über mehrere Gruppen hinweg gilt die höchste Stufe. Ein Konto ohne Gruppe hat auf kein Modell ein Recht und bekommt 403. Ein Superuser wird nicht geprüft. Was die Stufen für die Verwaltung bedeuten, beschreibt Abschnitt [Modellrechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-2-modellrechte-zugriff-je-datenmodell). Die zusammengeführten Rechte eines Kontos hält jeder Prozess des Backends fünf Minuten vor. Signale leeren diesen Zwischenspeicher, sobald sich `model_permission`, `route_permission` oder die Gruppen eines Kontos ändern – aber nur in dem Prozess, der die Änderung speichert; eine geänderte Stufe greift deshalb erst nach bis zu fünf Minuten überall. `GET /api/v1/auth/permissions/` liefert die zusammengeführten Modell- und Routenrechte des angemeldeten Kontos; die Weboberfläche richtet danach ihre Schaltflächen und ihre Navigationsleiste aus.
+
+Modellrechte prüfen die `ViewSet`s der Fachobjekte, dazu der Rohrimport (`import/conduit/`) und die Verknüpfung von Kabeln mit Mikrorohren (`cables/<uuid>/micropipe-connections/`, `cables/<uuid>/auto-link-micropipe/`, beide mit dem Recht auf `microductcableconnection`); welche Objektarten ein Modellrecht haben, listet Abschnitt [Modellrechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-2-modellrechte-zugriff-je-datenmodell).
 
 ::: warning
 Die Rechte der Gruppen steuern die Bearbeitung über die Endpunkte der Fachobjekte; sie teilen die Daten einer Installation nicht zwischen Konten auf. Vergeben Sie Konten nur an Personen und Stellen, die das Netz der Installation sehen dürfen. Für Daten, die eine Stelle nicht sehen darf, ist eine eigene Installation der sichere Weg.
@@ -121,7 +125,7 @@ Die Auswertungen der Weboberfläche sind eigene Endpunkte mit eigenem Pfad:
 Einige Eigenheiten, die beim Aufruf auffallen:
 
 - `routing/` erwartet `project_id` und `tolerance` als Liste mit einem Element (`"project_id": [2]`), entgegen dem Schema, das einfache Zahlen angibt: Der Endpunkt liest jeweils das erste Element. Fehlt einer der beiden Werte, scheitert er mit 500.
-- `fiber-trace/` nimmt genau einen der Parameter `fiber_id`, `cable_id`, `node_id`, `address_id`, `residential_unit_id`. Mit `include_geometry` liefert er den Weg als Geometrie, `geometry_mode` und `orient_geometry` steuern, wie er zusammengesetzt wird.
+- `fiber-trace/` nimmt genau einen der Parameter `fiber_id`, `cable_id`, `node_id`, `address_id`, `residential_unit_id`. Mit `include_geometry` liefert er den Weg als Geometrie, `geometry_mode` und `orient_geometry` steuern, wie er zusammengesetzt wird. Zusammen mit `fiber_id` wählt `start_node_id` das Ende, von dem aus der Weg gelesen wird.
 - `dashboard/statistics/` hält sein Ergebnis bis zu fünf Minuten im Arbeitsspeicher vor. Jeder Worker von gunicorn hat seinen eigenen Stand.
 
 Import und Export:
@@ -136,7 +140,7 @@ Import und Export:
 | `GET pipeline-records/<uuid>/inquiry-export/` | Leitungsauskunft als ZIP-Archiv |
 | `GET feature-files/<uuid>/download/` | ein Anhang |
 
-**`export/features/`** ist der Export ohne Gegenstück in der Oberfläche. `layers` wählt die Objektarten (`cable`, `conduit`, `node`, `area`, kommagetrennt), `project` das Projekt; `exclude_projects` nimmt Projekte aus, wenn `project` fehlt. Die Antwort enthält je Objektart eine `FeatureCollection`. Kabel und Rohre haben keine eigene Geometrie; der Export setzt sie aus den Trassen zusammen, in denen sie liegen. Die Eigenschaften enthalten die Stammdaten aufgelöst, also etwa Eigentümer mit Anschrift und Kontaktdaten, nicht nur deren Nummer. Die Koordinaten stehen im Koordinatenbezugssystem der Installation, nicht in WGS 84, wie es GeoJSON-Leser meist annehmen; die Antwort nennt es unter `srid`. Trassen und Adressen bietet der Export nicht an.
+**`export/features/`** ist der Export ohne Gegenstück in der Oberfläche. `layers` wählt die Objektarten (`cable`, `conduit`, `node`, `area`, kommagetrennt), `project` das Projekt; `exclude_projects` nimmt Projekte aus, wenn `project` fehlt. Die Antwort enthält je Objektart eine `FeatureCollection`. Kabel und Rohre haben keine eigene Geometrie; der Export setzt sie aus den Trassen zusammen, in denen sie liegen. Die Eigenschaften enthalten die Stammdaten aufgelöst, also etwa Eigentümer mit Anschrift und Kontaktdaten, nicht nur deren Nummer. Kabel und Rohre tragen zusätzlich `trench_funding`, die Zahl der geförderten, nicht geförderten und unbekannten Trassen, in denen sie liegen. Die Koordinaten stehen im Koordinatenbezugssystem der Installation, nicht in WGS 84, wie es GeoJSON-Leser meist annehmen; die Antwort nennt es unter `srid`. Trassen und Adressen bietet der Export nicht an.
 
 **Proxys.** Zwei Endpunkte reichen Anfragen an Kartendienste weiter: `wms-proxy/<uuid>/` an eine WMS-Quelle, mit den dort hinterlegten Zugangsdaten, siehe Abschnitt [WMS-Proxy und Zwischenspeicher](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md#_27-5-wms-proxy-und-zwischenspeicher), und `wfs3/<name>/…` an die OGC-API-Features-Schnittstelle von QGIS Server, siehe Abschnitt [Angebotene Dienste](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md#_27-2-angebotene-dienste-wms-wfs-wmts-ogc-api-features).
 

@@ -21,6 +21,7 @@
 import { expect, test, type Page } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { projectPath, projectUrl } from '../playwright/project'
 
 const CHAPTER = '06-stoerungsanalyse'
 
@@ -65,7 +66,7 @@ const LEAD_IN = 1.0
  * from its creation, and a long page load would end up in the video.
  */
 async function warmUp(page: Page) {
-  await page.goto('/fault-simulation')
+  await page.goto(projectPath('/fault-simulation'))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()
@@ -74,12 +75,11 @@ async function warmUp(page: Page) {
 /** Opens the fault simulation in the seeded view and places the replica cursor. */
 async function openFaultSimulation(page: Page) {
   await page.addInitScript((v) => {
-    localStorage.setItem('mapCenter', JSON.stringify(v.center))
-    localStorage.setItem('mapZoom', JSON.stringify(v.zoom))
+    localStorage.setItem('mapView:2', JSON.stringify({ zoom: v.zoom, center: v.center }))
   }, VIEW)
 
-  await page.goto('/fault-simulation')
-  await expect(page).toHaveURL(/\/fault-simulation\/2(\/|$)/)
+  await page.goto(projectPath('/fault-simulation'))
+  await expect(page).toHaveURL(projectUrl('/fault-simulation'))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.

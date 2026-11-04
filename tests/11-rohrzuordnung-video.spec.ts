@@ -26,6 +26,7 @@ import {
   showCursor,
   videoPath,
 } from '../playwright/manual-videos'
+import { projectPath, projectUrl } from '../playwright/project'
 
 const CHAPTER = '11-rohrzuordnung'
 
@@ -224,14 +225,13 @@ async function openAssignment(page: Page, options: OpenOptions) {
       localStorage.setItem('selectedFlag', JSON.stringify([state.flagId]))
       localStorage.setItem('routingMode', JSON.stringify(state.routing))
       localStorage.setItem('showLinkedTrenches', JSON.stringify(state.linkedTrenches))
-      localStorage.setItem('mapCenter', JSON.stringify(state.view.center))
-      localStorage.setItem('mapZoom', JSON.stringify(state.view.zoom))
+      localStorage.setItem('mapView:2', JSON.stringify({ zoom: state.view.zoom, center: state.view.center }))
     },
     { flagId: FLAG_ID, routing, linkedTrenches, view },
   )
 
-  await page.goto('/trench')
-  await expect(page).toHaveURL(new RegExp(`/trench/2/${FLAG_ID}(/|$)`))
+  await page.goto(projectPath('/trench'))
+  await expect(page).toHaveURL(projectUrl(`/trench/${FLAG_ID}`))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.
@@ -281,7 +281,7 @@ async function mapPoint(
  * from its creation, and a long page load would end up in the video.
  */
 async function warmUp(page: Page) {
-  await page.goto('/trench')
+  await page.goto(projectPath('/trench'))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()

@@ -55,7 +55,7 @@ Die Verknüpfung zwischen Netzknoten und Adresse lässt sich in der Weboberfläc
 :::
 
 ::: warning
-Löschen ist in den mitgelieferten Rollen nur der Rolle „Admin“ erlaubt. Mit der Rolle „Editor“ ist der Button zwar da und die Rückfrage erscheint, die Meldung danach lautet aber „Sie sind nicht berechtigt, diese Aktion durchzuführen.“ und die Adresse bleibt bestehen, siehe Abschnitt [Fehlende Rechte erkennen](./18-wenn-etwas-nicht-funktioniert.md#_18-3-fehlende-rechte-erkennen).
+Löschen ist in den mitgelieferten Rollen nur der Rolle „Admin“ erlaubt. Mit der Rolle „Editor“ ist der Button zwar da und die Rückfrage erscheint, die Meldung danach lautet aber „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“ und die Adresse bleibt bestehen, siehe Abschnitt [Fehlende Rechte erkennen](./18-wenn-etwas-nicht-funktioniert.md#_18-3-fehlende-rechte-erkennen).
 :::
 
 **„Mikrorohrverbindungen“**
@@ -82,9 +82,7 @@ Der Abschnitt „Wohneinheiten“ am Fuß der Adressdetails führt die Nutzungse
 
 ![Screenshot des Fensters „Wohneinheit hinzufügen“ mit ausgefüllten Feldern](/images/manual/teil-a/address_unit_modal.jpg)
 
-::: warning
-Das Fenster bleibt nach dem Speichern geöffnet, und Ihre Eingaben stehen weiter in den Feldern. Die Wohneinheit ist trotzdem angelegt – Qonnectra meldet „Wohneinheit erfolgreich erstellt“ und die Tabelle dahinter ist eine Zeile länger. Schließen Sie das Fenster mit „Schließen“; ein zweiter Klick auf „Speichern“ legt eine weitere Wohneinheit mit denselben Werten an.
-:::
+Nach dem Speichern meldet Qonnectra „Wohneinheit erfolgreich erstellt“, schließt das Fenster und zeigt die neue Wohneinheit in der Tabelle. Beim nächsten Öffnen ist das Fenster wieder leer.
 
 ![](/videos/address_unit_add.webm)
 
@@ -104,7 +102,7 @@ Auch hier gilt der Hinweis aus Abschnitt [Adressdetails](#_16-2-adressdetails-st
 
 **Löschen**
 
-Eine Wohneinheit löschen Sie entweder auf ihrer eigenen Seite über „Löschen“ oder in der Tabelle über das Papierkorbsymbol in der Spalte „Aktionen“. Beide Wege fragen nach. Auch hier braucht es das Recht zum Löschen, sonst bleibt es bei der Meldung „Sie sind nicht berechtigt, diese Aktion durchzuführen.“
+Eine Wohneinheit löschen Sie entweder auf ihrer eigenen Seite über „Löschen“ oder in der Tabelle über das Papierkorbsymbol in der Spalte „Aktionen“. Beide Wege fragen nach. Auch hier braucht es das Recht zum Löschen, sonst bleibt es bei der Meldung „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“
 
 ::: danger
 Mit der Wohneinheit geht ihre Anbindung verloren. Die Spleiße im Netzschema bleiben zwar bestehen, verlieren aber ihr Ziel: Der Faserweg endet danach am Port, und die Störungsanalyse führt die Einheit nicht mehr unter den betroffenen auf, siehe Kapitel [Faserweg](./15-faserweg.md) und [Störungsanalyse](./06-stoerungsanalyse.md). Wiederherstellen lässt sich die Zuordnung nur, indem Sie die Wohneinheit neu anlegen und im Netzschema erneut auf einen Port legen.

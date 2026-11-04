@@ -14,7 +14,7 @@ Eine Änderung berührt meist mehr Stellen, als ihr Name vermuten lässt. Die Li
 4. **Vektorkacheln** – soll das Feld in der Karte erscheinen, zum Beschriften oder Einfärben, ergänzen Sie es im SQL des Kachel-Endpunkts in `views.py` (`OlTrenchTileViewSet` usw.). Die Kacheln enthalten nur die Spalten, die dort ausdrücklich ausgewählt sind, siehe Abschnitt [Vektor-Tile-Endpunkte](./32-rest-api.md#_32-6-vektor-tile-endpunkte).
 5. **Administrationsbereich** – in `backend/apps/api/admin.py`, falls das Feld in Liste, Filter oder Suche erscheinen soll. Im Formular steht es von selbst, sofern der Admin keine `fields` oder `fieldsets` festlegt.
 6. **Schema und Typen** – `schema.yml` neu erzeugen und `api.d.ts` daraus, siehe Abschnitt [OpenAPI-Schema und Typgenerierung](./32-rest-api.md#_32-7-openapi-schema-und-typgenerierung).
-7. **Frontend** – die Anzeige in der Info-Box und in Formularen. Den Feldnamen übersetzt `src/lib/utils/fieldAliases.ts` in eine Beschriftung; der Text dazu gehört in `messages/de.json` und `messages/en.json`.
+7. **Frontend** – die Remote Functions, die das Modell lesen und schreiben, unter `src/lib/remote/<Bereich>/`: Viele übernehmen Felder einzeln, im valibot-Schema der Eingabe und beim Zusammensetzen der Anfrage, und lassen ein neues Feld sonst ohne Meldung fallen. Dazu die Anzeige in der Info-Box und in Formularen. Den Feldnamen übersetzt `src/lib/utils/fieldAliases.ts` in eine Beschriftung; der Text dazu gehört in `messages/de.json` und `messages/en.json`.
 8. **Übersetzung des Backends** – `uv run manage.py makemessages -l de`, den neuen Eintrag in `backend/locale/de/LC_MESSAGES/django.po` übersetzen, `compilemessages`, siehe Abschnitt [Eine weitere Sprache ergänzen](#_36-3-eine-weitere-sprache-erganzen).
 9. **Tests** – die Factory in `backend/apps/api/tests/factories.py` ergänzen, wenn das Feld Pflicht ist, und einen Test für sein Verhalten.
 
@@ -28,12 +28,12 @@ Ein Pflichtfeld ohne Vorgabewert in der Datenbank lässt jedes Einfügen aus QGI
 
 - `db_table` im `Meta`, nach dem Muster der übrigen ohne App-Präfix, siehe Kapitel [Datenmodell des Backends](./31-datenmodell-des-backends.md),
 - `history = HistoricalRecords()`, wenn Änderungen nachvollziehbar sein sollen, und im Administrationsbereich `SimpleHistoryAdmin` als Basisklasse,
-- ein `ModelViewSet` mit `queryset` auf das neue Modell und `permission_classes = [IsAuthenticated, RoleBasedPermission]`, registriert am Router in `backend/apps/api/urls.py`,
+- ein `ModelViewSet` mit `queryset` auf das neue Modell und `permission_classes = [IsAuthenticated, RoleBasedPermission]`, registriert am Router in `backend/apps/api/urls.py`. Ein eigener Endpunkt ohne `queryset` nennt das Modell in `permission_model`, sonst prüft `RoleBasedPermission` nichts und lässt jedes angemeldete Konto durch. Eine Zusatzaktion, deren HTTP-Methode nicht zu ihrer Wirkung passt – ein `POST`, der löscht oder nur liest –, bekommt ihre Stufe in `action_access_levels`, etwa `{"clear_port": "full"}`, siehe Abschnitt [Berechtigungsprüfung in der Schnittstelle](./32-rest-api.md#_32-3-berechtigungsprufung-in-der-schnittstelle),
 - eine Registrierung in `admin.py`,
 - ein Eintrag in `GEOPACKAGE_LAYER_CONFIG` in `backend/apps/api/services.py`, wenn die Tabelle im GeoPackage-Schema erscheinen soll,
 - eine **Datenmigration, die die Modellrechte anlegt**.
 
-Der letzte Punkt wird am leichtesten vergessen. `RoleBasedPermission` liest das Recht unter dem Modellnamen in Kleinbuchstaben (`_meta.model_name`) aus `model_permission`. Fehlt dort eine Zeile, hat jede Gruppe die Stufe `none`, und alle Konten außer dem Superuser bekommen 403 – auch beim Lesen, siehe Abschnitt [Rechte, die keine mitgelieferte Rolle enthält](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-6-rechte-die-keine-mitgelieferte-rolle-enthalt). Die Migration `0068` zeigt das Muster, hier als vollständige Migration:
+Der letzte Punkt wird am leichtesten vergessen. `RoleBasedPermission` liest das Recht unter dem Modellnamen in Kleinbuchstaben (`_meta.model_name`) aus `model_permission`. Fehlt dort eine Zeile, gilt die Zeile `*` der Gruppe. Fehlt auch diese, hat die Gruppe die Stufe `none`, und ihre Konten bekommen 403 – auch beim Lesen, siehe Abschnitt [Eigene Rollen anlegen und Rechte ergänzen](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-6-eigene-rollen-anlegen-und-rechte-erganzen). Die Migrationen `0068` und `0078` zeigen das Muster, hier als vollständige Migration:
 
 ```python
 from django.db import migrations
@@ -66,13 +66,22 @@ Soll die Datenbank etwas selbst durchsetzen – eine Kennung vergeben, eine Geom
 
 Eine neue Ansicht der Weboberfläche mit eigenem Menüpunkt entsteht so:
 
-1. **Route** – einen Ordner unter `frontend/src/routes/` mit `+page.svelte` und, wenn die Seite Daten lädt, `+page.server.ts`. Braucht die Ansicht das Projekt, legen Sie sie als `neue-ansicht/[[projectId]]` an.
-2. **Projekt im Pfad** – den Pfad in zwei Listen aufnehmen, die übereinstimmen müssen: `PROJECT_ROUTES` in `frontend/src/hooks.server.ts`, damit `/neue-ansicht` auf `/neue-ansicht/<Projekt>` umleitet, und `PROJECT_AWARE_ROUTES` in `frontend/src/lib/components/ProjectCombobox.svelte`, damit ein Wechsel des Projekts die Ansicht mitnimmt.
-3. **Menüpunkt** – einen Eintrag in `frontend/src/lib/config/navLinks.ts`, in der passenden Gruppe von `navGroups` oder in `footerLinks`, mit einer festen `id`, `href`, der Beschriftung als Text aus Paraglide (`label: () => m.nav_…()`), einem Symbol aus `@tabler/icons-svelte` und `pathMatch`. Unter der `id` merkt sich die Navigationsleiste, ob ein Eintrag ausgeblendet ist; ändern Sie sie später nicht mehr.
+1. **Route** – einen Ordner mit `+page.svelte`. Gehört die Ansicht zu einem Projekt, liegt er unter `frontend/src/routes/project/[projectId=integer]/neue-ansicht/`; das Projekt liest die Seite mit `routeProjectId()` aus der Adresse. Projektübergreifende Ansichten liegen direkt unter `src/routes/`. Ein Projektwechsel nimmt die Ansicht ohne weiteren Eintrag mit, weil die Projektauswahl die passende Route über den Menüpunkt findet.
+2. **Daten** – über Remote Functions in `frontend/src/lib/remote/<Bereich>/`, siehe Abschnitt [Zustandsverwaltung, Kontexte und Remote Functions](./33-frontend.md#_33-2-zustandsverwaltung-kontexte-und-remote-functions), nicht über eine neue `+page.server.ts`. Was die Ansicht an Zustand zeigt – geöffnetes Objekt, Reiter, Suche, Seite –, gehört in die Abfrageparameter mit den Hilfsfunktionen aus `src/lib/utils/urlState.ts`.
+3. **Menüpunkt** – einen Eintrag in `frontend/src/lib/config/navLinks.ts`, in der passenden Gruppe von `navGroups` oder in `footerLinks`, mit
+   - einer festen `id` – unter ihr merkt sich die Navigationsleiste, ob ein Eintrag ausgeblendet ist; ändern Sie sie später nicht mehr,
+   - `scope` (`'project'` oder `'global'`) und `routeId`, der Route-ID wie `'/project/[projectId=integer]/neue-ansicht'`,
+   - `href`, gebaut mit `resolve()` aus `$app/paths` aus derselben Route-ID,
+   - `permissionKey`, dem Rechteschlüssel der Route, hier `'/neue-ansicht'`,
+   - der Beschriftung als Text aus Paraglide (`label: () => m.nav_…()`) und einem Symbol aus `@tabler/icons-svelte`.
 4. **Texte** – die Beschriftung in `frontend/messages/de.json` und `frontend/messages/en.json`.
-5. **Tests** – mindestens ein Test der Lade-Funktion im Projekt `server` von Vitest.
+5. **Tests** – mindestens Tests der Hilfsfunktionen der neuen Remote Functions im Projekt `server` von Vitest.
 
-Ohne weiteren Schritt ist die Route für alle Konten sichtbar: Was keine Zeile in `route_permission` erfasst, ist erlaubt, siehe Abschnitt [Anmeldung, Token-Erneuerung und Routenschutz im Frontend](./33-frontend.md#_33-8-anmeldung-token-erneuerung-und-routenschutz-im-frontend). Soll sie für einzelne Gruppen gesperrt sein, braucht es Zeilen in `route_permission` – zwei je Gruppe, für den Pfad und für `…/*`, siehe Abschnitt [Routenrechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-3-routenrechte-zugriff-je-menupunkt). Gehört die Sperre zur Auslieferung, legen Sie diese Zeilen in einer Datenmigration an, nach dem Muster von `0058` (dort genügt eine Zeile für `/admin/*`, weil darunter nur `/admin/logs` liegt).
+::: warning
+`permissionKey` muss genau dem Schlüssel entsprechen, den `permissionKeyFor()` aus der Route-ID bildet: die Route-ID ohne `/project/[projectId=integer]` und ohne Parameter. Der Server-Hook prüft den Schlüssel der Route, Navigationsleiste und Startseite prüfen den des Menüpunkts. Weichen beide ab, zeigt die Navigationsleiste einen Menüpunkt, den der Server ablehnt, oder blendet einen erlaubten aus. Kein Test fängt das ab.
+:::
+
+Ohne weiteren Schritt ist die Route für alle Konten sichtbar: Was keine Zeile in `route_permission` erfasst, ist erlaubt, siehe Abschnitt [Anmeldung, Token-Erneuerung und Routenschutz im Frontend](./33-frontend.md#_33-8-anmeldung-token-erneuerung-und-routenschutz-im-frontend). Soll sie für einzelne Gruppen gesperrt sein, braucht es eine Zeile je Gruppe in `route_permission` mit dem Rechteschlüssel als Muster, `/neue-ansicht`; sie deckt auch alle Seiten darunter ab, siehe Abschnitt [Routenrechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md#_19-3-routenrechte-zugriff-je-menupunkt). Gehört die Sperre zur Auslieferung, legen Sie diese Zeilen in einer Datenmigration an, nach dem Muster von `0058`.
 
 Die Routenrechte steuern nur das Frontend. Liest oder schreibt die neue Ansicht Daten, gehört der Schutz dieser Daten in das Backend: ein `ViewSet` mit `RoleBasedPermission` statt eines Endpunkts, der nur die Anmeldung prüft, siehe Abschnitt [Ein Attribut oder Modell ergänzen](#_36-1-ein-attribut-oder-modell-erganzen).
 
@@ -87,7 +96,7 @@ Frontend und Backend übersetzen getrennt; eine neue Sprache braucht beide.
 3. Die Stellen anpassen, an denen die Sprachen fest im Code stehen:
    - `src/lib/components/LocaleSwitcher.svelte` – die Liste der Auswahl,
    - `src/lib/components/MobileNav.svelte` – die Schaltflächen der mobilen Ansicht und der Typ `'de' | 'en'`,
-   - `src/lib/classes/CableTrenchDataManager.svelte.ts` – die Wahl zwischen deutschem und englischem Farbnamen.
+   - `src/lib/utils/fiberColors.ts` – die Wahl zwischen deutschem und englischem Farbnamen.
 
    Eine Suche nach `'de' | 'en'` und `'en'` in `src/` findet sie.
 

@@ -31,6 +31,11 @@ Einige Spalten füllt die Datenbank selbst. Lassen Sie sie beim Erfassen leer:
 - `length` einer Trasse – die Länge aus der Geometrie, bei jeder Änderung neu berechnet.
 - `id_address` einer neuen Adresse – die Adress-ID.
 - `geom_3857` aller vier Layer – eine Kopie der Geometrie für die Karte der Weboberfläche.
+- `canvas_x` und `canvas_y` eines neuen Netzknotens – seine Lage im Netzschema, berechnet aus der Geometrie und den Netzschema-Einstellungen des Projekts, siehe Abschnitt [Netzschema-Einstellungen](./22-projektbezogene-konfiguration.md#_22-1-netzschema-einstellungen). Werte, die beim Einfügen mitkommen, etwa aus einem kopierten Netzknoten, ersetzt die Datenbank; die Lage im Subnetz (`child_canvas_x`, `child_canvas_y`) leert sie.
+
+::: info
+Die Lage im Netzschema berechnet die Datenbank nur beim Anlegen. Verschieben Sie einen Netzknoten später in QGIS, bleibt er im Netzschema, wo er war; dort verschieben Sie ihn in der Weboberfläche, siehe Abschnitt [Netzknoten verschieben, verbinden und löschen](../teil-a-anwenderhandbuch/14-netzschema.md#_14-2-netzknoten-verschieben-verbinden-und-loschen).
+:::
 
 Stammdaten wie Status, Netzknotentyp oder Oberfläche stehen als Nummern in den Spalten. Erfassen Sie sie über eine Wertbeziehung, siehe Abschnitt [Layer, Koordinatenbezugssystem und Stile](./25-qgis-arbeitsplatz-einrichten.md#_25-3-layer-koordinatenbezugssystem-und-stile); eine Nummer, die es nicht gibt, weist die Datenbank beim Speichern ab.
 
@@ -82,7 +87,7 @@ Für Aufnahmen ohne Verbindung zur Datenbank – im Feld, durch ein beauftragtes
 4. Prüfen Sie die Objekte: Projekt, Kennzeichen und Stammdaten-Nummern müssen zu Ihrer Installation passen.
 5. Kopieren Sie die Objekte aus dem GeoPackage-Layer und fügen Sie sie im Bearbeitungsmodus in den Layer der Datenbank ein; speichern Sie.
 
-Für die Rückführung gibt es keinen Import in Qonnectra. Sie ist ein Kopieren in QGIS, und dabei gelten alle Regeln dieses Kapitels: Die Datenbank vergibt IDs und Längen und weist ungültige Geometrien ab.
+Für die Rückführung gibt es keinen Import in Qonnectra. Sie ist ein Kopieren in QGIS, und dabei gelten alle Regeln dieses Kapitels: Die Datenbank vergibt IDs, Längen und die Lage im Netzschema und weist ungültige Geometrien ab.
 
 ::: warning
 Leeren Sie vor dem Einfügen die Spalten `uuid`, `id_trench` und `id_address`, falls die aufnehmende Stelle sie gefüllt hat. Eine UUID oder eine Trassen-ID, die es im Projekt schon gibt, lässt das Einfügen scheitern; die Datenbank vergibt beide selbst. Ebenso scheitert ein Netzknoten oder Gebiet, dessen Name im Projekt schon vergeben ist – benennen Sie solche Objekte vorher um.

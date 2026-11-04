@@ -19,6 +19,7 @@ import {
   typeText,
   videoPath,
 } from '../playwright/manual-videos'
+import { projectPath, projectUrl } from '../playwright/project'
 
 const CHAPTER = '10-rohrverwaltung'
 
@@ -137,7 +138,7 @@ test('10.2 Rohr hinzufügen', async ({ page, context }) => {
   // 1. Warm-up page. It fills the HTTP cache of the context, so that the actual
   //    recording page is up within a fraction of a second - Playwright records a
   //    page from its creation, and a long page load would end up in the video.
-  await page.goto('/conduit')
+  await page.goto(projectPath('/conduit'))
   await expect(page.locator('table tbody tr').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()
@@ -151,11 +152,10 @@ test('10.2 Rohr hinzufügen', async ({ page, context }) => {
     localStorage.removeItem('conduit-form-defaults')
   })
 
-  await capture.goto('/conduit')
-  // `/conduit` redirects to `/conduit/2` - the 2 is the test project (cookie
-  // `selected-project`, set in playwright/auth.setup.ts). Without it the app
-  // shows the project "Default", which holds no conduits at all.
-  await expect(capture).toHaveURL(/\/conduit\/2(\/|$)/)
+  await capture.goto(projectPath('/conduit'))
+  // The project is part of the path (playwright/project.ts); the check catches
+  // a redirect to the landing page.
+  await expect(capture).toHaveURL(projectUrl('/conduit'))
   await expect(capture.locator('table tbody tr').first()).toBeVisible()
   await capture.waitForLoadState('networkidle')
   await showCursor(capture)
@@ -216,17 +216,19 @@ test('10.2 Rohr hinzufügen', async ({ page, context }) => {
 
   // The list behind the dialog is checked without a role: while the modal is
   // open, the design system marks everything behind it as `aria-hidden`, and
-  // `getByRole('cell')` finds nothing there.
-  await expect(capture.locator('table tbody tr').first()).toContainText(CONDUIT)
+  // `getByRole('cell')` finds nothing there. Since v1.8.0 the new conduit
+  // takes its alphabetical place in the list instead of the top row.
+  const newRow = capture.locator('table tbody tr').filter({ hasText: CONDUIT })
+  await expect(newRow).toHaveCount(1)
   await capture.waitForTimeout(2500)
 
-  // 6. Close the dialog; the video ends on the new conduit at the top of the
-  //    list.
+  // 6. Close the dialog; the video ends on the new conduit at its place in
+  //    the list.
   await click(capture, dialog.getByRole('button', { name: 'Schließen', exact: true }), {
     duration: 500,
   })
   await expect(dialog).toBeHidden()
-  await expect(capture.locator('table tbody tr').first()).toContainText(CONDUIT)
+  await expect(newRow).toBeVisible()
 
   // Out of the way, so that the last frame shows no hover state on the button.
   await pointAt(capture, { x: 700, y: 700 }, { duration: 500 })

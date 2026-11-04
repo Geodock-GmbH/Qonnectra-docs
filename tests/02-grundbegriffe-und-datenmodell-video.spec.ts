@@ -22,6 +22,7 @@ import { expect, request, test, type APIRequestContext, type Page } from '../pla
 
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { projectPath } from '../playwright/project'
 
 const CHAPTER = '02-grundbegriffe-und-datenmodell'
 
@@ -185,7 +186,7 @@ async function createComponentWithPorts(api: APIRequestContext, uuid: string) {
  * page from its creation, and a long page load would end up in the video.
  */
 async function warmUp(page: Page) {
-  await page.goto('/map')
+  await page.goto(projectPath('/map'))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()
@@ -205,12 +206,11 @@ async function warmUp(page: Page) {
  */
 async function openStructure(page: Page) {
   await page.addInitScript((view) => {
-    localStorage.setItem('mapCenter', JSON.stringify(view.center))
-    localStorage.setItem('mapZoom', JSON.stringify(view.zoom))
+    localStorage.setItem('mapView:2', JSON.stringify({ zoom: view.zoom, center: view.center }))
     localStorage.setItem('drawerWidth', '400')
   }, VIEW)
 
-  await page.goto('/map')
+  await page.goto(projectPath('/map'))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.
@@ -237,7 +237,12 @@ async function openStructure(page: Page) {
     [4, 0],
   ]) {
     await map.click({ position: { x: box.width / 2 + dx, y: box.height / 2 + dy } })
-    if ((await title.isVisible()) && (await title.textContent()) === NODE) break
+    // toHaveText and not textContent(): the title carries the whitespace of
+    // its template and arrives after the details have loaded (v1.8.0).
+    const hit = await expect(title)
+      .toHaveText(NODE, { timeout: 3000 })
+      .then(() => true, () => false)
+    if (hit) break
   }
   await expect(
     title,

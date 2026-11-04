@@ -12,7 +12,7 @@ Dieses Kapitel beschreibt die Tests, Prüfwerkzeuge und automatischen Abläufe d
 
 ## 34.1 Backend-Tests
 
-Die Tests des Backends liegen in `backend/apps/api/tests/`: Dateien `test_*.py` für Endpunkte, Dienste, Routing, Faserweg, Rechte, Signale und Validatoren, dazu die Unterordner `models/` und `viewsets/`. Testdaten erzeugen die Factories in `factories.py` (factory_boy); `conftest.py` stellt sie als Fixtures bereit, schaltet für jeden Test auf Englisch, damit Meldungen vergleichbar sind, und leert den Zwischenspeicher der Content Types.
+Die Tests des Backends liegen in `backend/apps/api/tests/`: Dateien `test_*.py` für Dienste, Routing, Faserweg, Rechte, Signale, Validatoren und einzelne Endpunkte, dazu die Unterordner `models/` und `viewsets/` mit den Tests je Modell und je `ViewSet`. Auch Migrationen mit Datenumbau und die Rechte des QGIS-Datenbankbenutzers haben eigene Tests (`test_canvas_placement_migration.py`, `test_qgis_role.py`). Testdaten erzeugen die Factories in `factories.py` (factory_boy); `conftest.py` stellt sie als Fixtures bereit, schaltet für jeden Test auf Englisch, damit Meldungen vergleichbar sind, und leert den Zwischenspeicher der Content Types.
 
 Die Konfiguration steht in `pytest.ini` im **Wurzelverzeichnis** des Repositorys, nicht in `backend/`. pytest sucht sie vom Arbeitsverzeichnis aus nach oben und findet sie auch aus `backend/` heraus; dort greift zusätzlich die Einstellung der Abdeckung aus `backend/pyproject.toml`:
 
@@ -24,14 +24,12 @@ uv run pytest
 
 Die Tests brauchen eine echte PostgreSQL-Datenbank mit PostGIS; eine SQLite-Datenbank genügt nicht, weil Geometrien, Trigger und `pg_trgm` im Spiel sind. Die Verbindung kommt wie beim Entwicklungsserver aus `deployment/.env` und der Shell, siehe Abschnitt [Backend starten](./30-entwicklungsumgebung.md#_30-2-backend-starten). pytest-django legt daneben eine Testdatenbank `test_<DB_NAME>` an; das Konto aus `DB_USER` braucht dafür das Recht, Datenbanken anzulegen. Der Container aus Abschnitt [Backend starten](./30-entwicklungsumgebung.md#_30-2-backend-starten) legt `POSTGRES_USER` als Superuser an und erfüllt das.
 
-Der Lauf, aus dem die Zahl in der Tabelle oben stammt, nutzte die Python-Pakete des Backend-Images, nicht die aus `uv.lock`, siehe Abschnitt [Technologiestack](./29-architekturueberblick.md#_29-2-technologiestack).
-
 `--reuse-db` steht in den Voreinstellungen: Die Testdatenbank bleibt zwischen zwei Läufen bestehen, und ein Lauf beginnt ohne erneute Migration. Nach einer neuen Migration rufen Sie pytest einmal mit `--create-db` auf, sonst laufen die Tests gegen den alten Stand der Tabellen.
 
 `pytest.ini` deklariert neben `django_db` von pytest-django die Marker `slow`, `integration` und `unit`, kein Test setzt sie aber; `-m integration` wählt deshalb nichts aus. Teile wählen Sie über den Pfad oder mit `-k`. `--strict-markers` lässt außer den eingebauten Markern von pytest keine anderen als die deklarierten zu. Die Abdeckung misst pytest-cov, eingestellt in `backend/pyproject.toml` (`[tool.coverage.*]`): `uv run pytest --cov` in `backend/`.
 
 ::: info
-`backend/README.md` nennt Testdateien, die es nicht mehr gibt (`test_models.py`). Maßgeblich ist der Inhalt von `backend/apps/api/tests/`.
+`backend/README.md` nennt als Beispiel für einen einzelnen Lauf `test_views.py`, eine Datei, die es nicht mehr gibt. Maßgeblich ist der Inhalt von `backend/apps/api/tests/`.
 :::
 
 ## 34.2 Frontend-Tests
@@ -39,9 +37,9 @@ Der Lauf, aus dem die Zahl in der Tabelle oben stammt, nutzte die Python-Pakete 
 Die Tests des Frontends führt Vitest aus, eingestellt in `frontend/vite.config.ts` mit zwei Projekten:
 
 - **`client`** – Komponenten und Zustandsklassen, Dateien `*.svelte.test.ts`, in jsdom mit der Testing Library für Svelte. `vitest-setup-client.js` ersetzt dort alle Remote Functions (`*.remote`), `ResizeObserver` und `matchMedia` durch Attrappen.
-- **`server`** – Lade-Funktionen, Formularaktionen und Hilfsfunktionen, Dateien `*.test.ts`, in Node.
+- **`server`** – Server-Hooks, Lade-Funktionen, die Hilfsmodule der Remote Functions und übrige Hilfsfunktionen, Dateien `*.test.ts`, in Node.
 
-Die Tests liegen neben dem Code, den sie prüfen. Gemeinsame Attrappen stehen in `src/lib/test-utils/`, darunter eine für Svelte Flow und eine für die Karte; einige Komponenten haben für ihre Tests eine Hülle `*.fixture.svelte`.
+Die Tests liegen neben dem Code, den sie prüfen. Gemeinsame Attrappen stehen in `src/lib/test-utils/`: Komponenten für Svelte Flow und die Karte, Nachbildungen von `page` und `afterNavigate` für Komponenten, die die Adresse lesen (`pageStub.ts`, `reactivePageStub.svelte.ts`, `afterNavigateStub.ts`), Bausteine für Antworten von Remote Functions (`remote-stubs.ts`) und eine Attrappe für Chart.js. Einige Komponenten haben für ihre Tests eine Hülle `*.fixture.svelte`.
 
 ```bash
 cd frontend
@@ -54,14 +52,14 @@ Die Tests brauchen weder Backend noch Datenbank. In der CI laufen sie mit `TZ=Eu
 
 ## 34.3 End-to-End-Tests
 
-Die End-to-End-Tests liegen in `frontend/tests/e2e/`, eine Datei je Bereich der Oberfläche, mit gemeinsamer Anmeldung in `helpers/auth.js`. `frontend/playwright.config.js` startet sie in Chromium, Firefox und WebKit gegen `http://localhost:5173` und ruft dafür selbst `npm run dev` auf, falls dort noch nichts läuft.
+Die End-to-End-Tests liegen in `frontend/tests/e2e/`, eine Datei je Bereich der Oberfläche, mit gemeinsamen Hilfen in `helpers/` – Anmeldung (`auth.js`), Aufrufe der Schnittstelle (`api.js`), Adressen der Ansichten (`routes.js`). `frontend/playwright.config.js` startet sie gegen `http://localhost:5173` und ruft dafür selbst `npm run dev` auf, falls dort noch nichts läuft. Lokal laufen sie in Chromium und Firefox, WebKit kommt nur mit gesetztem `CI` hinzu: WebKit verwirft Cookies mit `Secure` über einfaches HTTP, und die Anmeldung am lokalen Entwicklungsserver scheitert dort.
 
 Die Tests klicken sich durch eine laufende Anwendung. Sie brauchen deshalb:
 
 - ein laufendes Backend mit Daten, an das das Frontend über `.env` angeschlossen ist, siehe Kapitel [Entwicklungsumgebung](./30-entwicklungsumgebung.md),
 - ein Konto zum Anmelden, in `frontend/.env` als `E2E_TEST_USERNAME` und `E2E_TEST_PASSWORD`.
 
-Fehlen die Zugangsdaten oder schlägt die Anmeldung fehl, überspringen die Tests sich selbst, statt zu scheitern. Ein Lauf ohne Fehler sagt deshalb nur etwas, wenn der Bericht auch ausgeführte Tests zeigt.
+Fehlen die Zugangsdaten oder ist das Backend nicht erreichbar, überspringen die Tests sich selbst, statt zu scheitern. Ein Lauf ohne Fehler sagt deshalb nur etwas, wenn der Bericht auch ausgeführte Tests zeigt. Schlägt die Anmeldung dagegen bei erreichbarem Backend fehl, etwa wegen falscher Zugangsdaten, scheitern die Tests.
 
 ```bash
 cd frontend

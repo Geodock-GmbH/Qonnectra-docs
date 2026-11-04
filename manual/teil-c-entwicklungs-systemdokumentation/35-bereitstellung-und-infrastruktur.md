@@ -57,13 +57,9 @@ Alle Pfade sind relativ zum Wurzelverzeichnis des Repositorys, alle Befehle lauf
    docker compose up -d --build
    ```
 
-   Sind `QGIS_DB_USER` und `QGIS_DB_PASSWORD` gesetzt, bricht der allererste Start der Datenbank ab, siehe Abschnitt [Varianten der Docker-Compose-Dateien](./30-entwicklungsumgebung.md#_30-4-varianten-der-docker-compose-dateien). Rufen Sie den Befehl dann ein zweites Mal auf.
+7. Warten Sie, bis `docker compose ps` alle Dienste als laufend zeigt. Das Backend legt beim ersten Start die Tabellen an, gibt dem QGIS-Datenbankbenutzer seine Rechte, lädt die Stammdaten und legt das erste Superuser-Konto aus `DJANGO_SUPERUSER_*` an; das dauert einige Minuten. Caddy holt währenddessen die Zertifikate.
 
-7. Warten Sie, bis `docker compose ps` alle Dienste als laufend zeigt. Das Backend legt beim ersten Start die Tabellen an, lädt die Stammdaten und legt das erste Superuser-Konto aus `DJANGO_SUPERUSER_*` an; das dauert einige Minuten. Caddy holt währenddessen die Zertifikate.
-
-8. Schränken Sie die Rechte des QGIS-Datenbankbenutzers ein, siehe Abschnitt [Datenbank, PostGIS und Datenbankzugang](#_35-4-datenbank-postgis-und-datenbankzugang).
-
-9. Melden Sie sich unter `https://admin.ihre-domain.de/admin/` mit dem Superuser an und legen Sie Konten, Projekte und Stammdaten an, siehe die Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md) und [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md).
+8. Melden Sie sich unter `https://admin.ihre-domain.de/admin/` mit dem Superuser an und legen Sie Konten, Projekte und Stammdaten an, siehe die Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md) und [Projekte und Stammdaten pflegen](../teil-b-betrieb-admin-qgis/21-projekte-und-stammdaten.md).
 
 ## 35.2 Container und Images
 
@@ -155,32 +151,15 @@ Die Datenbank ist PostgreSQL 17 mit PostGIS 3.5. Sie läuft im Dienst `db` mit e
 
 Beim allerersten Start mit leerem Volume führt das Image `deployment/postgres/init.sh` aus. Das Skript legt die Erweiterungen PostGIS, pgRouting, `dblink` und `pgcrypto` an, stellt Zeichensatz und Zeitzone (`Europe/Berlin`) des Hauptbenutzers ein und legt, wenn `QGIS_DB_USER` und `QGIS_DB_PASSWORD` gesetzt sind, einen zweiten Benutzer für QGIS an. Danach läuft das Skript nie wieder; was es einstellt, ändert eine neue `.env` nicht, siehe Abschnitt [Konfiguration über Umgebungsvariablen](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md#_28-2-konfiguration-uber-umgebungsvariablen).
 
-**Der QGIS-Datenbankbenutzer** dient zwei Zwecken: QGIS Server liest mit ihm die Layer der hinterlegten Projekte, und QGIS-Arbeitsplätze bearbeiten mit ihm über das VPN die Netzdaten, siehe Abschnitt [Verbindung zur PostGIS-Datenbank](../teil-b-betrieb-admin-qgis/25-qgis-arbeitsplatz-einrichten.md#_25-2-verbindung-zur-postgis-datenbank-und-zu-den-diensten). `init.sh` gibt ihm Lese- und Schreibrechte auf alle Tabellen, auch auf alle, die später entstehen. Beschränken Sie ihn nach dem ersten Start auf die Netzdaten, indem Sie ihm die Tabellen der Konten, Rechte und Einstellungen entziehen:
+**Der QGIS-Datenbankbenutzer** dient zwei Zwecken: QGIS Server liest mit ihm die Layer der hinterlegten Projekte, und QGIS-Arbeitsplätze bearbeiten mit ihm über das VPN die Netzdaten, siehe Abschnitt [Verbindung zur PostGIS-Datenbank](../teil-b-betrieb-admin-qgis/25-qgis-arbeitsplatz-einrichten.md#_25-2-verbindung-zur-postgis-datenbank-und-zu-den-diensten). `init.sh` legt ihn nur an und erlaubt ihm die Verbindung; seine Rechte an den Tabellen setzt das Backend. `backend/apps/api/qgis_role.py` läuft nach jedem `migrate` – also bei jedem Start des Containers `backend` – und
 
-```bash
-docker compose exec -T db sh -c 'psql -v ON_ERROR_STOP=1 -U "$POSTGRES_USER" -d "$POSTGRES_DB"' <<'SQL'
-DO $$
-DECLARE
-  t text;
-BEGIN
-  FOR t IN
-    SELECT tablename FROM pg_tables
-    WHERE schemaname = 'public'
-      AND (tablename LIKE 'auth\_%' OR tablename LIKE 'django\_%' OR tablename LIKE 'token\_blacklist\_%'
-           OR tablename LIKE 'authtoken\_%'
-           OR tablename IN ('model_permission', 'route_permission', 'user_settings', 'wms_source',
-                            'api_historicalwmssource', 'wms_layer', 'api_historicalwmslayer', 'log_entry'))
-  LOOP
-    EXECUTE format('REVOKE ALL ON public.%I FROM %I', t, 'qgis_user');
-  END LOOP;
-END $$;
-SQL
-```
+- gibt dem Benutzer aus `QGIS_DB_USER` Lese- und Schreibrechte auf alle Tabellen im Schema `public` und die Nutzung ihrer Sequenzen,
+- entzieht ihm alle Rechte an den Tabellen der Konten, Gruppen, Sitzungen, Tokens, Inhaltstypen und des Protokolls der Administration, an `model_permission`, `route_permission`, `user_settings` und `django_migrations`.
 
-Ersetzen Sie `qgis_user` durch den Wert von `QGIS_DB_USER`. Danach kann der Benutzer Trassen, Netzknoten und alle übrigen Netzdaten weiter lesen und schreiben, ebenso die Auswahllisten, aber keine Konten, Gruppen, Rechte, Sitzungen, Benutzereinstellungen, WMS-Quellen und Protokolle mehr. Lesbar bleibt auch die Leitungsauskunft (`pipeline_record`) mit Namen und Telefonnummern der anfragenden Stellen; wird sie in QGIS nicht gebraucht, nehmen Sie `pipeline_record`, `pipeline_inquiry_area`, `api_historicalpipelinerecord` und `api_historicalpipelineinquiryarea` in die Liste auf.
+Tabellen, die eine neue Version mit ihren Migrationen anlegt, sind damit beim nächsten Start ohne weiteres Zutun erfasst. Ist `QGIS_DB_USER` leer oder gibt es den Benutzer in der Datenbank nicht, tut das Backend nichts. Der Wert muss deshalb im Dienst `backend` ankommen; `docker-compose.yml` reicht ihn aus `.env` weiter.
 
 ::: warning
-Neue Tabellen, die eine spätere Version mit ihren Migrationen anlegt, bekommt der QGIS-Benutzer wieder mit allen Rechten. Führen Sie den Befehl deshalb nach jeder Aktualisierung erneut aus, siehe Abschnitt [Aktualisierung auf eine neue Version](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md#_28-3-aktualisierung-auf-eine-neue-version).
+Rechte, die Sie dem Benutzer zusätzlich von Hand entziehen, gibt ihm der nächste Start des Backends zurück. Lesen und schreiben kann er deshalb neben den Netzdaten und den Auswahllisten auch die Leitungsauskunft mit Namen und Telefonnummern der anfragenden Stellen, die WMS-Quellen, die hinterlegten QGIS-Projekte, die Protokolle und die Tabellen des Änderungsverlaufs. Geben Sie seine Zugangsdaten nur an Personen, die diese Daten sehen dürfen.
 :::
 
 **WireGuard** bringt die QGIS-Arbeitsplätze in das Netz der Datenbank. Der Dienst legt beim Start für jeden Namen in `WIREGUARD_PEERS` einen Zugang an, als Datei `deployment/wireguard/peer_<name>/peer_<name>.conf`; im VPN hat der Server die Adresse `10.13.13.1`. Damit Anfragen an diese Adresse die Datenbank erreichen, braucht die Konfiguration des Servers eine Weiterleitung des Ports 5432 an den Container `db`, die nicht automatisch entsteht. Die Zeilen `PostUp` und `PostDown` dafür stehen in `deployment/wireguard/README.md`, das sie nur in `wireguard/wg_confs/wg0.conf` einträgt. Der Dienst erzeugt `wg0.conf` aber aus der Vorlage `wireguard/templates/server.conf` neu, sobald sich `WIREGUARD_PEERS`, `WIREGUARD_SERVERURL` oder `WIREGUARD_PORT` ändern, und eine Weiterleitung nur in `wg0.conf` ginge dabei verloren. Tragen Sie die Zeilen deshalb an beiden Stellen ein: in `wg0.conf` wie im README beschrieben, damit sie sofort gilt, und in die Vorlage. In der Vorlage schreiben Sie jedes `$` als `\$`. Der Dienst wertet sie beim Erzeugen als Shell-Text aus; ohne Maskierung stünde in der fertigen `wg0.conf` statt der Adresse der Datenbank eine leere Zeichenkette, und das VPN startet nicht:
@@ -208,7 +187,7 @@ services:
 
 Der Dienst `qgis-server` nutzt das offizielle Image `qgis/qgis-server:3.44.7-noble` und baut seine Umgebung bei jedem Start selbst auf (`command` in `docker-compose.yml`):
 
-- Er schreibt `/etc/postgresql-common/pg_service.conf` mit einem Dienst namens `QGIS_PG_SERVICE_NAME` (Vorgabe `qonnectra`), der mit `QGIS_DB_USER` auf die Datenbank zeigt. Hinterlegte QGIS-Projekte müssen ihre Layer über diesen Dienst laden, siehe Abschnitt [QGIS-Projekte in Qonnectra hinterlegen](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md#_27-1-qgis-projekte-in-qonnectra-hinterlegen). Die Vorlage `deployment/qgis/pg_service.conf.template` und die Anleitungen in `deployment/README.md` und `deployment/qgis/environment-variables.md`, sie zu kopieren, sind damit überholt.
+- Er schreibt `/etc/postgresql-common/pg_service.conf` mit einem Dienst namens `QGIS_PG_SERVICE_NAME` (Vorgabe `qonnectra`), der mit `QGIS_DB_USER` auf die Datenbank zeigt. Hinterlegte QGIS-Projekte müssen ihre Layer über diesen Dienst laden, siehe Abschnitt [QGIS-Projekte in Qonnectra hinterlegen](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md#_27-1-qgis-projekte-in-qonnectra-hinterlegen). Eine Datei anzulegen ist nicht nötig; `deployment/qgis/pg_service.conf.template` dient nur noch als Beispiel.
 - Er startet einen virtuellen Bildschirm (Xvfb), den QGIS zum Zeichnen braucht, und drei Prozesse von QGIS Server hinter einem nginx im Container.
 
 Die Projekte liest der Dienst nur lesend aus `deployment/qgis/projects`, ihre Datendateien aus `deployment/qgis/data`. Das Backend bindet dieselben Ordner schreibend ein: Projekte, die im Administrationsbereich hochgeladen werden, landen dort.
@@ -225,7 +204,7 @@ Die Hintergrundkarte liefert TileServer GL (`maptiler/tileserver-gl:v5.6.0`) aus
 - `--public_url` setzt `docker-compose.yml` auf `https://${TILE_SERVER_DOMAIN}`, damit die Verweise in den Stilen auf die öffentliche Adresse zeigen.
 - Caddy erlaubt den Abruf von jeder Herkunft (`Access-Control-Allow-Origin: *`).
 
-Eine Kacheldatei bringt das Repository nicht mit. Sie entsteht mit Planetiler aus einem Auszug von OpenStreetMap; die Befehle stehen in `deployment/README.md` unter „Generating Map Tiles with Planetiler“, den Ablauf im Betrieb beschreibt Abschnitt [Kartenkacheln bereitstellen und erneuern](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md#_28-6-kartenkacheln-bereitstellen-und-erneuern).
+Eine Kacheldatei bringt das Repository nicht mit. Sie entsteht mit Planetiler aus einem Auszug von OpenStreetMap; die Befehle stehen in `deployment/README.md` unter „Generating map tiles with Planetiler“, den Ablauf im Betrieb beschreibt Abschnitt [Kartenkacheln bereitstellen und erneuern](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md#_28-6-kartenkacheln-bereitstellen-und-erneuern).
 
 Die Vektorkacheln der Netzobjekte kommen nicht von hier, sondern vom Backend, siehe Abschnitt [Vektor-Tile-Endpunkte](./32-rest-api.md#_32-6-vektor-tile-endpunkte).
 
@@ -267,7 +246,7 @@ Alle Variablen stehen in `deployment/.env`; Docker Compose reicht sie an die Die
 
 | Variable | Bedeutung | Änderung |
 |---|---|---|
-| `QGIS_DB_USER`, `QGIS_DB_PASSWORD` | Benutzer für QGIS Server und QGIS-Arbeitsplätze, siehe Abschnitt [Datenbank, PostGIS und Datenbankzugang](#_35-4-datenbank-postgis-und-datenbankzugang) | nie |
+| `QGIS_DB_USER`, `QGIS_DB_PASSWORD` | Benutzer für QGIS Server und QGIS-Arbeitsplätze, siehe Abschnitt [Datenbank, PostGIS und Datenbankzugang](#_35-4-datenbank-postgis-und-datenbankzugang); `QGIS_DB_USER` liest auch das Backend, um dem Benutzer seine Rechte zu geben | nie |
 
 **Frontend**
 
@@ -301,7 +280,7 @@ Für eine Installation auf einem Server gilt:
 - **Geheimnisse.** `.env` enthält alle Passwörter und Schlüssel der Installation. Geben Sie ihr die Rechte `600` und nehmen Sie sie nie in ein Repository auf. `backup.sh` sichert sie unverschlüsselt mit; wählen Sie als Ziel von `rclone` deshalb ein verschlüsseltes, siehe Abschnitt [Sicherung und Wiederherstellung](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md#_28-4-sicherung-und-wiederherstellung). Erzeugen Sie `DJANGO_SECRET_KEY`, `FIELD_ENCRYPTION_KEY` und die Datenbankpasswörter zufällig, siehe Abschnitt [Erstinstallation auf einem Server](#_35-1-erstinstallation-auf-einem-server); die Werte der Vorlage sind Platzhalter.
 - **`DEBUG=False`.** Mit `DEBUG` zeigt Django bei Fehlern Einzelheiten der Konfiguration, die Schnittstelle bietet ihr Schema und die Swagger-Oberfläche an, und das Backend liefert Anhänge selbst aus statt über nginx.
 - **Frontend ohne `.env`.** Entfernen Sie `env_file` beim Dienst `frontend` über die Override-Datei, siehe Abschnitt [Container und Images](#_35-2-container-und-images).
-- **QGIS-Datenbankbenutzer.** Beschränken Sie ihn auf die Netzdaten und wiederholen Sie das nach jeder Aktualisierung, siehe Abschnitt [Datenbank, PostGIS und Datenbankzugang](#_35-4-datenbank-postgis-und-datenbankzugang). Seine Zugangsdaten kommen dennoch einem weitgehenden Schreibzugriff auf das Netz gleich; geben Sie sie nur an Personen, die in QGIS bearbeiten.
+- **QGIS-Datenbankbenutzer.** Seine Rechte setzt das Backend bei jedem Start, siehe Abschnitt [Datenbank, PostGIS und Datenbankzugang](#_35-4-datenbank-postgis-und-datenbankzugang). Seine Zugangsdaten kommen einem weitgehenden Schreibzugriff auf das Netz und die übrigen Fachdaten gleich; geben Sie sie nur an Personen, die in QGIS bearbeiten.
 - **VPN.** Geben Sie jeder Person einen eigenen Zugang, entfernen Sie nicht mehr benötigte Zugänge und starten Sie den Dienst ohne Bedarf gar nicht, siehe Abschnitt [Datenbank, PostGIS und Datenbankzugang](#_35-4-datenbank-postgis-und-datenbankzugang).
 - **Erreichbarkeit.** Beschränken Sie den Administrationsbereich und den WebDAV-Zugang über `deployment/caddy/extra/` auf die Adressen des eigenen Netzes, siehe Abschnitt [Reverse Proxy](#_35-3-reverse-proxy-caddy-und-nginx).
 - **Konten.** Vergeben Sie Konten nur an Personen und Stellen, die das Netz der Installation sehen dürfen, siehe Abschnitt [Berechtigungsprüfung in der Schnittstelle](./32-rest-api.md#_32-3-berechtigungsprufung-in-der-schnittstelle). Für Netze, die getrennt bleiben müssen, betreiben Sie getrennte Installationen.

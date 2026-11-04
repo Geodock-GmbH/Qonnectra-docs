@@ -34,16 +34,20 @@
 //       print(a.similarity, a.street, a.housenumber, a.id_address)"
 import type { Page } from '@playwright/test'
 
+import { type Flat, hydrate, rewriteRemote } from './remote-functions'
+
 /**
- * The search endpoint the browser calls itself: `trace-search/` serves the
- * address fields of the Nachverdichtung (chapter 7) and the Faserweg (chapter
- * 15). The search panel of the map and the list of the Adressen go through
- * SvelteKit form actions instead; their payload is flattened by `devalue` and
- * cannot be sorted here. The map search for "Nieharde" ties just the same and
- * has merely come out in the same order so far - if `map_search` starts
- * reordering its hits, that is where to look.
+ * The remote functions behind the address fields that search `trace-search/`:
+ * `searchAddresses` for the Nachverdichtung (chapter 7) and `searchTraceEntries`
+ * for the Faserweg (chapter 15). Since v1.8.0 the browser no longer calls the
+ * API itself; the frontend server does, and the hits reach the page as the
+ * result of the remote function (playwright/remote-functions.ts). The search
+ * panel of the map and the list of the Adressen go through other remote
+ * functions; the map search for "Nieharde" ties just the same and has merely
+ * come out in the same order so far - if `map_search` starts reordering its
+ * hits, that is where to look.
  */
-const SEARCH_URLS = /\/api\/v1\/trace-search\/\?.*search=/
+const SEARCH_FUNCTIONS = ['searchAddresses', 'searchTraceEntries']
 
 type Hit = Record<string, unknown>
 
@@ -54,15 +58,18 @@ const SCORED_FIELDS = ['street', 'city', 'zip_code', 'district']
  * The token the backend ranks by: the first one of three or more characters,
  * exactly as `trigram_address_search()` picks it. Shorter tokens only filter.
  */
-function rankingToken(url: string): string | undefined {
-  const search = new URL(url).searchParams.get('search') ?? ''
+function rankingToken(search: string): string | undefined {
   return search
     .trim()
     .split(/\s+/)
     .find((token) => token.length >= 3)
 }
 
-/** 0 for a hit one of whose scored fields contains the token as a word, else 1. */
+/**
+ * 0 for a hit one of whose scored fields contains the token as a word, else 1.
+ * `searchAddresses` drops `district` from its hits; for the terms the specs
+ * use, the street decides alone.
+ */
 function rank(hit: Hit, token: string | undefined): number {
   if (!token) return 0
   const asWord = new RegExp(`(^|[^\\p{L}\\p{N}])${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^\\p{L}\\p{N}]|$)`, 'iu')
@@ -74,39 +81,36 @@ function tieBreak(hit: Hit): string {
   return String(hit.id_address ?? hit.name ?? hit.uuid ?? '')
 }
 
+/** Sorts the hit array of one flattened result in place. */
+function sortHits(flat: Flat, result: number, argument: unknown): void {
+  const hits = flat[result]
+  if (!Array.isArray(hits)) return
+  const search = String((argument as { searchQuery?: unknown } | undefined)?.searchQuery ?? '')
+  const token = rankingToken(search)
+  const hit = (index: unknown) => (hydrate(flat, index) ?? {}) as Hit
+  hits.sort((a, b) => {
+    const ha = hit(a)
+    const hb = hit(b)
+    return rank(ha, token) - rank(hb, token) || tieBreak(ha).localeCompare(tieBreak(hb))
+  })
+}
+
 /**
- * Sorts the `results` of every matching search response: full matches of the
+ * Sorts the hits of every address search the page runs: full matches of the
  * ranking token first, then the rest, and `tieBreak()` within each group.
  *
- * Has to be installed before the view loads, i.e. before `page.goto()`. Only
- * `results` is touched; a paginated response keeps `count`, `next` and
- * `previous` as they are.
+ * Has to be installed before the view loads, i.e. before `page.goto()`.
+ * Returns a function telling how many responses were sorted - a spec that
+ * searches asserts on it, so that a search that stops passing through here
+ * fails instead of capturing the order of chance.
  */
-export async function stableSearchOrder(page: Page): Promise<void> {
-  await page.route(SEARCH_URLS, async (route) => {
-    if (route.request().method() !== 'GET') {
-      await route.continue()
-      return
-    }
-
-    const response = await route.fetch()
-
-    let body: unknown
-    try {
-      body = await response.json()
-    } catch {
-      await route.fulfill({ response })
-      return
-    }
-
-    if (body && typeof body === 'object' && Array.isArray((body as { results?: unknown }).results)) {
-      const token = rankingToken(route.request().url())
-      const results = (body as { results: Hit[] }).results
-      results.sort(
-        (a, b) => rank(a, token) - rank(b, token) || tieBreak(a).localeCompare(tieBreak(b)),
-      )
-    }
-
-    await route.fulfill({ response, json: body })
-  })
+export async function stableSearchOrder(page: Page): Promise<() => number> {
+  let sorted = 0
+  for (const name of SEARCH_FUNCTIONS) {
+    await rewriteRemote(page, name, (flat, result, argument) => {
+      sortHits(flat, result, argument)
+      sorted += 1
+    })
+  }
+  return () => sorted
 }

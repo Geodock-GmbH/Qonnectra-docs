@@ -10,7 +10,7 @@ Alles, was Kapitel [Grundbegriffe und Datenmodell](./02-grundbegriffe-und-datenm
 
 Den größten Teil der Ansicht nimmt die **Zeichenfläche** ein. Sie ist ein Diagramm und keine Karte: Ein Netzknoten steht als Kasten mit seinem Namen darin, ein Kabel als Linie zwischen zwei Kästen, beschriftet mit dem Kabelnamen. An jeder Seite eines Kastens sitzt ein grüner Punkt – ein **Fangpunkt**, an dem ein Kabel andockt.
 
-Wo ein Netzknoten auf der Zeichenfläche liegt, hat mit seiner Lage im Gelände zunächst durchaus zu tun: Qonnectra rechnet die Position beim ersten Öffnen aus den Koordinaten der Karte, siehe Abschnitt [Kartenkoordinaten mit dem Schema synchronisieren](#_14-11-kartenkoordinaten-mit-dem-schema-synchronisieren). Danach sind beide Positionen voneinander unabhängig.
+Wo ein Netzknoten auf der Zeichenfläche liegt, hat mit seiner Lage im Gelände zunächst durchaus zu tun: Qonnectra rechnet die Position aus den Koordinaten der Karte, sobald der Netzknoten angelegt wird, siehe Abschnitt [Wie Netzknoten auf die Zeichenfläche kommen](#_14-11-wie-netzknoten-auf-die-zeichenflache-kommen). Danach sind beide Positionen voneinander unabhängig.
 
 Die Farbe eines Kabels ist keine Eigenschaft des Kabels, sondern eine Anzeigeoption: In der Voreinstellung nimmt die Linie die Farbe des Mikrorohrs mit der niedrigsten Nummer an, mit dem das Kabel verknüpft ist. Umstellen können Sie das unter „Kabelfarbe“ in den Einstellungen, siehe Kapitel [Einstellungen](./17-einstellungen.md).
 
@@ -23,11 +23,7 @@ Unten links sitzen die Schaltflächen der Zeichenfläche, siehe Abschnitt [Netzk
 ::: warning
 Das Schema zeigt nicht alle Netzknoten des Projekts, sondern nur die Netzknotentypen, die Ihre Administration in den **Netzschema-Einstellungen** dafür vorgesehen hat, siehe Kapitel [Projektbezogene Konfiguration](../teil-b-betrieb-admin-qgis/22-projektbezogene-konfiguration.md). Üblicherweise bleiben die Hausanschlüsse ausgeblendet – es sind zu viele für ein lesbares Diagramm; Sie erreichen sie über das Subnetz ihres Verteilers, siehe Abschnitt [Subnetz eines Netzknotens](#_14-9-subnetz-eines-netzknotens).
 
-Fehlen die Einstellungen ganz, meldet Qonnectra beim Öffnen „Die Netzschema-Einstellungen sind für dieses Projekt nicht konfiguriert. Bitte konfigurieren Sie diese im Admin-Bereich.“ und zeigt jeden Netzknoten – bei vielen Hausanschlüssen wird das Diagramm damit unübersichtlich.
-:::
-
-::: info
-Ein Netzknoten ohne Geometrie bekommt keine berechnete Position und landet im Nullpunkt der Zeichenfläche, weit außerhalb der übrigen Netzknoten. Wo ein Netzknoten liegt, erfassen Sie in QGIS, siehe Kapitel [Netzdaten in QGIS bearbeiten](../teil-b-betrieb-admin-qgis/26-netzdaten-in-qgis-bearbeiten.md).
+Solange Ihre Administration die Einstellungen nicht als „Konfiguriert“ markiert hat, meldet Qonnectra beim Öffnen „Die Netzschema-Einstellungen sind für dieses Projekt nicht konfiguriert, daher werden alle Knoten inklusive Hausanschlüsse im Schema platziert. Bitte schließen Sie Knotentypen aus und setzen Sie "Konfiguriert" im Admin-Bereich.“ Ein neues Projekt bekommt die Einstellungen mit seinem ersten Netzknoten von selbst, aber leer: Das Schema zeigt dann jeden Netzknoten, und bei vielen Hausanschlüssen wird das Diagramm unübersichtlich.
 :::
 
 ### 14.1.1 Objekte im Schema suchen
@@ -51,7 +47,7 @@ Ein Klick auf das Schloss hebt die Sperre auf. Erst danach lassen sich Netzknote
 Ziehen Sie einen Kasten mit gedrückter linker Maustaste an eine andere Stelle. Er rastet auf einem Raster von 120 Pixeln ein, und mit dem Loslassen ist die neue Position gespeichert; Qonnectra meldet „Position erfolgreich aktualisiert“.
 
 ::: info
-Verschoben wird ausschließlich die Position im Diagramm. Die Karte bleibt unberührt – umgekehrt ändert eine Verschiebung in QGIS die Position im Schema nicht mehr, sobald der Netzknoten dort einmal einen Platz hat.
+Verschoben wird ausschließlich die Position im Diagramm. Die Karte bleibt unberührt – umgekehrt ändert eine Verschiebung in QGIS die Position im Schema nicht, siehe Abschnitt [Wie Netzknoten auf die Zeichenfläche kommen](#_14-11-wie-netzknoten-auf-die-zeichenflache-kommen).
 :::
 
 **Kabel anlegen**
@@ -229,7 +225,11 @@ Qonnectra bestätigt die Änderung mit „Mikrorohr-Status aktualisiert“. Geme
 Der Reiter „Aktionen“ eines Netzknotens führt zu seinem inneren Aufbau: „Slots konfigurieren“ öffnet das Fenster „Netzknoten-Konfiguration“, „Struktur konfigurieren“ das Fenster „Netzknotenstruktur“. Beide Fenster kennen Sie aus der Karte, dort sind sie reine Anzeigen – wie sie aufgebaut sind, steht in Abschnitt [Netzknoten: Slot-Konfiguration und Struktur öffnen](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen). Im Netzschema sind sie bearbeitbar.
 
 ::: warning
-Beide Fenster öffnen mittig und gleich groß übereinander, und „Netzknotenstruktur“ liegt immer oben. Ziehen Sie das obere Fenster an seiner Titelzeile beiseite, wenn Sie beide gleichzeitig brauchen – Abschnitt [Netzknoten: Slot-Konfiguration und Struktur öffnen](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen) beschreibt das Verhalten im Einzelnen.
+Beim ersten Öffnen liegen beide Fenster mittig und gleich groß übereinander, und „Netzknotenstruktur“ liegt oben. Ziehen Sie das obere Fenster an seiner Titelzeile beiseite, wenn Sie beide gleichzeitig brauchen – Abschnitt [Netzknoten: Slot-Konfiguration und Struktur öffnen](./05-karte.md#_5-6-netzknoten-slot-konfiguration-und-struktur-offnen) beschreibt das Verhalten im Einzelnen.
+:::
+
+::: info
+Anders als in der Karte merkt sich Ihr Browser im Netzschema Lage und Größe jedes Fensters, auch das der „Kabel-Mikrorohr Verknüpfung“; beim nächsten Öffnen steht es wieder dort. Ein geöffnetes Fenster folgt außerdem der Auswahl: Klicken Sie einen anderen Netzknoten an, zeigt es dessen Aufbau.
 :::
 
 **Einbauplätze und Container anlegen**
@@ -303,7 +303,7 @@ Unter den Kabeln steht der Abschnitt „Adressen“, und zwar nur dann, wenn dem
 
 Eine **Wohneinheit** aus diesem Abschnitt belegt einen Port genauso wie eine Faser. So dokumentieren Sie, welche Wohneinheit an welchem Port hängt – der Faserweg zeigt sie später als Ziel, siehe Abschnitt [Betroffene Adressen und Wohneinheiten](./15-faserweg.md#_15-5-betroffene-adressen-und-wohneinheiten).
 
-Jede belegte Zelle trägt beim Zeigen mit der Maus drei Schaltflächen: „Folgen“ öffnet den Faserweg dieser Faser (siehe Kapitel [Faserweg](./15-faserweg.md)) und zeigt anschließend in der Zelle eine Zusammenfassung („2 Spleisse · 1 Adresse“), „Löschen“ nimmt die Faser vom Port, und bei zusammengeführten Ports kommt „Trennen“ hinzu.
+Jede belegte Zelle trägt beim Zeigen mit der Maus drei Schaltflächen: „Folgen“ zeigt in der Zelle eine Zusammenfassung des Faserwegs dieser Faser („2 Spleisse · 1 Adresse“), ein zweiter Klick blendet sie wieder aus; den vollständigen Weg zeigt das Kapitel [Faserweg](./15-faserweg.md), „Löschen“ nimmt die Faser vom Port, und bei zusammengeführten Ports kommt „Trennen“ hinzu.
 
 **Ports zusammenführen**
 
@@ -318,7 +318,7 @@ Auf eine Seite eines Ports gehört immer nur eine Faser. Wenn mehrere Fasern in 
 Die zusammengeführten Ports stehen danach als eine Zelle mit dem Bereich („1-3“) und teilen sich eine Faser. „Trennen“ löst die Gruppe wieder auf. Das Symbol in der Spaltenüberschrift beendet den Auswahlmodus, ohne etwas zusammenzuführen.
 
 ::: warning
-Zusammenführen geht nur auf einer Seite und nur bei lückenlos aufeinanderfolgenden Ports. Andernfalls meldet Qonnectra „Ports von verschiedenen Seiten können nicht zusammengeführt werden“ beziehungsweise – englisch – „Ports must be consecutive (e.g., 1-2-3, not 1-3)“. Auch andere Meldungen dieser Tabelle sind teils englisch, etwa „No available ports“, wenn ab der Zelle kein freier Port mehr folgt.
+Zusammenführen geht nur auf einer Seite und nur bei lückenlos aufeinanderfolgenden Ports. Andernfalls meldet Qonnectra „Ports von verschiedenen Seiten können nicht zusammengeführt werden“ beziehungsweise „Ports müssen aufeinanderfolgend sein (z. B. 1-2-3, nicht 1-3)“.
 :::
 
 ::: info
@@ -356,19 +356,19 @@ Die beiden Umschalter unter „Anzeigeoptionen“ im Bereich „Eigenschaften“
 
 Die Farbe der Kabellinien stellen Sie nicht hier, sondern in den Einstellungen unter „Kabelfarbe“ ein, siehe Kapitel [Einstellungen](./17-einstellungen.md).
 
-## 14.11 Kartenkoordinaten mit dem Schema synchronisieren
+## 14.11 Wie Netzknoten auf die Zeichenfläche kommen
 
-Ein Netzknoten hat zwei Positionen: die geografische aus der Karte und die auf der Zeichenfläche. Beim Öffnen des Netzschemas prüft Qonnectra, ob Netzknoten ohne Position auf der Zeichenfläche vorhanden sind, und rechnet sie aus den Kartenkoordinaten aus. Ist das geschehen, meldet es „Canvas Synchronisierung erfolgreich“.
+Ein Netzknoten hat zwei Positionen: die geografische aus der Karte und die auf der Zeichenfläche. Die zweite bekommt er in dem Moment, in dem er angelegt wird – gleich ob in QGIS, über einen Import oder auf anderem Weg. Qonnectra rechnet sie aus seiner Lage im Gelände, maßstäblich verkleinert und bezogen auf einen festen Mittelpunkt des Projekts. Ein neuer Netzknoten steht deshalb beim nächsten Öffnen des Schemas bereits an der Stelle, die seiner Lage zu den übrigen Netzknoten entspricht.
 
-Diese Synchronisierung läuft nur in eine Richtung und nur einmal je Netzknoten:
+Danach sind beide Positionen voneinander unabhängig:
 
-- Ein neu hinzugekommener Netzknoten steht beim nächsten Öffnen an der Stelle, die seiner Lage im Gelände entspricht – maßstäblich verkleinert und auf das Raster gerundet.
-- Sobald er eine Position hat, bleibt sie, wo sie ist. Verschieben Sie ihn in der Zeichenfläche, ändert das die Karte nicht; verschieben Sie ihn in QGIS, ändert das das Schema nicht.
+- Verschieben Sie den Netzknoten auf der Zeichenfläche, ändert das die Karte nicht.
+- Verschieben Sie ihn in QGIS, ändert das das Schema nicht. Ein Netzknoten, den Sie dort weit versetzt haben, liegt im Schema weiter an seiner alten Stelle; ziehen Sie ihn von Hand nach.
 
 ::: info
-Arbeiten mehrere Personen gleichzeitig, führt Qonnectra die Synchronisierung nur einmal aus: Läuft sie bereits, wartet die Ansicht bis zu 30 Sekunden auf das Ergebnis.
+Kopieren Sie in QGIS einen Netzknoten, bekommt die Kopie eine eigene Position aus ihrer Lage im Gelände, nicht die des Originals. Liegt die Kopie an derselben Stelle wie das Original, liegt sie auch im Schema genau darauf – ziehen Sie sie beiseite.
 :::
 
-::: warning
-Schlägt die Synchronisierung fehl, meldet Qonnectra „Fehler beim Synchronisieren der Canvas“. Das Schema öffnet trotzdem, greift für die betroffenen Netzknoten aber auf eine grobe Notrechnung zurück: Sie liegen dann alle dicht beieinander und müssen von Hand auseinandergezogen werden.
+::: info
+Den Mittelpunkt legt Qonnectra mit dem ersten Netzknoten eines Projekts fest, der Maßstab hat einen festen Vorgabewert. Beide stehen in den Netzschema-Einstellungen, siehe Kapitel [Projektbezogene Konfiguration](../teil-b-betrieb-admin-qgis/22-projektbezogene-konfiguration.md); der Maßstab lässt sich dort nur ändern, solange noch kein Netzknoten des Projekts eine Position hat.
 :::

@@ -7,6 +7,7 @@ import {
   shoot,
   spotlight,
 } from '../playwright/manual-shots'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "14. Netzschema" in the manual
 // (manual/teil-a-anwenderhandbuch/14-netzschema.md). Produces all images of the
@@ -58,7 +59,7 @@ const VIEW = { x: 320, y: 445, zoom: 1 }
 
 /**
  * Map extent of the window "Kabel-Mikrorohr Verknüpfung" in EPSG:3857. That
- * window brings a map of its own, and it reads `mapCenter`/`mapZoom` from
+ * window brings a map of its own, and it reads the map view (`mapView:2`) from
  * localStorage like every other map of the app.
  */
 const MICROPIPE_VIEW = { center: [1083718, 7308663], zoom: 18 }
@@ -156,17 +157,16 @@ async function openSchema(page: Page, drawerWidth = DRAWER_WIDTH) {
     (state) => {
       localStorage.setItem('networkSchemaViewport', JSON.stringify(state.view))
       localStorage.setItem('drawerWidth', JSON.stringify(state.drawerWidth))
-      localStorage.setItem('mapCenter', JSON.stringify(state.map.center))
-      localStorage.setItem('mapZoom', JSON.stringify(state.map.zoom))
+      localStorage.setItem('mapView:2', JSON.stringify({ zoom: state.map.zoom, center: state.map.center }))
     },
     { view: VIEW, drawerWidth, map: MICROPIPE_VIEW },
   )
 
-  await page.goto('/network-schema')
+  await page.goto(projectPath('/network-schema'))
 
-  // `/network-schema` redirects to `/network-schema/<project>` - the 2 is the
-  // test project (cookie `selected-project`, set in playwright/auth.setup.ts).
-  await expect(page).toHaveURL(/\/network-schema\/2(\/|$)/)
+  // The project is part of the path (playwright/project.ts); the check catches
+  // a redirect to the landing page if the route is ever locked or renamed.
+  await expect(page).toHaveURL(projectUrl('/network-schema'))
   await expect(
     page.locator('.svelte-flow__node'),
     'The network schema shows a different number of nodes than the demo data ' +
@@ -545,7 +545,7 @@ test('14.9 Subnetz eines Netzknotens', async ({ page }) => {
   await openNode(page, SUBNET.node, 'Aktionen')
 
   await page.getByRole('button', { name: 'Subnetz öffnen' }).click()
-  await expect(page).toHaveURL(/\/network-schema\/2\/node\//)
+  await expect(page).toHaveURL(/\/project\/2\/network-schema\/node\//)
 
   // Parent node plus its children; the child view fits the diagram itself.
   await expect(page.locator('.svelte-flow__node')).toHaveCount(SUBNET.children + 1, {

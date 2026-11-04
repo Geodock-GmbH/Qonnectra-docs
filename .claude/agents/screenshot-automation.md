@@ -100,10 +100,12 @@ of 2 has no effect there.
 
 Screenshots have to be pixel-identical on a repeated run:
 
-- The setup pins project selection (cookie `selected-project=2`), language,
-  light mode and map position. Do not rely on a pre-selection of your own.
+- The setup pins the remembered project (cookie `last-project=2`), language,
+  light mode and map position (`mapView:2`). Project views carry the project in
+  their path: open them with `projectPath('/map')` and check them with
+  `projectUrl()` from `playwright/project.ts`, never through a pre-selection.
 - Set the map position through `page.addInitScript()`, never through "load, set
-  `localStorage`, reload" – the app writes `mapCenter`/`mapZoom` back on every
+  `localStorage`, reload" – the app writes the view (`mapView:2`) back on every
   `moveend` and would eat the seed.
 - Address maps through a fixed route/zoom, not through mouse gestures.
 - Wait for concrete elements (`expect(locator).toBeVisible()`), plus

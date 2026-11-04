@@ -4,7 +4,7 @@ Dieses Kapitel führt Sie in die Anwendung ein: Anmeldung, Aufbau der Oberfläch
 
 ## 1.1 Anmelden und abmelden
 
-Qonnectra wird über einen Webbrowser bedient; eine Installation auf Ihrem Rechner ist nicht nötig. Die Adresse zur Anmeldung erhalten Sie von Ihrer Organisation oder zuständigen Verwaltung. Melden Sie sich mit Benutzernamen und Passwort an; „Login“ oder die Eingabetaste bringt Sie zum Dashboard.
+Qonnectra wird über einen Webbrowser bedient; eine Installation auf Ihrem Rechner ist nicht nötig. Die Adresse zur Anmeldung erhalten Sie von Ihrer Organisation oder zuständigen Verwaltung. Melden Sie sich mit Benutzernamen und Passwort an; „Login“ oder die Eingabetaste bringt Sie in die Karte des Projekts, mit dem Sie in diesem Browser zuletzt gearbeitet haben, siehe Abschnitt [Projekt auswählen und wechseln](#_1-3-projekt-auswahlen-und-wechseln). Haben Sie einen Link zu einer bestimmten Ansicht aufgerufen, führt die Anmeldung stattdessen direkt dorthin.
 
 ![Screenshot Anmeldeseite mit dem Anmeldeformular auf der rechten Seite](/images/manual/teil-a/login_start.jpg)
 ![Screenshot Ausschnittvergrößerung des Anmeldeformulars mit den Feldern „Benutzername“ und „Passwort“ und der Schaltfläche „Login“](/images/manual/teil-a/login_start_detail.jpg)
@@ -13,7 +13,7 @@ Qonnectra wird über einen Webbrowser bedient; eine Installation auf Ihrem Rechn
 Zum Abmelden klicken Sie in der Kopfzeile rechts auf „Abmelden“.
 
 ::: info
-Stimmen Benutzername oder Passwort nicht, erscheint am unteren Bildschirmrand kurz die Meldung „Fehler beim Anmelden“ und Sie bleiben auf der Anmeldeseite. Prüfen Sie in diesem Fall die Groß- und Kleinschreibung.
+Stimmen Benutzername oder Passwort nicht, erscheint am unteren Bildschirmrand kurz die Meldung „Fehler beim Anmelden“ und Sie bleiben auf der Anmeldeseite. Unter dem Formular steht zusätzlich der Grund in englischer Sprache, etwa „Invalid credentials.“, bei einem gesperrten Konto „Account is inactive.“. Prüfen Sie in diesem Fall die Groß- und Kleinschreibung.
 :::
 
 ### 1.1.1 Noch keine Zugangsdaten?
@@ -26,7 +26,7 @@ Derzeit gibt es keine „Passwort vergessen“-Funktion im System. Wenn Sie Ihr 
 
 ## 1.2 Aufbau der Oberfläche
 
-Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Bedienoberfläche ist immer gleich aufgebaut und besteht aus drei Bereichen: der **Navigationsleiste** am linken Rand, der **Kopfzeile** am oberen Rand und der **Inhaltsfläche** in der Mitte.
+Die Bedienoberfläche ist in jeder Ansicht gleich aufgebaut und besteht aus drei Bereichen: der **Navigationsleiste** am linken Rand, der **Kopfzeile** am oberen Rand und der **Inhaltsfläche** in der Mitte.
 
 ![Screenshot Startbildschirm mit Hervorhebung der einzelnen Bestandteile der App](/images/manual/teil-a/login_navigation.jpg){.big}{.no-border}
 
@@ -34,7 +34,7 @@ Nach der Anmeldung befinden Sie sich auf dem Dashboard. Die Bedienoberfläche is
 
 Über die Navigationsleiste am linken Rand wechseln Sie zu allen verfügbaren Ansichten; sie bleibt beim Arbeiten immer sichtbar. Die Einträge sind nach Themen gruppiert:
 
-- „Info“ – „Dashboard“ (Startansicht, siehe Kapitel [Dashboard](./04-dashboard.md)) und „Karte“ (siehe Kapitel [Karte](./05-karte.md))
+- „Info“ – „Dashboard“ (siehe Kapitel [Dashboard](./04-dashboard.md)) und „Karte“ (siehe Kapitel [Karte](./05-karte.md))
 - „Funktionen“ – Auswertungen und Verfahren, die auf den dokumentierten Daten aufbauen: „Störungsanalyse“ (siehe Kapitel [Störungsanalyse](./06-stoerungsanalyse.md)), „Nachverdichtung“ (siehe Kapitel [Nachverdichtung](./07-nachverdichtung.md)), „Leitungsauskunft“ (siehe Kapitel [Leitungsauskunft](./08-leitungsauskunft.md)) und „Wertermittlung“ (siehe Kapitel [Wertermittlung](./09-wertermittlung.md))
 - „Rohr“ – „Verwaltung“ (siehe Kapitel [Rohrverwaltung](./10-rohrverwaltung.md)), „Zuordnung“ (siehe Kapitel [Rohrzuordnung](./11-rohrzuordnung.md)), „Verzweigung“ (siehe Kapitel [Rohrverzweigung](./12-rohrverzweigung.md)) und „Mikrorohre“ (siehe Kapitel [Mikrorohre](./13-mikrorohre.md))
 - „Kabel“ – „Netzschema“ (siehe Kapitel [Netzschema](./14-netzschema.md)) und „Faserweg“ (siehe Kapitel [Faserweg](./15-faserweg.md))
@@ -64,20 +64,34 @@ In der zentralen Inhaltsfläche werden alle projektbezogenen Informationen angez
 
 ## 1.3 Projekt auswählen und wechseln
 
-Alle Daten in Qonnectra gehören zu einem **Projekt**. Welches Projekt gilt, wählen Sie oben links in der Kopfzeile; die Auswahl gilt für die gesamte Anwendung und bleibt beim Wechsel in eine andere Ansicht erhalten. Kennzahlen, Karteninhalte und Listen zeigen deshalb immer nur den Bestand des ausgewählten Projekts.
+Alle Daten in Qonnectra gehören zu einem **Projekt**. Welches Projekt gilt, wählen Sie oben links in der Kopfzeile. Kennzahlen, Karteninhalte und Listen zeigen deshalb immer nur den Bestand des ausgewählten Projekts.
 
-Die Projektauswahl ist ein **Kombinationsfeld** und wird bedient wie alle anderen auch, siehe Abschnitt [Auswahllisten und Kombinationsfelder](./03-wiederkehrende-bedienelemente.md#_3-2-auswahllisten-und-kombinationsfelder): Der Pfeil am rechten Rand öffnet die Liste aller für Sie freigegebenen Projekte. Mit dem Klick auf einen Eintrag wechseln Sie das Projekt; alle angezeigten Inhalte aktualisieren sich daraufhin automatisch.
+Die Projektauswahl ist ein **Kombinationsfeld** und wird bedient wie alle anderen auch, siehe Abschnitt [Auswahllisten und Kombinationsfelder](./03-wiederkehrende-bedienelemente.md#_3-2-auswahllisten-und-kombinationsfelder): Der Pfeil am rechten Rand öffnet die Liste aller für Sie freigegebenen Projekte. Mit dem Klick auf einen Eintrag wechseln Sie das Projekt und bleiben dabei in derselben Ansicht. Was zum bisherigen Projekt gehörte, verwirft der Wechsel: Eine geöffnete Info-Box schließt sich, die Detailseite einer Adresse kehrt in die Adressliste zurück, und Tabellen beginnen wieder auf Seite 1.
 
 ![Screenshot Dashboard mit Hervorhebung der Projektauswahl oben links in der Kopfzeile](/images/manual/teil-a/dashboard_project.jpg)
 ![Screenshot Ausschnittvergrößerung der geöffneten Projektliste in der Kopfzeile mit dem hervorgehobenen Eintrag „Testprojekt“](/images/manual/teil-a/dashboard_project_detail.jpg)
 {.img-row}
 
 ::: warning
-Die Eingabe im Feld allein wählt nichts aus – erst der Klick auf einen Eintrag der Liste wechselt das Projekt. Solange kein Projekt gewählt ist, bleiben alle Kennzahlen auf Null und die Diagramme zeigen „Keine Daten verfügbar“.
+Die Eingabe im Feld allein wählt nichts aus – erst der Klick auf einen Eintrag der Liste wechselt das Projekt.
 :::
 
 ::: info
 Sind für Ihr Benutzerkonto keine Projekte freigegeben, erscheint anstelle des Feldes der Hinweis „Keine Projekte verfügbar“.
+:::
+
+**Das Projekt steht in der Adresse**
+
+Jede Ansicht, die zu einem Projekt gehört, trägt dieses Projekt in ihrer Adresse in der Adresszeile des Browsers. Ein Lesezeichen oder ein Link, den Ihnen jemand schickt, öffnet deshalb immer das Projekt, in dem er entstanden ist – unabhängig davon, welches Projekt Sie zuletzt ausgewählt hatten. Die Projektauswahl in der Kopfzeile folgt dem Link.
+
+Das zuletzt gewählte Projekt merkt sich jeder Browser für sich. Nach der Anmeldung öffnet Qonnectra die Karte dieses Projekts. Hat Ihr Konto keinen Zugriff auf die Karte, öffnet sich stattdessen die oberste Ansicht der Navigationsleiste, für die Sie berechtigt sind.
+
+::: info
+Leitungsauskunft, Faserweg und Einstellungen gehören zu keinem Projekt. Dort wechselt die Projektauswahl die Ansicht nicht, sondern legt nur fest, mit welchem Projekt Sie weiterarbeiten – im Faserweg etwa, in welchem Projekt gesucht wird, und in der Leitungsauskunft, zu welchem Projekt eine neue Auskunft gehört.
+:::
+
+::: warning
+Führt ein Link in ein Projekt, das für Ihr Konto nicht freigegeben ist, erscheint die Fehlerseite mit der Nummer 404 und dem Text „Project not found“, siehe Abschnitt [Meldungen der Anwendung und was sie bedeuten](./18-wenn-etwas-nicht-funktioniert.md#_18-1-meldungen-der-anwendung-und-was-sie-bedeuten).
 :::
 
 In der Karte und in der Wertermittlung steht neben der Projektauswahl zusätzlich die Schaltfläche „Alle Projekte anzeigen“, mit der Sie die Beschränkung auf das gewählte Projekt vorübergehend aufheben; eingeschaltet heißt sie „Nur aktuelles Projekt anzeigen“. In den übrigen Ansichten mit einem Kartenfenster gibt es sie nicht.
@@ -86,7 +100,7 @@ In der Karte und in der Wertermittlung steht neben der Projektauswahl zusätzlic
 
 Oben rechts in der Kopfzeile finden Sie:
 
-- die aktuelle Softwareversion, z. B. „v1.7.0“ – geben Sie diese Angabe mit an, wenn Sie einen Fehler bei Ihrer Administration melden
+- die aktuelle Softwareversion, z. B. „v1.8.0“ – geben Sie diese Angabe mit an, wenn Sie einen Fehler bei Ihrer Administration melden
 - die Spracheinstellung: Deutsch („DE“) oder Englisch („EN“)
 - einen Verweis auf das Projekt bei GitHub, in dem Qonnectra entwickelt wird
 - „Hell-/Dunkelmodus umschalten“
@@ -116,12 +130,12 @@ Qonnectra lässt sich auch auf einem Tablet oder Smartphone bedienen. Unterhalb 
 
 ![Screenshot des Dashboards auf einem Smartphone mit Hervorhebung der Leiste am unteren Bildschirmrand](/images/manual/teil-a/login_mobile_bar.jpg){.small}
 
-„Mehr“ öffnet ein Menü mit allen übrigen Menüpunkten, gegliedert nach denselben Gruppen wie die Navigationsleiste am Rechner. Darunter stehen der Bereich „System“ mit „Einstellungen“ und, sofern hinterlegt, „Dokumentation“ sowie die Umschaltung zwischen „DE“ und „EN“. Ein Tippen neben das Menü schließt es wieder.
+„Mehr“ öffnet ein Menü mit den übrigen Menüpunkten, gegliedert nach denselben Gruppen wie die Navigationsleiste am Rechner. Darunter stehen der Bereich „System“ mit „Einstellungen“ und, sofern hinterlegt, „Dokumentation“ sowie die Umschaltung zwischen „DE“ und „EN“. Ein Tippen neben das Menü schließt es wieder.
 
 ![Screenshot des geöffneten Menüs „Weitere Seiten“ auf einem Smartphone mit den Gruppen „Funktionen“, „Rohr“ und „Kabel“](/images/manual/teil-a/login_mobile_more.jpg){.small}
 
 ::: info
-Ausgeblendete Einträge und zugeklappte Gruppen aus Abschnitt [Navigationsleiste anpassen](#_1-5-navigationsleiste-anpassen) wirken sich hier nicht aus: Das Menü „Mehr“ enthält immer alle Menüpunkte, für die Ihr Konto berechtigt ist.
+Das Menü „Mehr“ passen Sie an wie die Navigationsleiste am Rechner, siehe Abschnitt [Navigationsleiste anpassen](#_1-5-navigationsleiste-anpassen): Ein Tippen auf einen Gruppennamen klappt die Gruppe zu, das Symbol mit den Schiebereglern neben der Überschrift „Weitere Seiten“ blendet Einträge aus und wieder ein. Fehlt im Menü ein Eintrag, ist er ausgeblendet oder seine Gruppe zugeklappt. Die Leiste am unteren Bildschirmrand zeigt dagegen immer „Dashboard“ und „Karte“.
 :::
 
 Die Kopfzeile wird unterhalb von etwa 640 Pixeln auf das Nötigste gekürzt: Projektauswahl, „Hell-/Dunkelmodus umschalten“ und „Abmelden“ bleiben stehen, die Versionsanzeige, die Sprachumschaltung, die „Dokumentation“ und der Verweis auf GitHub entfallen. Sprache und Dokumentation erreichen Sie stattdessen über „Mehr“.

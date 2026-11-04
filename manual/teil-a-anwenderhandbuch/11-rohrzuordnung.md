@@ -69,7 +69,7 @@ Hatte das Rohr in diesem Trassensegment Mikrorohrverbindungen, löscht Qonnectra
 :::
 
 ::: warning
-Das Löschen setzt die Zugriffsstufe „Vollzugriff“ voraus; die Berechtigung zum Bearbeiten genügt dafür nicht. Fehlt sie, erscheint „Fehler beim Löschen der Trassenverbindung“, und die Zuordnung bleibt bestehen. Wenden Sie sich in diesem Fall an Ihre Administration.
+Das Löschen setzt die Zugriffsstufe „Vollzugriff“ voraus; die Berechtigung zum Bearbeiten genügt dafür nicht. Fehlt sie, verschwindet die Zeile kurz, kehrt dann zurück, und es erscheint „Fehler beim Löschen der Trassenverbindung“ mit dem Zusatz „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“ Die Zuordnung bleibt bestehen. Wenden Sie sich in diesem Fall an Ihre Administration.
 :::
 
 ## 11.3 Routing-Modus
