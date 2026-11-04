@@ -170,9 +170,13 @@ environment.
    it. If phase 8 stopped before the preview was deployed, say so next to the
    URL: the links of the table lead nowhere until „Deploy PR Preview“ is
    green.
-2. **What changed.** Diff against the branch point, not against the last
-   commit: `git diff --name-status main...HEAD -- manual/ public/ OUTLINE.md`,
-   then `git diff main...HEAD -- manual/` for the hunks.
+2. **What changed.** Diff against the branch point of the pull request, not
+   against the last commit, and against the remote base – a local `main` that
+   is behind lists everything merged since as a change of this branch:
+   `git fetch origin`, then
+   `git diff --name-status origin/main...HEAD -- manual/ public/ OUTLINE.md`
+   and `git diff origin/main...HEAD -- manual/` for the hunks (base branch
+   from `gh pr view --json baseRefName`).
    - A changed `.md` hunk → the nearest heading above it (`##`/`###`).
    - A changed image or video in `public/` → every place in `manual/` that
      embeds it (`grep -rn "<name>.jpg" manual/`) and the heading above that.
