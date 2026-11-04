@@ -7,7 +7,8 @@ description: Bring the manual, the capture specs and the published images up to 
 
 Raising the pin is its own piece of work (`CLAUDE.md`, „Local Qonnectra
 instance“). This is the procedure that has worked, in this order. Every phase
-ends in at least one commit; the user decides about pushing.
+ends in at least one commit. Nothing is pushed before phase 8; from there on
+the skill pushes the update branch itself.
 
 ## 1. Scan the release, before changing anything
 
@@ -120,5 +121,80 @@ manual warns about many of them. Check **every** `::: info`, `::: warning` and
 - `.claude/agents/*.md` if they quote paths or keys that changed.
 - Open points that stay open (undocumented features, flaky tests) go into
   `OUTLINE.md` notes or are reported to the user – not silently dropped.
-- Finally, give the user a summary: the commits, the test results, what is still
-  open, and that nothing has been pushed.
+## 8. Push and wait for the pipeline
+
+1. Push the update branch (`git push -u origin <branch>`), never with
+   `--force`, never to `main`. The review environment and the PR runs of
+   `test.yml` only exist for a pull request: if `gh pr view` finds none, open
+   one against `main` with `gh pr create` (title „Update to Qonnectra
+   vX.Y.Z“, body: the chapter table of phase 1 in short and the attribution
+   line).
+2. Wait for every check of the pull request: `gh pr checks --watch
+   --fail-fast`, run in the background – the „Captures“ job of `test.yml`
+   takes the better part of an hour, longer than a foreground command may
+   run. „Deploy PR Preview“ (`preview.yml`) has to be green as well, otherwise
+   the review URL of phase 9 leads nowhere.
+3. If a check fails, read why: `gh run view <run-id> --log-failed`, and for
+   „Captures“ the artifacts (`gh run download <run-id>`):
+   `screenshots-from-this-run` holds the images that differ from the
+   published ones, `playwright-report` the failing tests.
+4. Fix what can be fixed, locally and by the rules of this repo:
+   - Spelling, gender, `lint:captures` → fix the source, rerun the lint.
+   - „tests/captures.lock is stale“ → run the named specs locally,
+     `pnpm screenshots:publish`, commit images and lock together.
+   - Images that differ from the published ones → find the cause in the spec
+     or in the list „What the pipeline cannot make deterministic“ in
+     `CLAUDE.md`; fix the spec, recapture, publish. Never edit a file in
+     `public/` by hand, never raise the publish tolerance, never skip or
+     weaken a test to get green.
+   - A failing test → the same procedure as in phase 3.
+   Commit each fix on its own, push, and wait again.
+5. Stop after three rounds that end in red, and stop at once where the cause
+   lies outside the repo (runner outage, GitHub Pages not configured, a bug in
+   the app at the pinned commit). Do not guess further – report the failing
+   check, the log excerpt and what was tried.
+6. Then give the user a summary: the commits (including the fix commits of
+   this phase), the local test results, the result of every check with a link
+   to the run, and what is still open.
+
+## 9. Final output: where to review the changes
+
+The very last thing of the run, after the summary, is a table of every place in
+the manual that changed, so that the user can walk through them in the review
+environment.
+
+1. **Review URL.** `.github/workflows/preview.yml` deploys every pull request to
+   `https://geodock-gmbh.github.io/Qonnectra-docs/pr-<number>/` (and `main` to
+   `…/branch-main/`). Look the number up with
+   `gh pr view --json number,url` on the update branch – phase 8 has opened
+   it. If phase 8 stopped before the preview was deployed, say so next to the
+   URL: the links of the table lead nowhere until „Deploy PR Preview“ is
+   green.
+2. **What changed.** Diff against the branch point, not against the last
+   commit: `git diff --name-status main...HEAD -- manual/ public/ OUTLINE.md`,
+   then `git diff main...HEAD -- manual/` for the hunks.
+   - A changed `.md` hunk → the nearest heading above it (`##`/`###`).
+   - A changed image or video in `public/` → every place in `manual/` that
+     embeds it (`grep -rn "<name>.jpg" manual/`) and the heading above that.
+   - A renamed or new heading, a removed section, a changed `OUTLINE.md` entry
+     is a row of its own.
+3. **The table**, one row per section, sorted by chapter number:
+
+   | Kapitel | Abschnitt | Was geändert wurde | Link |
+   |---|---|---|---|
+   | 5 Karte | 5.4 Rohrübersicht und Kabelübersicht einer Trasse | Hinweis entfernt; Bild `map_trench_conduits.jpg` neu | <URL> |
+
+   - „Was geändert wurde“ in one line, prefixed with the kind: Text, Hinweis
+     (note block), Bild, Video, Überschrift, Abschnitt neu/entfernt.
+   - The link is the full review URL of the page plus the anchor:
+     `<review URL>manual/<part folder>/<file>.html#<anchor>`. VitePress builds
+     without `cleanUrls`, so the page ends in `.html`; take the anchor from the
+     heading the way VitePress slugs it (lower case, spaces and dots to `-`,
+     umlauts lose their dots, leading `_` before a digit:
+     `## 32.3 Berechtigungsprüfung in der Schnittstelle` →
+     `#_32-3-berechtigungsprufung-in-der-schnittstelle`). Check one
+     anchor against `pnpm build` output (`.vitepress/dist/`) before handing
+     the table over.
+   - Images whose only change is a new capture with no visible difference do
+     not exist – the publish gate does not write them. Every changed image is
+     therefore a row.
