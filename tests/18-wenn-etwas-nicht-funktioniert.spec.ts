@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from '../playwright/test'
 
 import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "18. Wenn etwas nicht funktioniert" in the manual
 // (manual/teil-a-anwenderhandbuch/18-wenn-etwas-nicht-funktioniert.md).
@@ -24,6 +25,15 @@ import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwrig
 //
 // Publish to public/images/ with: pnpm screenshots:publish 18-wenn-etwas-nicht-funktioniert
 const CHAPTER = '18-wenn-etwas-nicht-funktioniert'
+
+/**
+ * The message of a refused action. Since v1.8.0 every view that writes through
+ * a remote function maps a 403 to `message_error_permission_denied`
+ * (src/lib/remote/shared/remote-error.ts); it replaced „Sie sind nicht
+ * berechtigt, diese Aktion durchzuführen.“
+ */
+const PERMISSION_DENIED =
+  'Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.'
 
 /** The address the two message images are taken of, as in tests/16-adressen.spec.ts. */
 const ADDRESS = { uuid: '613504f0-d3a3-48e5-9a83-b886b51f8345', title: 'Toft 15', units: 5 }
@@ -68,7 +78,7 @@ function version(page: Page): Locator {
 
 /** Opens the detail page of ADDRESS. */
 async function openAddress(page: Page) {
-  await page.goto(`/address/2/${ADDRESS.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}`))
 
   await expect(page.getByRole('heading', { name: ADDRESS.title, level: 1 })).toBeVisible()
   await expect(page.locator('div.map canvas').first()).toBeVisible()
@@ -128,7 +138,7 @@ test('18.3 Meldung über das fehlende Recht', async ({ page }) => {
   await page.getByRole('button', { name: 'Löschen', exact: true }).last().click()
 
   await expect(
-    page.getByText('Sie sind nicht berechtigt, diese Aktion durchzuführen.'),
+    page.getByText(PERMISSION_DENIED),
   ).toBeVisible()
   // Nothing was deleted - that is the statement of the section.
   await expect(rows).toHaveCount(ADDRESS.units)
@@ -141,15 +151,14 @@ test('18.3 Meldung über das fehlende Recht', async ({ page }) => {
 
 test('18.4 Leere Karte mit Projektauswahl und Legende', async ({ page }) => {
   // The view goes in through addInitScript, i.e. before every load of the
-  // document: the app writes mapCenter/mapZoom back on every `moveend`, and a
+  // document: the app writes the map view (`mapView:2`) back on every `moveend`, and a
   // write-back between setting and reloading would drop the seed.
   await page.addInitScript((view) => {
-    localStorage.setItem('mapCenter', JSON.stringify(view.center))
-    localStorage.setItem('mapZoom', JSON.stringify(view.zoom))
+    localStorage.setItem('mapView:2', JSON.stringify({ zoom: view.zoom, center: view.center }))
   }, VIEW_FAR)
 
-  await page.goto('/map')
-  await expect(page).toHaveURL(/\/map\/2(\/|$)/)
+  await page.goto(projectPath('/map'))
+  await expect(page).toHaveURL(projectUrl('/map'))
   // With a running tileserver (vector tiles) OpenLayers creates a second
   // canvas, without it (OSM raster fallback) only one - hence .first().
   await expect(page.locator('div.map canvas').first()).toBeVisible()
@@ -173,8 +182,8 @@ test('18.4 Leere Karte mit Projektauswahl und Legende', async ({ page }) => {
 })
 
 test('18.5 Version und Projekt in der Kopfzeile', async ({ page }) => {
-  await page.goto('/dashboard')
-  await expect(page).toHaveURL(/\/dashboard\/2(\/|$)/)
+  await page.goto(projectPath('/dashboard'))
+  await expect(page).toHaveURL(projectUrl('/dashboard'))
   await page.waitForLoadState('networkidle')
 
   await disableAnimations(page)

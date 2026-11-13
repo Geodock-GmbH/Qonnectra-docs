@@ -165,11 +165,17 @@ function resultSection(page: Page, heading: string): Locator {
     .locator('xpath=ancestor::section[1]')
 }
 
+/**
+ * How many search responses stableSearchOrder() has sorted on the current
+ * page; set by openTrace().
+ */
+let sortedSearches: () => number = () => 0
+
 /** Opens the start page of the fiber trace. */
 async function openTrace(page: Page) {
   // The hits of "Toft 1" all score the same and come back in an order of
   // Postgres' choosing; see playwright/stable-search.ts.
-  await stableSearchOrder(page)
+  sortedSearches = await stableSearchOrder(page)
   await page.goto('/trace')
   await expect(page.getByRole('heading', { name: 'Faserweg' })).toBeVisible()
   await page.waitForLoadState('networkidle')
@@ -180,10 +186,13 @@ async function openTrace(page: Page) {
 /**
  * Opens a result page and waits until it is fully built.
  *
- * The trace runs on the server (`+page.server.ts`), so the page arrives
- * complete - only the map of section 15.6 loads its tiles afterwards.
+ * Since v1.8.0 the page arrives empty and fetches the trace through a remote
+ * function (`getFiberTrace`, `getSignalAnalysis` in src/lib/remote/trace/),
+ * so the wait is for a heading of the result. "Faserwege" closes every trace result; the block
+ * "Statistiken" that used to open it is gone. The map of section 15.6 loads its
+ * tiles afterwards.
  */
-async function openResult(page: Page, path: string, heading = 'Statistiken') {
+async function openResult(page: Page, path: string, heading = 'Faserwege') {
   await page.goto(path)
   await expect(page.getByRole('heading', { name: heading, exact: true })).toBeVisible({
     timeout: 60_000,
@@ -216,6 +225,11 @@ test('15.1 Suchergebnisse einer Adresse', async ({ page }) => {
   // result list, not one hit.
   const results = page.getByRole('button').filter({ hasText: ADDRESS.result })
   await expect(results.first()).toBeVisible({ timeout: 30_000 })
+  expect(
+    sortedSearches(),
+    'The hits did not pass through stableSearchOrder() - they would keep the ' +
+      'order of chance (playwright/stable-search.ts).',
+  ).toBeGreaterThan(0)
   await moveCursorAway(page)
 
   const spotlightOff = await spotlight(page, searchCard(page))
@@ -251,7 +265,7 @@ test('15.2 Ergebnis einer Adresse', async ({ page }) => {
 
   // Three residential units, one fiber each - the whole result including the
   // table of fiber paths fits into the viewport. The count is read below the
-  // table; the statistics card above carries the same words.
+  // table.
   await expect(resultSection(page, 'Faserwege').getByText('3 Fasern')).toBeVisible()
   await shoot(page, CHAPTER, 'trace_result')
 })
@@ -305,7 +319,7 @@ test('15.2 Tabelle der Faserwege', async ({ page }) => {
 })
 
 test('15.4 Modus „Signalanalyse"', async ({ page }) => {
-  // The signal analysis has no section "Statistiken" - it opens with the signal
+  // The signal analysis has no section "Faserwege" - it opens with the signal
   // source instead.
   await openResult(page, `/trace/fiber/${targets.fiberUuid}?mode=signal`, 'Signalquelle')
 

@@ -13,6 +13,7 @@ import {
   type SpotlightEllipse,
 } from '../playwright/manual-shots'
 import { waitForBaseMapSettled } from '../playwright/stable-map'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "5. Karte" in the manual
 // (manual/teil-a-anwenderhandbuch/05-karte.md). Produces all images of the
@@ -69,19 +70,18 @@ const SEARCH_TERM_MANY = 'Nieharde'
  *
  * The view is set through `addInitScript`, i.e. before every load of the
  * document. The obvious route - load, set `localStorage`, reload - has a race
- * condition: the app writes `mapCenter`/`mapZoom` back on every `moveend`. If
+ * condition: the app writes the map view (`mapView:2`) back on every `moveend`. If
  * that write-back lands between setting and reloading, the seed is gone again
  * and the map starts at the overview instead of the requested spot. In tests
  * that click on a particular spot, the click then hits nothing.
  */
 async function openMap(page: Page, view = VIEW.overview) {
   await page.addInitScript((v) => {
-    localStorage.setItem('mapCenter', JSON.stringify(v.center))
-    localStorage.setItem('mapZoom', JSON.stringify(v.zoom))
+    localStorage.setItem('mapView:2', JSON.stringify({ zoom: v.zoom, center: v.center }))
   }, view)
 
-  await page.goto('/map')
-  await expect(page).toHaveURL(/\/map\/2(\/|$)/)
+  await page.goto(projectPath('/map'))
+  await expect(page).toHaveURL(projectUrl('/map'))
 
   // With a running tileserver (vector tiles) OpenLayers creates a second
   // canvas, without it (OSM raster fallback) only one - hence .first().
@@ -739,7 +739,12 @@ async function selectAtCentre(page: Page, expected: string) {
     [0, 8],
   ]) {
     await map.click({ position: { x: box.width / 2 + dx, y: box.height / 2 + dy } })
-    if ((await title.isVisible()) && (await title.textContent()) === expected) break
+    // toHaveText and not textContent(): the title carries the whitespace of
+    // its template and arrives after the details have loaded (v1.8.0).
+    const hit = await expect(title)
+      .toHaveText(expected, { timeout: 3000 })
+      .then(() => true, () => false)
+    if (hit) break
   }
 
   await expect(

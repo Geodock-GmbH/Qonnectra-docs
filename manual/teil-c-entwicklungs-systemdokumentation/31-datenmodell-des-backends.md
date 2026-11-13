@@ -44,7 +44,7 @@ Eindeutig sind die Namen der Objekte innerhalb eines Projekts:
 
 Der Kabelname ist die Ausnahme: Ein Kabel „K-001“ kann es in der ganzen Installation nur einmal geben.
 
-Projektbezogene Einstellungen hängen ebenfalls an `projects`: `network_schema_settings` und `pipe_branch_settings` mit dem Projekt als Primärschlüssel, also genau einem Eintrag je Projekt, sowie `valuation_cost_rate` und `wms_source` mit beliebig vielen. Was sie bewirken, beschreibt Kapitel [Projektbezogene Konfiguration](../teil-b-betrieb-admin-qgis/22-projektbezogene-konfiguration.md).
+Projektbezogene Einstellungen hängen ebenfalls an `projects`: `network_schema_settings` und `pipe_branch_settings` mit dem Projekt als Primärschlüssel, also genau einem Eintrag je Projekt, sowie `valuation_cost_rate` und `wms_source` mit beliebig vielen. Was sie bewirken, beschreibt Kapitel [Projektbezogene Konfiguration](../teil-b-betrieb-admin-qgis/22-projektbezogene-konfiguration.md). `network_schema_settings` hält außerdem, wie neue Netzknoten im Netzschema platziert werden: den geografischen Punkt, der im Schema der Ursprung ist (`canvas_center_x`, `canvas_center_y`), und den Maßstab (`canvas_scale`, Vorgabe 0,5 Einheiten je Meter), siehe Abschnitt [Netzknotenstruktur](#_31-5-netzknotenstruktur-container-slots-und-komponenten). `configured` hält fest, ob die ausgeblendeten Netzknotentypen eingerichtet sind; bis dahin warnt das Netzschema.
 
 ## 31.2 Geometriemodelle und SRID
 
@@ -76,6 +76,8 @@ Ungültige Geometrien weist die Datenbank zurück. Ein Trigger auf `trench` verl
 **`trench`** ist die Trasse: Geometrie, Bauart, Oberfläche, Status, Phase, Eigentümer und Baufirma, Verlegetiefe, Datum. Der Primärschlüssel ist eine UUID (`uuid`), die sichtbare Kennung steht in `id_trench`, siehe Abschnitt [Migrationen, Datenbank-Trigger und Signale](#_31-9-migrationen-datenbank-trigger-und-signale). `length` berechnet ein Trigger bei jedem Speichern aus der Geometrie; ein Wert, der von außen kommt, wird überschrieben.
 
 **`conduit`** ist das Rohr. Es hat keinen Ort, sondern liegt in Trassen; die Zuordnung steht in **`trench_conduit_connect`** (`uuid_trench`, `uuid_conduit`), einer eigenen Tabelle mit eigener UUID statt eines `ManyToManyField`. Wird eine Trasse oder ein Rohr gelöscht, löscht die Datenbank die Zuordnung mit.
+
+Trasse, Rohr, Kabel und Netzknoten tragen je einen **Förderstatus** (`funding_status`): ja, nein oder leer für unbekannt.
 
 **`microduct`** ist ein Mikrorohr eines Rohrs, mit Nummer (`number`), Farbe (`color`), Status und optional dem Netzknoten, an dem es als Hausanschluss endet (`uuid_node`). Die Mikrorohre entstehen beim Anlegen eines Rohrs aus der Farbzuordnung seines Rohrtyps (`conduit_type_color_mapping`), siehe Abschnitt [Migrationen, Datenbank-Trigger und Signale](#_31-9-migrationen-datenbank-trigger-und-signale). `color` enthält den deutschen Namen der Farbe als Text, keinen Verweis auf `attributes_microduct_color`; eine spätere Umbenennung der Farbe erreicht bestehende Mikrorohre nicht.
 
@@ -112,7 +114,12 @@ Die Datenbank schützt die Struktur gegen Änderungen, die Kabel abreißen würd
 - den Wechsel des Netzknotentyps, solange der Netzknoten zugleich untergeordnete Netzknoten und Kabel hat,
 - den Wechsel des übergeordneten Netzknotens, solange Kabel daran hängen.
 
-Ein weiterer Trigger bewahrt die Lage im Netzschema: Setzt ein Werkzeug `canvas_x` oder `canvas_y` auf leer, etwa weil die Spalte in QGIS fehlt, behält der Netzknoten den alten Wert. Eine Lage im Netzschema lässt sich deshalb nicht zurücksetzen, indem man sie leert; neu setzt sie der Abgleich aus Abschnitt [Kartenkoordinaten mit dem Schema synchronisieren](../teil-a-anwenderhandbuch/14-netzschema.md#_14-11-kartenkoordinaten-mit-dem-schema-synchronisieren).
+Zwei weitere Trigger bestimmen die Lage im Netzschema:
+
+- **Beim Anlegen** rechnet `tg_place_node_on_canvas` die Lage aus der Geometrie: Abstand zum Ursprung des Projekts mal Maßstab, beides aus `network_schema_settings`, die Y-Achse umgekehrt. Hat das Projekt noch keinen Ursprung, wird der erste Netzknoten dazu, und fehlt der Eintrag in `network_schema_settings`, legt der Trigger ihn an. Werte für `canvas_x` und `canvas_y`, die mit dem Einfügen ankommen, ersetzt er, und `child_canvas_x`, `child_canvas_y` leert er – so landet auch ein in QGIS kopierter Netzknoten an seiner eigenen Stelle statt auf der des Originals. Weil der Trigger in der Datenbank läuft, haben auch Netzknoten aus QGIS sofort eine Lage im Schema.
+- **Beim Ändern** bewahrt `tg_preserve_canvas_coordinates` die Lage: Setzt ein Werkzeug `canvas_x` oder `canvas_y` auf leer, etwa weil die Spalte in QGIS fehlt, behält der Netzknoten den alten Wert.
+
+Nach dem Anlegen folgt die Lage im Schema der Geometrie nicht mehr. Wer einen Netzknoten auf der Karte verschiebt, verschiebt ihn im Netzschema nicht mit, und durch Leeren lässt sich die Lage nicht neu berechnen; sie ändert sich nur, wenn ein Wert geschrieben wird, etwa durch Verschieben im Netzschema.
 
 ## 31.6 Adresse, Wohneinheit, Gebiet, Leitungsauskunft und Anhänge
 
@@ -153,7 +160,7 @@ Was beim Löschen eines verwendeten Werts geschieht, unterscheidet sich je Liste
 
 **Rechte.** Die Rechte einer Gruppe stehen in zwei Tabellen, beide mit einem Fremdschlüssel auf die Gruppe von Django (`auth_group`):
 
-- **`model_permission`** – je Gruppe und Modell eine Zeile mit `model_name` (der Name des Modells in Kleinbuchstaben als freier Text, etwa `trench` oder `wmssource` – nicht der Tabellenname `wms_source`) und `access_level` (`none`, `view`, `edit`, `full`).
+- **`model_permission`** – je Gruppe und Modell eine Zeile mit `model_name` (der Name des Modells in Kleinbuchstaben, etwa `trench` oder `wmssource` – nicht der Tabellenname `wms_source`) und `access_level` (`none`, `view`, `edit`, `full`). Die Zeile mit `model_name` `*` gilt für jedes Modell, für das die Gruppe keine eigene Zeile hat.
 - **`route_permission`** – je Gruppe und Pfadmuster eine Zeile mit `route_pattern` und `allowed`.
 
 Was die Stufen erlauben und wie Muster aussehen, beschreibt Kapitel [Rollen und Rechte](../teil-b-betrieb-admin-qgis/19-rollen-und-rechte.md). Wo das Backend die Modellrechte prüft, beschreibt Abschnitt [Berechtigungsprüfung in der Schnittstelle](./32-rest-api.md#_32-3-berechtigungsprufung-in-der-schnittstelle), wo das Frontend die Routenrechte prüft, Abschnitt [Anmeldung, Token-Erneuerung und Routenschutz im Frontend](./33-frontend.md#_33-8-anmeldung-token-erneuerung-und-routenschutz-im-frontend). Eine geänderte Stufe greift erst nach bis zu fünf Minuten überall, weil jeder Prozess des Backends die Rechte zwischenspeichert; wie, steht im Abschnitt zur Berechtigungsprüfung.
@@ -165,7 +172,7 @@ Was die Stufen erlauben und wie Muster aussehen, beschreibt Kapitel [Rollen und 
 - **`wms_source`** und **`wms_layer`** – externe Kartendienste je Projekt und ihre Layer, siehe Abschnitt [Externe WMS-Quellen als Hintergrund einbinden](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md#_27-4-externe-wms-quellen-als-hintergrund-einbinden). Das Passwort eines Dienstes steht verschlüsselt in `_password`, mit Fernet und dem Schlüssel aus `FIELD_ENCRYPTION_KEY`. Geht der Schlüssel verloren oder ändert er sich, lassen sich die gespeicherten Passwörter nicht mehr lesen und müssen neu eingegeben werden.
 - **`qgis_projects`** und **`qgis_project_data_files`** – hinterlegte QGIS-Projekte und ihre Datendateien, siehe Abschnitt [QGIS-Projekte in Qonnectra hinterlegen](../teil-b-betrieb-admin-qgis/27-qgis-server-und-kartendienste.md#_27-1-qgis-projekte-in-qonnectra-hinterlegen). Beim Löschen eines Eintrags löscht ein Signal auch die Datei.
 
-**Betrieb.** **`log_entry`** nimmt die Protokolle von Backend, Frontend und QGIS Server auf (`source`), siehe Abschnitt [Protokolle auswerten](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md#_28-5-protokolle-auswerten). **`canvas_sync_status`** ist eine Sperre, damit je Projekt nur ein Abgleich der Kartenkoordinaten mit dem Netzschema zugleich läuft, siehe Abschnitt [Kartenkoordinaten mit dem Schema synchronisieren](../teil-a-anwenderhandbuch/14-netzschema.md#_14-11-kartenkoordinaten-mit-dem-schema-synchronisieren).
+**Betrieb.** **`log_entry`** nimmt die Protokolle von Backend, Frontend und QGIS Server auf (`source`), siehe Abschnitt [Protokolle auswerten](../teil-b-betrieb-admin-qgis/28-betrieb-der-instanz.md#_28-5-protokolle-auswerten).
 
 **Verlauf.** Achtzehn Modelle führen mit django-simple-history einen Änderungsverlauf: die Fachobjekte (`trench`, `conduit`, `microduct`, `cable`, `fiber`, `fiber_splice`, `node`, `container`, `address`, `residential_unit`, `area`), die Leitungsauskunft mit ihren Bereichen sowie `projects`, `flags`, `container_type`, `wms_source` und `wms_layer`. Jedes hat eine Tabelle `api_historical` mit dem Klassennamen des Modells in Kleinbuchstaben, etwa `api_historicalwmssource`, mit allen Spalten des Modells und dazu Zeitpunkt, Art der Änderung und Konto. Das Konto ermittelt die Middleware `HistoryRequestMiddleware` aus der Anfrage. Wie der Verlauf im Administrationsbereich erscheint, beschreibt Abschnitt [Änderungsverlauf eines Objekts einsehen](../teil-b-betrieb-admin-qgis/20-administrationsbereich.md#_20-3-anderungsverlauf-eines-objekts-einsehen).
 
@@ -173,7 +180,7 @@ Der Verlauf entsteht in Django, nicht in der Datenbank. Was QGIS oder ein andere
 
 ## 31.9 Migrationen, Datenbank-Trigger und Signale
 
-**Migrationen.** Die App hat zum Stand des Handbuchs 74 Migrationen, `0001_initial` bis `0074`. 35 davon enthalten SQL (`RunSQL`), vor allem für Trigger, Funktionen und Indizes, die Django nicht selbst beschreiben kann. Datenmigrationen (`RunPython`) legen die Gruppen und ihre Rechte an (`0058`, `0068`, `0071`) und überführen die Kostenkategorien der Wertermittlung in freie Namen (`0073`); die Umstellung bestehender Kennungen auf die neuen Formate (`0035`, `0038`, `0045`) geschieht in SQL. Einige Migrationen nehmen frühere Trigger und Sichten wieder zurück; was heute gilt, zeigt die Datenbank selbst:
+**Migrationen.** Die App hat zum Stand des Handbuchs 78 Migrationen, `0001_initial` bis `0078`. 37 davon enthalten SQL (`RunSQL`), vor allem für Trigger, Funktionen und Indizes, die Django nicht selbst beschreiben kann. Datenmigrationen (`RunPython`) legen die Gruppen und ihre Rechte an (`0058`, `0068`, `0071`, ergänzt in `0078`) und überführen die Kostenkategorien der Wertermittlung in freie Namen (`0073`); die Umstellung bestehender Kennungen auf die neuen Formate (`0035`, `0038`, `0045`) geschieht in SQL. Einige Migrationen nehmen frühere Trigger und Sichten wieder zurück; was heute gilt, zeigt die Datenbank selbst:
 
 ```sql
 select tgrelid::regclass, tgname from pg_trigger where not tgisinternal order by 1, 2;
@@ -191,6 +198,7 @@ select tgrelid::regclass, tgname from pg_trigger where not tgisinternal order by
 | `node` | `tg_01_delete_microduct_connection` | ebenso für Netzknoten |
 | `trench_conduit_connect` | `tg_01_delete_microduct_connection` | löscht Mikrorohrverbindungen, wenn eine Rohrzuordnung wegfällt, siehe unten |
 | `node` | `tg_prevent_…` (vier) | schützt Netzknoten mit Kabeln, siehe Abschnitt [Netzknotenstruktur](#_31-5-netzknotenstruktur-container-slots-und-komponenten) |
+| `node` | `tg_place_node_on_canvas` | setzt beim Anlegen die Lage im Netzschema aus der Geometrie, siehe Abschnitt [Netzknotenstruktur](#_31-5-netzknotenstruktur-container-slots-und-komponenten) |
 | `node` | `tg_preserve_canvas_coordinates` | behält die Lage im Netzschema, wenn sie leer geschrieben wird |
 | `address` | `tg_00_generate_id_address_if_null` | vergibt `id_address`, wenn der Wert fehlt |
 | `residential_unit` | `tg_00_generate_id_residential_unit_if_null` | vergibt `id_residential_unit`, wenn der Wert fehlt |

@@ -14,13 +14,16 @@
 // draws the outline - three places changing at once, in a view where every
 // other map in the app would open the info box instead.
 //
-// Nothing is written: the view only calculates, and this spec stops before
-// "Berechnen".
+// Nothing is written: the view only calculates. Since v1.8.0 it does so by
+// itself after every click; the result below the list changes along, outside
+// the crop.
 //
 // Publish to public/videos/ with: pnpm screenshots:publish 09-wertermittlung
 import { expect, test, type Page } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { projectPath } from '../playwright/project'
+import { CAPTURE_DATE } from '../playwright/stable-dates'
 
 const CHAPTER = '09-wertermittlung'
 
@@ -36,7 +39,7 @@ test.use({ video: { mode: 'on', size: { width: 1792, height: 1120 } } })
  * viewport.
  *
  * Hard-coded and not measured: the map position is seeded by
- * playwright/auth.setup.ts (mapCenter/mapZoom), so the same pixel always hits
+ * playwright/auth.setup.ts (`mapView:2`), so the same pixel always hits
  * the same area. Which of the two an unchecked point belongs to is not obvious
  * from the map - the spec therefore checks after every click that the intended
  * area is the one that got ticked.
@@ -53,18 +56,30 @@ const AREA_POINTS = [
  * (measured). Both together are 1446 px wide - too wide for the around 690 px
  * the manual renders a video at. 1100 px starting at the left edge of the map
  * hold the whole map plus the area list of the panel, which is what the flow is
- * about. The button "Berechnen" and the result table stay outside; they are the
- * subject of the still images of the sections 9.4 to 9.6.
+ * about. The result table stays outside; it is the subject of the still images
+ * of the sections 9.4 to 9.6.
  */
 const CROP = { x: 314, y: 106, width: 1100, height: 800 }
 
 /** Seconds of still image before the first step. */
 const LEAD_IN = 1.0
 
-/** Opens the valuation and waits for the map tiles. */
+/**
+ * The year the projection starts from, pinned in the URL for the same reason
+ * as in tests/09-wertermittlung.spec.ts: the default is the current year.
+ */
+const BASE_YEAR = new Date(CAPTURE_DATE).getFullYear()
+
+/**
+ * Opens the valuation and waits for the map tiles and for the result of the
+ * whole project, which the view calculates by itself on opening.
+ */
 async function openValuation(page: Page) {
-  await page.goto('/valuation')
-  await expect(page.getByRole('button', { name: 'Berechnen' })).toBeVisible({ timeout: 30_000 })
+  await page.goto(`${projectPath('/valuation')}?baseYear=${BASE_YEAR}`)
+  await expect(page.getByRole('cell', { name: 'Gesamtinvestition' })).toBeVisible({
+    timeout: 60_000,
+  })
+  await expect(page.getByText('Berechne …')).toHaveCount(0)
   await expect(page.locator('div.map canvas').first()).toBeVisible({ timeout: 30_000 })
   await page.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.

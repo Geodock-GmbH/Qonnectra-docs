@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from '../playwright/test'
 
 import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
+import { projectPath, projectUrl } from '../playwright/project'
 
 // Screenshots for chapter "16. Adressen" in the manual
 // (manual/teil-a-anwenderhandbuch/16-adressen.md). Produces all images of the
@@ -71,8 +72,8 @@ const NEW_UNIT = { floor: '6', side: 'links', buildingSection: 'A', externalId: 
 
 /** Opens the address list of the test project. */
 async function openAddressList(page: Page) {
-  await page.goto('/address')
-  await expect(page).toHaveURL(/\/address\/2(\?|$)/)
+  await page.goto(projectPath('/address'))
+  await expect(page).toHaveURL(projectUrl('/address'))
 
   // A full first page - ADDRESS itself is not on it: the list is sorted by
   // street, and its street sits on a later page.
@@ -83,7 +84,7 @@ async function openAddressList(page: Page) {
 
 /** Opens the detail page of ADDRESS. */
 async function openAddress(page: Page) {
-  await page.goto(`/address/2/${ADDRESS.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}`))
 
   await expect(page.getByRole('heading', { name: ADDRESS.title, level: 1 })).toBeVisible()
   // The small map in "Standort" is built in onMount and only then replaces the
@@ -197,6 +198,15 @@ test('16.3 Fenster „Wohneinheit hinzufügen"', async ({ page }) => {
   await openAddress(page)
 
   await scrollTo(page, section(page, 'Wohneinheiten'))
+
+  // The buttons of the window sit at fractional positions (x 911.16 for
+  // "Schließen"), and whether Chromium rasterises the window on a layer of its
+  // own or into the page below the blurred backdrop was decided anew on every
+  // run - with the same DOM, scroll offset and timing. The two outcomes differ
+  // in the antialiasing of the rounded corners, and CI flipped between them
+  // (1425 pixels). Forcing the layer makes it the same every time; the
+  // difference to either outcome is half a device pixel, nothing a reader sees.
+  await page.addStyleTag({ content: '[role="dialog"] { will-change: transform; }' })
   await page.getByRole('button', { name: 'Hinzufügen' }).click()
 
   const dialog = page.getByRole('dialog')
@@ -215,7 +225,7 @@ test('16.3 Fenster „Wohneinheit hinzufügen"', async ({ page }) => {
 })
 
 test('16.3 Wohneinheit im Detail', async ({ page }) => {
-  await page.goto(`/address/2/${ADDRESS.uuid}/unit/${UNIT.uuid}`)
+  await page.goto(projectPath(`/address/${ADDRESS.uuid}/unit/${UNIT.uuid}`))
 
   await expect(page.getByRole('heading', { name: UNIT.id, level: 1 })).toBeVisible()
   await page.waitForLoadState('networkidle')

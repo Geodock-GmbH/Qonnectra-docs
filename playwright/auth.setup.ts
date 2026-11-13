@@ -41,6 +41,7 @@ import { expect, request as playwrightRequest, test as setup } from '@playwright
 import type { APIRequestContext, Browser, Cookie } from '@playwright/test'
 
 import { credentialsFor, localApp, type Credentials, type Role } from './local-app'
+import { MAP_VIEW_KEY, TEST_PROJECT_ID, projectPath, projectUrl } from './project'
 
 /** Where the logged-in state of a role goes; see the header comment. */
 const AUTH_STATE: Record<Role, string> = {
@@ -48,8 +49,6 @@ const AUTH_STATE: Record<Role, string> = {
   admin: 'admin-auth-state.json',
 }
 
-/** Project "Testprojekt" from scripts/qonnectra-demo-data/testprojekt-export.json. */
-const TEST_PROJECT_ID = '2'
 
 /**
  * Map centre and zoom at which the complete network of the test project is in
@@ -262,9 +261,10 @@ async function storeLoggedInState(
     ...cookies,
     ...adminCookies,
     {
-      // Controls which project the app shows; a UI login would write "1"
-      // (project "Default") here.
-      name: 'selected-project',
+      // The project the app remembers; it decides where `/` lands and which
+      // project the global views (Leitungsauskunft, Faserweg) default to. The
+      // project views carry their project in the path (playwright/project.ts).
+      name: 'last-project',
       value: TEST_PROJECT_ID,
       domain: new URL(appUrl).hostname,
       path: '/',
@@ -280,7 +280,7 @@ async function storeLoggedInState(
   //
   // Seeded through an init script, i.e. before any script of the app runs in
   // the document, and never by writing into a loaded page. The app reads
-  // mapCenter/mapZoom when its stores initialise and writes them back on every
+  // the view of a project (mapView:<id>) when the map initialises and writes them back on every
   // `moveend` of the map - and `/` redirects to the map. Seeding a loaded page
   // therefore raced the first moveend, and in one run of ten the app won:
   // auth-state.json then carried [0, 0] at zoom 2.5, and every spec that relies
@@ -288,15 +288,14 @@ async function storeLoggedInState(
   // drew its inquiry area into the sea, chapter 9 found no highlighted area
   // and failed. The same rule as for the specs, see CLAUDE.md.
   await context.addInitScript(
-    ({ center, zoom }) => {
+    ({ key, center, zoom }) => {
       localStorage.setItem('PARAGLIDE_LOCALE', 'de')
       localStorage.setItem('mode', 'light')
       localStorage.setItem('lightSwitchMode', JSON.stringify('light'))
       localStorage.setItem('basemapTheme', JSON.stringify('light'))
-      localStorage.setItem('mapCenter', JSON.stringify(center))
-      localStorage.setItem('mapZoom', JSON.stringify(zoom))
+      localStorage.setItem(key, JSON.stringify({ zoom, center }))
     },
-    { center: MAP_CENTER, zoom: MAP_ZOOM },
+    { key: MAP_VIEW_KEY, center: MAP_CENTER, zoom: MAP_ZOOM },
   )
 
   // 5. Load the map once. Its stores write their own keys into localStorage on
@@ -308,14 +307,15 @@ async function storeLoggedInState(
   //    back of the view on `moveend` is harmless here, the map starts at the
   //    seeded view and writes the same values.
   const page = await context.newPage()
-  await page.goto(`${appUrl}/map`, { waitUntil: 'domcontentloaded' })
+  await page.goto(`${appUrl}${projectPath('/map')}`, { waitUntil: 'domcontentloaded' })
   await expect(page.locator('div.map canvas').first()).toBeVisible({ timeout: 30_000 })
   await page.waitForFunction(() => localStorage.getItem('nodeTypeStyles') !== null)
 
   // 6. Cross-check: does the app really show the test project?
-  await page.goto(`${appUrl}/dashboard`, { waitUntil: 'domcontentloaded' })
+  //    `/` lands on the map of the remembered project (cookie above).
+  await page.goto(`${appUrl}/`, { waitUntil: 'domcontentloaded' })
   await expect(page, 'The test project was not opened after login.').toHaveURL(
-    new RegExp(`/dashboard/${TEST_PROJECT_ID}(/|$)`),
+    projectUrl('/map'),
   )
 
   // 7. And does the state really open the administration? Without the session

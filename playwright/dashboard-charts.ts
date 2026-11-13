@@ -10,11 +10,36 @@
 import type { Locator } from '@playwright/test'
 
 /**
- * Colour of the bars in the chart "Gesamtlänge pro Oberfläche" (`#0ea5e9`, see
- * TrenchStatistics.svelte). Every chart of the dashboard has its own colour;
- * the canvas is searched for exactly this one.
+ * Colour of the bars of the single-series charts, read from the page.
+ *
+ * Up to v1.7 every chart had a hard-coded colour (`#0ea5e9` for "Gesamtlänge
+ * pro Oberfläche"). Since v1.8.0 Chart.svelte draws with
+ * `readChartTheme().series` (local-app/frontend/src/lib/utils/chartTheme.ts):
+ * the primary colour of the Skeleton theme at 20 % opacity. It is resolved here
+ * the same way the app does it - through the cascade of the chart's host
+ * element and a one-pixel canvas - so a change of the theme does not need a
+ * change here. getImageData() returns the colour with the alpha divided out,
+ * so a bar pixel reads back as these RGB values with an alpha of about 51.
  */
-export const CHART_BLUE: [number, number, number] = [14, 165, 233]
+export async function seriesColour(canvas: Locator): Promise<[number, number, number]> {
+  return canvas.evaluate((element) => {
+    const host = element.parentElement ?? document.body
+    const probe = document.createElement('span')
+    probe.style.color = 'var(--color-primary-500)'
+    host.appendChild(probe)
+    const computed = getComputedStyle(probe).color
+    probe.remove()
+
+    const pixel = document.createElement('canvas')
+    pixel.width = pixel.height = 1
+    const ctx = pixel.getContext('2d', { willReadFrequently: true })
+    if (!ctx) return [0, 0, 0] as [number, number, number]
+    ctx.fillStyle = computed
+    ctx.fillRect(0, 0, 1, 1)
+    const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data
+    return [r, g, b] as [number, number, number]
+  })
+}
 
 export interface Bar {
   /** Point in the window where the bar is hit reliably (CSS pixels). */
@@ -56,6 +81,7 @@ export async function measureBars(
       for (let x = 0; x < surface.width; x++) {
         const i = (y * surface.width + x) * 4
         if (
+          data[i + 3] > 0 &&
           Math.abs(data[i] - c[0]) < 24 &&
           Math.abs(data[i + 1] - c[1]) < 24 &&
           Math.abs(data[i + 2] - c[2]) < 24

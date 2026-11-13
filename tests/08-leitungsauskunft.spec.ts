@@ -3,6 +3,7 @@ import { expect, request as playwrightRequest, test, type Locator, type Page } f
 import { localApp, superuserCredentials } from '../playwright/local-app'
 import { disableAnimations, moveCursorAway, shoot, spotlight } from '../playwright/manual-shots'
 import { CAPTURE_DATE, replaceInResponses } from '../playwright/stable-dates'
+import { remoteUrl } from '../playwright/remote-functions'
 
 // Screenshots for chapter "8. Leitungsauskunft" in the manual
 // (manual/teil-a-anwenderhandbuch/08-leitungsauskunft.md). Produces all images
@@ -157,25 +158,22 @@ async function recordTimestamps(): Promise<string[]> {
  * Opens the table of the pipeline records with the timestamps frozen at
  * CAPTURE_DATE.
  *
- * The table is loaded by a `+page.server.ts`, so `freezeDates()` cannot reach
- * it on a `page.goto()`. Reached through the navigation bar instead, SvelteKit
- * fetches the load data as `__data.json`, and the known timestamps are
- * rewritten there by value - the same route the dashboard takes for its
- * deadlines (tests/04-dashboard.spec.ts).
+ * Since v1.8.0 the table loads its rows through the remote function
+ * `getPipelineRecordList`, which asks the API on the frontend server and hands
+ * the rows to the browser flattened by `devalue` (playwright/remote-functions.ts).
+ * The field names sit apart from the values there, so `freezeDates()` cannot
+ * find them; the known timestamps are rewritten by value instead - the same
+ * route the dashboard takes for its deadlines (tests/04-dashboard.spec.ts).
  */
 async function openRecords(page: Page) {
   const timestamps = await recordTimestamps()
   const rewritten = await replaceInResponses(
     page,
-    '**/__data.json*',
+    remoteUrl('getPipelineRecordList'),
     Object.fromEntries(timestamps.map((timestamp) => [timestamp, CAPTURE_DATE])),
   )
 
-  await page.goto('/settings')
-  // A click before SvelteKit has hydrated the page is a plain page load, which
-  // renders the table on the server and bypasses the rewrite.
-  await page.waitForLoadState('networkidle')
-  await page.getByRole('link', { name: 'Leitungsauskunft', exact: true }).click()
+  await page.goto('/pipeline-records')
   await expect(page).toHaveURL(/\/pipeline-records(\/|\?|$)/)
   await expect(page.getByRole('button', { name: 'Erstellen', exact: true })).toBeVisible()
   // The seeded records have to be in the table, otherwise the image shows the
@@ -189,8 +187,8 @@ async function openRecords(page: Page) {
   // row still shows the day of the run.
   expect(
     rewritten(),
-    'Not every timestamp was rewritten in the page data. Does SvelteKit still ' +
-      'deliver the load data of the table as __data.json?',
+    'Not every timestamp was rewritten in the table data. Does the table still ' +
+      'load its rows through the remote function getPipelineRecordList?',
   ).toBeGreaterThanOrEqual(timestamps.length)
 
   await disableAnimations(page)
@@ -214,9 +212,8 @@ async function openDemoRecord(page: Page) {
  *
  * Section 8.5 works with it and not with the demo record: that one carries no
  * contact data, so its detail view would show three cards of empty fields. The
- * seeded record has them filled and shows in addition what the section warns
- * about - "Art der Arbeit" and "Grund der Anfrage" stay at "-" although the
- * record has both.
+ * seeded record has them filled, "Art der Arbeit" and "Grund der Anfrage"
+ * included.
  */
 async function openSeededRecord(page: Page) {
   await page.goto(`/pipeline-records/${uuidsToRemove[0]}`)
@@ -234,7 +231,7 @@ async function openSeededRecord(page: Page) {
  * Corners of the area drawn for the images, in CSS pixels of the viewport.
  *
  * Hard-coded and not measured: the map position is seeded by
- * playwright/auth.setup.ts (mapCenter/mapZoom), so the same pixel always hits
+ * playwright/auth.setup.ts (`mapView:2`), so the same pixel always hits
  * the same place. The four points frame the western cluster of addresses of the
  * demo data - small enough that objects stay outside the area, which is what
  * makes the highlighting readable in the first place.

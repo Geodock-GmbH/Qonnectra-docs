@@ -18,9 +18,11 @@
 //     next write, and the demo import would have to carry it.
 //
 // What is left is the response on its way into the page. That only works for
-// data the browser fetches itself - anything a SvelteKit `+page.server.ts`
-// loads runs inside the container and never passes Playwright (the dashboard is
-// the example, see the note on the node dates in tests/04-dashboard.spec.ts).
+// data that reaches the browser over the network: either an API call the
+// browser makes itself (the attachments of FileExplorer.svelte), or - since
+// v1.8.0 - the result of a SvelteKit remote function, which the browser fetches
+// even on a full page load (playwright/remote-functions.ts). Whatever the
+// frontend server renders into the HTML never passes Playwright.
 import type { Page } from '@playwright/test'
 
 /**
@@ -100,16 +102,17 @@ export async function freezeDates(page: Page, options: FreezeDatesOptions): Prom
  * Replaces literal strings in the matching responses and reports how often it
  * did so.
  *
- * For the places where the field name is not in the response at all: SvelteKit
- * delivers the data of a `+page.server.ts` as `__data.json` when the page is
- * reached from inside the app, and `devalue` flattens it into an array in which
- * the keys are gone and only the values are left. Replacing by value works
- * there, as long as what is replaced is known exactly - the dates the spec
- * seeded itself, for instance.
+ * For the places where the field name is not next to the value: the result of
+ * a SvelteKit remote function (`remoteUrl()` in playwright/remote-functions.ts)
+ * is flattened by `devalue` into an array in which values and keys sit apart.
+ * Replacing by value works there, as long as what is replaced is known exactly
+ * - the dates the spec seeded itself, for instance. The payload is a JSON
+ * string inside JSON, so only values without quotes or backslashes can be
+ * matched; dates and timestamps have none.
  *
- * The returned function gives the number of replacements. Check it: if
- * SvelteKit ever changes the route of that payload, the interception stops
- * working, and without the check the dates would quietly start moving again.
+ * The returned function gives the number of replacements. Check it: if the app
+ * ever moves that data to another route, the interception stops working, and
+ * without the check the dates would quietly start moving again.
  */
 export async function replaceInResponses(
   page: Page,

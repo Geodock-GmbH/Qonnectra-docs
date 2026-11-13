@@ -16,6 +16,7 @@
 import { expect, test } from '../playwright/test'
 
 import { click, pointAt, postProcessVideo, showCursor, videoPath } from '../playwright/manual-videos'
+import { projectPath } from '../playwright/project'
 
 const CHAPTER = '03-wiederkehrende-bedienelemente'
 
@@ -114,7 +115,7 @@ test('3.5 Strecke und Fläche messen', async ({ page, context }) => {
   // Warm-up page: fills the HTTP cache of the context, so that the recorded
   // page is up within a fraction of a second. Playwright records a page from
   // its creation onwards, and a long page load would end up in the video.
-  await page.goto('/map')
+  await page.goto(projectPath('/map'))
   await expect(page.locator('div.map canvas').first()).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()
@@ -123,11 +124,10 @@ test('3.5 Strecke und Fläche messen', async ({ page, context }) => {
   const pageStart = Date.now()
 
   await capture.addInitScript((v) => {
-    localStorage.setItem('mapCenter', JSON.stringify(v.center))
-    localStorage.setItem('mapZoom', JSON.stringify(v.zoom))
+    localStorage.setItem('mapView:2', JSON.stringify({ zoom: v.zoom, center: v.center }))
   }, VIEW)
 
-  await capture.goto('/map')
+  await capture.goto(projectPath('/map'))
   await expect(capture.locator('div.map canvas').first()).toBeVisible()
   await capture.waitForLoadState('networkidle')
   // The tiles arrive through a worker pool that networkidle does not see.

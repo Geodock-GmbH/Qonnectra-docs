@@ -2,6 +2,7 @@ import { expect, test } from '../playwright/test'
 
 import { formRow, openAdmin, unionBox } from '../playwright/admin-pages'
 import { removePlaceholderUsers, seedPlaceholderUsers } from '../playwright/admin-users'
+import { expectOutput, pyLiteral, runInBackend } from '../playwright/backend-shell'
 import { shoot, spotlight } from '../playwright/manual-shots'
 
 // Screenshots for chapter "19. Rollen und Rechte" in the manual
@@ -13,7 +14,8 @@ import { shoot, spotlight } from '../playwright/manual-shots'
 //   permission_group_form   the empty Django permissions of "Admin" (pattern 2)
 //   permission_model_list   model rights of "Editor" (pattern 2)
 //   permission_route_list   the three shipped route rights (pattern 1)
-//   permission_model_add    a new row for wmssource, unsaved (pattern 2)
+//   permission_model_add    a wmssource row for a group of its own, unsaved
+//                           (pattern 2)
 //
 // Runs in the Playwright project "chromium-admin" as Django superuser against
 // {$ADMIN_DOMAIN} (ADMIN_SPECS in playwright.config.ts).
@@ -25,7 +27,7 @@ import { shoot, spotlight } from '../playwright/manual-shots'
 // a fixed password hash, so the form comes out the same on every run.
 //
 // Nothing is saved: the add form of 19.6 is filled in and captured, never
-// submitted.
+// submitted. Its group „Auskunft“ exists only for the length of that test.
 //
 // Publish to public/images/ with: pnpm screenshots:publish 19-rollen-und-rechte
 const CHAPTER = '19-rollen-und-rechte'
@@ -92,15 +94,16 @@ test('19.2 Modellrechte der Gruppe „Editor"', async ({ page }) => {
 
   const filter = page.locator('#changelist-filter')
   await filter.getByRole('link', { name: 'Editor', exact: true }).click()
-  await expect(page.locator('#result_list tbody tr')).toHaveCount(29)
+  // 33 rows since v1.8.0: migration 0078 added wmssource, nodetrenchselection,
+  // nodeslotclipnumber and nodeslotdivider to the three shipped groups.
+  await expect(page.locator('#result_list tbody tr')).toHaveCount(33)
 
   // The column that can be edited in place, header included. The submit
-  // button below the list is out of frame at 29 rows; the text names it.
+  // button below the list is out of frame at 33 rows; the text names it.
   const levelColumn = await unionBox(
     page.locator('#result_list').locator('th.column-access_level, td.field-access_level'),
   )
   const spotlightOff = await spotlight(page, [filter, levelColumn.box])
-  await spotlightOff() // PROBE
   await shoot(page, CHAPTER, 'permission_model_list')
   await spotlightOff()
   await levelColumn.remove()
@@ -113,16 +116,48 @@ test('19.3 Routenrechte', async ({ page }) => {
   await shoot(page, CHAPTER, 'permission_route_list')
 })
 
+/** The group of its own that 19.6 shows; created and removed by its test. */
+const OWN_GROUP = 'Auskunft'
+
 test('19.6 Modellrecht hinzufügen', async ({ page }) => {
-  await openAdmin(page, '/admin/api/modelpermission/add/')
+  // Since v1.8.0 migration 0078 gives the shipped groups a wmssource row, so
+  // the example is a group of one's own - the case 19.6 is about. Created
+  // empty, and removed again in `finally`.
+  const created = runInBackend(
+    [
+      'import json',
+      'from django.contrib.auth.models import Group',
+      `Group.objects.get_or_create(name=${pyLiteral(OWN_GROUP)})`,
+      'print("group-ready")',
+    ].join('\n'),
+    'Creating the group of 19.6',
+  )
+  expectOutput(created, 'group-ready', 'Creating the group of 19.6')
 
-  await page.locator('#id_group').selectOption({ label: 'Viewer' })
-  await page.locator('#id_model_name').fill('wmssource')
-  await page.locator('#id_access_level').selectOption({ label: 'Nur Ansehen' })
-  await page.locator('#id_model_name').blur()
+  try {
+    await openAdmin(page, '/admin/api/modelpermission/add/')
 
-  const form = page.locator('#content-main form fieldset').first()
-  const spotlightOff = await spotlight(page, form)
-  await shoot(page, CHAPTER, 'permission_model_add')
-  await spotlightOff()
+    // „Modellname“ is a list since v1.8.0 (ModelPermissionForm), picked by the
+    // technical name as its value.
+    await page.locator('#id_group').selectOption({ label: OWN_GROUP })
+    await page.locator('#id_model_name').selectOption('wmssource')
+    await page.locator('#id_access_level').selectOption({ label: 'Nur Ansehen' })
+    // No focus ring in the image, whichever field holds the focus now.
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
+    await expect(page.locator('#content-main form :focus')).toHaveCount(0)
+
+    const form = page.locator('#content-main form fieldset').first()
+    const spotlightOff = await spotlight(page, form)
+    await shoot(page, CHAPTER, 'permission_model_add')
+    await spotlightOff()
+  } finally {
+    runInBackend(
+      [
+        'import json',
+        'from django.contrib.auth.models import Group',
+        `Group.objects.filter(name=${pyLiteral(OWN_GROUP)}).delete()`,
+      ].join('\n'),
+      'Removing the group of 19.6',
+    )
+  }
 })

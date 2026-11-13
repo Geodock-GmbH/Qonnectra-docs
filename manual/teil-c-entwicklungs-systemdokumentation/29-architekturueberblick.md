@@ -67,8 +67,10 @@ flowchart TB
 
 Für die Weboberfläche gibt es zwei Wege zum Backend, und welcher genommen wird, hängt davon ab, wo der Code läuft:
 
-- **Auf dem Server.** Lade-Funktionen, Formularaktionen und Remote Functions des Frontends laufen im Container `frontend` und erreichen das Backend über `API_URL` direkt im Docker-Netz (`http://backend:8000/api/v1/`), an Caddy und nginx vorbei. Die Anmelde-Cookies des Browsers reicht das Frontend dabei weiter.
-- **Im Browser.** Alles, was die Seite nach dem Laden selbst holt – Vektorkacheln der Karte, WMS-Bilder, Suchtreffer, Speichervorgänge –, geht über `PUBLIC_API_URL` an die Adresse der Schnittstelle, also durch Caddy und nginx. Die Cookies gelten für alle Adressen der Installation, weil sie auf die gemeinsame Domain gesetzt werden (`COOKIE_DOMAIN`).
+- **Über den Server des Frontends.** Fachdaten lesen und schreiben die Ansichten über **Remote Functions** – Funktionen des Frontends, die der Browser aufruft und die im Container `frontend` laufen. Sie erreichen das Backend über `API_URL` direkt im Docker-Netz (`http://backend:8000/api/v1/`), an Caddy und nginx vorbei, ebenso die wenigen verbliebenen Lade-Funktionen und die Anmeldung. Die Anmelde-Cookies des Browsers reicht das Frontend dabei weiter.
+- **Direkt aus dem Browser.** Was der Browser selbst holen muss – Vektorkacheln der Karte, WMS-Quellen und -Bilder, Anhänge zum Hoch- und Herunterladen, das ZIP-Archiv einer Leitungsauskunft –, geht über `PUBLIC_API_URL` an die Adresse der Schnittstelle, also durch Caddy und nginx. Die Cookies gelten für alle Adressen der Installation, weil sie auf die gemeinsame Domain gesetzt werden (`COOKIE_DOMAIN`).
+
+Den Zustand einer Ansicht hält die Adresse im Browser: das Projekt im Pfad (`/project/2/map`), das in der Info-Box geöffnete Objekt, der Reiter und Such- und Seitenangaben in den Abfrageparametern (`?feature=trench:<uuid>`), der Kartenausschnitt im Fragment (`#map=…`). Eine kopierte Adresse öffnet deshalb dieselbe Ansicht, und „Zurück“ im Browser schließt eine geöffnete Info-Box wieder. Wie das im Frontend umgesetzt ist, beschreibt Abschnitt [SvelteKit-Struktur und Routen](./33-frontend.md#_33-1-sveltekit-struktur-und-routen).
 
 Wie die Anmeldung über beide Wege funktioniert und wann das Frontend die Tokens erneuert, beschreiben die Kapitel [REST-API](./32-rest-api.md) und [Frontend](./33-frontend.md).
 
@@ -113,7 +115,7 @@ Das Image des Backends hält sich nicht an `backend/uv.lock`. Sein Dockerfile in
 | Baustein | Version | Aufgabe |
 |---|---|---|
 | Node.js | 22 | Laufzeit, Image `node:22-alpine`, `@sveltejs/adapter-node` |
-| Svelte, SvelteKit | 5.56.10, 2.66.0 | Oberfläche und Server-Rendering |
+| Svelte, SvelteKit | 5.57.1, 2.66.0 | Oberfläche und Server-Rendering |
 | Vite | 8.0.16 | Build |
 | TypeScript | 5.9.3 | Typprüfung |
 | OpenLayers, ol-mapbox-style | 10.7.0, 13.2.0 | Karte und Hintergrundkarte |
@@ -153,8 +155,9 @@ backend/
   templates/         Vorlagen des Administrationsbereichs
   schema.yml         OpenAPI-Schema, Quelle der Frontend-Typen
 frontend/
-  src/routes/        eine Route je Menüpunkt, dazu login, logout, admin/logs
-                     und api (Server-Endpunkte)
+  src/routes/        project/[projectId=integer]/ mit den Ansichten eines
+                     Projekts, daneben die projektübergreifenden Seiten
+  src/params/        Prüfungen der Pfadparameter (integer, traceEntryType)
   src/lib/           classes, components, config, context, map, remote,
                      server, stores, test-utils, types, utils
   messages/          Texte der Oberfläche, de.json und en.json

@@ -24,11 +24,14 @@ import { CAPTURE_DATE } from '../playwright/stable-dates'
 //   spec empties it first (django.contrib.admin.models.LogEntry, the admin's
 //   own action log, not Qonnectra's LogEntry of chapter 28), so the box reads
 //   „Keine vorhanden“ everywhere.
-// - The demo data has no change history: the importer writes around
-//   django-simple-history. The history image needs two versions, so the spec
-//   saves the conduit twice through the ORM as „admin“, pins both history
-//   dates and afterwards restores the field and deletes exactly the history
-//   rows it made.
+// - The demo data has no change history of its own: the importer writes
+//   around django-simple-history. Since v1.8.0 a re-import of the setup leaves
+//   one row per conduit behind, though - „Gelöscht“, by nobody, dated the
+//   moment of the setup. The spec sets those rows aside for the length of the
+//   run (serialised into its state file, deleted, put back with their own ids
+//   afterwards). The history image needs two versions, so the spec then saves
+//   the conduit twice through the ORM as „admin“, pins both history dates and
+//   afterwards restores the field and deletes exactly the history rows it made.
 // - The delete confirmation is opened, never confirmed. Its rows name the
 //   objects by the UUIDs of the demo export, which are stable.
 //
@@ -55,15 +58,18 @@ function clearAdminActionLog(): void {
 }
 
 /**
- * Two saves of the conduit as the superuser - first the date, then the status - so the history lists two versions with a user. Both are undone in
- * removeHistory(); the original values travel through a JSON file in the
- * container's /tmp, so a run that died in between can still be cleaned up by
- * the next one.
+ * Two saves of the conduit as the superuser - first the date, then the status -
+ * so the history lists two versions with a user. Whatever history the conduit
+ * had before is set aside first (see the header comment). Everything is undone
+ * in removeHistory(); the original values and the set-aside rows travel through
+ * a JSON file in the container's /tmp, so a run that died in between can still
+ * be cleaned up by the next one.
  */
 function seedHistory(): void {
   const output = runInBackend(
     [
       'import json, os',
+      'from django.core import serializers',
       'from django.contrib.auth import get_user_model',
       'from django.utils.dateparse import parse_datetime',
       'from apps.api.models import Conduit, AttributesStatus',
@@ -72,7 +78,9 @@ function seedHistory(): void {
       'state = "/tmp/qonnectra-docs-history.json"',
       'c = Conduit.objects.get(name=name, project_id=2)',
       'if not os.path.exists(state):',
-      '    json.dump({"date": c.date.isoformat() if c.date else None, "status": c.status_id, "after": c.history.order_by("-history_id").values_list("history_id", flat=True).first() or 0}, open(state, "w"))',
+      '    kept = c.history.all()',
+      '    json.dump({"date": c.date.isoformat() if c.date else None, "status": c.status_id, "after": Conduit.history.order_by("-history_id").values_list("history_id", flat=True).first() or 0, "kept": serializers.serialize("json", kept)}, open(state, "w"))',
+      '    kept.delete()',
       'admin = get_user_model().objects.get(username="admin")',
       'c._history_user = admin',
       'c.date = parse_datetime(dates[1]).date()',
@@ -95,6 +103,7 @@ function removeHistory(): void {
   const output = runInBackend(
     [
       'import json, os',
+      'from django.core import serializers',
       'from apps.api.models import Conduit',
       `name = ${pyLiteral(CONDUIT)}`,
       'state = "/tmp/qonnectra-docs-history.json"',
@@ -103,6 +112,8 @@ function removeHistory(): void {
       '    qs = Conduit.objects.filter(name=name, project_id=2)',
       '    qs.update(date=saved["date"], status_id=saved["status"])',
       '    Conduit.history.filter(name=name, history_id__gt=saved["after"]).delete()',
+      '    for row in serializers.deserialize("json", saved.get("kept", "[]")):',
+      '        row.save()',
       '    os.remove(state)',
       'print("restored")',
     ].join('\n'),

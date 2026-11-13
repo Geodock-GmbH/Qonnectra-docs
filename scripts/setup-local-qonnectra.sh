@@ -51,21 +51,17 @@ QONNECTRA_REPO_URL="https://github.com/Geodock-GmbH/Qonnectra.git"
 # noticing: the images simply differed and it looked like the capture pipeline
 # was unreliable.
 #
-# A commit, not a tag, and deliberately so: the manual was surveyed and written
-# against the state of `main` of 2026-09-11, and part A describes features that
-# no release carries yet - the edit mode of the cable labels in chapter 14
-# („Kabel bearbeiten“, app PR #88) arrived after v1.7.0. Pinning to v1.7.0
-# instead would take those sections out of the app. The app still reports 1.7.0
-# in its header; the release after it will carry the state pinned here.
-#
-# aa28575 is the last commit of 2026-09-11. The four before it on that day are
-# backend and OpenAPI changes and cannot move a pixel of the interface.
+# A commit, not a tag. Until v1.8.0 the manual was written against a state of
+# `main` that no release carried (the edit mode of the cable labels in chapter
+# 14, app PR #88, arrived after v1.7.0), and a tag can be moved where a commit
+# cannot. e3a7139 is the release commit of v1.8.0 (2026-09-29), so the app now
+# reports the version it is built from.
 #
 # Raising it is a deliberate step, not a side effect of running the setup
 # again: bump the commit here, regenerate the screenshots, and go through what
 # changed in the app. Overridable via QONNECTRA_REF for a look at another
 # version - the result must not be committed.
-QONNECTRA_REF="${QONNECTRA_REF:-aa2857516278cc5d2d0fe1f27fc255bedcc4bcc0}"
+QONNECTRA_REF="${QONNECTRA_REF:-e3a713946f7d3ff923bed80f1514614a1cc5d849}"
 
 # Persistent local dev CA. Deliberately lives OUTSIDE local-app/ (which gets
 # cloned/deleted) and outside this repo (it contains a private key), so that it
@@ -78,8 +74,7 @@ CA_KEY="$CA_DIR/root.key"
 CA_NAME="Qonnectra Local Dev CA"
 
 # Map tiles (.mbtiles) for the tileserver. The app deliberately ships none, but
-# tileserver-gl exits immediately without them and, thanks to
-# "restart: always", ends up in an endless loop - the map would then fall back
+# tileserver-gl exits immediately without them - the map would then fall back
 # to OSM raster tiles instead of showing the real vector base map.
 #
 # Like the dev CA, the tiles live OUTSIDE local-app/ (which gets cloned/deleted)
@@ -162,9 +157,8 @@ Usage: $(basename "$0") [--reset] [--reset-checkout] [--skip-tiles]
                     --reset.
                     Also the way out when the checkout sits on another version
                     and cannot be switched because of local changes.
-  --skip-tiles      Do not download map tiles. The tileserver then runs into a
-                    restart loop without data and the map falls back to OSM
-                    raster tiles.
+  --skip-tiles      Do not download map tiles. The tileserver then exits
+                    without data and the map falls back to OSM raster tiles.
   -h, --help        Show this help.
 
 The app is built from the pinned commit $QONNECTRA_REF. All images of the
@@ -682,8 +676,9 @@ fi
 # --- Create docker-compose.override.yml -------------------------------------
 #
 # Adjustments to the production compose: point Caddy at the Caddyfile generated
-# above with "tls internal", hand the backend the capture account, and build the
-# db image against the PGDG archive (see the comment at "db" below). The nginx
+# above with "tls internal", hand the backend the capture account, build the
+# db image against the PGDG archive (see the comment at "db" below), and turn
+# off "restart: always" (see the comment at the top of the generated file). The nginx
 # and qgis-server commands in docker-compose.yml are already correct (unlike in
 # docker-compose.dev.yml).
 
@@ -692,6 +687,11 @@ cat >"$DEPLOY_DIR/docker-compose.override.yml" <<EOF
 # Generated automatically by scripts/setup-local-qonnectra.sh - local
 # adjustment to docker-compose.yml (production) for *.qonnectra.localhost
 # instead of real domains with Let's Encrypt certificates.
+#
+# Every service gets restart: "no" in place of the "restart: always" of
+# docker-compose.yml: a local instance for captures has no business starting on
+# every boot. scripts/stop-local-qonnectra.sh stops it, the setup script brings
+# it up again.
 services:
   # docker-compose.yml lists the environment of the backend one by one and
   # reads no env_file - the APP_USER_* values therefore have to be added here.
@@ -701,6 +701,7 @@ services:
   # stay unresolved: Compose fills them in from .env on startup, so this file
   # contains no password.
   backend:
+    restart: "no"
     environment:
       - APP_USER_USERNAME=\${APP_USER_USERNAME}
       - APP_USER_EMAIL=\${APP_USER_EMAIL}
@@ -715,6 +716,7 @@ services:
   # Dockerfile, one sed in front. The fix belongs upstream; local-app/ is never
   # patched from here.
   db:
+    restart: "no"
     build:
       dockerfile: !reset null
       dockerfile_inline: |
@@ -724,6 +726,7 @@ services:
             apt-get install -y --no-install-recommends postgresql-17-pgrouting && \\
             rm -rf /var/lib/apt/lists/*
   caddy:
+    restart: "no"
     volumes:
       - ./Caddyfile.production.local:/etc/caddy/Caddyfile:ro
       - ./caddy/extra:/etc/caddy/extra:ro
@@ -733,6 +736,18 @@ services:
       - caddy_config:/config
       - ./logs:/var/log/caddy
       - media_volume:/media:ro
+  backend-wms:
+    restart: "no"
+  qgis-server:
+    restart: "no"
+  pg-error-parser:
+    restart: "no"
+  frontend:
+    restart: "no"
+  nginx:
+    restart: "no"
+  tileserver:
+    restart: "no"
 EOF
 
 COMPOSE=(docker compose -f "$DEPLOY_DIR/docker-compose.yml" -f "$DEPLOY_DIR/docker-compose.override.yml")
@@ -1009,8 +1024,8 @@ $CA_SECTION
 
 $TILES_SECTION
 
-Stopping the stack:
-  cd $DEPLOY_DIR && docker compose -f docker-compose.yml -f docker-compose.override.yml down
+Stopping the stack (the containers do not start on boot by themselves):
+  $REPO_ROOT/scripts/stop-local-qonnectra.sh
 
 Run the script again to rebuild/restart the stack (secrets/DB are kept as long
 as local-app/deployment/.env is not deleted). For a rebuild with an empty

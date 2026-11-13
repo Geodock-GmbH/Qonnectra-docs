@@ -18,7 +18,7 @@ Im Feld „Rohrverzweigung auswählen“ stehen die Netzknoten des Projekts, die
 
 ![Screenshot der Rohrverzweigung mit Hervorhebung des Feldes „Rohrverzweigung auswählen“ und der geöffneten Liste der Netzknoten oben links](/images/manual/teil-a/pipe_branch_select.jpg)
 
-Mit der Auswahl sucht Qonnectra alle Trassen, die höchstens fünf Meter vom Netzknoten entfernt liegen, und öffnet damit sofort das Fenster „Trassen auswählen“, siehe den nächsten Abschnitt.
+Mit der Auswahl sucht Qonnectra alle Trassen, die höchstens fünf Meter vom Netzknoten entfernt liegen. Hat der Netzknoten bereits eine gespeicherte Trassenauswahl oder Mikrorohrverbindungen, lädt Qonnectra diese Rohre sofort auf die Arbeitsfläche; andernfalls öffnet sich das Fenster „Trassen auswählen“, siehe den nächsten Abschnitt. Der Netzknoten steht danach in der Adresse, ein Link öffnet also dieselbe Rohrverzweigung.
 
 ::: warning
 Findet Qonnectra in diesem Umkreis keine Trasse, meldet es „Keine Trassen in der Nähe dieses Netzknotens gefunden“, und die Arbeitsfläche bleibt leer. Prüfen Sie in der Karte, ob die Trassen tatsächlich am Netzknoten enden – die fünf Meter lassen sich nicht einstellen.
@@ -34,15 +34,17 @@ Jede Trasse steht mit ihrer Trassen-ID in einer eigenen Zeile, darunter die Zahl
 
 Rohre, die an diesem Netzknoten bereits Mikrorohrverbindungen haben, sind mit „Hat Verbindungen“ gekennzeichnet, von vornherein ausgewählt und mit einem Schloss gesperrt. Sie lassen sich nicht abwählen – sonst blieben gespeicherte Verbindungen ohne Gegenstück auf der Arbeitsfläche.
 
-„Auf Canvas laden“ übernimmt die Auswahl auf die Arbeitsfläche. „Abbrechen“ verwirft nicht nur die Auswahl, sondern auch den Netzknoten; Sie beginnen dann wieder mit Abschnitt [Rohrverzweigung auswählen](#_12-1-rohrverzweigung-auswahlen). Solange ein Netzknoten ausgewählt ist, öffnet die Schaltfläche „Grabenauswahl bearbeiten“ das Fenster erneut.
+„Auf Canvas laden“ übernimmt die Auswahl auf die Arbeitsfläche. „Abbrechen“ schließt das Fenster, ohne etwas zu ändern; Netzknoten und Arbeitsfläche bleiben, wie sie waren. Solange ein Netzknoten ausgewählt ist, öffnet die Schaltfläche „Grabenauswahl bearbeiten“ das Fenster erneut.
+
+::: warning
+Nach „Auf Canvas laden“ behält die Arbeitsfläche ihren bisherigen Ausschnitt. Kommen Rohre hinzu, liegen sie oft teilweise außerhalb davon. Klicken Sie unten links auf „Fit View“, um alle Rohre einzupassen, siehe Abschnitt [Arbeitsfläche](#_12-4-arbeitsflache-anordnen-zoomen-sperren).
+:::
 
 ::: info
 Das Fenster spricht von „Trassen“, die Schaltfläche daneben von der „Grabenauswahl“. Gemeint ist beides Mal dasselbe: die Trassen rund um den Netzknoten.
 :::
 
-::: warning
-Qonnectra meldet „Trassenauswahl erfolgreich gespeichert“, merkt sich die Auswahl aber nicht. Kehren Sie später zu demselben Netzknoten zurück, ist wieder nur ausgewählt, was dort bereits Verbindungen hat; die übrigen Rohre stellen Sie erneut zusammen. Verloren geht dabei nichts – die gespeicherten Mikrorohrverbindungen bleiben erhalten.
-:::
+Qonnectra meldet „Trassenauswahl erfolgreich gespeichert“ und merkt sich die Auswahl je Netzknoten, allerdings nur die Trassen, nicht die einzelnen Rohre. Kehren Sie später zu demselben Netzknoten zurück, sind alle Rohre der gespeicherten Trassen ausgewählt, dazu jedes Rohr, das dort bereits Verbindungen hat. Haben Sie aus einer Trasse nur einzelne Rohre übernommen, wählen Sie die übrigen erneut ab.
 
 ## 12.3 Mikrorohre verbinden und Auto-Verbindung
 
@@ -101,7 +103,7 @@ Das Löschen erfolgt ohne Rückfrage.
 :::
 
 ::: warning
-Das Löschen setzt die Zugriffsstufe „Vollzugriff“ voraus; die Berechtigung zum Bearbeiten genügt dafür nicht. Fehlt sie, verschwindet die Verbindung zwar von der Arbeitsfläche, und Qonnectra meldet „Verbindung erfolgreich gelöscht“ – gelöscht ist sie damit aber nicht. Laden Sie den Netzknoten erneut, ist sie wieder da. Wenden Sie sich in diesem Fall an Ihre Administration.
+Das Löschen setzt die Zugriffsstufe „Vollzugriff“ voraus; die Berechtigung zum Bearbeiten genügt dafür nicht. Fehlt sie, verschwindet die Verbindung kurz von der Arbeitsfläche, kehrt dann zurück, und es erscheint „Deine Rolle erlaubt diese Aktion nicht. Wende dich an deine Administration.“ Wenden Sie sich in diesem Fall an Ihre Administration.
 :::
 
 ## 12.4 Arbeitsfläche: Anordnen, Zoomen, Sperren

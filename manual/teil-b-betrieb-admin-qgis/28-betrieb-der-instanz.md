@@ -49,6 +49,12 @@ Ein später in `.env` geändertes Passwort ändert das bestehende Konto nicht; s
 Ändern Sie `DB_PASSWORD` und `QGIS_DB_PASSWORD` nicht in der Datei allein. Die Datenbank übernimmt sie nur beim ersten Start; danach passt die Datei nicht mehr zur Datenbank, und Backend und QGIS-Server erreichen sie nicht.
 :::
 
+`QGIS_DB_USER` braucht neben der Datenbank auch das Backend. Die Datenbank legt den Benutzer beim ersten Start nur an, ohne Rechte auf die Tabellen; die vergibt ihm das Backend bei jedem Start, auch für Tabellen, die eine neue Version hinzufügt, siehe Abschnitt [Verbindung zur PostGIS-Datenbank](./25-qgis-arbeitsplatz-einrichten.md#_25-2-verbindung-zur-postgis-datenbank-und-zu-den-diensten). Die mitgelieferte `docker-compose.yml` gibt den Wert aus `.env` an beide weiter.
+
+::: warning
+Fehlt `QGIS_DB_USER` beim Backend, etwa in einer eigenen Compose-Datei, vergibt es keine Rechte. In einer neuen Installation können QGIS-Server und QGIS-Arbeitsplätze die Tabellen dann nicht lesen; in einer, die vor Version 1.8 eingerichtet wurde, behält der Benutzer seine alten Rechte, auch auf die Tabellen der Benutzerkonten. Wird die Variable erst nach dem ersten Start der Datenbank gesetzt, fehlt der Benutzer ganz; legen Sie ihn in der Datenbank an und starten Sie danach das Backend neu.
+:::
+
 ::: warning
 `DEFAULT_SRID` legt das Koordinatenbezugssystem der Geometrien fest. Ändern Sie es nie, sobald Daten erfasst sind – die vorhandenen Koordinaten würden danach falsch gelesen.
 :::
@@ -79,9 +85,12 @@ Qonnectra wird aus dem Quellcode gebaut. Eine Aktualisierung:
    ```
 
 5. Prüfen Sie mit `docker compose ps`, dass alle Dienste laufen, und melden Sie sich in der Weboberfläche und im Administrationsbereich an.
-6. Ist ein Datenbankbenutzer für QGIS eingerichtet, beschränken Sie ihn erneut, siehe Abschnitt [Datenbank, PostGIS und Datenbankzugang](../teil-c-entwicklungs-systemdokumentation/35-bereitstellung-und-infrastruktur.md#_35-4-datenbank-postgis-und-datenbankzugang).
 
-Beim Start bringt das Backend die Datenbank selbst auf den neuen Stand. Bis dahin antworten Weboberfläche und Schnittstelle mit Fehlern; das dauert je nach Umfang der Änderungen einige Minuten.
+Beim Start bringt das Backend die Datenbank selbst auf den neuen Stand und vergibt danach die Rechte des Datenbankbenutzers für QGIS neu, siehe Abschnitt [Konfiguration über Umgebungsvariablen](#_28-2-konfiguration-uber-umgebungsvariablen). Bis dahin antworten Weboberfläche und Schnittstelle mit Fehlern; das dauert je nach Umfang der Änderungen einige Minuten.
+
+::: warning
+Rechte, die Sie dem Datenbankbenutzer für QGIS darüber hinaus selbst entzogen haben, etwa auf die Leitungsauskünfte, vergibt das Backend bei jedem Start wieder.
+:::
 
 ::: warning
 Neue Stammdaten, die eine Version mitbringt, kommen nur in eine leere Installation. Das Backend lädt seine Grundausstattung gruppenweise und überspringt jede Gruppe, von der es schon Einträge gibt. Bringt eine Version etwa einen neuen Netzknotentyp mit, legen Sie ihn in einer bestehenden Installation selbst an, siehe Kapitel [Projekte und Stammdaten pflegen](./21-projekte-und-stammdaten.md).

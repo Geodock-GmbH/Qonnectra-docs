@@ -29,6 +29,7 @@ import {
   videoPath,
 } from '../playwright/manual-videos'
 import { stableSearchOrder } from '../playwright/stable-search'
+import { projectPath } from '../playwright/project'
 
 const CHAPTER = '07-nachverdichtung'
 
@@ -68,7 +69,7 @@ const LEAD_IN = 1.0
  * from its creation, and a long page load would end up in the video.
  */
 async function warmUp(page: Page) {
-  await page.goto('/post-compaction')
+  await page.goto(projectPath('/post-compaction'))
   await expect(page.getByRole('heading', { name: 'Nachverdichtung' })).toBeVisible()
   await page.waitForLoadState('networkidle')
   await page.close()
@@ -105,7 +106,7 @@ test('7.1 Adresse suchen und auswählen', async ({ page, context }) => {
   // The hits of "Toft 1" all score the same and come back in an order of
   // Postgres' choosing; see playwright/stable-search.ts.
   await stableSearchOrder(capture)
-  await capture.goto('/post-compaction')
+  await capture.goto(projectPath('/post-compaction'))
   await expect(capture.getByRole('heading', { name: 'Nachverdichtung' })).toBeVisible()
   await capture.waitForLoadState('networkidle')
 
