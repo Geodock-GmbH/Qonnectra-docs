@@ -182,23 +182,46 @@ environment.
      embeds it (`grep -rn "<name>.jpg" manual/`) and the heading above that.
    - A renamed or new heading, a removed section, a changed `OUTLINE.md` entry
      is a row of its own.
-3. **The table**, one row per section, sorted by chapter number:
+3. **Two tables**, one row per section each, sorted by chapter number. They
+   split by the kind of review a section needs: the first has to be read, the
+   second only looked at.
+
+   **Textänderungen** – every section whose text changed, with the images and
+   videos of that section that changed alongside:
 
    | Kapitel | Abschnitt | Was geändert wurde | Link |
    |---|---|---|---|
-   | 5 Karte | 5.4 Rohrübersicht und Kabelübersicht einer Trasse | Hinweis entfernt; Bild `map_trench_conduits.jpg` neu | <URL> |
+   | 5. Karte | 5.4 Rohrübersicht und Kabelübersicht einer Trasse | Hinweis entfernt; Bild/Video neu: `map_trench_conduits.jpg` | [öffnen](<URL>) |
+
+   **Nur Bilder oder Videos neu aufgenommen, Text unverändert** – every other
+   section that embeds a changed image or video:
+
+   | Kapitel | Abschnitt | Neu aufgenommen | Link |
+   |---|---|---|---|
+   | 7. Nachverdichtung | 7.1 Adresse suchen | `compaction_search.jpg`, `compaction_search.webm` | [öffnen](<URL>) |
 
    - „Was geändert wurde“ in one line, prefixed with the kind: Text, Hinweis
-     (note block), Bild, Video, Überschrift, Abschnitt neu/entfernt.
+     (note block), Wichtig, Achtung, Überschrift, Abschnitt neu/entfernt.
+   - A change above the first `##` belongs to the chapter introduction; write
+     „<n>. (Einleitung)“ in the column „Abschnitt“ and link the page without
+     an anchor.
    - The link is the full review URL of the page plus the anchor:
-     `<review URL>manual/<part folder>/<file>.html#<anchor>`. VitePress builds
-     without `cleanUrls`, so the page ends in `.html`; take the anchor from the
-     heading the way VitePress slugs it (lower case, spaces and dots to `-`,
-     umlauts lose their dots, leading `_` before a digit:
+     `<review URL>manual/<part folder>/<file>.html#<anchor>`, written as
+     `[öffnen](…)` so the table stays readable. VitePress builds without
+     `cleanUrls`, so the page ends in `.html`. Compute the anchor with
+     VitePress' own `slugify` (`node_modules/vitepress/dist/node/chunk-*.js`):
+     NFKD, combining marks removed (umlauts lose their dots, `ß` stays), runs
+     of whitespace and of the characters `` ~`!@#$%^&*()-_+=[]{}|\;:"'“”‘’<>,.?/ ``
+     become one `-`, `_` before a leading digit, lower case.
      `## 32.3 Berechtigungsprüfung in der Schnittstelle` →
-     `#_32-3-berechtigungsprufung-in-der-schnittstelle`). Check one
-     anchor against `pnpm build` output (`.vitepress/dist/`) before handing
-     the table over.
+     `#_32-3-berechtigungsprufung-in-der-schnittstelle`. The opening „ is not
+     in that list and stays in the anchor, the closing “ goes:
+     `## 4.2 Reiter „Trasse“` → `#_4-2-reiter-„trasse`. Fetch a few of the
+     linked pages from the preview and check that the `id` is there before
+     handing the tables over.
    - Images whose only change is a new capture with no visible difference do
      not exist – the publish gate does not write them. Every changed image is
-     therefore a row.
+     therefore in one of the two tables.
+   - Say which commit the preview shows (the head SHA of the last „Deploy PR
+     Preview“ run) when it is not the local `HEAD`, and which changes are
+     therefore not visible there yet.
