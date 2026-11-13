@@ -198,6 +198,15 @@ test('16.3 Fenster „Wohneinheit hinzufügen"', async ({ page }) => {
   await openAddress(page)
 
   await scrollTo(page, section(page, 'Wohneinheiten'))
+
+  // The buttons of the window sit at fractional positions (x 911.16 for
+  // "Schließen"), and whether Chromium rasterises the window on a layer of its
+  // own or into the page below the blurred backdrop was decided anew on every
+  // run - with the same DOM, scroll offset and timing. The two outcomes differ
+  // in the antialiasing of the rounded corners, and CI flipped between them
+  // (1425 pixels). Forcing the layer makes it the same every time; the
+  // difference to either outcome is half a device pixel, nothing a reader sees.
+  await page.addStyleTag({ content: '[role="dialog"] { will-change: transform; }' })
   await page.getByRole('button', { name: 'Hinzufügen' }).click()
 
   const dialog = page.getByRole('dialog')

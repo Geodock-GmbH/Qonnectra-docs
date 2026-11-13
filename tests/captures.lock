@@ -25,7 +25,7 @@ fa09dfb9ee16877c  tests/13-mikrorohre.spec.ts
 83af4e9e388f296f  tests/14-netzschema.spec.ts
 734a66904e5eef3a  tests/15-faserweg.spec.ts
 9c6583bdfa41d063  tests/16-adressen-video.spec.ts
-677f9929c1c8c2db  tests/16-adressen.spec.ts
+e19b4263d41f4c89  tests/16-adressen.spec.ts
 25bee1de029254b5  tests/17-einstellungen-video.spec.ts
 23d862dd87eb9c75  tests/17-einstellungen.spec.ts
 7c16e05b70902ee3  tests/18-wenn-etwas-nicht-funktioniert-video.spec.ts
