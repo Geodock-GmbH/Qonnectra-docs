@@ -37,7 +37,19 @@ export default defineConfig({
   // scripts/setup-local-qonnectra.sh). Without this exclusion VitePress pulls
   // its Markdown files into the build and fails on the HTML inside them.
   // OUTLINE.md is the working outline of the manual, not a page of the site.
-  srcExclude: ['local-app/**', '**/node_modules/**', 'OUTLINE.md'],
+  // The same goes for the Markdown that documents the repository to whoever
+  // works in it: CLAUDE.md and every README.md were built as /CLAUDE.html,
+  // /README.html, /playwright/fonts/noto-sans/README.html and
+  // /scripts/qonnectra-demo-data/README.html and shipped with the site. Dot
+  // directories (.github/, .claude/) VitePress skips by itself.
+  srcExclude: [
+    'local-app/**',
+    '**/node_modules/**',
+    'OUTLINE.md',
+    'CLAUDE.md',
+    'README.md',
+    '**/README.md',
+  ],
   head: [
     ['link', { rel: 'icon', href: '/favicon.ico' }]
   ],
