@@ -140,6 +140,28 @@ scripts/qonnectra-demo-data/fetch_geodock_export.py --out scripts/qonnectra-demo
 New German technical terms cspell does not know go into `.cspell.json` under
 `words`, sorted alphabetically – not suppressed with an inline comment.
 
+## Releases
+
+Every build CI makes for GitHub Pages carries a base path – `/Qonnectra-docs/pr-42/`
+for a pull request, `/Qonnectra-docs/branch-main/` for `main`, which is where the
+preview of `main` lives since the production deploy was dropped. None of them
+works anywhere else. The build for a webserver of its own comes from a release:
+push a tag `v*`, and `.github/workflows/release.yml` builds the site without
+`BASE_PATH` (so for the root path `/`) and attaches `qonnectra-docs-<tag>.tar.gz`,
+`.zip` and `SHA256SUMS.txt` to the release of that tag. Nothing deploys – the
+archives are downloaded and uploaded by hand.
+
+Tag a commit `test.yml` ran green on. The release workflow repeats the static
+checks (spelling, Gendersternchen, `lint:captures`, the `tests/captures.lock`
+gate) but not the Playwright run.
+
+The map tile sets are releases of this repository too (`tiles-<id>`, see
+`scripts/build-map-tiles.sh`), and GitHub would take the latest of them as the
+starting point of the generated release notes. The workflow therefore looks up
+the previous `v*` tag by version order and passes it as `--notes-start-tag`.
+A release of the manual is **not** the place to raise `QONNECTRA_REF` – that is
+the skill `qonnectra-update`, and the tag comes after it.
+
 ## Writing style of the manual
 
 Binding, derived from the existing chapters. New chapters follow it exactly; when

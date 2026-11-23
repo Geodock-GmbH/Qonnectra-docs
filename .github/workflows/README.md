@@ -1,62 +1,92 @@
-# GitHub Pages Deployment Setup
+# Workflows
 
-This directory contains GitHub Actions workflows for deploying documentation to GitHub Pages.
+Four of them, and only one of them produces something anybody outside this
+repository sees.
 
-## Workflows
+| Workflow | Runs on | What it does |
+|---|---|---|
+| `test.yml` | every push to `main`, every pull request | spelling, Gendersternchen, and the captures: spec lint, the `tests/captures.lock` gate and a Playwright run against a local Qonnectra instance |
+| `preview.yml` | every pull request, every push to `main` | builds the site and commits it into the `gh-pages-preview` branch |
+| `cleanup-preview.yml` | a closed pull request | removes that pull request's directory from `gh-pages-preview` |
+| `release.yml` | a pushed tag `v*` | builds the site for a webserver and attaches the archives to the release of that tag |
 
-### `deploy.yml`
-Deploys the main documentation site to GitHub Pages when changes are pushed to the `main` branch.
+## Previews, including `main`
 
-### `preview.yml`
-Builds a preview version of the documentation for each pull request. The build artifact is uploaded and instructions are provided for manual GitHub Pages setup.
+`preview.yml` treats every branch alike. A pull request is built with
+`BASE_PATH=/Qonnectra-docs/pr-<number>/` and lands in `gh-pages-preview` under
+`pr-<number>/`, a push to `main` with `BASE_PATH=/Qonnectra-docs/branch-main/`
+under `branch-main/`. GitHub Pages serves the branch at its root, so
+`index.html` there is a generated list of all previews
+(`.github/scripts/generate-preview-index.sh`) and the state of `main` is one
+entry in it:
 
-## How It Works
+- list of previews: <https://geodock-gmbh.github.io/Qonnectra-docs/>
+- `main`: <https://geodock-gmbh.github.io/Qonnectra-docs/branch-main/>
 
-### Production Deployment (`deploy.yml`)
-1. When changes are pushed to the `main` branch, the workflow automatically builds and deploys the site
-2. The site is deployed via GitHub Actions to GitHub Pages
-3. The site is available at: `https://geodock-gmbh.github.io/Qonnectra-docs/`
+There is no separate production deployment on Pages. A `deploy.yml` used to
+build `main` a second time into the Pages artifact; it was removed in `8a056f1`
+because `preview.yml` already builds every push to `main`.
 
-### PR Preview Build (`preview.yml`)
-1. When a PR is opened/updated, the workflow builds the site with a PR-specific base path
-2. The build artifact is uploaded and available for download from the Actions tab
-3. A comment is added to the PR with instructions for manually enabling GitHub Pages
-4. **Manual step required**: Users must manually configure GitHub Pages for their branch if they want a live preview
+**Every one of these builds carries a base path** and only works under the URL
+it was built for. None of them is suitable for a webserver of its own - that is
+what the release is for.
 
-## Manual PR Preview Setup
+## Releases
 
-To enable a GitHub Pages preview for your PR branch:
+A release is cut by pushing a version tag:
 
-1. Go to **Repository Settings → Pages**
-2. Under "Source", select **"Deploy from a branch"**
-3. Select your PR branch (e.g., `feature/my-changes`)
-4. Select folder: `/.vitepress/dist`
-5. Click **Save**
+```bash
+git tag v1.1.0
+git push origin v1.1.0
+```
 
-⚠️ **Important Notes:**
-- GitHub Pages can only serve from **one branch** at a time per repository
-- Enabling Pages for a PR branch will temporarily replace the main site
-- Remember to switch back to `main` branch after reviewing
-- The preview build uses base path `/Qonnectra-docs/pr-{PR_NUMBER}/` - make sure your GitHub Pages URL matches this
+`release.yml` then runs the static checks, builds the site **without**
+`BASE_PATH` - so for the root path `/` of a domain - and attaches to the
+release of that tag:
+
+- `qonnectra-docs-v1.1.0.tar.gz` and `.zip` - the built site, unpacking into a
+  directory of the same name
+- `SHA256SUMS.txt` - the checksums of both
+
+Nothing is deployed anywhere. The archives are downloaded from the release page
+and uploaded by hand.
+
+The workflow does not run the Playwright captures - that takes the better part
+of an hour and needs the app stack. What it does check is that
+`tests/captures.lock` is not stale, i.e. that the images in the build are the
+ones the specs produce. Tag a commit that `test.yml` ran green on.
+
+### Why `--notes-start-tag`
+
+The map tile sets are releases of this repository as well (tag `tiles-<id>`,
+written by `scripts/build-map-tiles.sh`, consumed by
+`scripts/setup-local-qonnectra.sh`). When GitHub generates release notes
+without being told where the range starts, it takes the previous release by
+date - which is a tile set whenever one was published after the last version,
+and the notes then list every commit since a map build. `release.yml` therefore
+looks up the previous `v*` tag by version order and passes it as
+`--notes-start-tag`. Tile releases are invisible to the note generator no
+matter when they are published, and `--latest` keeps the "Latest" badge on the
+version (`build-map-tiles.sh` already publishes tile sets with `--latest=false`).
+
+### A tag that already has a release
+
+`release.yml` can also be started by hand from the Actions tab with a tag as
+its input. If that tag already carries a release, the run replaces its assets
+and leaves title, notes and the "Latest" badge alone - the way to give an older
+release its archives without moving the tag.
 
 ## Configuration
 
-### Environment Variables
+`BASE_PATH` is the only environment variable the build reads
+(`.vitepress/config.ts`):
 
-The VitePress config uses the `BASE_PATH` environment variable to set the base URL:
-- **Local development**: `/` (default)
-- **Production**: `/Qonnectra-docs/` (set in `deploy.yml`)
-- **PR Preview**: `/Qonnectra-docs/pr-{PR_NUMBER}/` (set in `preview.yml`)
+| Where | Value |
+|---|---|
+| local development | unset → `/` |
+| release | unset → `/` |
+| `main` preview | `/Qonnectra-docs/branch-main/` |
+| pull request preview | `/Qonnectra-docs/pr-<number>/` |
 
-### Required GitHub Settings
-
-1. **Enable GitHub Pages**: Repository Settings → Pages → Source: "GitHub Actions"
-2. This enables automatic deployment for the `main` branch
-
-## Troubleshooting
-
-- **Preview not accessible**: Ensure GitHub Pages is manually configured for your PR branch
-- **Base path issues**: Verify the `BASE_PATH` environment variable matches your GitHub Pages URL structure
-- **Build failures**: Check that all dependencies are installed correctly (pnpm is used)
-- **Build artifact not found**: Check the Actions tab for the workflow run and download the artifact
-
+GitHub Pages is configured as "Deploy from a branch", branch
+`gh-pages-preview`, folder `/`. The previews need no further setup per branch.
