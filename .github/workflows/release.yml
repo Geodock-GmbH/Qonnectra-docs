@@ -1,0 +1,179 @@
+name: Release
+
+# A release is cut by pushing a version tag:
+#
+#   git tag v1.1.0 && git push origin v1.1.0
+#
+# The workflow builds the site the way a webserver needs it - base path "/",
+# not the /Qonnectra-docs/<id>/ of the GitHub Pages previews - packs
+# .vitepress/dist and attaches the archives to the release of that tag. Nothing
+# here deploys anywhere: the assets are downloaded from the release page and
+# uploaded by hand.
+on:
+  push:
+    tags:
+      - 'v*'
+
+  # For a tag that already carries a release: v1.0.0 was cut by hand before this
+  # workflow existed, and a release cannot gain assets without a run. This
+  # builds that tag and replaces its assets; title, notes and the "Latest"
+  # badge of the existing release stay as they are.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to build the assets for (e.g. v1.0.0)
+        required: true
+        type: string
+
+# Creating the release and uploading its assets.
+permissions:
+  contents: write
+
+# Two runs for one tag would fight over the same assets, and a release is cheap
+# enough to let it finish.
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build and publish the assets
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TAG: ${{ inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.tag || github.ref }}
+          # The previous version tag is read from the repository below, and a
+          # shallow checkout brings no tags with it.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: true
+
+      # The static checks of test.yml, repeated here on purpose: what the tag
+      # points at is not necessarily what ran green on main, and a release is
+      # the one build that leaves this repository.
+      - name: Check the spelling
+        run: pnpm lint:spelling
+
+      - name: Check the Gendersternchen
+        run: pnpm lint:gender
+
+      - name: Lint the specs
+        run: pnpm lint:captures
+
+      # A spec whose inputs differ from tests/captures.lock has not been run and
+      # published since it changed, so the images in this build are not the ones
+      # its spec produces. Static, no capture run - the same gate the captures
+      # job of test.yml opens with.
+      - name: Fail if tests/captures.lock is stale
+        run: |
+          stale="$(scripts/capture-fingerprint.sh --stale)"
+          if [ -z "$stale" ]; then
+            echo "Every spec matches tests/captures.lock."
+            exit 0
+          fi
+          echo "Stale against tests/captures.lock:"
+          echo "$stale" | sed 's/^/  /'
+          echo "::error::$(echo "$stale" | wc -l) spec(s) are stale against tests/captures.lock. Run them and publish locally ('pnpm test:e2e && pnpm screenshots:publish'), commit the lock with the images and videos, and tag that commit."
+          exit 1
+
+      # Deliberately without BASE_PATH. The archive is unpacked into the
+      # document root of a webserver, so the site needs the VitePress default
+      # base "/"; preview.yml sets /Qonnectra-docs/<id>/ for GitHub Pages, and a
+      # build carrying that prefix is unusable anywhere else.
+      - name: Build the site
+        run: pnpm build
+
+      - name: Check the base path
+        run: |
+          if grep -q '/Qonnectra-docs/' .vitepress/dist/index.html; then
+            echo "::error::The build carries the GitHub Pages base path. BASE_PATH has to be unset for a release."
+            exit 1
+          fi
+          echo "Built for the root path."
+
+      - name: Pack the assets
+        id: pack
+        run: |
+          name="qonnectra-docs-${TAG}"
+          mv .vitepress/dist "$name"
+          tar -czf "${name}.tar.gz" "$name"
+          zip -qr "${name}.zip" "$name"
+          sha256sum "${name}.tar.gz" "${name}.zip" >SHA256SUMS.txt
+          cat SHA256SUMS.txt
+          du -sh "$name"
+          echo "name=$name" >>"$GITHUB_OUTPUT"
+
+      # The tile sets are releases of this repository too (tag `tiles-<id>`,
+      # scripts/build-map-tiles.sh). When GitHub generates release notes without
+      # being told where to start, it takes the previous release by date - which
+      # is a tile set whenever one was published after the last version, and the
+      # notes then list every commit since a map build. --notes-start-tag pins
+      # the range to the previous v* tag instead. `git tag --sort=-v:refname`
+      # orders by version, so this is the tag below the one being released, not
+      # the one published before it.
+      - name: Find the previous version tag
+        id: previous
+        run: |
+          previous="$(git tag --list 'v*' --sort=-v:refname |
+            awk -v current="$TAG" 'found { print; exit } $0 == current { found = 1 }')"
+          if [ -n "$previous" ]; then
+            echo "Notes are generated from $previous to $TAG."
+          else
+            echo "No version tag below $TAG - the release gets no generated notes."
+          fi
+          echo "tag=$previous" >>"$GITHUB_OUTPUT"
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NAME: ${{ steps.pack.outputs.name }}
+          PREVIOUS: ${{ steps.previous.outputs.tag }}
+        run: |
+          assets=("${NAME}.tar.gz" "${NAME}.zip" SHA256SUMS.txt)
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG exists - replacing its assets and leaving title and notes alone."
+            gh release upload "$TAG" "${assets[@]}" --clobber
+            exit 0
+          fi
+
+          cat >notes.md <<EOF
+          The built manual, ready to be uploaded to a webserver.
+
+          | File | Contents |
+          |---|---|
+          | \`${NAME}.tar.gz\` | the finished site, unpacking into \`${NAME}/\` |
+          | \`${NAME}.zip\` | the same files as a ZIP archive |
+          | \`SHA256SUMS.txt\` | checksums of both archives |
+
+          Built for the root path \`/\` of a domain. Unpack it and put the
+          *contents* of the directory into the document root of the webserver:
+
+          \`\`\`bash
+          tar -xzf ${NAME}.tar.gz
+          rsync -a ${NAME}/ <user>@<host>:/var/www/qonnectra.de/
+          \`\`\`
+
+          The file names below \`assets/\` carry a hash of their contents, so the
+          files of the previous release stay behind on upload. Clear the target
+          directory beforehand to be rid of them, or add \`--delete\` - which also
+          removes everything there that did not come out of this archive.
+          EOF
+
+          args=(--title "$TAG" --notes-file notes.md --latest --verify-tag)
+          if [ -n "$PREVIOUS" ]; then
+            args+=(--generate-notes --notes-start-tag "$PREVIOUS")
+          fi
+          gh release create "$TAG" "${assets[@]}" "${args[@]}"
